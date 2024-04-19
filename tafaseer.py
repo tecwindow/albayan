@@ -53,8 +53,3 @@ class TafaseerManager:
         if self._conn:
             self._conn.close()
 
-
-tafaseer_manager = TafaseerManager()
-tafaseer_manager.set(Category.baghawy)
-result = tafaseer_manager.get_tafaseer(1, 2)
-print(result)
