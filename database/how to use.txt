@@ -1,0 +1,5 @@
+1. reciters.db
+this is SQLLite DataBase that has table named reciters
+it has these columns: id INTEGER (PRIMARY KEY AUTOINCREMENT), name (TEXT), rewaya (TEXT),  type (TEXT), url (TEXT), bitrate (INTEGER)
+2. Surahs.json
+this is surahs meta as json file

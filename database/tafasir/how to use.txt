@@ -1,0 +1,6 @@
+these data bases Are SQLLite data bases: they all have tables named: tafsir_suranumber
+e.g: tafsir_1
+tafsir_2
+...
+these tables have the columns:
+text (tafsir text), number (aya number in quran), numberInSurah (aya number in surah)

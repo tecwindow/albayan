@@ -1,0 +1,16 @@
+1. quran.DB
+this is a sqlLite data base so it has a table named quran
+these are the table columns:
+
+text (normal quran ayah text), number (number of aya in the quran), sura_name, sura_number, numberInSurah (aya number in surah), juz, hizb, page, hizbQuarter, sajda (True or False), sajdaObligation (True or False)
+
+2. uthmani.DB
+this is a sqlLite data base so it has a table named quran
+these are the table columns:
+
+text (uthmanic  quran ayahs text), number (number of aya in the quran), sura_name, sura_number, numberInSurah (aya number in surah), juz, hizb, page, hizbQuarter, sajda (True or False), sajdaObligation (True or False)
+
+3. Verses.DB
+this is a sqllite data base that has table named: quran
+it has these columns:  text (normal quran ayah text), text_No_tashkil (aya text without tashkill), number (number of aya in the quran), sura_name, sura_number, numberInSurah (aya number in surah), juz, hizb, page, hizbQuarter, sajda (True or False), sajdaObligation (True or False)
+
