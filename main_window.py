@@ -3,12 +3,15 @@ import os
 import re
 import json
 import pyperclip
+from widgets.QTextEdit import QuranViewer
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QVBoxLayout, 
     QWidget, 
     QLabel, 
     QTextEdit, 
+    QTextBrowser,
+    QPlainTextEdit,
     QPushButton, 
     QMenu, 
     QHBoxLayout, 
@@ -20,6 +23,7 @@ import sys
 from PyQt6.QtWidgets import QMainWindow, QApplication
 from PyQt6.QtGui import QIcon, QAction
 
+100
 from quran_classes import quran_mgr
 from dialogs import QuickAccess, view_information
 
@@ -70,8 +74,9 @@ class QuranInterface(QMainWindow):
         font.setBold(True)
         self.quran_title.setFont(font)
 
-        self.quran_view = QTextEdit()
+        self.quran_view = QTextEdit(self)
         self.quran_view.setReadOnly(True)
+        self.quran_view.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard|Qt.TextInteractionFlag.LinksAccessibleByKeyboard)
         self.quran_view.setText(self.quran.get_page(1))
 
         self.next_to = QPushButton("التالي")
@@ -101,7 +106,9 @@ class QuranInterface(QMainWindow):
         buttons_layout.addWidget(self.save_current_position)
 
         layout.addLayout(buttons_layout)
-        self.centralWidget().setLayout(layout)  # Fixed typo
+        self.centralWidget().setLayout(layout)
+
+
 
     def OnNext(self):
         self.quran_view.setText(self.quran.next())
@@ -198,6 +205,9 @@ class QuranInterface(QMainWindow):
         lineNum = len(self.quran_view.toPlainText().split("\n"))
         current_line = self.quran_view.textCursor().block().text()
         pyperclip.copy(current_line)
+
+            
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
