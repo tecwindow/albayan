@@ -4,7 +4,7 @@ import os
 import re
 import json
 import pyperclip
-from widgets.QTextEdit import QuranViewer
+from widgets.button import EnterButton
 from PyQt6.QtCore import Qt, QDir, QFile, QTextStream, QTimer
 from PyQt6.QtWidgets import (
     QVBoxLayout, 
@@ -81,21 +81,21 @@ class QuranInterface(QMainWindow):
         self.quran_view.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard|Qt.TextInteractionFlag.LinksAccessibleByKeyboard)
         self.quran_view.setText(self.quran.get_page(1))
 
-        self.next_to = QPushButton("التالي")
+        self.next_to = EnterButton("التالي")
         self.next_to.setEnabled(self.quran.current_pos != self.quran.max_pos)
         self.next_to.clicked.connect(self.OnNext)
-
-        self.back_to = QPushButton("السابق")
+        
+        self.back_to = EnterButton("السابق")
         self.back_to.setEnabled(self.quran.current_pos != 1)
         self.back_to.clicked.connect(self.OnBack)
 
-        self.interpretation_verse = QPushButton("تفسير الآية")
+        self.interpretation_verse = EnterButton("تفسير الآية")
         self.interpretation_verse.clicked.connect(self.OnInterpretation)
 
-        self.quick_access = QPushButton("الوصول السريع")
+        self.quick_access = EnterButton("الوصول السريع")
         self.quick_access.clicked.connect(self.OnQuickAccess)
 
-        self.search_in_quran = QPushButton("البحث في القرآن")
+        self.search_in_quran = EnterButton("البحث في القرآن")
         self.save_current_position = QPushButton("حفظ الموضع الحالي")
 
         # Theme dropdown
@@ -254,6 +254,5 @@ if __name__ == "__main__":
     main_window = QuranInterface()
     main_window.show()
     main_window.setFocus()
-#    QTimer.singleShot(10, main_window.next_to.setFocus)
     QTimer.singleShot(200, main_window.quran_view.setFocus)
     sys.exit(app.exec())
