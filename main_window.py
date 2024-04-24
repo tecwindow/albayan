@@ -80,6 +80,7 @@ class QuranInterface(QMainWindow):
         self.quran_view.setReadOnly(True)
         self.quran_view.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard|Qt.TextInteractionFlag.LinksAccessibleByKeyboard)
         self.quran_view.setText(self.quran.get_page(1))
+        self.set_text_ctrl_label()
 
         self.next_to = EnterButton("التالي")
         self.next_to.setEnabled(self.quran.current_pos != self.quran.max_pos)
@@ -125,7 +126,7 @@ class QuranInterface(QMainWindow):
 
     def OnNext(self):
         self.quran_view.setText(self.quran.next())
-        self.text_ctrl_label()
+        self.set_text_ctrl_label()
         self.quran_view.setFocus()
         self.back_to.setEnabled(True)
         if self.quran.current_pos == self.quran.max_pos:
@@ -133,23 +134,28 @@ class QuranInterface(QMainWindow):
 
     def OnBack(self):
         self.quran_view.setText(self.quran.back())
-        self.text_ctrl_label()
+        self.set_text_ctrl_label()
         self.quran_view.setFocus()
         self.next_to.setEnabled(True)
         if self.quran.current_pos == 1:
             self.back_to.setEnabled(False)
 
-    def text_ctrl_label(self):
+    def set_text_ctrl_label(self):
         if self.quran.type == 0:
             self.quran_title.setText(f"الصفحة {self.quran.current_pos}")
+            self.quran_view.setAccessibleName(f"الصفحة {self.quran.current_pos}")
         elif self.quran.type == 1:
             self.quran_title.setText(self.quran.data_list[-1][2])
+            self.quran_view.setAccessibleName(self.quran.data_list[-1][2])
         elif self.quran.type == 2:
             self.quran_title.setText(f"الربع {self.quran.current_pos}")
+            self.quran_view.setAccessibleName(f"الربع {self.quran.current_pos}")
         elif self.quran.type == 3:
             self.quran_title.setText(f"الحزب {self.quran.current_pos}")
+            self.quran_view.setAccessibleName(f"الحزب {self.quran.current_pos}")
         elif self.quran.type == 4:
             self.quran_title.setText(f"الجزء {self.quran.current_pos}")
+            self.quran_view.setAccessibleName(f"الجزء {self.quran.current_pos}")
 
     def OnQuickAccess(self):
         dialog = QuickAccess(self, "الوصول السريع")
@@ -167,7 +173,7 @@ class QuranInterface(QMainWindow):
         elif selected_item["view_by"] == 4:
             self.quran_view.setText(self.quran.get_juzz(number))
 
-        self.text_ctrl_label()
+        self.set_text_ctrl_label()
         self.quran_view.setFocus()
 
         if self.quran.current_pos == 1:
