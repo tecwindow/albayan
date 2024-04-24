@@ -191,7 +191,7 @@ class quran_mgr:
 			ayah_text = ayah[0]
 			ayah_number = ayah[4]
 			if int(ayah_number) == 1:
-				text += f"{ayah[2]} {ayah[3]}\n\n"
+				text += f"{ayah[2]} {ayah[3]}\n|\n"
 				if  ayah[3] != 1:
 					ayah_text = ayah_text.replace("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", f"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\n")
 
@@ -209,5 +209,6 @@ class quran_mgr:
 			self.data_list[ayah_index] += (start, end)
 			start = end+1
 
+		text += "|"
 		self.text = text
 		return text
