@@ -1,10 +1,11 @@
+import time
 import sys
 import os
 import re
 import json
 import pyperclip
 from widgets.QTextEdit import QuranViewer
-from PyQt6.QtCore import Qt, QDir, QFile, QTextStream
+from PyQt6.QtCore import Qt, QDir, QFile, QTextStream, QTimer
 from PyQt6.QtWidgets import (
     QVBoxLayout, 
     QWidget, 
@@ -40,7 +41,7 @@ class QuranInterface(QMainWindow):
         self.create_menu()
         self.create_widgets()
         self.create_layout()
-
+        
     def create_menu(self):
         menubar = self.menuBar()
 
@@ -118,6 +119,7 @@ class QuranInterface(QMainWindow):
 
         layout.addLayout(buttons_layout)
         self.centralWidget().setLayout(layout)
+        
 
 
 
@@ -210,7 +212,8 @@ class QuranInterface(QMainWindow):
         if "سُورَةُ" in current_line or current_line == "" or not re.search(r"\(\d+\)$", current_line):
             copy_verse.setEnabled(False)
 
-        menu.exec_(self.quran_view.mapToGlobal(self.quran_view.pos()))
+        menu.exec(self.quran_view.mapToGlobal(self.quran_view.pos()))
+        
 
     def on_copy_verse(self):
         lineNum = len(self.quran_view.toPlainText().split("\n"))
@@ -250,4 +253,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     main_window = QuranInterface()
     main_window.show()
+    main_window.setFocus()
+#    QTimer.singleShot(10, main_window.next_to.setFocus)
+    QTimer.singleShot(200, main_window.quran_view.setFocus)
     sys.exit(app.exec())
