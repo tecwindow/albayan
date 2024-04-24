@@ -209,6 +209,6 @@ class quran_mgr:
 			self.data_list[ayah_index] += (start, end)
 			start = end+1
 
-		text += "|"
+		text = text.strip("\n")
 		self.text = text
 		return text

@@ -78,7 +78,9 @@ class QuranInterface(QMainWindow):
 
         self.quran_view = QTextEdit(self)
         self.quran_view.setReadOnly(True)
-        self.quran_view.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard|Qt.TextInteractionFlag.LinksAccessibleByKeyboard)
+        self.quran_view.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard| Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.quran_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.quran_view.customContextMenuRequested.connect(self.onContextMenu)
         self.quran_view.setText(self.quran.get_page(1))
         self.set_text_ctrl_label()
 
@@ -218,6 +220,8 @@ class QuranInterface(QMainWindow):
         if "سُورَةُ" in current_line or current_line == "" or not re.search(r"\(\d+\)$", current_line):
             copy_verse.setEnabled(False)
 
+        menu.setAccessibleName("Context menu")
+        menu.setFocus()
         menu.exec(self.quran_view.mapToGlobal(self.quran_view.pos()))
         
 
