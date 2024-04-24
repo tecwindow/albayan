@@ -4,7 +4,7 @@ import re
 import json
 import pyperclip
 from widgets.QTextEdit import QuranViewer
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QDir, QFile, QTextStream
 from PyQt6.QtWidgets import (
     QVBoxLayout, 
     QWidget, 
@@ -18,12 +18,13 @@ from PyQt6.QtWidgets import (
     QMainWindow, 
     QApplication,
     QMessageBox,
+    QComboBox,
 )
 import sys
 from PyQt6.QtWidgets import QMainWindow, QApplication
 from PyQt6.QtGui import QIcon, QAction
 
-100
+
 from quran_classes import quran_mgr
 from dialogs import QuickAccess, view_information
 
@@ -88,9 +89,18 @@ class QuranInterface(QMainWindow):
         self.back_to.clicked.connect(self.OnBack)
 
         self.interpretation_verse = QPushButton("تفسير الآية")
+        self.interpretation_verse.clicked.connect(self.OnInterpretation)
+
         self.quick_access = QPushButton("الوصول السريع")
+        self.quick_access.clicked.connect(self.OnQuickAccess)
+
         self.search_in_quran = QPushButton("البحث في القرآن")
         self.save_current_position = QPushButton("حفظ الموضع الحالي")
+
+        # Theme dropdown
+        self.theme_combo = QComboBox()
+        self.populate_themes()
+        self.theme_combo.currentIndexChanged.connect(self.apply_theme)
 
     def create_layout(self):
         layout = QVBoxLayout()
@@ -104,6 +114,7 @@ class QuranInterface(QMainWindow):
         buttons_layout.addWidget(self.quick_access)
         buttons_layout.addWidget(self.search_in_quran)
         buttons_layout.addWidget(self.save_current_position)
+        buttons_layout.addWidget(self.theme_combo)
 
         layout.addLayout(buttons_layout)
         self.centralWidget().setLayout(layout)
@@ -206,7 +217,33 @@ class QuranInterface(QMainWindow):
         current_line = self.quran_view.textCursor().block().text()
         pyperclip.copy(current_line)
 
-            
+    def populate_themes(self):
+        theme_dir = QDir("theme")
+        if not theme_dir.exists():
+            print("مجلد الثيمات غير موجود")
+            return
+
+        theme_files = theme_dir.entryList(["*.qss"])
+        if not theme_files:
+            print("لا توجد ملفات ثيمات في المجلد")
+            return
+
+        for theme_file in theme_files:
+            self.theme_combo.addItem(theme_file)
+
+    def apply_theme(self):
+        selected_theme = self.theme_combo.currentText()
+        theme_path = QDir("theme").filePath(selected_theme)
+        if not QFile.exists(theme_path):
+            print("الملف غير موجود:", theme_path)
+            return
+
+        try:
+            with open(theme_path, 'r') as theme_file:
+                stylesheet = theme_file.read()
+                self.setStyleSheet(stylesheet)
+        except Exception as e:
+            print("حدث خطأ أثناء قراءة الملف:", e)
 
 
 if __name__ == "__main__":
