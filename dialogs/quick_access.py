@@ -1,47 +1,23 @@
 import os
 import json
 from PyQt6.QtWidgets import (
-    QApplication,
     QDialog,
     QVBoxLayout,
     QHBoxLayout,
-    QGroupBox,
     QLabel,
-    QTextEdit,
     QPushButton,
     QRadioButton,
     QComboBox,
-    QMessageBox,
+    QGroupBox
 )
 from PyQt6.QtCore import Qt
 
 
-class view_information(QDialog):
-    def __init__(self, parent, title):
-        super().__init__(parent)
-        self.setWindowTitle(title)
-        self.setGeometry(100, 100, 550, 550)
-        self.label = QLabel()
-        self.view_text = QTextEdit()
-        self.close = QPushButton("إغلاق")
-        self.copy = QPushButton("نسخ")
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.view_text, stretch=1)
-        
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(self.close)
-        button_layout.addWidget(self.copy)
-        layout.addLayout(button_layout)
-
-        self.setLayout(layout)
-
-        self.close.clicked.connect(self.accept)
 
 class QuickAccess(QDialog):
     def __init__(self, parent, title):
         super().__init__(parent)
+        self.parent = parent
         self.setWindowTitle(title)
         self.setGeometry(100, 100, 300, 200)
         self.sura = []
@@ -70,6 +46,7 @@ class QuickAccess(QDialog):
 
         self.choices_label = QLabel("إنتقل إلى:")
         self.choices = QComboBox()
+        self.choices.setAccessibleName("إنتقل إلى:")
         self.go_button = QPushButton("اذهب")
         self.cancel_button = QPushButton("إغلاق")
 
@@ -92,8 +69,19 @@ class QuickAccess(QDialog):
         self.jus_radio.toggled.connect(self.on_radio_toggled)
 
     def on_submit(self):
+        selected_item = self.choices.currentIndex() + 1
+        if self.sura_radio.isChecked():
+            self.parent.quran_view.setText(self.parent.quran.get_surah(selected_item))
+        elif self.pages_radio.isChecked():
+            self.parent.quran_view.setText(self.parent.quran.get_page(selected_item))
+        elif self.quarters_radio.isChecked():
+            self.parent.quran_view.setText(self.parent.quran.get_quarter(selected_item))
+        elif self.hizb_radio.isChecked():
+            self.parent.quran_view.setText(self.parent.quran.get_hizb(selected_item))
+        elif self.jus_radio.isChecked():
+            self.parent.quran_view.setText(self.parent.quran.get_juzz(selected_item))
         self.accept()
-
+        
     def on_radio_toggled(self):
         if self.sura_radio.isChecked():
             self.choices.clear()
@@ -111,29 +99,3 @@ class QuickAccess(QDialog):
             self.choices.clear()
             self.choices.addItems(self.jus)
 
-    def get_selected_item(self):
-        view_by = 0
-        if self.sura_radio.isChecked():
-            view_by = 0
-        elif self.pages_radio.isChecked():
-            view_by = 1
-        elif self.quarters_radio.isChecked():
-            view_by = 2
-        elif self.hizb_radio.isChecked():
-            view_by = 3
-        elif self.jus_radio.isChecked():
-            view_by = 4
-
-        item = {
-            "number": self.choices.currentIndex() + 1,
-            "view_by": view_by
-        }
-
-        return item
-
-if __name__ == "__main__":
-    app = QApplication([])
-    view_info_dialog = view_information(None, "معلومات الآية")
-    view_info_dialog.exec()
-    quick_access_dialog = QuickAccess(None, "الوصول السريع")
-    quick_access_dialog.exec()

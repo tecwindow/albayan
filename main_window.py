@@ -20,14 +20,13 @@ from PyQt6.QtWidgets import (
     QApplication,
     QMessageBox,
     QComboBox,
+    QDialog
 )
 import sys
 from PyQt6.QtWidgets import QMainWindow, QApplication
 from PyQt6.QtGui import QIcon, QAction
-
-
 from quran_classes import quran_mgr
-from dialogs import QuickAccess, view_information
+from dialogs.quick_access import QuickAccess
 
 class QuranInterface(QMainWindow):
     def __init__(self):
@@ -161,20 +160,9 @@ class QuranInterface(QMainWindow):
 
     def OnQuickAccess(self):
         dialog = QuickAccess(self, "الوصول السريع")
-        dialog.exec_()
-        selected_item = dialog.get_selected_item()
-        number = selected_item["number"]
-        if selected_item["view_by"] == 0:
-            self.quran_view.setText(self.quran.get_surah(number))
-        elif selected_item["view_by"] == 1:
-            self.quran_view.setText(self.quran.get_page(number))
-        elif selected_item["view_by"] == 2:
-            self.quran_view.setText(self.quran.get_quarter(number))
-        elif selected_item["view_by"] == 3:
-            self.quran_view.setText(self.quran.get_hizb(number))
-        elif selected_item["view_by"] == 4:
-            self.quran_view.setText(self.quran.get_juzz(number))
-
+        if not dialog.exec():
+            return
+        
         self.set_text_ctrl_label()
         self.quran_view.setFocus()
 
@@ -220,7 +208,7 @@ class QuranInterface(QMainWindow):
         if "سُورَةُ" in current_line or current_line == "" or not re.search(r"\(\d+\)$", current_line):
             copy_verse.setEnabled(False)
 
-        menu.setAccessibleName("Context menu")
+        menu.setAccessibleName("الإجراءات")
         menu.setFocus()
         menu.exec(self.quran_view.mapToGlobal(self.quran_view.pos()))
         
