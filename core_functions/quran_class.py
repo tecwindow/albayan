@@ -203,9 +203,9 @@ class quran_mgr:
         self.data_list = [(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], None, None) for row in rows]
         return self.get_text()
 
-    def get_ayah_number(self, ayah:str) -> int:
-        self.cursor.execute("SELECT number FROM quran WHERE text = ?;", (ayah,))
-        return self.cursor.fetchone()[0]
+    def get_ayah_number(self, ayah:str) -> list:
+        self.cursor.execute("SELECT sura_number, number FROM quran WHERE text = ?;", (ayah,))
+        return self.cursor.fetchone()
 
     def get_text(self):
         if not self.data_list:

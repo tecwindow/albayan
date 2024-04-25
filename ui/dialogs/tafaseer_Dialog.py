@@ -10,19 +10,23 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QIcon
 from ui.widgets.qText_edit import ReadOnlyTextEdit
+from core_functions.tafaseer import TafaseerManager, Category
 
 
 class TafaseerDialog(QDialog):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, aya_info):
         super().__init__(parent)
         self.parent = parent
         self.setWindowTitle(title)
         self.setGeometry(100, 100, 300, 200)
+        self.tafaseer_manager = TafaseerManager()
+        self.tafaseer_manager.set(Category.muyassar)
 
 
         self.layout = QVBoxLayout(self)
         
         self.text_edit = ReadOnlyTextEdit(self)
+        self.text_edit.setText(self.tafaseer_manager.get_tafaseer(aya_info[0], aya_info[1]))
         self.layout.addWidget(self.text_edit)
 
         self.button_layout = QVBoxLayout()

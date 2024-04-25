@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
     QComboBox,
 )
 from PyQt6.QtGui import QIcon, QAction
-from core_functions.quran_classe import quran_mgr
+from core_functions.quran_class import quran_mgr
 from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog
 from ui.widgets.button import EnterButton
@@ -154,10 +154,9 @@ class QuranInterface(QMainWindow):
             number = search.group()
             title += number
             current_line = current_line.replace(number, "").strip()
-        dialog = TafaseerDialog(self, title)
-        print(self.quran.get_ayah_number(current_line))
-        if dialog.exec():
-            print(current_line)
+        aya_info = self.quran.get_ayah_number(current_line)
+        dialog = TafaseerDialog(self, title, aya_info)
+        dialog.exec()
 
     def onContextMenu(self):
         menu = QMenu(self)
