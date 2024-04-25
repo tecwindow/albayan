@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout, 
     QLabel, 
-    QTextEdit, 
     QPushButton, 
     QMenu, 
     QHBoxLayout, 
@@ -20,6 +19,8 @@ from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog
 from ui.widgets.button import EnterButton
 from ui.widgets.menu_bar import MenuBar
+from ui.widgets.qText_edit import ReadOnlyTextEdit
+from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 
 
 class QuranInterface(QMainWindow):
@@ -46,9 +47,7 @@ class QuranInterface(QMainWindow):
         font.setBold(True)
         self.quran_title.setFont(font)
 
-        self.quran_view = QTextEdit(self)
-        self.quran_view.setReadOnly(True)
-        self.quran_view.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard| Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.quran_view = ReadOnlyTextEdit(self)
         self.quran_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.quran_view.customContextMenuRequested.connect(self.onContextMenu)
         self.quran_view.setText(self.quran.get_page(1))
@@ -148,15 +147,16 @@ class QuranInterface(QMainWindow):
 
 
     def OnInterpretation(self):
-        lineNum = len(self.quran_view.toPlainText().split("\n"))
         current_line = self.quran_view.textCursor().block().text()
-        title = "تفسير الآية رقم" + re.search(r"\(\d+\)", current_line).group()
-        dialog = view_information(self, title)
-        try:
-            dialog.view_text.setPlainText(self.quran.get_tafasir(current_line[:-4].strip()))
-            dialog.label.setText(title)
-        except IndexError:
-            QMessageBox.critical(self, "لم يتم تحديد آية", "قم بالوقوف على الآية المراد تفسيرها.")
+        title = "تفسير الآية رقم"
+        search = re.search(r"\(\d+\)", current_line)
+        if search:
+            number = search.group()
+            title += number
+            current_line = current_line.replace(number, "").strip()
+        dialog = TafaseerDialog(self, title)
+        if dialog.exec():
+            pass
 
     def onContextMenu(self):
         menu = QMenu(self)
