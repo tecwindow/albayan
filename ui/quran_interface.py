@@ -1,32 +1,26 @@
-import time
-import sys
 import os
 import re
-import json
 import pyperclip
-from widgets.button import EnterButton
-from PyQt6.QtCore import Qt, QDir, QFile, QTextStream, QTimer
+from PyQt6.QtCore import Qt, QDir, QFile, QTextStream
 from PyQt6.QtWidgets import (
+    QWidget,
     QVBoxLayout, 
-    QWidget, 
     QLabel, 
     QTextEdit, 
-    QTextBrowser,
-    QPlainTextEdit,
     QPushButton, 
     QMenu, 
     QHBoxLayout, 
     QMainWindow, 
-    QApplication,
     QMessageBox,
     QComboBox,
 )
-import sys
-from PyQt6.QtWidgets import QMainWindow, QApplication
 from PyQt6.QtGui import QIcon, QAction
-from quran_classes import quran_mgr
-from dialogs.quick_access import QuickAccess
-from dialogs.find import SearchDialog
+from core_functions.quran_classes import quran_mgr
+from ui.dialogs.quick_access import QuickAccess
+from ui.dialogs.find import SearchDialog
+from ui.widgets.button import EnterButton
+from ui.widgets.menu_bar import MenuBar
+
 
 class QuranInterface(QMainWindow):
     def __init__(self):
@@ -37,34 +31,11 @@ class QuranInterface(QMainWindow):
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
         self.quran.aya_to_line = True
 
-        self.create_menu()
+        menu_bar = MenuBar(self)
+        self.setMenuBar(menu_bar)
         self.create_widgets()
         self.create_layout()
         
-    def create_menu(self):
-        menubar = self.menuBar()
-
-        file_menu = menubar.addMenu("&File")
-        new_action = QAction(QIcon(), "&New", self)  # Adding empty QIcon
-        file_menu.addAction(new_action)
-        open_action = QAction(QIcon(), "&Open", self)
-        file_menu.addAction(open_action)
-        save_action = QAction(QIcon(), "&Save", self)
-        file_menu.addAction(save_action)
-        file_menu.addSeparator()
-        exit_action = QAction("&Exit", self)
-        exit_action.setShortcut("Ctrl+Q")
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
-
-        edit_menu = menubar.addMenu("&Edit")
-        copy_action = QAction("&Copy", self)
-        edit_menu.addAction(copy_action)
-        cut_action = QAction("Cu&t", self)
-        edit_menu.addAction(cut_action)
-        paste_action = QAction("&Paste", self)
-        edit_menu.addAction(paste_action)
-
     def create_widgets(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -101,11 +72,6 @@ class QuranInterface(QMainWindow):
         self.search_in_quran.clicked.connect(self.OnSearch)
         self.save_current_position = QPushButton("حفظ الموضع الحالي")
 
-        # Theme dropdown
-        self.theme_combo = QComboBox()
-        self.populate_themes()
-        self.theme_combo.currentIndexChanged.connect(self.apply_theme)
-
     def create_layout(self):
         layout = QVBoxLayout()
         layout.addWidget(self.quran_title, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -118,7 +84,6 @@ class QuranInterface(QMainWindow):
         buttons_layout.addWidget(self.quick_access)
         buttons_layout.addWidget(self.search_in_quran)
         buttons_layout.addWidget(self.save_current_position)
-        buttons_layout.addWidget(self.theme_combo)
 
         layout.addLayout(buttons_layout)
         self.centralWidget().setLayout(layout)
@@ -225,39 +190,4 @@ class QuranInterface(QMainWindow):
         current_line = self.quran_view.textCursor().block().text()
         pyperclip.copy(current_line)
 
-    def populate_themes(self):
-        theme_dir = QDir("theme")
-        if not theme_dir.exists():
-            print("مجلد الثيمات غير موجود")
-            return
-
-        theme_files = theme_dir.entryList(["*.qss"])
-        if not theme_files:
-            print("لا توجد ملفات ثيمات في المجلد")
-            return
-
-        for theme_file in theme_files:
-            self.theme_combo.addItem(theme_file)
-
-    def apply_theme(self):
-        selected_theme = self.theme_combo.currentText()
-        theme_path = QDir("theme").filePath(selected_theme)
-        if not QFile.exists(theme_path):
-            print("الملف غير موجود:", theme_path)
-            return
-
-        try:
-            with open(theme_path, 'r') as theme_file:
-                stylesheet = theme_file.read()
-                self.setStyleSheet(stylesheet)
-        except Exception as e:
-            print("حدث خطأ أثناء قراءة الملف:", e)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    main_window = QuranInterface()
-    main_window.show()
-    main_window.setFocus()
-    QTimer.singleShot(200, main_window.quran_view.setFocus)
-    sys.exit(app.exec())
+    
