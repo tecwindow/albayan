@@ -33,7 +33,7 @@ class SearchDialog(QDialog):
         self.cancel_button = QPushButton('إلغاء')
 
         self.advanced_search_groupbox = QGroupBox('البحث المتقدم')
-        self.advanced_search_groupbox.setVisible(False)
+        self.advanced_search_groupbox.setEnabled(False)
         self.search_type_label = QLabel('نوع البحث:')
         self.search_type_radio_page = QRadioButton('صفحة')
         self.search_type_radio_page.setChecked(True)
@@ -83,7 +83,6 @@ class SearchDialog(QDialog):
 
         self.setLayout(main_layout)
 
-        # قراءة البيانات من الملفات وإعداد الخيارات
         self.sura = []
         with open(os.path.join("database", "Surahs.Json"), encoding="UTF-8") as f:
             self.sura = json.load(f)["surahs"]
@@ -103,10 +102,9 @@ class SearchDialog(QDialog):
         self.on_radio_toggled()
 
     def show_advanced_options(self):
-        self.advanced_search_groupbox.setVisible(self.advanced_search_checkbox.isChecked())
+        self.advanced_search_groupbox.setEnabled(self.advanced_search_checkbox.isChecked())
 
     def on_submit(self):
-        # إضافة التعليمات اللازمة لمعالجة البحث هنا
         self.accept()
 
     def on_radio_toggled(self):
@@ -116,25 +114,21 @@ class SearchDialog(QDialog):
             self.search_from_combobox.addItems([str(i) for i in range(1, 605)])
             self.search_to_combobox.addItems([str(i) for i in range(1, 605)])
         elif self.search_type_radio_sura.isChecked():
-            # قم بتعيين الخيارات للبحث بناءً على اختيار صورة السورة
             self.search_from_combobox.clear()
             self.search_to_combobox.clear()
             self.search_from_combobox.addItems([sura["name"] for sura in self.sura])
             self.search_to_combobox.addItems([sura["name"] for sura in self.sura])
         elif self.search_type_radio_juz.isChecked():
-            # قم بتعيين الخيارات للبحث بناءً على اختيار صورة الجزء
             self.search_from_combobox.clear()
             self.search_to_combobox.clear()
             self.search_from_combobox.addItems(self.jus)
             self.search_to_combobox.addItems(self.jus)
         elif self.search_type_radio_hizb.isChecked():
-            # قم بتعيين الخيارات للبحث بناءً على اختيار صورة الحزب
             self.search_from_combobox.clear()
             self.search_to_combobox.clear()
             self.search_from_combobox.addItems(self.hizb)
             self.search_to_combobox.addItems(self.hizb)
         elif self.search_type_radio_quarter.isChecked():
-            # قم بتعيين الخيارات للبحث بناءً على اختيار صورة الربع
             self.search_from_combobox.clear()
             self.search_to_combobox.clear()
             self.search_from_combobox.addItems(self.quarters)
