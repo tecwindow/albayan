@@ -20,13 +20,13 @@ from PyQt6.QtWidgets import (
     QApplication,
     QMessageBox,
     QComboBox,
-    QDialog
 )
 import sys
 from PyQt6.QtWidgets import QMainWindow, QApplication
 from PyQt6.QtGui import QIcon, QAction
 from quran_classes import quran_mgr
 from dialogs.quick_access import QuickAccess
+from dialogs.find import SearchDialog
 
 class QuranInterface(QMainWindow):
     def __init__(self):
@@ -98,6 +98,7 @@ class QuranInterface(QMainWindow):
         self.quick_access.clicked.connect(self.OnQuickAccess)
 
         self.search_in_quran = EnterButton("البحث في القرآن")
+        self.search_in_quran.clicked.connect(self.OnSearch)
         self.save_current_position = QPushButton("حفظ الموضع الحالي")
 
         # Theme dropdown
@@ -174,6 +175,12 @@ class QuranInterface(QMainWindow):
             self.back_to.setEnabled(True)
         if self.quran.current_pos == self.quran.max_pos:
             self.next_to.setEnabled(False)
+
+    def OnSearch(self):
+        search_dialog = SearchDialog(self, "بحث")
+        if search_dialog.exec():
+            return
+
 
     def OnInterpretation(self):
         lineNum = len(self.quran_view.toPlainText().split("\n"))
