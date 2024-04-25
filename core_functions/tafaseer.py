@@ -42,7 +42,8 @@ class TafaseerManager:
         self._cursor.execute(query, [ayah_number])
         result = self._cursor.fetchone()
         if result:
-            return result["text"].replace(".", ".\n")
+            tetx = result[0].replace(".", ". \n").strip()
+            return tetx
         else:
             return ""
 
