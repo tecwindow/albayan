@@ -62,6 +62,7 @@ class QuickAccess(QDialog):
         self.choices.addItems([sura["name"] for sura in self.sura])
 
         self.go_button.clicked.connect(self.on_submit)
+        self.cancel_button.clicked.connect(self.reject)
         self.sura_radio.toggled.connect(self.on_radio_toggled)
         self.pages_radio.toggled.connect(self.on_radio_toggled)
         self.quarters_radio.toggled.connect(self.on_radio_toggled)
