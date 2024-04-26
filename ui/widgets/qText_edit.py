@@ -7,4 +7,5 @@ class ReadOnlyTextEdit(QTextEdit):
         super().__init__(parent)
         self.setReadOnly(True)
         self.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard| Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
 
