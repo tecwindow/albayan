@@ -62,6 +62,7 @@ class QuranInterface(QMainWindow):
         self.back_to.clicked.connect(self.OnBack)
 
         self.interpretation_verse = EnterButton("تفسير الآية")
+        self.interpretation_verse.setEnabled(False)
         self.interpretation_verse.clicked.connect(self.OnInterpretation)
 
         self.quick_access = EnterButton("الوصول السريع")
@@ -162,6 +163,7 @@ class QuranInterface(QMainWindow):
         menu = QMenu(self)
         get_verse_info = menu.addAction("معلومات الآية")
         get_interpretation_verse = menu.addAction("تفسير الآية")
+        get_interpretation_verse.triggered.connect(self.OnInterpretation)
         submenu = menu.addMenu("تفسير الآية")
         muyassar_interpretation = submenu.addAction("التفسير الميسر")
         qortoby_interpretation = submenu.addAction("تفسير القرطبي")
@@ -178,6 +180,11 @@ class QuranInterface(QMainWindow):
         current_line = self.quran_view.textCursor().block().text()
         if "سُورَةُ" in current_line or current_line == "" or not re.search(r"\(\d+\)$", current_line):
             copy_verse.setEnabled(False)
+            get_verse_info.setEnabled(False)
+            get_interpretation_verse.setEnabled(False)
+            submenu.setEnabled(False)
+            get_verse_syntax.setEnabled(False)
+            get_verse_reasons.setEnabled(False)
 
         menu.setAccessibleName("الإجراءات")
         menu.setFocus()
