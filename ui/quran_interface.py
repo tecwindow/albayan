@@ -13,13 +13,13 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QComboBox,
 )
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtGui import QIcon, QAction, QKeyEvent
 from core_functions.quran_class import quran_mgr
 from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog
 from ui.widgets.button import EnterButton
 from ui.widgets.menu_bar import MenuBar
-from ui.widgets.qText_edit import ReadOnlyTextEdit
+from ui.widgets.qText_edit import QuranViewer
 from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 
 
@@ -47,7 +47,7 @@ class QuranInterface(QMainWindow):
         font.setBold(True)
         self.quran_title.setFont(font)
 
-        self.quran_view = ReadOnlyTextEdit(self)
+        self.quran_view = QuranViewer(self)
         self.quran_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.quran_view.customContextMenuRequested.connect(self.onContextMenu)
         self.quran_view.setText(self.quran.get_page(1))
@@ -175,7 +175,6 @@ class QuranInterface(QMainWindow):
         copy_verse = menu.addAction("نسخ الآية")
         copy_verse.triggered.connect(self.on_copy_verse)
 
-        lineNum = len(self.quran_view.toPlainText().split("\n"))
         current_line = self.quran_view.textCursor().block().text()
         if "سُورَةُ" in current_line or current_line == "" or not re.search(r"\(\d+\)$", current_line):
             copy_verse.setEnabled(False)
@@ -186,8 +185,10 @@ class QuranInterface(QMainWindow):
         
 
     def on_copy_verse(self):
-        lineNum = len(self.quran_view.toPlainText().split("\n"))
         current_line = self.quran_view.textCursor().block().text()
         pyperclip.copy(current_line)
 
-    
+    def keyPressEvent(self, a0: QKeyEvent | None) -> None:
+        current_line = self.quran_view.textCursor().block().text()
+        if "سُورَةُ" in current_line or current_line == "" or not re.search(r"\(\d+\)$", current_line):
+            self.interpretation_verse.setEnabled(False)
