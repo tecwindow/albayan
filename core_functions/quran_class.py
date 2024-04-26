@@ -204,7 +204,7 @@ class quran_mgr:
         return self.get_text()
 
     def get_ayah_number(self, ayah:str) -> list:
-        self.cursor.execute("SELECT sura_number, number FROM quran WHERE text = ?;", (ayah,))
+        self.cursor.execute("SELECT sura_number, number FROM quran WHERE text LIKE ?", ('%' + ayah + '%',))
         return self.cursor.fetchone()
 
     def get_text(self):
