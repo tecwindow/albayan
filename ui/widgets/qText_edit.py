@@ -17,7 +17,6 @@ class QuranViewer(ReadOnlyTextEdit):
     def keyPressEvent(self, e):
         super().keyPressEvent(e)
         current_line = self.textCursor().block().text()
-        print(current_line)
         if "سُورَةُ" in current_line or current_line == "|" or not re.search(r"\(\d+\)$", current_line):
             self.parent.interpretation_verse.setEnabled(False)
         else:
