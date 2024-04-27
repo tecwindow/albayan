@@ -1,7 +1,6 @@
 import os
 import re
-import pyperclip
-from PyQt6.QtCore import Qt, QDir, QFile, QTextStream
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout, 
@@ -12,6 +11,7 @@ from PyQt6.QtWidgets import (
     QMainWindow, 
     QMessageBox,
     QComboBox,
+    QApplication
 )
 from PyQt6.QtGui import QIcon, QAction, QKeyEvent
 from core_functions.quran_class import quran_mgr
@@ -198,4 +198,6 @@ class QuranInterface(QMainWindow):
         
     def on_copy_verse(self):
         current_line = self.quran_view.textCursor().block().text()
-        pyperclip.copy(current_line)
+        clipboard = QApplication.clipboard()
+        clipboard.setText(current_line)
+

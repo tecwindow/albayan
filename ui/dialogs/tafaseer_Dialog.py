@@ -1,4 +1,3 @@
-import sys
 from PyQt6.QtWidgets import (
     QWidget,
     QHBoxLayout, 
@@ -91,7 +90,7 @@ class TafaseerDialog(QDialog):
 
     def copy_content(self):
         copied_content = self.text_edit.toPlainText()
-        clipboard = QApplication.instance().clipboard()
+        clipboard = QApplication.clipboard()
         clipboard.setText(copied_content)  # وضع النص في الحافظة
 
     def save_content(self):
