@@ -3,6 +3,8 @@ import traceback
 import os
 import ctypes
 import sys
+from utils.settings import SettingsManager
+from utils.const import albayan_folder
 
 
 class Logger:
@@ -16,7 +18,7 @@ class Logger:
 				mode = "a"
 			else:
 				mode = "w"
-			logging.basicConfig(filename=os.path.join("albayan.log"),
+			logging.basicConfig(filename=os.path.join(albayan_folder, "albayan.log"),
 level=logging.INFO,
 					filemode=mode,
 					format="(%(asctime)s) | %(name)s | %(levelname)s => '%(message)s'")
@@ -25,7 +27,7 @@ level=logging.INFO,
 	@classmethod
 	def info(cls, message:str) -> None:
 		cls.initialize_logger()
-		if "True" == "True":
+		if SettingsManager.current_settings["general"].get("is_logging_enabled"):
 			logging.info(message)
 
 	@classmethod
