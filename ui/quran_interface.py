@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QIcon, QAction, QKeyEvent
 from core_functions.quran_class import quran_mgr
+from core_functions.tafaseer import Category
 from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog
 from ui.widgets.button import EnterButton
@@ -148,6 +149,11 @@ class QuranInterface(QMainWindow):
 
 
     def OnInterpretation(self):
+
+        selected_category = self.sender().text()
+        if selected_category not in Category.get_categories_in_arabic():
+            selected_category = "الميسر"
+
         current_line = self.quran_view.textCursor().block().text()
         title = "تفسير الآية رقم"
         search = re.search(r"\(\d+\)", current_line)
@@ -155,8 +161,8 @@ class QuranInterface(QMainWindow):
             number = search.group()
             title += number
             current_line = current_line.replace(number, "").strip()
-        aya_info = self.quran.get_ayah_number(current_line)
-        dialog = TafaseerDialog(self, title, aya_info)
+        ayah_info = self.quran.get_ayah_info(current_line)
+        dialog = TafaseerDialog(self, title, ayah_info, selected_category)
         dialog.exec()
 
     def onContextMenu(self):
@@ -164,14 +170,14 @@ class QuranInterface(QMainWindow):
         get_verse_info = menu.addAction("معلومات الآية")
         get_interpretation_verse = menu.addAction("تفسير الآية")
         get_interpretation_verse.triggered.connect(self.OnInterpretation)
+
         submenu = menu.addMenu("تفسير الآية")
-        muyassar_interpretation = submenu.addAction("التفسير الميسر")
-        qortoby_interpretation = submenu.addAction("تفسير القرطبي")
-        katheer_interpretation = submenu.addAction("تفسير ابن كثير")
-        tabary_interpretation = submenu.addAction("تفسير الطبري")
-        saadiy_interpretation = submenu.addAction("تفسير السعدي")
-        baghawy_interpretation = submenu.addAction("تفسير البغوي")
-        jalalain_interpretation = submenu.addAction("تفسير الجلالين")
+        arabic_categories = Category.get_categories_in_arabic()
+        for arabic_category in arabic_categories:
+            action = QAction(arabic_category, self)
+            action.triggered.connect(self.OnInterpretation)
+            submenu.addAction(action)
+
         get_verse_syntax = menu.addAction("إعراب الآية")
         get_verse_reasons = menu.addAction("أسباب نزول الآية")
         copy_verse = menu.addAction("نسخ الآية")
@@ -190,12 +196,6 @@ class QuranInterface(QMainWindow):
         menu.setFocus()
         menu.exec(self.quran_view.mapToGlobal(self.quran_view.pos()))
         
-
     def on_copy_verse(self):
         current_line = self.quran_view.textCursor().block().text()
         pyperclip.copy(current_line)
-
-    def keyPressEvent(self, a0: QKeyEvent | None) -> None:
-        current_line = self.quran_view.textCursor().block().text()
-        if "سُورَةُ" in current_line or current_line == "" or not re.search(r"\(\d+\)$", current_line):
-            self.interpretation_verse.setEnabled(False)
