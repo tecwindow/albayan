@@ -58,11 +58,23 @@ class TafaseerManager:
         query = "SELECT text FROM tafsir_{} WHERE number = ?".format(surah_number)
         self._cursor.execute(query, [ayah_number])
         result = self._cursor.fetchone()
-        if result:
-            tetx = result[0].replace(".", ". \n").strip()
-            return tetx
+
+        return self.get_text(result)
+
+    def get_text(self, row) -> str:
+
+        if row:
+                    text = row["text"].replace(".", ". \n").strip()
         else:
             return ""
+
+        # Remove empty lines.
+        lines = text.split("\n")
+        lines = list(filter(lambda x: x.strip(), lines))
+        text = "\n".join(lines)
+
+        return text
+
 
     def __str__(self) -> str:
         return "Category: {}".format(self._tafaseer_category)
