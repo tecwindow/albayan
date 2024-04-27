@@ -91,13 +91,13 @@ class TafaseerDialog(QDialog):
     def copy_content(self):
         copied_content = self.text_edit.toPlainText()
         clipboard = QApplication.clipboard()
-        clipboard.setText(copied_content)  # وضع النص في الحافظة
+        clipboard.setText(copied_content) 
 
     def save_content(self):
-        options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getSaveFileName(
-            self, "Save File", "", "Text Files (*.txt);;All Files (*)", options=options
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Save File", "", "Text files (*.txt)"
         )
-        if file_name:
-            with open(file_name, "w") as file:
+        if file_path:
+            with open(file_path, "w") as file:
                 file.write(self.text_edit.toPlainText())
+            
