@@ -11,6 +11,7 @@ class ReadOnlyTextEdit(QTextEdit):
         self.setReadOnly(True)
         self.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard| Qt.TextInteractionFlag.TextSelectableByMouse)
         self.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
+        self.setAlignment(Qt.AlignmentFlag.AlignRight)
 
 class QuranViewer(ReadOnlyTextEdit):
 
