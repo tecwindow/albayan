@@ -8,12 +8,13 @@ sys.excepthook = Logger.my_excepthook
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtCore import QTimer
 from ui.quran_interface import QuranInterface
+from utils.const import program_name
 
 
 def main():
     try:
         app = QApplication(sys.argv)
-        main_window = QuranInterface("Albayan")
+        main_window = QuranInterface(program_name)
         main_window.show()
         main_window.setFocus()
         QTimer.singleShot(200, main_window.quran_view.setFocus)
