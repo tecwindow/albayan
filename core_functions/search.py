@@ -1,93 +1,127 @@
-"""
-This file is part of the Qurani project, created by Nacer Baaziz.
-Copyright (c) 2023 Nacer Baaziz
-Qurani is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-Qurani is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with Qurani. If not, see https://www.gnu.org/licenses/.
-You are free to modify this file, but please keep this header.
-For more information, visit: https://github.com/baaziznasser/qurani
-"""
-
-#code start here
-
 import sqlite3
-
-class quran_search:
-	def __init__(self, no_tashkil=False, no_hamza=False, from_surah=False, from_ayah=False, to_surah=False, to_ayah=False):
-		self.no_tashkil = no_tashkil
-		self.no_hamza = no_hamza
-		self.from_surah = from_surah
-		self.from_ayah = from_ayah
-		self.to_surah = to_surah
-		self.to_ayah = to_ayah
-		self.conn = sqlite3.connect('Verses.db')
-		self.cursor = self.conn.cursor()
-
-	def __del__(self):
-		self.conn.close()
-
-	def search(self, text_to_search):
-		# set default values
-		from_surah = self.from_surah
-		to_surah = self.to_surah
-		from_ayah = self.from_ayah
-		to_ayah = self.to_ayah
-		#check from_surah real number
-		if from_surah >= 1:
-			self.cursor.execute(f"select number from quran WHERE sura_number = {from_surah}")
-			result = self.cursor.fetchall()
-			if from_ayah < 1:
-				from_ayah = 1
-			elif from_ayah > len(result):
-				from_ayah = len(result	)
-			else:
-				from_ayah = int(result[0][0])+(int(from_ayah)-1)
-
-		#check to_surah real number
-		if to_surah >= 1:
-			self.cursor.execute(f"select number from quran WHERE sura_number = {to_surah}")
-			result = self.cursor.fetchall()
-			if to_ayah < 1:
-				to_ayah = len(result)
-			elif to_ayah > len(result):
-				to_ayah = len(result	)
-			else:
-				to_ayah = int(result[0][0])+(int(to_ayah)-1)
+import os
 
 
+class SearchCriteria:
+    page = "page"
+    sura = "sura_number"
+    hizb = "hizb"
+    juz = "juz"
+    quarter = "hizbQuarter"
+    _arabic_criteria_dict = {
+        "صفحة": page,
+        "سورة": sura,
+        "الحزب": hizb,
+        "الجزء": juz,
+        "الربع": quarter
+    }    
 
-		#set the query
-		if to_ayah:
-			from_ayah = 1 if from_ayah is False else from_ayah
-			query = f"SELECT text, numberInSurah, sura_name, sura_number FROM quran WHERE text LIKE '%' || ? || '%' AND (number >= {from_ayah} AND number <= {to_ayah})"
-		elif from_ayah and to_ayah is False:
-			query = f"SELECT text, numberInSurah, sura_name, sura_number FROM quran WHERE text LIKE '%' || ? || '%' AND (number >= {from_ayah})"
-		else:
-			query = f"SELECT text, numberInSurah, sura_name, sura_number FROM quran WHERE text LIKE '%' || ? || '%'"
+    @classmethod
+    def is_valid(cls, criteria) -> bool:
+        return criteria in cls._arabic_criteria_dict.values()
 
-		if self.no_tashkil:
-			# remove all tashkil from the text to search
-			tashkil = ['َ', 'ً', 'ُ', 'ٌ', 'ِ', 'ٍ', 'ْ', 'ّ']
-			for char in tashkil:
-				text_to_search = text_to_search.replace(char, '')
-				query = query.replace('WHERE text', f"WHERE REPLACE(text, '{char}', '')")
-				query = query.replace('REPLACE(text', f"REPLACE(REPLACE(text, '{char}', '')")
-		if self.no_hamza:
-			# replace all hamzat with 'ا'
-			hamzat = ['أ', 'إ', 'آ', 'ء', 'ؤ']
-			for char in hamzat:
-				text_to_search = text_to_search.replace(char, 'ا')
-				# replace all hamzat with 'ا' in the SQL query
-				query = query.replace('WHERE text', f"WHERE REPLACE(text, '{char}', 'ا')")
-				query = query.replace('REPLACE(text', f"REPLACE(REPLACE(text, '{char}', 'ا')")
-		self.cursor.execute(query, (text_to_search,))
+    @classmethod
+    def get_criteria_by_arabic_name(cls, arabic_criteria) -> str:
+        return cls._arabic_criteria_dict.get(arabic_criteria)
 
-		result = self.cursor.fetchall()
-		return result
+    @classmethod    
+    def get_arabic_criteria(cls) -> list:
+        return list(cls._arabic_criteria_dict.keys())
+
+
+class QuranSearchManager:
+    def __init__(self):
+        self.no_tashkil = False
+        self.no_hamza = False
+        self._criteria = None
+        self._from = None
+        self._to = None
+        self._from_ayah = None
+        self._to_ayah = None
+        self._conn = None
+        self._cursor = None
+        self._connect()
+
+    def set(self, no_tashkil:bool=False, no_hamza:bool=False, criteria:str=None, _from:int=None, _to:int=None, from_ayah:int=None, to_ayah:int=None) -> None:
+        assert SearchCriteria.is_valid(criteria), "You must set a valid search criteria."
+        assert self._conn is not None, "You must connect to database."
+
+        #Get surah number if the input is surah  name
+        if  criteria == SearchCriteria.sura and isinstance(_from, str):
+            self._cursor.execute("SELECT DISTINCT sura_number AS 'number' FROM quran WHERE sura_name LIKE '%' || ? || '%';", (_from,))
+            _from = self._cursor.fetchone()['number']
+        if  criteria == SearchCriteria.sura and isinstance(_to, str):
+            self._cursor.execute("SELECT DISTINCT sura_number AS 'number' FROM quran WHERE sura_name LIKE '%' || ? || '%';", (_to,))
+            _to = self._cursor.fetchone()['number']
+
+        if not isinstance(_from, int) or _from < 1:
+            _from = 1
+
+        if _to < _from:
+            _to = _from
+
+        if not isinstance(_to, int) or _to <1:
+            self._cursor.execute(f"SELECT DISTINCT MAX({criteria}) AS 'max' FROM quran;")
+            _to = self._cursor.fetchone()["max"]
+
+# Set attributes
+        self.no_tashkil = no_tashkil
+        self.no_hamza = no_hamza
+        self._from = _from
+        self._to = _to
+        self._from_ayah = from_ayah
+        self._to_ayah = to_ayah
+        self._criteria = criteria
+    
+    def _connect(self):
+        file_path = os.path.join("database", "quran", 'Verses.DB')
+        if not os.path.isfile(file_path):
+            raise FileNotFoundError("There is no  such file in {}.".format(file_path))
+        
+        # connect to database
+        self._conn = sqlite3.connect(file_path)
+        self._conn.row_factory = sqlite3.Row
+        self._cursor = self._conn.cursor()
+
+    def search(self, search_text:str) -> list:
+        assert isinstance(search_text, str), "search text must be str."
+        assert SearchCriteria.is_valid(self._criteria), "You must set a valid criteria."
+
+        if not search_text:
+            return None
+
+        query = f"SELECT * FROM quran WHERE {self._criteria} >= ? AND {self._criteria} <= ? AND text LIKE '%' || ? || '%';"
+        if self.no_tashkil:
+            # remove all tashkil from the text to search
+            tashkil = ['َ', 'ً', 'ُ', 'ٌ', 'ِ', 'ٍ', 'ْ', 'ّ']
+            for char in tashkil:
+                search_text = search_text.replace(char, '')
+                query = query.replace('AND text', f"AND REPLACE(text, '{char}', '')")
+                query = query.replace('REPLACE(text', f"REPLACE(REPLACE(text, '{char}', '')")
+        if self.no_hamza:
+            # replace all hamzat with 'ا'
+            hamzat = ['أ', 'إ', 'آ', 'ء', 'ؤ']
+            for char in hamzat:
+                search_text = search_text.replace(char, 'ا')
+                # replace all hamzat with 'ا' in the SQL query
+                query = query.replace('AND text', f"AND REPLACE(text, '{char}', 'ا')")
+                query = query.replace('REPLACE(text', f"REPLACE(REPLACE(text, '{char}', 'ا')")
+
+        self._cursor.execute(query, (self._from, self._to, search_text))
+        result = self._cursor.fetchall()
+        return result
+
+    def __str__(self) -> str:
+        return "Quran Search Manager Information:\n" \
+            "No Tashkil: {}\n" \
+            "No Hamza: {}\n" \
+            "Criteria: {}\n" \
+            "From: {}\n" \
+            "To: {}\n" \
+            "From Ayah: {}\n" \
+            "To Ayah: {}\n".format(self.no_tashkil, self.no_hamza, self._criteria, self._from, self._to, self._from_ayah, self._to_ayah)
+
+    def __del__(self):
+        if self._conn is not None:
+            self._conn.close()
+

@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QApplication
 )
-from PyQt6.QtGui import QIcon, QAction, QKeyEvent
+from PyQt6.QtGui import QIcon, QAction
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
 from ui.dialogs.quick_access import QuickAccess
@@ -25,9 +25,9 @@ from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 
 
 class QuranInterface(QMainWindow):
-    def __init__(self):
+    def __init__(self, title):
         super().__init__()
-        self.setWindowTitle("Qurani")
+        self.setWindowTitle(title)
         self.setGeometry(100, 100, 800, 600)
         self.quran = quran_mgr()
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
@@ -145,8 +145,7 @@ class QuranInterface(QMainWindow):
     def OnSearch(self):
         search_dialog = SearchDialog(self, "بحث")
         if search_dialog.exec():
-            return
-
+            self.set_text_ctrl_label()
 
     def OnInterpretation(self):
 

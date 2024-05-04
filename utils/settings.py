@@ -14,12 +14,13 @@ class SettingsManager:
         }}
 
     @classmethod
-    def write_settings(cls, new_settings) -> None:
+    def write_settings(cls, new_settings:dict, is_reading:bool=False) -> None:
         try:
             cls.config.read_dict(new_settings)
             with open(cls.path, "w", encoding='utf-8') as config_file:
                 cls.config.write(config_file)
-            cls._current_settings = cls.read_settings()
+            if not is_reading:
+                cls._current_settings = cls.read_settings()
         except Exception as e:
             print(e)
 
@@ -43,7 +44,7 @@ class SettingsManager:
                         current_settings[section][setting] = cls.config.get(section, setting)
                 except Exception as e:
                     print(e)
-                    cls.write_settings({section: {setting: default_value}})
+                    cls.write_settings({section: {setting: default_value}}, is_reading=True)
                     current_settings[section][setting] = default_value
 
         return current_settings

@@ -9,10 +9,11 @@ from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtCore import QTimer
 from ui.quran_interface import QuranInterface
 
+
 def main():
     try:
         app = QApplication(sys.argv)
-        main_window = QuranInterface()
+        main_window = QuranInterface("Albayan")
         main_window.show()
         main_window.setFocus()
         QTimer.singleShot(200, main_window.quran_view.setFocus)
