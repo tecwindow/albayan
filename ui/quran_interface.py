@@ -161,6 +161,7 @@ class QuranInterface(QMainWindow):
             title += number
             current_line = current_line.replace(number, "").strip()
         ayah_info = self.quran.get_ayah_info(current_line)
+        title += "من {}".format(ayah_info[2])
         dialog = TafaseerDialog(self, title, ayah_info, selected_category)
         dialog.exec()
 
