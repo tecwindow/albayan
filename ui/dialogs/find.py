@@ -186,9 +186,8 @@ class SearchResultsDialog(QDialog):
         self.list_widget = QListWidget(self)
         self.list_widget.setAccessibleDescription("النتائج:")
         for row in search_result:
-            self.list_widget.addItem(row["text"])
-            self.list_widget.setCurrentRow(0)
-
+            self.list_widget.addItem(self.format_result(row))
+            
         self.go_to_button = QPushButton("الذهاب للنتيجة")
         self.go_to_button.clicked.connect(self.accept)
         self.cancel_button = QPushButton("إلغاء")
@@ -201,3 +200,14 @@ class SearchResultsDialog(QDialog):
         layout.addWidget(self.cancel_button)
         
         self.setLayout(layout)
+        self.list_widget.setCurrentRow(0)
+
+    def format_result(self, row:dict) -> str:
+        text = row["text"]
+        # take first 5 words from text
+        words = text.split()
+        text = " ".join(words[:5])
+        text += "..." if len(words) > 5 else ""
+
+        return "{} | الآية {} من {}".format(text, row["numberInSurah"], row["sura_name"])
+

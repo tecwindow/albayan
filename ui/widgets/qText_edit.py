@@ -1,5 +1,5 @@
 import re
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QLocale
 from PyQt6.QtGui import QKeyEvent
 from PyQt6.QtWidgets import QTextEdit
 
@@ -11,7 +11,11 @@ class ReadOnlyTextEdit(QTextEdit):
         self.setReadOnly(True)
         self.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard| Qt.TextInteractionFlag.TextSelectableByMouse)
         self.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
+        self.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.setLocale(QLocale("ar"))
+        self.setAcceptRichText(True)
+
 
 class QuranViewer(ReadOnlyTextEdit):
 
