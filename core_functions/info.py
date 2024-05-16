@@ -18,6 +18,13 @@ class Base(ABC):
     def text(self) -> str:
         pass
 
+    def remove_empty_lines(self, text) -> str:
+        lines = text.split("\n")
+        lines = list(filter(lambda x: x.strip(), lines))
+        text = "\n".join(lines)
+
+        return text
+
     def __del__(self) -> None:
         if self._conn is not None:
             self._conn.close()
@@ -39,7 +46,7 @@ class E3rab(Base):
         result = self.cursor.fetchone()
 
         if result:
-            return result["text"]
+            return self.remove_empty_lines(result["text"])
         else:
             return ""
 
@@ -58,6 +65,6 @@ class TanzilAyah(Base):
         result = self.cursor.fetchone()
 
         if result:
-            return result["text"]
+            return self.remove_empty_lines(result["text"])
         else:
             return ""
