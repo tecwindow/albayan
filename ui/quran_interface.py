@@ -16,12 +16,14 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QIcon, QAction
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
+from core_functions.info import E3rab, TanzilAyah
 from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog
 from ui.widgets.button import EnterButton
 from ui.widgets.menu_bar import MenuBar
 from ui.widgets.qText_edit import QuranViewer
 from ui.dialogs.tafaseer_Dialog import TafaseerDialog
+from ui.dialogs.info_dialog import InfoDialog
 
 
 class QuranInterface(QMainWindow):
@@ -147,6 +149,17 @@ class QuranInterface(QMainWindow):
         if search_dialog.exec():
             self.set_text_ctrl_label()
 
+    def get_current_ayah_info(self) -> dict:
+
+        current_line = self.quran_view.textCursor().block().text()
+        search = re.search(r"\(\d+\)", current_line)
+        if search:
+            number = search.group()
+            current_line = current_line.replace(number, "").strip()
+        ayah_info = self.quran.get_ayah_info(current_line)
+
+        return ayah_info
+    
     def OnInterpretation(self):
 
         selected_category = self.sender().text()
@@ -179,6 +192,7 @@ class QuranInterface(QMainWindow):
             submenu.addAction(action)
 
         get_verse_syntax = menu.addAction("إعراب الآية")
+        get_verse_syntax.triggered.connect(self.OnSyntax)
         get_verse_reasons = menu.addAction("أسباب نزول الآية")
         copy_verse = menu.addAction("نسخ الآية")
         copy_verse.triggered.connect(self.on_copy_verse)
@@ -200,4 +214,11 @@ class QuranInterface(QMainWindow):
         current_line = self.quran_view.textCursor().block().text()
         clipboard = QApplication.clipboard()
         clipboard.setText(current_line)
+
+    def OnSyntax(self):
+        aya_info = self.get_current_ayah_info()
+        title = "إعراب آية رقم {} من {}".format(aya_info[3], aya_info[2])
+        label = "الإعراب"
+        text = E3rab(aya_info[0], aya_info[1]).text
+        InfoDialog(title, label, text).exec()
 
