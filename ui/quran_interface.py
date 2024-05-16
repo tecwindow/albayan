@@ -180,7 +180,7 @@ class QuranInterface(QMainWindow):
 
     def onContextMenu(self):
         menu = QMenu(self)
-        get_verse_info = menu.addAction("معلومات الآية")
+#        get_verse_info = menu.addAction("معلومات الآية")
         get_interpretation_verse = menu.addAction("تفسير الآية")
         get_interpretation_verse.triggered.connect(self.OnInterpretation)
 
@@ -194,6 +194,7 @@ class QuranInterface(QMainWindow):
         get_verse_syntax = menu.addAction("إعراب الآية")
         get_verse_syntax.triggered.connect(self.OnSyntax)
         get_verse_reasons = menu.addAction("أسباب نزول الآية")
+        get_verse_reasons.triggered.connect(self.OnVerseReasons)
         copy_verse = menu.addAction("نسخ الآية")
         copy_verse.triggered.connect(self.on_copy_verse)
 
@@ -220,5 +221,12 @@ class QuranInterface(QMainWindow):
         title = "إعراب آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "الإعراب"
         text = E3rab(aya_info[0], aya_info[1]).text
+        InfoDialog(title, label, text).exec()
+
+    def OnVerseReasons(self):
+        aya_info = self.get_current_ayah_info()
+        title = "أسباب نزول آية رقم {} من {}".format(aya_info[3], aya_info[2])
+        label = "الأسباب"
+        text = TanzilAyah(aya_info[1]).text
         InfoDialog(title, label, text).exec()
 
