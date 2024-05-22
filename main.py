@@ -3,6 +3,7 @@ import os
 # Change the working dir to current dir
 current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 os.chdir(current_dir)
+from multiprocessing import freeze_support
 from utils.logger import Logger
 sys.excepthook = Logger.my_excepthook
 from PyQt6.QtWidgets import QApplication, QMessageBox
@@ -24,4 +25,5 @@ def main():
         QMessageBox.critical(None, "Error", "حدث خطأ. يرجى الاتصال بالدعم للحصول على المساعدة.")
 
 if __name__ == "__main__":
+    freeze_support()
     main()
