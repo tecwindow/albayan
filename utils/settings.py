@@ -9,8 +9,14 @@ class SettingsManager:
 
     default_settings = {
         "general": {
+            "sound_effect_enabled": True,
+            "speak_actions_enabled": True,
             "check_update_enabled": True,
-            "is_logging_enabled": False
+            "logging_enabled": False
+        },
+        "search": {
+            "ignore_tashkeel": True,
+            "ignore_hamza": True,
         }}
 
     @classmethod
