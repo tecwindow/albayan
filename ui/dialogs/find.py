@@ -17,6 +17,7 @@ QMessageBox,
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QTextCursor
 from core_functions.search import SearchCriteria, QuranSearchManager
+from utils.settings import SettingsManager
 
 
 class SearchDialog(QDialog):
@@ -27,6 +28,7 @@ class SearchDialog(QDialog):
         self.setGeometry(100, 100, 500, 400)
         self.search_manager = QuranSearchManager()
         self.criteria = None
+        self.current_settings = SettingsManager.current_settings
         self.initUI()
 
     def initUI(self):
@@ -57,9 +59,9 @@ class SearchDialog(QDialog):
         self.search_to_combobox = QComboBox()
         self.search_to_combobox.setAccessibleName("إلى:")
         self.ignore_diacritics_checkbox = QCheckBox('تجاهل التشكيل')
-        self.ignore_diacritics_checkbox.setChecked(True)
+        self.ignore_diacritics_checkbox.setChecked(self.current_settings["search"]["ignore_tashkeel"])
         self.ignore_hamza_checkbox = QCheckBox('تجاهل الهمزات')
-        self.ignore_hamza_checkbox.setChecked(True)
+        self.ignore_hamza_checkbox.setChecked(self.current_settings["search"]["ignore_hamza"])
         
         self.search_type_layout = QHBoxLayout()
         self.search_type_layout.addWidget(self.search_type_radio_page)

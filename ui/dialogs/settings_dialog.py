@@ -6,15 +6,20 @@ from PyQt6.QtWidgets import (
     QListWidgetItem, 
     QCheckBox, 
     QPushButton, 
-    QGroupBox
+    QGroupBox,
+QMessageBox
 )
+from utils.settings import SettingsManager
 
 class SettingsDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("الإعدادات")
         self.setGeometry(100, 100, 400, 300)
+        self.init_ui()
+        self.set_current_settings()
 
+    def init_ui(self):
         main_layout = QVBoxLayout()
         taps_layout = QHBoxLayout()
 
@@ -33,12 +38,8 @@ class SettingsDialog(QDialog):
         self.update_checkbox = QCheckBox("التحقق من التحديثات")
         self.log_checkbox = QCheckBox("تمكين تسجيل الأخطاء")
         self.reset_button = QPushButton("إعادة الإعدادات الافتراضية")
-
-        self.sound_checkbox.setChecked(False)
-        self.speech_checkbox.setChecked(True)
-        self.update_checkbox.setChecked(True)
-        self.log_checkbox.setChecked(True)
-
+        self.reset_button.clicked.connect(self.OnReset)
+        
         self.group_general_layout.addWidget(self.sound_checkbox)
         self.group_general_layout.addWidget(self.speech_checkbox)
         self.group_general_layout.addWidget(self.update_checkbox)
@@ -52,8 +53,6 @@ class SettingsDialog(QDialog):
         self.group_search_layout = QVBoxLayout()
         self.ignore_tashkeel_checkbox = QCheckBox("تجاهل التشكيل")
         self.ignore_hamza_checkbox = QCheckBox("تجاهل الهمزات")
-        self.ignore_tashkeel_checkbox.setChecked(True)
-        self.ignore_hamza_checkbox.setChecked(True)
 
         self.group_search_layout.addWidget(self.ignore_tashkeel_checkbox)
         self.group_search_layout.addWidget(self.ignore_hamza_checkbox)
@@ -74,6 +73,7 @@ class SettingsDialog(QDialog):
         main_layout.addLayout(buttons_layout)
         self.setLayout(main_layout)
 
+
     def change_category(self, current, previous):
         if current:
             if current.text() == "الإعدادات العامة":
@@ -84,4 +84,47 @@ class SettingsDialog(QDialog):
                 self.group_search.setVisible(True)
 
     def save_settings(self):
-        pass
+
+        # Collect general settings
+        general_settings = {
+            "sound_effect_enabled": self.sound_checkbox.isChecked(),
+            "speak_actions_enabled": self.speech_checkbox.isChecked(),
+            "check_update_enabled": self.update_checkbox.isChecked(),
+            "logging_enabled": self.log_checkbox.isChecked()
+        }
+
+        # Collect search settings
+        search_settings = {
+            "ignore_tashkeel": self.ignore_tashkeel_checkbox.isChecked(),
+            "ignore_hamza": self.ignore_hamza_checkbox.isChecked()
+        }
+
+        # Update the current settings
+        SettingsManager.write_settings({
+            "general": general_settings,
+            "search": search_settings
+        })
+        self.accept()
+
+    def OnReset(self):
+
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("تحذير")
+        msg_box.setText("هل أنت متأكد من إعادة تعيين الإعدادات إلى الإعدادات الافتراضية؟")
+        msg_box.setIcon(QMessageBox.Icon.Warning)
+        yes_button = msg_box.addButton("نعم", QMessageBox.ButtonRole.YesRole)
+        no_button = msg_box.addButton("لا", QMessageBox.ButtonRole.NoRole)
+        msg_box.exec()
+
+        if msg_box.clickedButton() == yes_button:
+            SettingsManager.reset_settings()
+            self.set_current_settings()
+
+    def set_current_settings(self):
+        current_settings = SettingsManager.current_settings    
+        self.sound_checkbox.setChecked(current_settings["general"]["sound_effect_enabled"])
+        self.speech_checkbox.setChecked(current_settings["general"]["speak_actions_enabled"])
+        self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
+        self.log_checkbox.setChecked(current_settings["general"]["logging_enabled"])
+        self.ignore_tashkeel_checkbox.setChecked(current_settings["search"]["ignore_tashkeel"])
+        self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])
