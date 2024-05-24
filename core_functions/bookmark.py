@@ -89,6 +89,22 @@ class BookmarkManager:
         except Exception as e:
             Logger.error(str(e))
 
+    def search_bookmarks(self, search_text: str) -> list:
+
+        returned_data = []
+        query = """
+            SELECT * FROM bookmarks
+            WHERE name LIKE ?
+        """
+
+        try:
+            self.cursor.execute(query, ('%' + search_text + '%',))
+            returned_data = self.cursor.fetchall()
+        except Exception as e:
+            Logger.error(str(e))
+
+        return returned_data
+    
     def __str__(self) -> str:
         return "Connecting to {}.".format(self.file_path)
 
