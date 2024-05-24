@@ -1,16 +1,13 @@
 import sys
 import os
-# Change the working dir to current dir
-current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-os.chdir(current_dir)
 from multiprocessing import freeze_support
-from utils.logger import Logger
-sys.excepthook = Logger.my_excepthook
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtCore import QTimer
 from ui.quran_interface import QuranInterface
+from utils.update import UpdateManager
+from utils.settings import SettingsManager
 from utils.const import program_name
-
+from utils.logger import Logger
 
 def main():
     try:
@@ -19,8 +16,10 @@ def main():
         main_window.show()
         main_window.setFocus()
         QTimer.singleShot(200, main_window.quran_view.setFocus)
+        main_window.check_auto_update()
         sys.exit(app.exec())
     except Exception as e:
+        print(e)
         Logger.error(str(e))
         QMessageBox.critical(None, "Error", "حدث خطأ. يرجى الاتصال بالدعم للحصول على المساعدة.")
 

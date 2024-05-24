@@ -1,11 +1,14 @@
 from PyQt6.QtWidgets import QMenuBar
 from PyQt6.QtGui import QIcon, QAction
 from ui.dialogs.settings_dialog import SettingsDialog
+from utils.update import UpdateManager
+from utils.settings import SettingsManager
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
+        self.update_manager = UpdateManager(self.parent)
         self.create_menu()
 
     def create_menu(self):
@@ -50,6 +53,7 @@ class MenuBar(QMenuBar):
         user_guide_action = QAction("دليل البرنامج", self)
         contact_us_action = QAction("اتصل بنا", self)
         update_program_action = QAction("تحديث البرنامج", self)
+        update_program_action.triggered.connect(self.OnUpdate)
 
         help_menu.addAction(user_guide_action)
         help_menu.addAction(contact_us_action)
@@ -57,3 +61,6 @@ class MenuBar(QMenuBar):
 
     def OnSettings(self):
         SettingsDialog().exec()
+
+    def OnUpdate(self):
+         self.update_manager.check_updates()

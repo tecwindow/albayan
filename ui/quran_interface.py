@@ -1,6 +1,6 @@
 import os
 import re
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout, 
@@ -24,6 +24,8 @@ from ui.widgets.menu_bar import MenuBar
 from ui.widgets.qText_edit import QuranViewer
 from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
+from utils.settings import SettingsManager
+from utils.update import UpdateManager
 
 
 class QuranInterface(QMainWindow):
@@ -229,4 +231,9 @@ class QuranInterface(QMainWindow):
         label = "الأسباب"
         text = TanzilAyah(aya_info[1]).text
         InfoDialog(title, label, text).exec()
+
+    def check_auto_update(self):
+        check_update_enabled = SettingsManager.current_settings["general"]["check_update_enabled"]
+        update_manager = UpdateManager(self, check_update_enabled)
+        update_manager.check_auto_update()
 
