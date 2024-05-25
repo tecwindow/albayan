@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QMenuBar
 from PyQt6.QtGui import QIcon, QAction
 from ui.dialogs.settings_dialog import SettingsDialog
+from ui.dialogs.bookmark_dialog import BookmarkDialog
 from utils.update import UpdateManager
 from utils.settings import SettingsManager
 
@@ -39,6 +40,11 @@ class MenuBar(QMenuBar):
         actions_menu.addAction(verse_grammar_action)
         actions_menu.addAction(copy_verse_action)
 
+        tools_menu = self.addMenu("Tools")
+        bookmark_manager_action = QAction("Bookmark manager", self)
+        bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
+        tools_menu.addAction(bookmark_manager_action )
+
         preferences_menu = self.addMenu("التفضيلات")
         settings_action = QAction("الإعدادات", self)
         settings_action.triggered.connect(self.OnSettings)
@@ -64,3 +70,9 @@ class MenuBar(QMenuBar):
 
     def OnUpdate(self):
          self.update_manager.check_updates()
+
+    def OnBookmarkManager(self):
+        dialog = BookmarkDialog(self.parent)
+        if dialog.exec():
+            pass
+
