@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import datetime
 from utils.logger import Logger
 from utils.const import albayan_folder
 
@@ -38,8 +39,9 @@ class BookmarkManager:
         except Exception as e:
             Logger.error(str(e))
 
-    def insert_bookmark(self, name: str, ayah_number: int, surah_number: int, criteria_number: int, date: str) -> None:
+    def insert_bookmark(self, name: str, ayah_number: int, surah_number: int, criteria_number: int) -> None:
 
+        date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         query = """
             INSERT INTO bookmarks (
                 name, ayah_number, surah_number, criteria_number, date
