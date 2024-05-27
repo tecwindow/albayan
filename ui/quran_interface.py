@@ -11,12 +11,14 @@ from PyQt6.QtWidgets import (
     QMainWindow, 
     QMessageBox,
     QComboBox,
+    QInputDialog,
     QApplication
 )
 from PyQt6.QtGui import QIcon, QAction
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
 from core_functions.info import E3rab, TanzilAyah
+from core_functions.bookmark import BookmarkManager
 from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog
 from ui.widgets.button import EnterButton
@@ -36,9 +38,8 @@ class QuranInterface(QMainWindow):
         self.quran = quran_mgr()
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
         self.quran.aya_to_line = True
-
-        menu_bar = MenuBar(self)
-        self.setMenuBar(menu_bar)
+        self.menu_bar = MenuBar(self)
+        self.setMenuBar(self.menu_bar)
         self.create_widgets()
         self.create_layout()
         
@@ -76,6 +77,8 @@ class QuranInterface(QMainWindow):
         self.search_in_quran = EnterButton("البحث في القرآن")
         self.search_in_quran.clicked.connect(self.OnSearch)
         self.save_current_position = QPushButton("حفظ الموضع الحالي")
+        self.save_current_position.setEnabled(False)
+        self.save_current_position.clicked.connect(self.OnSavePosition)
 
     def create_layout(self):
         layout = QVBoxLayout()
@@ -151,7 +154,7 @@ class QuranInterface(QMainWindow):
         if search_dialog.exec():
             self.set_text_ctrl_label()
 
-    def get_current_ayah_info(self) -> dict:
+    def get_current_ayah_info(self) -> list:
 
         current_line = self.quran_view.textCursor().block().text()
         search = re.search(r"\(\d+\)", current_line)
@@ -182,6 +185,7 @@ class QuranInterface(QMainWindow):
 
     def onContextMenu(self):
         menu = QMenu(self)
+        save_current_position = menu.addAction("حفظ الموضع الحالي")
         get_sura_info = menu.addAction("معلومات السورة")
         get_interpretation_verse = menu.addAction("تفسير الآية")
         get_interpretation_verse.triggered.connect(self.OnInterpretation)
@@ -193,6 +197,7 @@ class QuranInterface(QMainWindow):
             action.triggered.connect(self.OnInterpretation)
             submenu.addAction(action)
 
+        save_current_position.triggered.connect(self.OnSavePosition)
         get_verse_syntax = menu.addAction("إعراب الآية")
         get_verse_syntax.triggered.connect(self.OnSyntax)
         get_verse_reasons = menu.addAction("أسباب نزول الآية")
@@ -202,6 +207,7 @@ class QuranInterface(QMainWindow):
 
         current_line = self.quran_view.textCursor().block().text()
         if "سُورَةُ" in current_line or current_line == "" or not re.search(r"\(\d+\)$", current_line):
+            save_current_position.setEnabled(False)
             copy_verse.setEnabled(False)
             get_sura_info.setEnabled(False)
             get_interpretation_verse.setEnabled(False)
@@ -231,6 +237,16 @@ class QuranInterface(QMainWindow):
         label = "الأسباب"
         text = TanzilAyah(aya_info[1]).text
         InfoDialog(title, label, text).exec()
+
+    def OnSavePosition(self):
+        aya_info = self.get_current_ayah_info()
+        criteria_number = self.quran.type
+        name, ok = QInputDialog.getText(self, "Bookmark name", "Enter bookmark name:")
+        BookmarkManager().insert_bookmark(name, aya_info[1], aya_info[0], criteria_number)
+        self.quran_view.setFocus()
+
+        
+
 
     def check_auto_update(self):
         check_update_enabled = SettingsManager.current_settings["general"]["check_update_enabled"]

@@ -26,19 +26,20 @@ class MenuBar(QMenuBar):
         navigation_menu.addAction(quick_access_action)
 
         actions_menu = self.addMenu("الإجرائات")
-        save_position_action = QAction("حفظ الموضع الحالي", self)
-        surah_info_action = QAction("معلومات السورة", self)
-        verse_tafsir_action = QAction("تفسير الآية", self)
-        verse_info_action = QAction("معلومات الآية", self)
-        verse_grammar_action = QAction("اعراب الآية", self)
-        copy_verse_action = QAction("نسخ الآية", self)
+        self.save_position_action = QAction("حفظ الموضع الحالي", self)
+        self.save_position_action.triggered.connect(self.parent.OnSavePosition)
+        self.surah_info_action = QAction("معلومات السورة", self)
+        self.verse_tafsir_action = QAction("تفسير الآية", self)
+        self.verse_info_action = QAction("معلومات الآية", self)
+        self.verse_grammar_action = QAction("اعراب الآية", self)
+        self.copy_verse_action = QAction("نسخ الآية", self)
 
-        actions_menu.addAction(save_position_action)
-        actions_menu.addAction(surah_info_action)
-        actions_menu.addAction(verse_tafsir_action)
-        actions_menu.addAction(verse_info_action)
-        actions_menu.addAction(verse_grammar_action)
-        actions_menu.addAction(copy_verse_action)
+        actions_menu.addAction(self.save_position_action)
+        actions_menu.addAction(self.surah_info_action)
+        actions_menu.addAction(self.verse_tafsir_action)
+        actions_menu.addAction(self.verse_info_action)
+        actions_menu.addAction(self.verse_grammar_action)
+        actions_menu.addAction(self.copy_verse_action)
 
         tools_menu = self.addMenu("Tools")
         bookmark_manager_action = QAction("Bookmark manager", self)
@@ -76,3 +77,4 @@ class MenuBar(QMenuBar):
         if dialog.exec():
             pass
 
+    
