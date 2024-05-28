@@ -242,11 +242,9 @@ class QuranInterface(QMainWindow):
         aya_info = self.get_current_ayah_info()
         criteria_number = self.quran.type
         name, ok = QInputDialog.getText(self, "Bookmark name", "Enter bookmark name:")
-        BookmarkManager().insert_bookmark(name, aya_info[1], aya_info[0], criteria_number)
-        self.quran_view.setFocus()
-
-        
-
+        if ok and name:
+            BookmarkManager().insert_bookmark(name, aya_info[1], aya_info[3], aya_info[0], aya_info[2], criteria_number)
+            self.quran_view.setFocus()
 
     def check_auto_update(self):
         check_update_enabled = SettingsManager.current_settings["general"]["check_update_enabled"]

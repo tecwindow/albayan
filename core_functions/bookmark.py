@@ -27,7 +27,9 @@ class BookmarkManager:
                 id INTEGER PRIMARY KEY,
                 name TEXT,
                 ayah_number INTEGER,
+                ayah_number_in_surah INTEGER,
                 surah_number INTEGER,
+                surah_name TEXT,
                 criteria_number INTEGER,
                 date TEXT
             )
@@ -39,22 +41,23 @@ class BookmarkManager:
         except Exception as e:
             Logger.error(str(e))
 
-    def insert_bookmark(self, name: str, ayah_number: int, surah_number: int, criteria_number: int) -> None:
+    def insert_bookmark(self, name: str, ayah_number: int, ayah_number_in_surah: int, surah_number: int, surah_name: str, criteria_number: int) -> None:
 
         date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         query = """
             INSERT INTO bookmarks (
-                name, ayah_number, surah_number, criteria_number, date
+                name, ayah_number, ayah_number_in_surah, surah_number, surah_name, criteria_number, date
                 )
             VALUES (
-                ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?
                 )
         """ 
 
         try:
-            self.cursor.execute(query, (name, ayah_number, surah_number, criteria_number, date))
+            self.cursor.execute(query, (name, ayah_number, ayah_number_in_surah, surah_number, surah_name, criteria_number, date))
             self.conn.commit()
         except Exception as e:
+            print(e)
             Logger.error(str(e))
 
     def get_bookmarks(self) -> list:

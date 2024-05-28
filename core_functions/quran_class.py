@@ -20,6 +20,7 @@ For more information, visit: https://github.com/baaziznasser/qurani
 
 import sqlite3
 
+
 class quran_mgr:
     def __init__(self):
         self.show_ayah_number = True
@@ -188,10 +189,13 @@ class quran_mgr:
             case 1:
                 col_name = "sura_number"
             case 2:
-                col_name = "hizb"
+                col_name = "hizbQuarter"
             case 3:
+                col_name = "hizb"
+            case 4:
                 col_name = "juz"
 
+        assert col_name is not None, "Must set a valid type."
         query = f"""
         SELECT * FROM quran WHERE {col_name} = (
         SELECT DISTINCT {col_name} FROM quran WHERE number = ? LIMIT 1
