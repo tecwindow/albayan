@@ -37,7 +37,7 @@ class SettingsDialog(QDialog):
         self.speech_checkbox = QCheckBox("نطق الإجرائات")
         self.update_checkbox = QCheckBox("التحقق من التحديثات")
         self.log_checkbox = QCheckBox("تمكين تسجيل الأخطاء")
-        self.reset_button = QPushButton("إعادة الإعدادات الافتراضية")
+        self.reset_button = QPushButton("استعادة الإعدادات الافتراضية")
         self.reset_button.clicked.connect(self.OnReset)
         
         self.group_general_layout.addWidget(self.sound_checkbox)

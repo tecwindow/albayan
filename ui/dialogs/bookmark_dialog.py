@@ -18,26 +18,26 @@ class BookmarkDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
-        self.setWindowTitle("Bookmark Manager")
+        self.setWindowTitle("مدير العلامات")
         self.resize(600, 400)
 
         self.manager = BookmarkManager()
 
-        self.search_label = QLabel("Search:")
+        self.search_label = QLabel("بحث:")
         self.search_input = QLineEdit()
-        self.search_input.setAccessibleName("Search:")
+        self.search_input.setAccessibleName("بحث:")
 
-        self.bookmarks_label = QLabel("Bookmarks:")
+        self.bookmarks_label = QLabel("العلامات:")
         self.bookmark_list = QListWidget()
-        self.bookmark_list.setAccessibleDescription("Bookmarks:")
+        self.bookmark_list.setAccessibleDescription("العلامات:")
 
-        self.update_button = QPushButton("Update Bookmark")
+        self.update_button = QPushButton("تحديث العلامة")
         self.update_button.setDefault(False)
-        self.delete_button = QPushButton("Delete Bookmark")
+        self.delete_button = QPushButton("حذف العلامة")
         self.delete_button.setDefault(False)
-        self.go_button = QPushButton("Go to Bookmark")
+        self.go_button = QPushButton("الذهاب إلى العلامة")
         self.go_button.setDefault(True)
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton("إلغاء")
 
         form_layout = QHBoxLayout()
         form_layout.addWidget(self.update_button)
@@ -87,7 +87,7 @@ class BookmarkDialog(QDialog):
 
         selected_items = self.bookmark_list.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, "Selection Error", "No bookmark selected.")
+            QMessageBox.warning(self, "Selection Error", "لم يتم تحديد أي علامة")
             return
 
         item = selected_items[0]
@@ -105,7 +105,7 @@ class BookmarkDialog(QDialog):
 
         selected_items = self.bookmark_list.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, "Selection Error", "No bookmark selected.")
+            QMessageBox.warning(self, "Selection Error", "لم يتم تحديد أي علامة.")
             return
         
         item = selected_items[0]

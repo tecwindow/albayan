@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QMenuBar
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtGui import QIcon, QAction, QKeySequence
 from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
 from utils.update import UpdateManager
@@ -15,10 +15,13 @@ class MenuBar(QMenuBar):
     def create_menu(self):
         navigation_menu = self.addMenu("التنقل")
         next_action = QAction("التالي", self)
+        next_action.setShortcut(QKeySequence("Ctrl+N"))
         previous_action = QAction("السابق", self)
+        previous_action.setShortcut(QKeySequence("Ctrl+P"))
         search_action = QAction("البحث", self)
+        search_action.setShortcut(QKeySequence("Ctrl+F"))
         quick_access_action = QAction("الوصول السريع", self)
-
+        quick_access_action.setShortcut(QKeySequence("Ctrl+Q"))
 
         navigation_menu.addAction(next_action)
         navigation_menu.addAction(previous_action)
@@ -27,12 +30,18 @@ class MenuBar(QMenuBar):
 
         actions_menu = self.addMenu("الإجرائات")
         self.save_position_action = QAction("حفظ الموضع الحالي", self)
+        self.save_position_action.setShortcut(QKeySequence("Ctrl+S"))
         self.save_position_action.triggered.connect(self.parent.OnSavePosition)
         self.surah_info_action = QAction("معلومات السورة", self)
+        self.surah_info_action.setShortcut(QKeySequence("Shift+S"))
         self.verse_tafsir_action = QAction("تفسير الآية", self)
+        self.verse_tafsir_action.setShortcut(QKeySequence("Ctrl+T"))
         self.verse_info_action = QAction("معلومات الآية", self)
+        self.verse_info_action.setShortcut(QKeySequence("Shift+A"))
         self.verse_grammar_action = QAction("اعراب الآية", self)
+        self.verse_grammar_action.setShortcut(QKeySequence("Shift+E"))
         self.copy_verse_action = QAction("نسخ الآية", self)
+        self.copy_verse_action.setShortcut(QKeySequence("Ctrl+C"))
 
         actions_menu.addAction(self.save_position_action)
         actions_menu.addAction(self.surah_info_action)
@@ -41,13 +50,16 @@ class MenuBar(QMenuBar):
         actions_menu.addAction(self.verse_grammar_action)
         actions_menu.addAction(self.copy_verse_action)
 
-        tools_menu = self.addMenu("Tools")
-        bookmark_manager_action = QAction("Bookmark manager", self)
+        tools_menu = self.addMenu("الأدوات")
+        bookmark_manager_action = QAction("مدير العلامات", self)
+        bookmark_manager_action.setShortcut(QKeySequence("Shift+D"))
         bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
         tools_menu.addAction(bookmark_manager_action )
 
         preferences_menu = self.addMenu("التفضيلات")
         settings_action = QAction("الإعدادات", self)
+        settings_action.setShortcut(QKeySequence("F3"))
+        settings_action.setShortcuts([QKeySequence("F3"), QKeySequence("Alt+S")])
         settings_action.triggered.connect(self.OnSettings)
         theme_change_action = QAction("تغيير الثيم", self)
         text_direction_action = QAction("تغيير اتجاه النص", self)
@@ -58,8 +70,10 @@ class MenuBar(QMenuBar):
 
         help_menu = self.addMenu("المساعدة")
         user_guide_action = QAction("دليل البرنامج", self)
+        user_guide_action.setShortcut(QKeySequence("F1"))
         contact_us_action = QAction("اتصل بنا", self)
         update_program_action = QAction("تحديث البرنامج", self)
+        update_program_action.setShortcuts([QKeySequence("F5"), QKeySequence("Ctrl+U")])
         update_program_action.triggered.connect(self.OnUpdate)
 
         help_menu.addAction(user_guide_action)

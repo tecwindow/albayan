@@ -20,20 +20,20 @@ class UpdateDialog(QDialog):
     def __init__(self, parent, release_notes, download_url, latest_version):
         super().__init__(parent)
         self.download_url = download_url
-        self.setWindowTitle("Update Available")
+        self.setWindowTitle("تحديث متاح")
         self.setFixedSize(400, 300)
         self.setWindowModality(Qt.WindowModality.ApplicationModal)
 
         layout = QVBoxLayout()
-        label1 = QLabel("{} version {} is available.".format(program_name, latest_version))
-        label2 = QLabel("What's new in {} version {}?".format(program_name, latest_version))
+        label1 = QLabel("{} الإصدار {} متاح.".format(program_name, latest_version))
+        label2 = QLabel("ما الجديد في الإصدار {}؟".format(latest_version))
 
         self.release_notes_edit = ReadOnlyTextEdit(self)
         self.release_notes_edit.setText(release_notes)
 
         buttons_layout = QHBoxLayout()
-        self.update_button = QPushButton("Update")
-        self.cancel_button = QPushButton("Cancel")
+        self.update_button = QPushButton("تحديث")
+        self.cancel_button = QPushButton("إلغاء")
 
         self.update_button.clicked.connect(self.on_update)
         self.cancel_button.clicked.connect(self.reject)
@@ -52,7 +52,7 @@ class UpdateDialog(QDialog):
     def on_update(self):
         self.progress_dialog = QProgressDialog("Updating...", "Cancel", 0, 100, self)
         self.progress_dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
-        self.progress_dialog.setWindowTitle("Updating")
+        self.progress_dialog.setWindowTitle("يجري التحديث")
         self.progress_dialog.canceled.connect(self.on_cancel)
         self.progress_dialog.show()
 

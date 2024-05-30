@@ -219,6 +219,9 @@ class QuranInterface(QMainWindow):
         menu.setFocus()
         menu.exec(self.quran_view.mapToGlobal(self.quran_view.pos()))
         
+    
+
+        
     def on_copy_verse(self):
         current_line = self.quran_view.textCursor().block().text()
         clipboard = QApplication.clipboard()
@@ -241,7 +244,7 @@ class QuranInterface(QMainWindow):
     def OnSavePosition(self):
         aya_info = self.get_current_ayah_info()
         criteria_number = self.quran.type
-        name, ok = QInputDialog.getText(self, "Bookmark name", "Enter bookmark name:")
+        name, ok = QInputDialog.getText(self, "اسم العلامة", "أدخل اسم العلامة:")
         if ok and name:
             BookmarkManager().insert_bookmark(name, aya_info[1], aya_info[3], aya_info[0], aya_info[2], criteria_number)
             self.quran_view.setFocus()
