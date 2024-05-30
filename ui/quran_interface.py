@@ -104,16 +104,20 @@ class QuranInterface(QMainWindow):
         self.set_text_ctrl_label()
         self.quran_view.setFocus()
         self.back_to.setEnabled(True)
+        self.menu_bar.previous_action.setEnabled(True)
         if self.quran.current_pos == self.quran.max_pos:
             self.next_to.setEnabled(False)
+            self.menu_bar.next_action.setEnabled(False)
 
     def OnBack(self):
         self.quran_view.setText(self.quran.back())
         self.set_text_ctrl_label()
         self.quran_view.setFocus()
         self.next_to.setEnabled(True)
+        self.menu_bar.next_action.setEnabled(True)
         if self.quran.current_pos == 1:
             self.back_to.setEnabled(False)
+            self.menu_bar.previous_action.setEnabled(False)
 
     def set_text_ctrl_label(self):
         if self.quran.type == 0:
