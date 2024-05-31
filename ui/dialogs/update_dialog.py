@@ -4,13 +4,14 @@ import os
 from threading import Thread
 from packaging import version
 from PyQt6.QtWidgets import (
-    QDialog, 
-    QVBoxLayout, 
-    QHBoxLayout, 
-    QLabel, 
-    QPushButton,  
-    QProgressDialog, 
-    QMessageBox
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QProgressDialog,
+    QMessageBox,
+    QGroupBox
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from ui.widgets.qText_edit import ReadOnlyTextEdit
@@ -25,12 +26,24 @@ class UpdateDialog(QDialog):
         self.setWindowModality(Qt.WindowModality.ApplicationModal)
 
         layout = QVBoxLayout()
-        label1 = QLabel("{} الإصدار {} متاح.".format(program_name, latest_version))
-        label2 = QLabel("ما الجديد في الإصدار {}؟".format(latest_version))
 
-        self.release_notes_edit = ReadOnlyTextEdit(self)
+        self.groupBox = QGroupBox(self)
+        self.groupBox.setObjectName("groupBox")
+
+        group_layout = QVBoxLayout(self.groupBox)
+
+        label1 = QLabel("{} الإصدار {} متاح.".format(program_name, latest_version), self.groupBox)
+        label2 = QLabel("ما الجديد في الإصدار {}؟".format(latest_version), self.groupBox)
+
+        self.release_notes_edit = ReadOnlyTextEdit(self.groupBox)
         self.release_notes_edit.setAccessibleName(label2.text())
         self.release_notes_edit.setText(release_notes)
+
+        group_layout.addWidget(label1)
+        group_layout.addWidget(label2)
+        group_layout.addWidget(self.release_notes_edit)
+
+        layout.addWidget(self.groupBox)
 
         buttons_layout = QHBoxLayout()
         self.update_button = QPushButton("تحديث")
@@ -39,9 +52,6 @@ class UpdateDialog(QDialog):
         self.update_button.clicked.connect(self.on_update)
         self.cancel_button.clicked.connect(self.reject)
 
-        layout.addWidget(label1)
-        layout.addWidget(label2)
-        layout.addWidget(self.release_notes_edit)
         buttons_layout.addWidget(self.update_button)
         buttons_layout.addWidget(self.cancel_button)
         layout.addLayout(buttons_layout)
@@ -82,7 +92,6 @@ class DownloadThread(QThread):
         self.download_url = download_url
 
     def run(self):
-
         file_name = self.download_url.split('/')[-1]
         file_path = os.path.join(temp_folder, file_name)
         response = requests.get(self.download_url, stream=True)
@@ -97,4 +106,3 @@ class DownloadThread(QThread):
                 self.download_progress.emit(progress)
 
         self.download_finished.emit(file_path)
-
