@@ -1,14 +1,16 @@
-from PyQt6.QtWidgets import QMenuBar
+from PyQt6.QtWidgets import QMenuBar, QMenu
 from PyQt6.QtGui import QIcon, QAction, QKeySequence
 from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
 from utils.update import UpdateManager
 from utils.settings import SettingsManager
+from theme import ThemeManager
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
+        self.theme_manager = ThemeManager(self.parent)
         self.update_manager = UpdateManager(self.parent)
         self.create_menu()
 
@@ -70,11 +72,17 @@ class MenuBar(QMenuBar):
         settings_action.setShortcut(QKeySequence("F3"))
         settings_action.setShortcuts([QKeySequence("F3"), QKeySequence("Alt+S")])
         settings_action.triggered.connect(self.OnSettings)
-        theme_change_action = QAction("تغيير الثيم", self)
+
+        theme_menu = QMenu("تغيير الثيم", self)
+        for theme in self.theme_manager.get_themes():
+            theme_action = QAction(theme, self)
+            theme_action.triggered.connect(lambda: self.theme_manager.apply_theme(theme))
+            theme_menu.addAction(theme_action)
+
         text_direction_action = QAction("تغيير اتجاه النص", self)
         
         preferences_menu.addAction(settings_action)
-        preferences_menu.addAction(theme_change_action)
+        preferences_menu.addMenu(theme_menu)
         preferences_menu.addAction(text_direction_action)
 
         help_menu = self.addMenu("المساعدة")
@@ -100,4 +108,6 @@ class MenuBar(QMenuBar):
         if dialog.exec():
             pass
 
-    
+    def OnTheme    (self):
+        pass
+
