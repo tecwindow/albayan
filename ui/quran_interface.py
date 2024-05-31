@@ -29,6 +29,7 @@ from ui.dialogs.info_dialog import InfoDialog
 from utils.settings import SettingsManager
 from utils.update import UpdateManager
 from utils.sound_Manager import SoundManager
+from utils.universal_speech import UniversalSpeech
 
 
 class QuranInterface(QMainWindow):
@@ -98,13 +99,9 @@ class QuranInterface(QMainWindow):
         layout.addLayout(buttons_layout)
         self.centralWidget().setLayout(layout)
         
-
-
-
     def OnNext(self):
         self.quran_view.setText(self.quran.next())
         self.set_text_ctrl_label()
-        self.quran_view.setFocus()
         self.sound_manager.play_sound("next")
         self.back_to.setEnabled(True)
         self.menu_bar.previous_action.setEnabled(True)
@@ -115,7 +112,6 @@ class QuranInterface(QMainWindow):
     def OnBack(self):
         self.quran_view.setText(self.quran.back())
         self.set_text_ctrl_label()
-        self.quran_view.setFocus()
         self.sound_manager.play_sound("previous")
         self.next_to.setEnabled(True)
         self.menu_bar.next_action.setEnabled(True)
@@ -140,6 +136,7 @@ class QuranInterface(QMainWindow):
         # set the label
         self.quran_title.setText(label)
         self.quran_view.setAccessibleName(label)
+        UniversalSpeech.say(label)
 
     def OnQuickAccess(self):
         dialog = QuickAccess(self, "الوصول السريع")
