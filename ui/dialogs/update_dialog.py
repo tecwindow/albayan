@@ -29,6 +29,7 @@ class UpdateDialog(QDialog):
         label2 = QLabel("ما الجديد في الإصدار {}؟".format(latest_version))
 
         self.release_notes_edit = ReadOnlyTextEdit(self)
+        self.release_notes_edit.setAccessibleName(label2.text())
         self.release_notes_edit.setText(release_notes)
 
         buttons_layout = QHBoxLayout()

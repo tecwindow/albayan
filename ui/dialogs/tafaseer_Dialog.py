@@ -29,12 +29,11 @@ class TafaseerDialog(QDialog):
 
         self.layout = QVBoxLayout(self)
         
-        self.label = QLabel(self)
-        self.label.setText("التفسير:")
+        self.label = QLabel("التفسير:", self)
         self.layout.addWidget(self.label)
 
         self.text_edit = ReadOnlyTextEdit(self)
-        self.text_edit.setAccessibleName("التفسير:")
+        self.text_edit.setAccessibleName(self.label.text())
         self.text_edit.setText(self.tafaseer_manager.get_tafaseer(ayah_info[0], ayah_info[1]))
         self.layout.addWidget(self.text_edit)
 
@@ -52,7 +51,7 @@ class TafaseerDialog(QDialog):
         self.save_button.clicked.connect(self.save_content)
         self.button_layout.addWidget(self.save_button)
 
-        self.close_button = QPushButton("Close")
+        self.close_button = QPushButton("إغلاق")
         self.close_button.clicked.connect(self.close)
         self.button_layout.addWidget(self.close_button)
 

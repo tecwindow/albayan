@@ -25,11 +25,11 @@ class BookmarkDialog(QDialog):
 
         self.search_label = QLabel("بحث:")
         self.search_input = QLineEdit()
-        self.search_input.setAccessibleName("بحث:")
+        self.search_input.setAccessibleName(self.search_label.text())
 
         self.bookmarks_label = QLabel("العلامات:")
         self.bookmark_list = QListWidget()
-        self.bookmark_list.setAccessibleDescription("العلامات:")
+        self.bookmark_list.setAccessibleDescription(self.bookmarks_label.text())
 
         self.update_button = QPushButton("تحديث العلامة")
         self.update_button.setDefault(False)

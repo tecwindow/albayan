@@ -35,7 +35,7 @@ class SearchDialog(QDialog):
         self.search_label = QLabel('اكتب ما تريد البحث عنه:')
         self.search_box = QLineEdit()
         self.search_box.textChanged.connect(self.OnEdit)
-        self.search_box.setAccessibleName('اكتب ما تريد البحث عنه:')
+        self.search_box.setAccessibleName(self.search_label.text())
         self.advanced_search_checkbox = QCheckBox('البحث المتقدم')
         self.advanced_search_checkbox.toggled.connect(self.show_advanced_options)
         self.search_button = QPushButton('بحث')
@@ -54,10 +54,10 @@ class SearchDialog(QDialog):
 
         self.search_from_label = QLabel('من:')
         self.search_from_combobox = QComboBox()
-        self.search_from_combobox.setAccessibleName("من:")
+        self.search_from_combobox.setAccessibleName(self.search_from_label.text())
         self.search_to_label = QLabel('إلى:')
         self.search_to_combobox = QComboBox()
-        self.search_to_combobox.setAccessibleName("إلى:")
+        self.search_to_combobox.setAccessibleName(self.search_to_label.text())
         self.ignore_diacritics_checkbox = QCheckBox('تجاهل التشكيل')
         self.ignore_diacritics_checkbox.setChecked(self.current_settings["search"]["ignore_tashkeel"])
         self.ignore_hamza_checkbox = QCheckBox('تجاهل الهمزات')
@@ -186,7 +186,7 @@ class SearchResultsDialog(QDialog):
         
         self.label = QLabel("النتائج:")
         self.list_widget = QListWidget(self)
-        self.list_widget.setAccessibleDescription("النتائج:")
+        self.list_widget.setAccessibleDescription(self.label.text())
         for row in search_result:
             self.list_widget.addItem(self.format_result(row))
             

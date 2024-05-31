@@ -46,7 +46,7 @@ class QuickAccess(QDialog):
 
         self.choices_label = QLabel("إنتقل إلى:")
         self.choices = QComboBox()
-        self.choices.setAccessibleName("إنتقل إلى:")
+        self.choices.setAccessibleName(self.choices_label.text())
         self.go_button = QPushButton("اذهب")
         self.cancel_button = QPushButton("إغلاق")
 
