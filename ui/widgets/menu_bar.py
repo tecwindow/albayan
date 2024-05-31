@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QMenuBar, QMenu
 from PyQt6.QtGui import QIcon, QAction, QKeySequence
+from PyQt6.QtCore import Qt
 from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
 from utils.update import UpdateManager
@@ -10,6 +11,7 @@ class MenuBar(QMenuBar):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
+        self.is_rtl = True
         self.theme_manager = ThemeManager(self.parent)
         self.update_manager = UpdateManager(self.parent)
         self.create_menu()
@@ -79,11 +81,13 @@ class MenuBar(QMenuBar):
             theme_action.triggered.connect(self.OnTheme)
             theme_menu.addAction(theme_action)
 
-        text_direction_action = QAction("تغيير اتجاه النص", self)
+        self.text_direction_action = QAction("تغيير اتجاه النص", self)
+        self.text_direction_action.triggered.connect(self.toggle_text_direction)
+
         
         preferences_menu.addAction(settings_action)
         preferences_menu.addMenu(theme_menu)
-        preferences_menu.addAction(text_direction_action)
+        preferences_menu.addAction(self.text_direction_action)
 
         help_menu = self.addMenu("المساعدة")
         user_guide_action = QAction("دليل البرنامج", self)
@@ -111,4 +115,16 @@ class MenuBar(QMenuBar):
     def OnTheme    (self):
         theme = self.sender().text()
         self.theme_manager.apply_theme(theme)
+
+    def toggle_text_direction(self):
+
+        option = self.parent.quran_view.document().defaultTextOption()                                               
+        if self.is_rtl:
+            option.setTextDirection(Qt.LayoutDirection.LeftToRight)
+            self.is_rtl = False
+        else:
+            option.setTextDirection(Qt.LayoutDirection.RightToLeft)
+            self.is_rtl = True
+
+        self.parent.quran_view.document().setDefaultTextOption(option)
 
