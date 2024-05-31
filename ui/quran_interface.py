@@ -28,6 +28,7 @@ from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
 from utils.settings import SettingsManager
 from utils.update import UpdateManager
+from utils.sound_Manager import SoundManager
 
 
 class QuranInterface(QMainWindow):
@@ -38,6 +39,7 @@ class QuranInterface(QMainWindow):
         self.quran = quran_mgr()
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
         self.quran.aya_to_line = True
+        self.sound_manager = SoundManager()
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
         self.create_widgets()
@@ -103,6 +105,7 @@ class QuranInterface(QMainWindow):
         self.quran_view.setText(self.quran.next())
         self.set_text_ctrl_label()
         self.quran_view.setFocus()
+        self.sound_manager.play_sound("next")
         self.back_to.setEnabled(True)
         self.menu_bar.previous_action.setEnabled(True)
         if self.quran.current_pos == self.quran.max_pos:
@@ -113,6 +116,7 @@ class QuranInterface(QMainWindow):
         self.quran_view.setText(self.quran.back())
         self.set_text_ctrl_label()
         self.quran_view.setFocus()
+        self.sound_manager.play_sound("previous")
         self.next_to.setEnabled(True)
         self.menu_bar.next_action.setEnabled(True)
         if self.quran.current_pos == 1:
