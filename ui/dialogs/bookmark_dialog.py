@@ -40,6 +40,8 @@ class BookmarkDialog(QDialog):
         self.go_button = QPushButton("الذهاب إلى العلامة")
         self.go_button.setDefault(True)
         self.cancel_button = QPushButton("إلغاء")
+        self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
+
 
         form_layout = QHBoxLayout()
         form_layout.addWidget(self.update_button)
