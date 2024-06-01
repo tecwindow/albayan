@@ -25,7 +25,7 @@ class SearchDialog(QDialog):
         super().__init__(parent)
         self.parent = parent
         self.setWindowTitle(title)
-        self.setGeometry(100, 100, 500, 400)
+        self.resize(500, 400)
         self.search_manager = QuranSearchManager()
         self.criteria = None
         self.current_settings = SettingsManager.current_settings

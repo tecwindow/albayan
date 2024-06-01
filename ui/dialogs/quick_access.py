@@ -19,7 +19,7 @@ class QuickAccess(QDialog):
         super().__init__(parent)
         self.parent = parent
         self.setWindowTitle(title)
-        self.setGeometry(100, 100, 300, 200)
+        self.resize(300, 200)
         self.sura = []
         with open(os.path.join("database", "Surahs.Json"), encoding="UTF-8") as f:
             self.sura = json.load(f)["surahs"]

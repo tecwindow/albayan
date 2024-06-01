@@ -23,7 +23,7 @@ class UpdateDialog(QDialog):
         super().__init__(parent)
         self.download_url = download_url
         self.setWindowTitle("تحديث متاح")
-        self.setFixedSize(400, 300)
+        self.resize(400, 300)
         self.setWindowModality(Qt.WindowModality.ApplicationModal)
 
         layout = QVBoxLayout()
