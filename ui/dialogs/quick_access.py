@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QGroupBox
 )
 from PyQt6.QtCore import Qt
-
+from PyQt6.QtGui import QKeySequence
 
 
 class QuickAccess(QDialog):
@@ -49,6 +49,8 @@ class QuickAccess(QDialog):
         self.choices.setAccessibleName(self.choices_label.text())
         self.go_button = QPushButton("اذهب")
         self.cancel_button = QPushButton("إغلاق")
+        self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
+
 
         layout.addWidget(self.view_by)
         layout.addWidget(self.choices_label)
