@@ -1,10 +1,11 @@
-from PyQt6.QtWidgets import QMenuBar, QMenu
-from PyQt6.QtGui import QIcon, QAction, QKeySequence
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QMenuBar, QMenu, QMessageBox
+from PyQt6.QtGui import QIcon, QAction, QKeySequence, QDesktopServices
+from PyQt6.QtCore import Qt, QUrl
 from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
 from utils.update import UpdateManager
 from utils.settings import SettingsManager
+from utils.logger import Logger
 from theme import ThemeManager
 
 class MenuBar(QMenuBar):
@@ -14,6 +15,11 @@ class MenuBar(QMenuBar):
         self.is_rtl = True
         self.theme_manager = ThemeManager(self.parent)
         self.update_manager = UpdateManager(self.parent)
+        self.our_emails = {
+            "محمود عاطف": "mahmoud.atef.987123@gmail.com",
+            "قيس الرفاعي": "ww258148@gmail.com",
+            "أحمد بكر": "AhmedBakr593@gmail.com"
+        }
         self.create_menu()
 
     def create_menu(self):
@@ -88,7 +94,6 @@ class MenuBar(QMenuBar):
         self.text_direction_action = QAction("تغيير اتجاه النص", self)
         self.text_direction_action.triggered.connect(self.toggle_text_direction)
 
-        
         preferences_menu.addAction(settings_action)
         preferences_menu.addMenu(theme_menu)
         preferences_menu.addAction(self.text_direction_action)
@@ -96,13 +101,18 @@ class MenuBar(QMenuBar):
         help_menu = self.addMenu("المساعدة")
         user_guide_action = QAction("دليل البرنامج", self)
         user_guide_action.setShortcut(QKeySequence("F1"))
-        contact_us_action = QAction("اتصل بنا", self)
+        contact_us_menu = QMenu("اتصل بنا", self)
+        for name in self.our_emails:
+            name_action = QAction(name, self)
+            name_action.triggered.connect(self.OnContact)
+            contact_us_menu.addAction(name_action)
+
         update_program_action = QAction("تحديث البرنامج", self)
         update_program_action.setShortcuts([QKeySequence("F5"), QKeySequence("Ctrl+U")])
         update_program_action.triggered.connect(self.OnUpdate)
 
         help_menu.addAction(user_guide_action)
-        help_menu.addAction(contact_us_action)
+        help_menu.addMenu(contact_us_menu)
         help_menu.addAction(update_program_action)
 
     def OnSettings(self):
@@ -132,3 +142,12 @@ class MenuBar(QMenuBar):
 
         self.parent.quran_view.document().setDefaultTextOption(option)
 
+    def OnContact(self):
+        name = self.sender().text()
+        email = self.our_emails[name]
+        try:
+            url = QUrl(f"mailto:{email}")
+            QDesktopServices.openUrl(url)
+        except Exception as e:
+            Logger.error(str(e))
+            QMessageBox.critical(self, "خطأ", "حدث خطأ أثناء محاولة فتح برنامج البريد الإلكتروني")
