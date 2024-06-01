@@ -65,6 +65,7 @@ class SettingsDialog(QDialog):
         buttons_layout = QHBoxLayout()
         save_button = QPushButton("حفظ")
         save_button.clicked.connect(self.save_settings)
+        save_button.setDefault(True)
         close_button = QPushButton("إغلاق")
         close_button.clicked.connect(self.close)
         buttons_layout.addWidget(save_button)
