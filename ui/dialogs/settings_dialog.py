@@ -16,7 +16,7 @@ class SettingsDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("الإعدادات")
-        self.resize(400, 300)
+        self.resize(500, 400)
         self.init_ui()
         self.set_current_settings()
 
