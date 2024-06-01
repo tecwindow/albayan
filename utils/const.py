@@ -11,3 +11,4 @@ os.makedirs(temp_folder, exist_ok=True)
 # program information
 program_name = "البيان"
 program_version = "1.0.0"
+website = "https://tecwindow.net/"
