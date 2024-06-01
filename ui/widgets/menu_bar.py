@@ -32,6 +32,7 @@ class MenuBar(QMenuBar):
         self.quick_access_action.triggered.connect(self.parent.OnQuickAccess)
         self.quick_access_action.setShortcut(QKeySequence("Ctrl+Q"))
         self.exit_action = QAction("إغلاق البرنامج", self)
+        self.exit_action.setShortcuts([QKeySequence("Ctrl+W"), QKeySequence("Ctrl+F4")])
         self.exit_action.triggered.connect(self.parent.close)
 
         navigation_menu.addAction(self.next_action)
