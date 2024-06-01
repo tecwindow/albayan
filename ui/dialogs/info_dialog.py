@@ -19,16 +19,10 @@ class InfoDialog(QDialog):
         self.resize(400, 300)
         self.setFocus()
 
-
-        bg_color = 'lightGray'
-        text_color = 'black'
-
         label = QLabel(self.label, self)
-        label.setStyleSheet(f'color: {text_color};')
         
         text_edit = ReadOnlyTextEdit(self)
         text_edit.setText(self.text)
-        text_edit.setStyleSheet(f'background-color: {bg_color}; color: {text_color};')
         text_edit.setAccessibleName(self.label)
 
         close_button = QPushButton('إغلاق', self)
