@@ -113,8 +113,8 @@ class BookmarkDialog(QDialog):
         bookmark_id = bookmark["id"]
 
         reply = QMessageBox.warning(
-                self, "Warning",
-                f"Are you sure you want to delete this bookmark?\n\nName: {bookmark['name']}",
+                self, "تحذير",
+                f"هل أنت متأكد إنك تريد حذف هذه العلامة؟\n\nالاسم: {bookmark['name']}",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
                 )
 
