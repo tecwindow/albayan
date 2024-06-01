@@ -7,6 +7,9 @@ from utils.update import UpdateManager
 from utils.settings import SettingsManager
 from utils.logger import Logger
 from theme import ThemeManager
+from utils.const import program_name
+from utils.const import program_version
+from utils.const import website
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
@@ -160,7 +163,9 @@ class MenuBar(QMenuBar):
 
     def OnAbout(self):
         about_text = (
-            "برنامج البيان، هو برنامج يهدف إلى مساعدة المسلم على قراءة القرآن بشكل سهل وبسيط مع العديد من المميزات.\n"
-            "تم تصميم البرنامج من فريق نافذة التقنية: محمود عاطف، أحمد بكر وقيس الرفاعي."
+            f"{program_name}، هو برنامج يهدف إلى مساعدة المسلم على قراءة القرآن بشكل سهل وبسيط مع العديد من المميزات.\n"
+            "تم تصميم البرنامج من فريق نافذة التقنية: محمود عاطف، أحمد بكر وقيس الرفاعي.\n"
+            f"إصدار البرنامج: {program_version}\n"
+            f"الموقع الرسمي للبرنامج: {website}\n"
         )
-        QMessageBox.about(None, "حول البرنامج", about_text)
+        QMessageBox.about(self, "حول البرنامج", about_text)
