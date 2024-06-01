@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
     QMenu,
 QApplication
 )
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtGui import QIcon, QAction, QKeySequence
 from PyQt6.QtCore import QTimer
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
@@ -52,6 +52,7 @@ class TafaseerDialog(QDialog):
         self.button_layout.addWidget(self.save_button)
 
         self.close_button = QPushButton("إغلاق")
+        self.close_button.setShortcut(QKeySequence("Ctrl+W"))
         self.close_button.clicked.connect(self.close)
         self.button_layout.addWidget(self.close_button)
 
