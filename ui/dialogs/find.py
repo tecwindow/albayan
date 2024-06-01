@@ -41,6 +41,7 @@ class SearchDialog(QDialog):
         self.search_button = QPushButton('بحث')
         self.search_button.setEnabled(False)
         self.cancel_button = QPushButton('إلغاء')
+        self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
 
         self.advanced_search_groupbox = QGroupBox('البحث المتقدم')
         self.advanced_search_groupbox.setEnabled(False)
