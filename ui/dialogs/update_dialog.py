@@ -47,6 +47,7 @@ class UpdateDialog(QDialog):
 
         buttons_layout = QHBoxLayout()
         self.update_button = QPushButton("تحديث")
+        self.update_button.setDefault(True)
         self.cancel_button = QPushButton("إلغاء")
 
         self.update_button.clicked.connect(self.on_update)
