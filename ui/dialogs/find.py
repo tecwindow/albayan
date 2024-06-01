@@ -15,7 +15,7 @@ QListWidget,
 QMessageBox,
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QTextCursor
+from PyQt6.QtGui import QTextCursor, QKeySequence
 from core_functions.search import SearchCriteria, QuranSearchManager
 from utils.settings import SettingsManager
 
@@ -193,6 +193,7 @@ class SearchResultsDialog(QDialog):
         self.go_to_button = QPushButton("الذهاب للنتيجة")
         self.go_to_button.clicked.connect(self.accept)
         self.cancel_button = QPushButton("إلغاء")
+        self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
         self.cancel_button.clicked.connect(self.reject)
         
         layout = QVBoxLayout()
