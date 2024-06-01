@@ -16,7 +16,7 @@ class InfoDialog(QDialog):
     def init_ui(self):
         
         self.setWindowTitle(self.title)
-        self.resize(300, 200)
+        self.resize(400, 300)
         self.setFocus()
 
 
