@@ -1,6 +1,7 @@
 import sys
 from PyQt6.QtWidgets import  QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton
 from PyQt6.QtCore import QTimer
+from PyQt6.QtGui import QKeySequence
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 
 class InfoDialog(QDialog):
@@ -31,6 +32,7 @@ class InfoDialog(QDialog):
         text_edit.setAccessibleName(self.label)
 
         close_button = QPushButton('إغلاق', self)
+        close_button.setShortcut(QKeySequence("Ctrl+W"))
         close_button.clicked.connect(self.reject)
         close_button.setStyleSheet(f'background-color: red; color: white;')
 
