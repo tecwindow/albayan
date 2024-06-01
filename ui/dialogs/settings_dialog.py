@@ -13,8 +13,8 @@ from PyQt6.QtGui import QKeySequence
 from utils.settings import SettingsManager
 
 class SettingsDialog(QDialog):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
         self.setWindowTitle("الإعدادات")
         self.resize(500, 400)
         self.init_ui()

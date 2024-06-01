@@ -116,7 +116,7 @@ class MenuBar(QMenuBar):
         help_menu.addAction(update_program_action)
 
     def OnSettings(self):
-        SettingsDialog().exec()
+        SettingsDialog(self.parent).exec()
 
     def OnUpdate(self):
          self.update_manager.check_updates()
