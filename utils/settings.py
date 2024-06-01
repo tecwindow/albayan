@@ -17,7 +17,11 @@ class SettingsManager:
         "search": {
             "ignore_tashkeel": True,
             "ignore_hamza": True,
-        }}
+        },
+        "preferences": {
+            "theme": "default"
+        }
+        }
 
     @classmethod
     def write_settings(cls, new_settings:dict, is_reading:bool=False) -> None:

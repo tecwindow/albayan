@@ -93,7 +93,8 @@ class MenuBar(QMenuBar):
             theme_action = QAction(theme, self)
             theme_action.triggered.connect(self.OnTheme)
             theme_menu.addAction(theme_action)
-
+        self.theme_manager.apply_theme(SettingsManager.current_settings["preferences"]["theme"])
+        
         self.text_direction_action = QAction("تغيير اتجاه النص", self)
         self.text_direction_action.triggered.connect(self.toggle_text_direction)
 
@@ -135,8 +136,20 @@ class MenuBar(QMenuBar):
             pass
 
     def OnTheme    (self):
+
+        # apply theme
         theme = self.sender().text()
         self.theme_manager.apply_theme(theme)
+
+        # Save selected theme in the settings
+        theme_setting = {
+            "preferences": {
+                "theme": theme
+            }
+        }
+        SettingsManager.write_settings(theme_setting)
+
+        
 
     def toggle_text_direction(self):
 
