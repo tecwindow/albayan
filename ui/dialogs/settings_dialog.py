@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
     QGroupBox,
 QMessageBox
 )
+from PyQt6.QtGui import QKeySequence
 from utils.settings import SettingsManager
 
 class SettingsDialog(QDialog):
@@ -67,7 +68,9 @@ class SettingsDialog(QDialog):
         save_button.clicked.connect(self.save_settings)
         save_button.setDefault(True)
         close_button = QPushButton("إغلاق")
+        close_button.setShortcut(QKeySequence("Ctrl+W"))
         close_button.clicked.connect(self.close)
+
         buttons_layout.addWidget(save_button)
         buttons_layout.addWidget(close_button)
 
