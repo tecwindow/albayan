@@ -111,10 +111,14 @@ class MenuBar(QMenuBar):
         update_program_action.setShortcuts([QKeySequence("F5"), QKeySequence("Ctrl+U")])
         update_program_action.triggered.connect(self.OnUpdate)
 
+        about_program_action = QAction("حول البرنامج", self)
+        about_program_action.setShortcuts([QKeySequence("F6")])
+        about_program_action.triggered.connect(self.OnAbout)
 
 #        help_menu.addAction(user_guide_action)
         help_menu.addMenu(contact_us_menu)
         help_menu.addAction(update_program_action)
+        help_menu.addAction(about_program_action)
 
     def OnSettings(self):
         SettingsDialog(self.parent).exec()
@@ -152,3 +156,11 @@ class MenuBar(QMenuBar):
         except Exception as e:
             Logger.error(str(e))
             QMessageBox.critical(self, "خطأ", "حدث خطأ أثناء محاولة فتح برنامج البريد الإلكتروني")
+
+
+    def OnAbout(self):
+        about_text = (
+            "برنامج البيان، هو برنامج يهدف إلى مساعدة المسلم على قراءة القرآن بشكل سهل وبسيط مع العديد من المميزات.\n"
+            "تم تصميم البرنامج من فريق نافذة التقنية: محمود عاطف، أحمد بكر وقيس الرفاعي."
+        )
+        QMessageBox.about(None, "حول البرنامج", about_text)
