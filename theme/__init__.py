@@ -5,7 +5,7 @@ from utils.logger import Logger
 class ThemeManager:
     def __init__(self, window):
         self.window = window
-        self.theme_dir = "theme"
+        self.theme_dir = os.path.dirname(__file__)
         self.themes = {}
 
     def get_themes(self):
