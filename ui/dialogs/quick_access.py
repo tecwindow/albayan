@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
     QHBoxLayout,
+    QGridLayout,
     QLabel,
     QPushButton,
     QRadioButton,
@@ -31,32 +32,34 @@ class QuickAccess(QDialog):
         layout = QVBoxLayout()
 
         self.view_by = QGroupBox("عرض وفقا ل:")
-        view_by_layout = QVBoxLayout()
+        view_by_layout = QGridLayout()
         self.sura_radio = QRadioButton("سور")
         self.pages_radio = QRadioButton("صفح")
         self.quarters_radio = QRadioButton("أرباع")
         self.hizb_radio = QRadioButton("أحزاب")
         self.jus_radio = QRadioButton("أجزاء")
-        view_by_layout.addWidget(self.sura_radio)
-        view_by_layout.addWidget(self.pages_radio)
-        view_by_layout.addWidget(self.quarters_radio)
-        view_by_layout.addWidget(self.hizb_radio)
-        view_by_layout.addWidget(self.jus_radio)
+        view_by_layout.addWidget(self.sura_radio, 0, 0)
+        view_by_layout.addWidget(self.pages_radio, 0, 1)
+        view_by_layout.addWidget(self.quarters_radio, 1, 0)
+        view_by_layout.addWidget(self.hizb_radio, 1, 1)
+        view_by_layout.addWidget(self.jus_radio, 2, 0)
         self.view_by.setLayout(view_by_layout)
 
         self.choices_label = QLabel("إنتقل إلى:")
         self.choices = QComboBox()
         self.choices.setAccessibleName(self.choices_label.text())
+        
+        button_layout = QHBoxLayout()  # استخدام QHBoxLayout لأزرار الإجراءات
         self.go_button = QPushButton("اذهب")
         self.cancel_button = QPushButton("إغلاق")
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
-
+        button_layout.addWidget(self.go_button)
+        button_layout.addWidget(self.cancel_button)
 
         layout.addWidget(self.view_by)
         layout.addWidget(self.choices_label)
         layout.addWidget(self.choices)
-        layout.addWidget(self.go_button)
-        layout.addWidget(self.cancel_button)
+        layout.addLayout(button_layout)
 
         self.setLayout(layout)
 
@@ -101,4 +104,3 @@ class QuickAccess(QDialog):
         elif self.jus_radio.isChecked():
             self.choices.clear()
             self.choices.addItems(self.jus)
-
