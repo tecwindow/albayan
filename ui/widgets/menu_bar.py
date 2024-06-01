@@ -99,8 +99,8 @@ class MenuBar(QMenuBar):
         preferences_menu.addAction(self.text_direction_action)
 
         help_menu = self.addMenu("المساعدة")
-        user_guide_action = QAction("دليل البرنامج", self)
-        user_guide_action.setShortcut(QKeySequence("F1"))
+#        user_guide_action = QAction("دليل البرنامج", self)
+#        user_guide_action.setShortcut(QKeySequence("F1"))
         contact_us_menu = QMenu("اتصل بنا", self)
         for name in self.our_emails:
             name_action = QAction(name, self)
@@ -111,7 +111,8 @@ class MenuBar(QMenuBar):
         update_program_action.setShortcuts([QKeySequence("F5"), QKeySequence("Ctrl+U")])
         update_program_action.triggered.connect(self.OnUpdate)
 
-        help_menu.addAction(user_guide_action)
+
+#        help_menu.addAction(user_guide_action)
         help_menu.addMenu(contact_us_menu)
         help_menu.addAction(update_program_action)
 
