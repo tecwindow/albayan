@@ -30,7 +30,7 @@ class SettingsDialog(QDialog):
         list_widget.addItem(general_item)
         list_widget.addItem(search_item)
         list_widget.currentItemChanged.connect(self.change_category)
-        taps_layout.addWidget(list_widget)
+        taps_layout.addWidget(list_widget, stretch=1)
 
         self.group_general = QGroupBox("الإعدادات العامة")
         self.group_general_layout = QVBoxLayout()
@@ -48,7 +48,7 @@ class SettingsDialog(QDialog):
         self.group_general_layout.addWidget(self.reset_button)
         self.group_general.setLayout(self.group_general_layout)
         self.group_general.setVisible(False)
-        taps_layout.addWidget(self.group_general)
+        taps_layout.addWidget(self.group_general, stretch=2)
 
         self.group_search = QGroupBox("إعدادات البحث")
         self.group_search_layout = QVBoxLayout()
@@ -59,7 +59,7 @@ class SettingsDialog(QDialog):
         self.group_search_layout.addWidget(self.ignore_hamza_checkbox)
         self.group_search.setLayout(self.group_search_layout)
         self.group_search.setVisible(False)
-        taps_layout.addWidget(self.group_search)
+        taps_layout.addWidget(self.group_search, stretch=2)
 
         main_layout.addLayout(taps_layout)
 
