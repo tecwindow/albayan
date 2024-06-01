@@ -22,7 +22,7 @@ class TafaseerDialog(QDialog):
         self.ayah_info = ayah_info
         self.default_category = default_category
         self.setWindowTitle(title)
-        self.resize(300, 200)
+        self.resize(500, 400)
         self.tafaseer_manager = TafaseerManager()
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(self.default_category))
 
