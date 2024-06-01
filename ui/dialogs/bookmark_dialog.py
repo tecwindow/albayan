@@ -33,9 +33,7 @@ class BookmarkDialog(QDialog):
         self.bookmark_list.setAccessibleDescription(self.bookmarks_label.text())
 
         self.update_button = QPushButton("تحديث العلامة")
-        self.update_button.setDefault(False)
         self.delete_button = QPushButton("حذف العلامة")
-        self.delete_button.setDefault(False)
         self.delete_button.setShortcut(QKeySequence(Qt.Key.Key_Delete))
         self.go_button = QPushButton("الذهاب إلى العلامة")
         self.go_button.setDefault(True)
