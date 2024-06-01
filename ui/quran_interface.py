@@ -247,8 +247,12 @@ class QuranInterface(QMainWindow):
         title = "أسباب نزول آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "الأسباب"
         text = TanzilAyah(aya_info[1]).text
-        InfoDialog(title, label, text).exec()
 
+        if text:
+            InfoDialog(title, label, text).exec()
+        else:
+            QMessageBox.information(self, "لا يتوفر معلومات للآية", "للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
+            
     def OnSavePosition(self):
         aya_info = self.get_current_ayah_info()
         criteria_number = self.quran.type
