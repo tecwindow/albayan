@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QFileDialog,
     QLabel,
     QMenu,
-QApplication
+    QApplication
 )
 from PyQt6.QtGui import QIcon, QAction, QKeySequence
 from PyQt6.QtCore import QTimer
@@ -22,7 +22,7 @@ class TafaseerDialog(QDialog):
         self.ayah_info = ayah_info
         self.default_category = default_category
         self.setWindowTitle(title)
-        self.resize(300, 200)
+        self.resize(500, 400)
         self.tafaseer_manager = TafaseerManager()
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(self.default_category))
 
@@ -37,7 +37,7 @@ class TafaseerDialog(QDialog):
         self.text_edit.setText(self.tafaseer_manager.get_tafaseer(ayah_info[0], ayah_info[1]))
         self.layout.addWidget(self.text_edit)
 
-        self.button_layout = QVBoxLayout()
+        self.button_layout = QHBoxLayout()  # استخدام QHBoxLayout بدلاً من QVBoxLayout
 
         self.category_button = QPushButton(self.default_category, self)
         self.category_button.clicked.connect(self.show_menu)
@@ -100,4 +100,3 @@ class TafaseerDialog(QDialog):
         if file_path:
             with open(file_path, "w") as file:
                 file.write(self.text_edit.toPlainText())
-            
