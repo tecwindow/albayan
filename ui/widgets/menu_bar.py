@@ -57,7 +57,7 @@ class MenuBar(QMenuBar):
         self.verse_grammar_action.setShortcut(QKeySequence("Shift+E"))
         self.copy_verse_action = QAction("نسخ الآية", self)
         self.copy_verse_action.triggered.connect(self.parent.on_copy_verse)
-        self.copy_verse_action.setShortcut(QKeySequence("Ctrl+C"))
+        self.copy_verse_action.setShortcut(QKeySequence("Shift+C"))
 
         actions_menu.addAction(self.save_position_action)
         actions_menu.addAction(self.surah_info_action)
