@@ -9,12 +9,22 @@ class ThemeManager:
         self.themes = {}
 
     def get_themes(self):
-        self.themes = {os.path.splitext(file)[0]: file for file in os.listdir(self.theme_dir) if file.endswith(".qss")}
+
+        self.themes = {"الافتراضي": "default"}
+        for file in os.listdir(self.theme_dir):
+            if file.endswith(".qss"):
+                theme_name = os.path.splitext(file)[0]
+                self.themes[theme_name] = file
+
         return list(self.themes.keys())
 
     def apply_theme(self, selected_theme):
 
         theme_file = self.themes.get(selected_theme)
+        if theme_file == "default":
+            self.window.setStyleSheet("")
+            return
+
         if not theme_file:
             Logger.error(f"Theme not found: {selected_theme}")
             return None
@@ -27,7 +37,7 @@ class ThemeManager:
         try:
             with open(theme_path, 'r') as theme_file:
                 stylesheet = theme_file.read()
-                self.window.setStyleSheet(stylesheet)  # تطبيق الثيم على النافذة المحددة
+                self.window.setStyleSheet(stylesheet)
         except Exception as e:
             Logger.error(str(e))
             message_box = QMessageBox()
