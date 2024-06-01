@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
     QGroupBox
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
+from PyQt6.QtGui import QKeySequence
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.const import program_name, temp_folder
 
@@ -49,6 +50,7 @@ class UpdateDialog(QDialog):
         self.update_button = QPushButton("تحديث")
         self.update_button.setDefault(True)
         self.cancel_button = QPushButton("إلغاء")
+        self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
 
         self.update_button.clicked.connect(self.on_update)
         self.cancel_button.clicked.connect(self.reject)
