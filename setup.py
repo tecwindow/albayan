@@ -1,3 +1,4 @@
+
 import sys
 import os
 from cx_Freeze import setup, Executable
@@ -5,17 +6,18 @@ from cx_Freeze import setup, Executable
 import PyQt6
 pyqt_path = os.path.dirname(PyQt6.__file__)
 
+# Include additional files and DLLs
+include_files = [("database", "database"), ("sounds", "sounds")]
+dll_files = ["Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Multimedia.dll"]
+for file in dll_files:
+    include_files.append((os.path.join(pyqt_path, "Qt6", "bin", file), os.path.join("lib", file)))
 
 build_exe_options = {
     "build_exe": "albayan_build",
     "optimize": 1,
-    "include_files": [
-        ("database", "database"), 
-        ("sounds", "sounds"),
-        (os.path.join(pyqt_path, "Qt6", "bin"), "Qt6/bin")
-    ],
+    "include_files": include_files,
     "packages": ["core_functions", "theme", "ui", "utils"],
-    "includes": ["PyQt6.QtCore", "PyQt6.QtWidgets", "PyQt6.QtGui", "packaging", "requests", "UniversalSpeech"],
+    "includes": ["PyQt6.QtCore", "PyQt6.QtWidgets", "PyQt6.QtGui", "PyQt6.QtMultimedia", "packaging", "requests", "UniversalSpeech"],
     "excludes": ["tkinter", "test", "setuptools", "pip", "numpy"],
     "include_msvcr": True
 }
