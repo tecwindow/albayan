@@ -2,7 +2,7 @@ import sys
 import os
 from multiprocessing import freeze_support
 from PyQt6.QtWidgets import QApplication, QMessageBox
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import QTimer, Qt
 from ui.quran_interface import QuranInterface
 from utils.update import UpdateManager
 from utils.settings import SettingsManager
@@ -12,6 +12,7 @@ from utils.logger import Logger
 def main():
     try:
         app = QApplication(sys.argv)
+        app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         main_window = QuranInterface(program_name)
         main_window.show()
         main_window.setFocus()
