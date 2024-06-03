@@ -4,7 +4,6 @@ from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
     QHBoxLayout,
-    QGridLayout,
     QLabel,
     QPushButton,
     QRadioButton,
@@ -32,17 +31,17 @@ class QuickAccess(QDialog):
         layout = QVBoxLayout()
 
         self.view_by = QGroupBox("عرض وفقا ل:")
-        view_by_layout = QGridLayout()
+        view_by_layout = QHBoxLayout()
         self.sura_radio = QRadioButton("سور")
         self.pages_radio = QRadioButton("صفح")
         self.quarters_radio = QRadioButton("أرباع")
         self.hizb_radio = QRadioButton("أحزاب")
         self.jus_radio = QRadioButton("أجزاء")
-        view_by_layout.addWidget(self.sura_radio, 0, 0)
-        view_by_layout.addWidget(self.pages_radio, 0, 1)
-        view_by_layout.addWidget(self.quarters_radio, 1, 0)
-        view_by_layout.addWidget(self.hizb_radio, 1, 1)
-        view_by_layout.addWidget(self.jus_radio, 2, 0)
+        view_by_layout.addWidget(self.sura_radio)
+        view_by_layout.addWidget(self.pages_radio)
+        view_by_layout.addWidget(self.quarters_radio)
+        view_by_layout.addWidget(self.hizb_radio)
+        view_by_layout.addWidget(self.jus_radio)
         self.view_by.setLayout(view_by_layout)
 
         self.choices_label = QLabel("إنتقل إلى:")
