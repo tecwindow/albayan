@@ -128,25 +128,29 @@ class QuranInterface(QMainWindow):
             self.quran_view.setFocus()
 
     def handle_key_press(self, event):
-        cursor = self.quran_view.textCursor()  # استخدام quran_view بدلاً من text_edit
+        cursor = self.quran_view.textCursor()
         current_line = cursor.blockNumber()
         total_lines = self.quran_view.document().blockCount()
 
         if event.key() == Qt.Key.Key_Up:
             if current_line == 0:
-                self.OnBack()
-                print("لم يتم الإنتقال للخلف")
+                if self.quran.current_pos > 1:
+                    self.OnBack()
+                else:
+                    print("أنت بالفعل في الصفحة الأولى")
             else:
-                QTextEdit.keyPressEvent(self.quran_view, event)  # استخدام quran_view بدلاً من text_edit
+                QTextEdit.keyPressEvent(self.quran_view, event)
         elif event.key() == Qt.Key.Key_Down:
             if current_line == total_lines - 1:
-                self.OnNext()
-                print("لم يتم الإنتقال للأمام")
+                if self.quran.current_pos < self.quran.max_pos:
+                    self.OnNext()
+                else:
+                    print("أنت بالفعل في الصفحة الأخيرة")
             else:
-                QTextEdit.keyPressEvent(self.quran_view, event)  # استخدام quran_view بدلاً من text_edit
+                QTextEdit.keyPressEvent(self.quran_view, event)
         else:
-            QTextEdit.keyPressEvent(self.quran_view, event)  # استخدام quran_view بدلاً من text_edit
-
+            QTextEdit.keyPressEvent(self.quran_view, event)
+    
     def set_text_ctrl_label(self):
 
         label = ""
