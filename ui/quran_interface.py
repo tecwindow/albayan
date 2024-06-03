@@ -1,5 +1,6 @@
 import os
 import re
+from PyQt6.QtGui import QTextCursor
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QWidget,
@@ -12,7 +13,8 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QComboBox,
     QInputDialog,
-    QApplication
+    QApplication,
+    QTextEdit
 )
 from PyQt6.QtGui import QIcon, QAction
 from core_functions.quran_class import quran_mgr
@@ -46,6 +48,10 @@ class QuranInterface(QMainWindow):
         self.create_widgets()
         self.create_layout()
         
+        # ربط دالة handle_key_press بأحداث لوحة المفاتيح
+        self.quran_view.keyPressEvent = self.handle_key_press
+
+
     def create_widgets(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -120,6 +126,26 @@ class QuranInterface(QMainWindow):
             self.back_to.setEnabled(False)
             self.menu_bar.previous_action.setEnabled(False)
             self.quran_view.setFocus()
+
+    def handle_key_press(self, event):
+        cursor = self.quran_view.textCursor()  # استخدام quran_view بدلاً من text_edit
+        current_line = cursor.blockNumber()
+        total_lines = self.quran_view.document().blockCount()
+
+        if event.key() == Qt.Key.Key_Up:
+            if current_line == 0:
+                self.OnBack()
+                print("لم يتم الإنتقال للخلف")
+            else:
+                QTextEdit.keyPressEvent(self.quran_view, event)  # استخدام quran_view بدلاً من text_edit
+        elif event.key() == Qt.Key.Key_Down:
+            if current_line == total_lines - 1:
+                self.OnNext()
+                print("لم يتم الإنتقال للأمام")
+            else:
+                QTextEdit.keyPressEvent(self.quran_view, event)  # استخدام quran_view بدلاً من text_edit
+        else:
+            QTextEdit.keyPressEvent(self.quran_view, event)  # استخدام quran_view بدلاً من text_edit
 
     def set_text_ctrl_label(self):
 
