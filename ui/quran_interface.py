@@ -1,6 +1,5 @@
 import os
 import re
-from PyQt6.QtGui import QTextCursor
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QWidget,
@@ -48,9 +47,6 @@ class QuranInterface(QMainWindow):
         self.create_widgets()
         self.create_layout()
         
-        # ربط دالة handle_key_press بأحداث لوحة المفاتيح
-        self.quran_view.keyPressEvent = self.handle_key_press
-
 
     def create_widgets(self):
         central_widget = QWidget()
@@ -126,30 +122,6 @@ class QuranInterface(QMainWindow):
             self.back_to.setEnabled(False)
             self.menu_bar.previous_action.setEnabled(False)
             self.quran_view.setFocus()
-
-    def handle_key_press(self, event):
-        cursor = self.quran_view.textCursor()
-        current_line = cursor.blockNumber()
-        total_lines = self.quran_view.document().blockCount()
-
-        if event.key() == Qt.Key.Key_Up:
-            if current_line == 0:
-                if self.quran.current_pos > 1:
-                    self.OnBack()
-                else:
-                    print("أنت بالفعل في الصفحة الأولى")
-            else:
-                QTextEdit.keyPressEvent(self.quran_view, event)
-        elif event.key() == Qt.Key.Key_Down:
-            if current_line == total_lines - 1:
-                if self.quran.current_pos < self.quran.max_pos:
-                    self.OnNext()
-                else:
-                    print("أنت بالفعل في الصفحة الأخيرة")
-            else:
-                QTextEdit.keyPressEvent(self.quran_view, event)
-        else:
-            QTextEdit.keyPressEvent(self.quran_view, event)
     
     def set_text_ctrl_label(self):
 
@@ -255,11 +227,8 @@ class QuranInterface(QMainWindow):
 
         menu.setAccessibleName("الإجراءات")
         menu.setFocus()
-        menu.exec(self.quran_view.mapToGlobal(self.quran_view.pos()))
-        
-    
+        menu.exec(self.quran_view.mapToGlobal(self.quran_view.pos()))        
 
-        
     def on_copy_verse(self):
         current_line = self.quran_view.textCursor().block().text()
         clipboard = QApplication.clipboard()
