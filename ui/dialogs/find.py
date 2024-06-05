@@ -64,7 +64,7 @@ class SearchDialog(QDialog):
         self.ignore_hamza_checkbox = QCheckBox('تجاهل الهمزات')
         self.ignore_hamza_checkbox.setChecked(self.current_settings["search"]["ignore_hamza"])
         
-        self.search_type_layout = QHBoxLayout()
+        self.search_type_layout = QVBoxLayout()
         self.search_type_layout.addWidget(self.search_type_radio_page)
         self.search_type_layout.addWidget(self.search_type_radio_sura)
         self.search_type_layout.addWidget(self.search_type_radio_juz)
@@ -99,10 +99,10 @@ class SearchDialog(QDialog):
         self.sura = []
         with open(os.path.join("database", "Surahs.Json"), encoding="UTF-8") as f:
             self.sura = json.load(f)["surahs"]
-        self.pages = ["{:03d}".format(i) for i in range(1, 605)]
-        self.quarters = ["{:03d}".format(i) for i in range(1, 241)]
-        self.jus = ["{:02d}".format(i) for i in range(1, 31)]
-        self.hizb = ["{:02d}".format(i) for i in range(1, 61)]
+        self.pages = ["{}".format(i) for i in range(1, 605)]
+        self.quarters = ["{}".format(i) for i in range(1, 241)]
+        self.jus = ["{}".format(i) for i in range(1, 31)]
+        self.hizb = ["{}".format(i) for i in range(1, 61)]
 
         self.search_button.clicked.connect(self.on_submit)
         self.cancel_button.clicked.connect(self.reject)
