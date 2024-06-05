@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QRadioButton,
     QComboBox,
-    QGroupBox
+    QGroupBox,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence
@@ -23,15 +23,14 @@ class QuickAccess(QDialog):
         self.sura = []
         with open(os.path.join("database", "Surahs.Json"), encoding="UTF-8") as f:
             self.sura = json.load(f)["surahs"]
-        self.pages = ["{:03d}".format(i) for i in range(1, 605)]
-        self.quarters = ["{:03d}".format(i) for i in range(1, 241)]
-        self.jus = ["{:02d}".format(i) for i in range(1, 31)]
-        self.hizb = ["{:02d}".format(i) for i in range(1, 61)]
+        self.pages = ["{}".format(i) for i in range(1, 605)]
+        self.quarters = ["{}".format(i) for i in range(1, 241)]
+        self.jus = ["{}".format(i) for i in range(1, 31)]
+        self.hizb = ["{}".format(i) for i in range(1, 61)]
 
         layout = QVBoxLayout()
-
         self.view_by = QGroupBox("عرض وفقا ل:")
-        view_by_layout = QHBoxLayout()
+        view_by_layout = QVBoxLayout()
         self.sura_radio = QRadioButton("سور")
         self.pages_radio = QRadioButton("صفح")
         self.quarters_radio = QRadioButton("أرباع")
