@@ -36,6 +36,8 @@ class QuranViewer(ReadOnlyTextEdit):
         self.parent.menu_bar.verse_grammar_action.setEnabled(status)
         self.parent.menu_bar.copy_verse_action.setEnabled(status)
 
+        #Disable temporarily
+        return
         if e.key() == Qt.Key.Key_Up:
             if (current_line == 0) and (self.parent.quran.current_pos > 1):
                 self.parent.OnBack()
