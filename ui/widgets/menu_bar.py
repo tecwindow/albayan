@@ -142,6 +142,7 @@ class MenuBar(QMenuBar):
         self.theme_manager.apply_theme(theme)
 
         # Save selected theme in the settings
+        theme = "default" if theme == "الافتراضي" else theme
         theme_setting = {
             "preferences": {
                 "theme": theme

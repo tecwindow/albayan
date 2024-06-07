@@ -20,11 +20,11 @@ class ThemeManager:
 
     def apply_theme(self, selected_theme):
 
-        theme_file = self.themes.get(selected_theme)
-        if theme_file == "default":
+        if selected_theme == "default":
             self.window.setStyleSheet("")
             return
 
+        theme_file = self.themes.get(selected_theme)
         if not theme_file:
             Logger.error(f"Theme not found: {selected_theme}")
             return None
