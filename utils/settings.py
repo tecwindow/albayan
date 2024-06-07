@@ -9,6 +9,7 @@ class SettingsManager:
 
     default_settings = {
         "general": {
+            "language": "Arabic",
             "sound_effect_enabled": True,
             "speak_actions_enabled": True,
             "check_update_enabled": True,

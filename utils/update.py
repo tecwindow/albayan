@@ -54,8 +54,8 @@ class UpdateManager:
         """Checks for updates and notifies the user if an update is available."""
         latest_version = info.get("latest_version")
         if version.parse(latest_version) > version.parse(program_version):
-            language = SettingsManager.current_settings["general"].get("language", "English")
-            release_notes = info.get("release_notes", {}).get(language, info["release_notes"].get("English", ""))
+            language = SettingsManager.current_settings["general"].get("language", "Arabic")
+            release_notes = info.get("release_notes", {}).get(language, info["release_notes"].get("Arabic", ""))
             download_url = info.get("download_url")
             self.show_update_dialog(release_notes, download_url, latest_version)
         else:
