@@ -13,7 +13,7 @@ class UpdateChecker(QThread):
     update_available = pyqtSignal(dict)
     update_error = pyqtSignal(str)
     session = requests.Session()
-    url = "https://dl.tecwindow.net/info.json"
+    url = "https://raw.githubusercontent.com/tecwindow/albayan/main/info.json"
     
     def __init__(self):
         super().__init__()
@@ -26,10 +26,10 @@ class UpdateChecker(QThread):
             self.update_available.emit(info)
         except requests.exceptions.ConnectionError as e:
             Logger.error(str(e))
-            self.update_error.emit("There is no internet connection.")
+            self.update_error.emit("لا يوجد اتصال بالإنترنت.")
         except Exception as e:
             Logger.error(str(e))
-            self.update_error.emit("An error occurred while connecting to the server.")
+            self.update_error.emit("حدث خطأ أثناء الاتصال بالخادم.")
 
 
 class UpdateManager:
@@ -54,8 +54,8 @@ class UpdateManager:
         """Checks for updates and notifies the user if an update is available."""
         latest_version = info.get("latest_version")
         if version.parse(latest_version) > version.parse(program_version):
-            language = SettingsManager.current_settings["general"].get("language", "English")
-            release_notes = info.get("release_notes", {}).get(language, info["release_notes"].get("English", ""))
+            language = SettingsManager.current_settings["general"].get("language", "Arabic")
+            release_notes = info.get("release_notes", {}).get(language, info["release_notes"].get("Arabic", ""))
             download_url = info.get("download_url")
             self.show_update_dialog(release_notes, download_url, latest_version)
         else:
@@ -70,5 +70,5 @@ class UpdateManager:
 
     def show_no_update_dialog(self):
         if not self.auto_update:
-            QMessageBox.information(self.parent, "No update available", f"You are using {program_name} version {program_version}, which is the latest version.")
+            QMessageBox.information(self.parent, "لا يوجد تحديث.", f"أنت تستخدم {program_name} الإصدار {program_version}, وهو الإصدار الأحدث.")
 

@@ -32,7 +32,7 @@ class BookmarkDialog(QDialog):
         self.bookmark_list = QListWidget()
         self.bookmark_list.setAccessibleDescription(self.bookmarks_label.text())
 
-        self.update_button = QPushButton("تحديث العلامة")
+        self.update_button = QPushButton("تعديل الاسم")
         self.delete_button = QPushButton("حذف العلامة")
         self.delete_button.setShortcut(QKeySequence(Qt.Key.Key_Delete))
         self.go_button = QPushButton("الذهاب إلى العلامة")
@@ -74,7 +74,7 @@ class BookmarkDialog(QDialog):
         self.go_button.setEnabled(status)
 
         for bookmark in bookmarks:
-            item_text = f"{bookmark['name']} (Ayah: {bookmark['ayah_number_in_surah']}, Surah: {bookmark['surah_name']}, Date: {bookmark['date']})"
+            item_text = f"{bookmark['name']} (آية: {bookmark['ayah_number_in_surah']}, {bookmark['surah_name'].replace('سورة', 'السورة:')}, التاريخ: {bookmark['date']})"
             item = QListWidgetItem(item_text)
             item.setData(Qt.ItemDataRole.UserRole, bookmark)
             self.bookmark_list.addItem(item)
