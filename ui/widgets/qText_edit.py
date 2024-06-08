@@ -21,6 +21,9 @@ class QuranViewer(ReadOnlyTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
+        font = self.font()
+        font.setPointSize(16)
+        self.setFont(font)
         self.textChanged.connect(self.set_ctrl)
 
 
