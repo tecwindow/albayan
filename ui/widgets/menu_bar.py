@@ -26,7 +26,7 @@ class MenuBar(QMenuBar):
         self.create_menu()
 
     def create_menu(self):
-        navigation_menu = self.addMenu("التنقل")
+        navigation_menu = self.addMenu("التنقل(&M)")
         self.next_action = QAction("التالي", self)
         self.next_action.triggered.connect(self.parent.OnNext)
         self.next_action.setShortcuts([QKeySequence("Ctrl+N"), QKeySequence("Ctrl+Down"), QKeySequence("Alt+Right"), QKeySequence(Qt.Key.Key_PageDown)])
@@ -51,7 +51,7 @@ class MenuBar(QMenuBar):
         navigation_menu.addAction(self.quick_access_action)
         navigation_menu.addAction(self.exit_action)
 
-        actions_menu = self.addMenu("الإجرائات")
+        actions_menu = self.addMenu("الإجرائات(&A)")
         self.save_position_action = QAction("حفظ الموضع الحالي", self)
         self.save_position_action.setShortcut(QKeySequence("Ctrl+S"))
         self.save_position_action.triggered.connect(self.parent.OnSavePosition)
@@ -77,13 +77,13 @@ class MenuBar(QMenuBar):
         actions_menu.addAction(self.verse_grammar_action)
         actions_menu.addAction(self.copy_verse_action)
 
-        tools_menu = self.addMenu("الأدوات")
+        tools_menu = self.addMenu("الأدوات(&T)")
         bookmark_manager_action = QAction("مدير العلامات", self)
         bookmark_manager_action.setShortcut(QKeySequence("Shift+D"))
         bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
         tools_menu.addAction(bookmark_manager_action )
 
-        preferences_menu = self.addMenu("التفضيلات")
+        preferences_menu = self.addMenu("التفضيلات(&P)")
         settings_action = QAction("الإعدادات", self)
         settings_action.setShortcut(QKeySequence("F3"))
         settings_action.setShortcuts([QKeySequence("F3"), QKeySequence("Alt+S")])
@@ -103,7 +103,7 @@ class MenuBar(QMenuBar):
         preferences_menu.addMenu(theme_menu)
         preferences_menu.addAction(self.text_direction_action)
 
-        help_menu = self.addMenu("المساعدة")
+        help_menu = self.addMenu("المساعدة(&H)")
 #        user_guide_action = QAction("دليل البرنامج", self)
 #        user_guide_action.setShortcut(QKeySequence("F1"))
         contact_us_menu = QMenu("اتصل بنا", self)
