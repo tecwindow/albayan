@@ -134,7 +134,7 @@ class MenuBar(QMenuBar):
     def OnBookmarkManager(self):
         dialog = BookmarkDialog(self.parent)
         if dialog.exec():
-            pass
+            self.parent.set_text_ctrl_label()
 
     def OnTheme    (self):
 

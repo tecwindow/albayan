@@ -47,7 +47,8 @@ class QuranInterface(QMainWindow):
         self.create_widgets()
         self.create_layout()
         self.quran_view.setText(self.quran.get_page(1))
-        
+        self.set_text_ctrl_label()
+       
         
     def create_widgets(self):
         central_widget = QWidget()
@@ -62,8 +63,7 @@ class QuranInterface(QMainWindow):
         self.quran_view = QuranViewer(self)
         self.quran_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.quran_view.customContextMenuRequested.connect(self.onContextMenu)
-        self.set_text_ctrl_label()
-
+        
         self.next_to = EnterButton("التالي")
         self.next_to.setEnabled(self.quran.current_pos != self.quran.max_pos)
         self.next_to.clicked.connect(self.OnNext)
