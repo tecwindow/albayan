@@ -32,7 +32,7 @@ class QuickAccess(QDialog):
         self.view_by = QGroupBox("عرض وفقا ل:")
         view_by_layout = QVBoxLayout()
         self.sura_radio = QRadioButton("سور")
-        self.pages_radio = QRadioButton("صفح")
+        self.pages_radio = QRadioButton("صفحات")
         self.quarters_radio = QRadioButton("أرباع")
         self.hizb_radio = QRadioButton("أحزاب")
         self.jus_radio = QRadioButton("أجزاء")
@@ -43,7 +43,7 @@ class QuickAccess(QDialog):
         view_by_layout.addWidget(self.jus_radio)
         self.view_by.setLayout(view_by_layout)
 
-        self.choices_label = QLabel("إنتقل إلى:")
+        self.choices_label = QLabel("انتقل إلى:")
         self.choices = QComboBox()
         self.choices.setAccessibleName(self.choices_label.text())
         
