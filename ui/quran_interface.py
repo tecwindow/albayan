@@ -196,7 +196,7 @@ class QuranInterface(QMainWindow):
     def onContextMenu(self):
         menu = QMenu(self)
         save_current_position = menu.addAction("حفظ الموضع الحالي")
-        get_sura_info = menu.addAction("معلومات السورة")
+        #get_sura_info = menu.addAction("معلومات السورة")
         get_interpretation_verse = menu.addAction("تفسير الآية")
         get_interpretation_verse.triggered.connect(self.OnInterpretation)
 
@@ -219,7 +219,7 @@ class QuranInterface(QMainWindow):
         if "سُورَةُ" in current_line or current_line == "" or not re.search(r"\(\d+\)$", current_line):
             save_current_position.setEnabled(False)
             copy_verse.setEnabled(False)
-            get_sura_info.setEnabled(False)
+            #get_sura_info.setEnabled(False)
             get_interpretation_verse.setEnabled(False)
             submenu.setEnabled(False)
             get_verse_syntax.setEnabled(False)

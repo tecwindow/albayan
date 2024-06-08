@@ -30,7 +30,7 @@ class QuranViewer(ReadOnlyTextEdit):
         self.parent.interpretation_verse.setEnabled(status)
         self.parent.save_current_position.setEnabled(status)
         self.parent.menu_bar.save_position_action.setEnabled(status)
-        self.parent.menu_bar.surah_info_action.setEnabled(status)
+        #self.parent.menu_bar.surah_info_action.setEnabled(status)
         self.parent.menu_bar.verse_tafsir_action.setEnabled(status)
         self.parent.menu_bar.verse_info_action.setEnabled(status)
         self.parent.menu_bar.verse_grammar_action.setEnabled(status)
