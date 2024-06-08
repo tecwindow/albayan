@@ -13,7 +13,7 @@ from PyQt6.QtGui import QIcon, QAction, QKeySequence
 from PyQt6.QtCore import QTimer
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
-
+from utils.universal_speech import UniversalSpeech
 
 class TafaseerDialog(QDialog):
     def __init__(self, parent, title, ayah_info, default_category):
@@ -92,6 +92,7 @@ class TafaseerDialog(QDialog):
         copied_content = self.text_edit.toPlainText()
         clipboard = QApplication.clipboard()
         clipboard.setText(copied_content) 
+        UniversalSpeech.say("تم نسخ التفسير.")
 
     def save_content(self):
         file_path, _ = QFileDialog.getSaveFileName(
