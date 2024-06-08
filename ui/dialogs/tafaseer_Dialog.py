@@ -1,3 +1,4 @@
+import os
 from PyQt6.QtWidgets import (
     QWidget,
     QHBoxLayout, 
@@ -14,8 +15,7 @@ from PyQt6.QtCore import QTimer
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
 from utils.universal_speech import UniversalSpeech
-import os
-
+from utils.const import albayan_documents_dir
 
 
 class TafaseerDialog(QDialog):
@@ -97,19 +97,14 @@ class TafaseerDialog(QDialog):
         clipboard.setText(copied_content) 
         UniversalSpeech.say("تم نسخ التفسير.")
         
-    def save_content(self):
-        # Get the path to the Documents directory
-        documents_dir = os.path.join(os.path.expanduser("~"), "Documents")
-        albayan_dir = os.path.join(documents_dir, "Albayan")
+    def save_content(self):            
 
-        # Create the Albayan directory if it does not exist
-        if not os.path.exists(albayan_dir):
-            os.makedirs(albayan_dir)
-
+        file_name = os.path.join(albayan_documents_dir, self.windowTitle())
         # Open the file dialog in the Albayan directory
         file_path, _ = QFileDialog.getSaveFileName(
-            self, "Save File", albayan_dir, "Text files (*.txt)"
+            self, "Save File", file_name, "Text files (*.txt)",
         )
+
         if file_path:
             with open(file_path, "w") as file:
                 file.write(self.text_edit.toPlainText())
