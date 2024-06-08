@@ -33,7 +33,8 @@ class MenuBar(QMenuBar):
         self.previous_action = QAction("السابق", self)
         self.previous_action.triggered.connect(self.parent.OnBack)
         self.previous_action.setEnabled(False)
-        self.previous_action.setShortcut(QKeySequence("Ctrl+P"))
+        self.previous_action.setShortcuts([QKeySequence("Ctrl+P"), QKeySequence(Qt.Key.Key_PageUp),
+                                           QKeySequence("Ctrl+Up"), QKeySequence("Alt+Left")])
         self.search_action = QAction("البحث", self)
         self.search_action.triggered.connect(self.parent.OnSearch)        
         self.search_action.setShortcut(QKeySequence("Ctrl+F"))
