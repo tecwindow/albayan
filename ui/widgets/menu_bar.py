@@ -140,18 +140,16 @@ class MenuBar(QMenuBar):
 
         # apply theme
         theme = self.sender().text()
+        theme = "default" if theme == "الافتراضي" else theme
         self.theme_manager.apply_theme(theme)
 
         # Save selected theme in the settings
-        theme = "default" if theme == "الافتراضي" else theme
         theme_setting = {
             "preferences": {
                 "theme": theme
             }
         }
         SettingsManager.write_settings(theme_setting)
-
-        
 
     def toggle_text_direction(self):
 
