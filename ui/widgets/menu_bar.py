@@ -29,7 +29,7 @@ class MenuBar(QMenuBar):
         navigation_menu = self.addMenu("التنقل")
         self.next_action = QAction("التالي", self)
         self.next_action.triggered.connect(self.parent.OnNext)
-        self.next_action.setShortcut(QKeySequence("Ctrl+N"))
+        self.next_action.setShortcuts([QKeySequence("Ctrl+N"), QKeySequence("Ctrl+Down"), QKeySequence("Alt+Right"), QKeySequence(Qt.Key.Key_PageDown)])
         self.previous_action = QAction("السابق", self)
         self.previous_action.triggered.connect(self.parent.OnBack)
         self.previous_action.setEnabled(False)
