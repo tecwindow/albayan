@@ -904,3 +904,8 @@ QSlider::handle:horizontal[themeID="tBarSlider"] {
 * [themeID="previousIcon"] {
     qproperty-icon: url(./Moonlight/media/media_previous.svg);
 }
+
+
+QTextEdit {
+    font-size: 18px;
+}
