@@ -1030,3 +1030,7 @@ QSlider::handle:horizontal[themeID="tBarSlider"] {
 		stop: 0.5 #2d6dce,
 		stop: 1 #4381dd);
 }
+
+QTextEdit {
+    font-size: 18px;
+}
