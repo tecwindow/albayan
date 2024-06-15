@@ -19,6 +19,7 @@ For more information, visit: https://github.com/baaziznasser/qurani
 
 
 import sqlite3
+from core_functions.ayah_data import AyahData
 
 
 class quran_mgr:
@@ -32,6 +33,7 @@ class quran_mgr:
         self.conn = None
         self.cursor = None
         self.text = ""
+        self.ayah_data = None
 
     def load_quran(self, db_path):
         self.conn = sqlite3.connect(db_path)
@@ -213,22 +215,27 @@ class quran_mgr:
             "full_text": self.get_text()
         }
     
-    def get_ayah_info(self, ayah:str) -> list:
-        self.cursor.execute("SELECT sura_number, number, sura_name, numberInSurah FROM quran WHERE text LIKE ?", ('%' + ayah + '%',))
+    def get_ayah_info(self, position: int) -> list:
+        ayah_number = self.ayah_data.get(position)
+        self.cursor.execute("SELECT sura_number, number, sura_name, numberInSurah FROM quran WHERE number = ?", (ayah_number,))
         return self.cursor.fetchone()
 
     def get_text(self):
+
         if not self.data_list:
             return ""
 
         text = ""
-        start = 0
+        current_position = 0
+        ayah_data = AyahData()
 
         for ayah_index, ayah in enumerate(self.data_list):
             ayah_text = ayah[0]
             ayah_number = ayah[4]
             if int(ayah_number) == 1:
-                text += f"{ayah[2]} {ayah[3]}\n|\n"
+                start_point_text = f"{ayah[2]} {ayah[3]}\n|\n"
+                text += start_point_text
+                current_position += len(start_point_text)
                 if  ayah[3] != 1:
                     ayah_text = ayah_text.replace("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", f"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\n")
 
@@ -242,10 +249,14 @@ class quran_mgr:
 
             text += ayah_text
 
-            end = start + len(ayah_text)
-            self.data_list[ayah_index] += (start, end)
-            start = end+1
+            # Calculate the positions
+            first_position = current_position
+            current_position += len(ayah_text)
+            last_position = current_position - 1
+            ayah_data.insert(ayah[1], first_position, last_position)
 
         text = text.strip("\n")
         self.text = text
+        self.ayah_data = ayah_data
+
         return text
