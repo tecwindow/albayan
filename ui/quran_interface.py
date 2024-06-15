@@ -166,12 +166,9 @@ class QuranInterface(QMainWindow):
 
     def get_current_ayah_info(self) -> list:
 
-        current_line = self.quran_view.textCursor().block().text()
-        search = re.search(r"\(\d+\)", current_line)
-        if search:
-            number = search.group()
-            current_line = current_line.replace(number, "").strip()
-        ayah_info = self.quran.get_ayah_info(current_line)
+        current_line = self.quran_view.textCursor().block()
+        position = current_line.position()
+        ayah_info = self.quran.get_ayah_info(position)
 
         return ayah_info
     
@@ -181,15 +178,8 @@ class QuranInterface(QMainWindow):
         if selected_category not in Category.get_categories_in_arabic():
             selected_category = "الميسر"
 
-        current_line = self.quran_view.textCursor().block().text()
-        title = "تفسير الآية رقم"
-        search = re.search(r"\(\d+\)", current_line)
-        if search:
-            number = search.group()
-            title += number
-            current_line = current_line.replace(number, "").strip()
-        ayah_info = self.quran.get_ayah_info(current_line)
-        title += "من {}".format(ayah_info[2])
+        ayah_info = self.get_current_ayah_info()
+        title = "تفسير آية {} من {}".format(ayah_info[3], ayah_info[2])
         dialog = TafaseerDialog(self, title, ayah_info, selected_category)
         dialog.exec()
 
