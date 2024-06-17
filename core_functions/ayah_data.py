@@ -25,6 +25,7 @@ class AyahData:
 
     def insert(self, ayah_number: int, first_position: int, last_position: int):
         """Insert a new ayah into the table."""
+
         self.cursor.execute('''
             INSERT INTO ayah_data (ayah_number, first_position, last_position)
             VALUES (?, ?, ?)
@@ -45,6 +46,15 @@ class AyahData:
         else:
             return None  
 
+    def get_position(self, ayah_number: int) -> int:
+        """Get position for Specific ayah"""
+        self.cursor.execute("SELECT first_position FROM ayah_data WHERE ayah_number = ?;", (ayah_number,))
+        result = self.cursor.fetchone()
+
+        if result:
+            return result["first_position"]
+        else:
+            return 0
 
     def __del__(self):
         """Close the connection when the object is deleted."""
