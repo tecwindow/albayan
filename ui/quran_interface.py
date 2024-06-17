@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QApplication,
     QTextEdit
 )
-from PyQt6.QtGui import QIcon, QAction, QTextCursor
+from PyQt6.QtGui import QIcon, QAction, QTextCursor, QKeySequence, QShortcut
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
 from core_functions.info import E3rab, TanzilAyah
@@ -48,7 +48,12 @@ class QuranInterface(QMainWindow):
         self.create_widgets()
         self.create_layout()
         self.set_text()
+        self.set_shortcut()
 
+    def set_shortcut(self):
+        for i in range(0, 4):  # لتشمل Ctrl+1 إلى Ctrl+4
+            shortcut = QShortcut(QKeySequence(f"Ctrl+{i+1}"), self)
+            shortcut.activated.connect(lambda mode=i: self.OnChangeNavigationMode(mode))
 
     def create_widgets(self):
         central_widget = QWidget()
@@ -110,9 +115,9 @@ class QuranInterface(QMainWindow):
         text = self.quran.goto(current_positiom)
         self.quran_view.setText(text)
         self.set_text_ctrl_label()
-        self.next_to.setEnabled(self.quran.current_pos < self.quran.max_pos)
-        self.back_to.setEnabled(self.quran.current_pos >= 1)
+        self.set_focus_to_ayah(ayah_number)
 
+    def set_focus_to_ayah(self, ayah_number: int):
         # set the Cursor to ayah_position in the text
         text_position = self.quran.ayah_data.get_position(ayah_number)
         cursor = QTextCursor(self.quran_view.document())
@@ -123,22 +128,14 @@ class QuranInterface(QMainWindow):
         self.quran_view.setText(self.quran.next())
         self.set_text_ctrl_label()
         self.sound_manager.play_sound("next")
-        self.back_to.setEnabled(True)
-        self.menu_bar.previous_action.setEnabled(True)
         if self.quran.current_pos == self.quran.max_pos:
-            self.next_to.setEnabled(False)
-            self.menu_bar.next_action.setEnabled(False)
             self.quran_view.setFocus()
 
     def OnBack(self):
         self.quran_view.setText(self.quran.back())
         self.set_text_ctrl_label()
         self.sound_manager.play_sound("previous")
-        self.next_to.setEnabled(True)
-        self.menu_bar.next_action.setEnabled(True)
-        if self.quran.current_pos == 1:
-            self.back_to.setEnabled(False)
-            self.menu_bar.previous_action.setEnabled(False)
+        if self.quran.current_pos == 1:            
             self.quran_view.setFocus()
     
     def set_text_ctrl_label(self):
@@ -160,6 +157,14 @@ class QuranInterface(QMainWindow):
         self.quran_view.setAccessibleName(label)
         UniversalSpeech.say(label)
 
+        # Enable back and next item
+        next_status = self.quran.current_pos < self.quran.max_pos
+        back_status = self.quran.current_pos > 1
+        self.next_to.setEnabled(next_status)
+        self.menu_bar.next_action.setEnabled(next_status)
+        self.back_to.setEnabled(back_status)
+        self.menu_bar.previous_action.setEnabled(back_status)
+
     def OnQuickAccess(self):
         dialog = QuickAccess(self, "الوصول السريع")
         if not dialog.exec():
@@ -167,15 +172,6 @@ class QuranInterface(QMainWindow):
         
         self.set_text_ctrl_label()
         self.quran_view.setFocus()
-
-        if self.quran.current_pos == 1:
-            self.back_to.setEnabled(False)
-        if self.quran.current_pos < self.quran.max_pos:
-            self.next_to.setEnabled(True)
-        if self.quran.current_pos > 1:
-            self.back_to.setEnabled(True)
-        if self.quran.current_pos == self.quran.max_pos:
-            self.next_to.setEnabled(False)
 
     def OnSearch(self):
         search_dialog = SearchDialog(self, "بحث")
@@ -284,3 +280,14 @@ class QuranInterface(QMainWindow):
          self.quran.current_pos
          )
         UniversalSpeech.say("تم حفظ الموضع الحالي.")
+
+    def OnChangeNavigationMode(self, mode):
+        ayah_info = self.get_current_ayah_info()
+        if  ayah_info:
+            ayah_number = ayah_info[1]
+            self.quran.type = mode
+            self.quran_view.setText(self.quran.get_by_ayah_number(ayah_number)["full_text"])
+            self.set_text_ctrl_label()
+            self.set_focus_to_ayah(ayah_number)
+
+        
