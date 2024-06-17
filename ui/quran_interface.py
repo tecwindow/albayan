@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QApplication,
     QTextEdit
 )
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtGui import QIcon, QAction, QTextCursor
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
 from core_functions.info import E3rab, TanzilAyah
@@ -31,6 +31,7 @@ from utils.settings import SettingsManager
 from utils.update import UpdateManager
 from utils.sound_Manager import SoundManager
 from utils.universal_speech import UniversalSpeech
+from utils.user_data import UserDataManager
 
 
 class QuranInterface(QMainWindow):
@@ -46,10 +47,9 @@ class QuranInterface(QMainWindow):
         self.setMenuBar(self.menu_bar)
         self.create_widgets()
         self.create_layout()
-        self.quran_view.setText(self.quran.get_page(1))
-        self.set_text_ctrl_label()
-       
-        
+        self.set_text()
+
+
     def create_widgets(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -83,7 +83,7 @@ class QuranInterface(QMainWindow):
         self.search_in_quran.clicked.connect(self.OnSearch)
         self.save_current_position = QPushButton("حفظ الموضع الحالي")
         self.save_current_position.setEnabled(False)
-        self.save_current_position.clicked.connect(self.OnSavePosition)
+        self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
 
     def create_layout(self):
         layout = QVBoxLayout()
@@ -100,7 +100,25 @@ class QuranInterface(QMainWindow):
 
         layout.addLayout(buttons_layout)
         self.centralWidget().setLayout(layout)
+
+
+    def set_text(self):
+        position_data = UserDataManager().get_last_position()
+        ayah_number = position_data.get("ayah_number", 1)
+        current_positiom = position_data.get("position", 1)
+        self.quran.type = position_data.get("criteria_number", 0)
         
+
+        text = self.quran.goto(current_positiom)
+        self.quran_view.setText(text)
+        self.set_text_ctrl_label()
+
+        # set the Cursor to ayah_position in the text
+        text_position = self.quran.ayah_data.get_position(ayah_number)
+        cursor = QTextCursor(self.quran_view.document())
+        cursor.setPosition(text_position)
+        self.quran_view.setTextCursor(cursor)
+
     def OnNext(self):
         self.quran_view.setText(self.quran.next())
         self.set_text_ctrl_label()
@@ -186,6 +204,7 @@ class QuranInterface(QMainWindow):
     def onContextMenu(self):
         menu = QMenu(self)
         save_current_position = menu.addAction("حفظ الموضع الحالي")
+        save_bookmark = menu.addAction("حفظ علامة")
         #get_sura_info = menu.addAction("معلومات السورة")
         get_interpretation_verse = menu.addAction("تفسير الآية")
         get_interpretation_verse.triggered.connect(self.OnInterpretation)
@@ -197,7 +216,8 @@ class QuranInterface(QMainWindow):
             action.triggered.connect(self.OnInterpretation)
             submenu.addAction(action)
 
-        save_current_position.triggered.connect(self.OnSavePosition)
+        save_current_position.triggered.connect(self.OnSaveCurrentPosition)
+        save_bookmark.triggered.connect(self.OnSaveBookmark)
         get_verse_syntax = menu.addAction("إعراب الآية")
         get_verse_syntax.triggered.connect(self.OnSyntax)
         get_verse_reasons = menu.addAction("أسباب نزول الآية")
@@ -208,6 +228,7 @@ class QuranInterface(QMainWindow):
         current_line = self.quran_view.textCursor().block().text()
         if "سُورَةُ" in current_line or current_line == "" or not re.search(r"\(\d+\)$", current_line):
             save_current_position.setEnabled(False)
+            save_bookmark.setEnabled(False)
             copy_verse.setEnabled(False)
             #get_sura_info.setEnabled(False)
             get_interpretation_verse.setEnabled(False)
@@ -243,7 +264,7 @@ class QuranInterface(QMainWindow):
         else:
             QMessageBox.information(self, "لا يتوفر معلومات للآية", "للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
             
-    def OnSavePosition(self):
+    def OnSaveBookmark(self):
         aya_info = self.get_current_ayah_info()
         criteria_number = self.quran.type
         name, ok = QInputDialog.getText(self, "اسم العلامة", "أدخل اسم العلامة:")
@@ -256,3 +277,10 @@ class QuranInterface(QMainWindow):
         update_manager = UpdateManager(self, check_update_enabled)
         update_manager.check_auto_update()
 
+    def OnSaveCurrentPosition(self):
+        UserDataManager().save_position(
+            self.get_current_ayah_info()[1],
+         self.quran.type,
+         self.quran.current_pos
+         )
+        UniversalSpeech.say("تم حفظ الموضع الحالي.")
