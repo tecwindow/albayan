@@ -235,7 +235,6 @@ class quran_mgr:
             if int(ayah_number) == 1:
                 start_point_text = f"{ayah[2]} {ayah[3]}\n|\n"
                 text += start_point_text
-                current_position += len(start_point_text)
                 if  ayah[3] != 1:
                     ayah_text = ayah_text.replace("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", f"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\n")
 
