@@ -1,4 +1,5 @@
 @echo off
+title Virtual environment
 setlocal enabledelayedexpansion
 
 cd /d "%~dp0"

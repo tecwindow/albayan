@@ -65,11 +65,9 @@ class QuranInterface(QMainWindow):
         self.quran_view.customContextMenuRequested.connect(self.onContextMenu)
         
         self.next_to = EnterButton("التالي")
-        self.next_to.setEnabled(self.quran.current_pos != self.quran.max_pos)
         self.next_to.clicked.connect(self.OnNext)
         
         self.back_to = EnterButton("السابق")
-        self.back_to.setEnabled(self.quran.current_pos != 1)
         self.back_to.clicked.connect(self.OnBack)
 
         self.interpretation_verse = EnterButton("تفسير الآية")
@@ -112,6 +110,8 @@ class QuranInterface(QMainWindow):
         text = self.quran.goto(current_positiom)
         self.quran_view.setText(text)
         self.set_text_ctrl_label()
+        self.next_to.setEnabled(self.quran.current_pos < self.quran.max_pos)
+        self.back_to.setEnabled(self.quran.current_pos >= 1)
 
         # set the Cursor to ayah_position in the text
         text_position = self.quran.ayah_data.get_position(ayah_number)
