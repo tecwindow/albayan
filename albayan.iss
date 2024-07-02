@@ -64,8 +64,6 @@ Filename: "{userappdata}\tecwindow\{#MyAppName}\Settingss.ini"; Section: "Genera
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
-Type: filesandordirs; Name: "{pf}\tecwindow"
-
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
