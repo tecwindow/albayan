@@ -290,4 +290,8 @@ class QuranInterface(QMainWindow):
             self.set_text_ctrl_label()
             self.set_focus_to_ayah(ayah_number)
 
-        
+    def closeEvent(self, event):
+        if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:
+            self.OnSaveCurrentPosition()
+        event.accept()
+
