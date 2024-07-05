@@ -12,6 +12,7 @@ class SettingsManager:
             "language": "Arabic",
             "sound_effect_enabled": True,
             "speak_actions_enabled": True,
+            "auto_save_position_enabled": False,
             "check_update_enabled": True,
             "logging_enabled": False
         },
@@ -63,7 +64,6 @@ class SettingsManager:
     @classmethod
     def reset_settings(cls) -> None:
         cls.write_settings(cls.default_settings)
-
 
     @classmethod
     @property
