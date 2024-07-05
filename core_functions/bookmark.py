@@ -1,8 +1,10 @@
 import sqlite3
 import os
 import datetime
+from PyQt6.QtWidgets import QMessageBox
 from utils.logger import Logger
 from utils.const import albayan_folder
+from utils.exceptions import DuplicateEntryError
 
 
 class BookmarkManager:
@@ -26,7 +28,7 @@ class BookmarkManager:
             CREATE TABLE IF NOT EXISTS bookmarks (
                 id INTEGER PRIMARY KEY,
                 name TEXT,
-                ayah_number INTEGER,
+                ayah_number INTEGER UNIQUE,
                 ayah_number_in_surah INTEGER,
                 surah_number INTEGER,
                 surah_name TEXT,
@@ -56,6 +58,9 @@ class BookmarkManager:
         try:
             self.cursor.execute(query, (name, ayah_number, ayah_number_in_surah, surah_number, surah_name, criteria_number, date))
             self.conn.commit()
+        except sqlite3.IntegrityError as e:
+            # Unique constraint
+            raise DuplicateEntryError(e)
         except Exception as e:
             print(e)
             Logger.error(str(e))
