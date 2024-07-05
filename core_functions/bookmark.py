@@ -60,6 +60,7 @@ class BookmarkManager:
             self.conn.commit()
         except sqlite3.IntegrityError as e:
             # Unique constraint
+            Logger.error(str(e))
             raise DuplicateEntryError(e)
         except Exception as e:
             print(e)
