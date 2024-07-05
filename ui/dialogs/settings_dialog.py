@@ -39,6 +39,7 @@ class SettingsDialog(QDialog):
         self.group_general_layout = QVBoxLayout()
         self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
         self.speech_checkbox = QCheckBox("نطق الإجرائات")
+        self.auto_save_position_checkbox = QCheckBox("حفظ الموضع الحالي تلقائيًا عند إغلاق البرنامج")
         self.update_checkbox = QCheckBox("التحقق من التحديثات")
         self.log_checkbox = QCheckBox("تمكين تسجيل الأخطاء")
         self.reset_button = QPushButton("استعادة الإعدادات الافتراضية")
@@ -46,6 +47,7 @@ class SettingsDialog(QDialog):
         
         self.group_general_layout.addWidget(self.sound_checkbox)
         self.group_general_layout.addWidget(self.speech_checkbox)
+        self.group_general_layout.addWidget(self.auto_save_position_checkbox)
         self.group_general_layout.addWidget(self.update_checkbox)
         self.group_general_layout.addWidget(self.log_checkbox)
         self.group_general_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))  # Spacer item
@@ -127,6 +129,7 @@ class SettingsDialog(QDialog):
         general_settings = {
             "sound_effect_enabled": self.sound_checkbox.isChecked(),
             "speak_actions_enabled": self.speech_checkbox.isChecked(),
+            "auto_save_position_enabled": self.auto_save_position_checkbox.isChecked(),
             "check_update_enabled": self.update_checkbox.isChecked(),
             "logging_enabled": self.log_checkbox.isChecked()
         }
@@ -162,6 +165,7 @@ class SettingsDialog(QDialog):
         current_settings = SettingsManager.current_settings    
         self.sound_checkbox.setChecked(current_settings["general"]["sound_effect_enabled"])
         self.speech_checkbox.setChecked(current_settings["general"]["speak_actions_enabled"])
+        self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
         self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
         self.log_checkbox.setChecked(current_settings["general"]["logging_enabled"])
         self.ignore_tashkeel_checkbox.setChecked(current_settings["search"]["ignore_tashkeel"])
