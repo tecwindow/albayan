@@ -51,7 +51,7 @@ class QuranInterface(QMainWindow):
         self.set_shortcut()
 
     def set_shortcut(self):
-        for i in range(0, 4):  # لتشمل Ctrl+1 إلى Ctrl+4
+        for i in range(0, 5):  
             shortcut = QShortcut(QKeySequence(f"Ctrl+{i+1}"), self)
             shortcut.activated.connect(lambda mode=i: self.OnChangeNavigationMode(mode))
 
