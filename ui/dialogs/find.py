@@ -15,9 +15,10 @@ QListWidget,
 QMessageBox,
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QTextCursor, QKeySequence
+from PyQt6.QtGui import QKeyEvent, QTextCursor, QKeySequence
 from core_functions.search import SearchCriteria, QuranSearchManager
 from utils.settings import SettingsManager
+from utils.universal_speech import UniversalSpeech
 
 
 class SearchDialog(QDialog):
@@ -184,7 +185,8 @@ class SearchResultsDialog(QDialog):
     def __init__(self, parent=None, search_result=[]):
         super().__init__(parent)
         self.setWindowTitle("نتائج البحث")
-        
+
+        self.total_label = QLabel("عدد النتائج: {}".format(len(search_result)))
         self.label = QLabel("النتائج:")
         self.list_widget = QListWidget(self)
         self.list_widget.setAccessibleDescription(self.label.text())
@@ -198,6 +200,7 @@ class SearchResultsDialog(QDialog):
         self.cancel_button.clicked.connect(self.reject)
         
         layout = QVBoxLayout()
+        layout.addWidget(self.total_label)
         layout.addWidget(self.label)
         layout.addWidget(self.list_widget)
         layout.addWidget(self.go_to_button)
@@ -215,3 +218,7 @@ class SearchResultsDialog(QDialog):
 
         return "{} | الآية {} من {}".format(text, row["numberInSurah"], row["sura_name"])
 
+    def keyPressEvent(self, event: QKeyEvent | None) -> None:
+        if event.key() == Qt.Key.Key_I and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            UniversalSpeech.say(self.total_label.text())
+        return super().keyPressEvent(event)
