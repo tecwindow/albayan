@@ -84,7 +84,7 @@ class QuranInterface(QMainWindow):
 
         self.search_in_quran = EnterButton("البحث في القرآن")
         self.search_in_quran.clicked.connect(self.OnSearch)
-        self.save_current_position = QPushButton("حفظ الموضع الحالي")
+        self.save_current_position = EnterButton("حفظ الموضع الحالي")
         self.save_current_position.setEnabled(False)
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
 
