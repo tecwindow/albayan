@@ -4,7 +4,6 @@ import datetime
 from PyQt6.QtWidgets import QMessageBox
 from utils.logger import Logger
 from utils.const import albayan_folder
-from utils.exceptions import DuplicateEntryError
 
 
 class BookmarkManager:
@@ -58,10 +57,6 @@ class BookmarkManager:
         try:
             self.cursor.execute(query, (name, ayah_number, ayah_number_in_surah, surah_number, surah_name, criteria_number, date))
             self.conn.commit()
-        except sqlite3.IntegrityError as e:
-            # Unique constraint
-            Logger.error(str(e))
-            raise DuplicateEntryError(e)
         except Exception as e:
             print(e)
             Logger.error(str(e))
@@ -123,3 +118,17 @@ class BookmarkManager:
         if self.conn:
             self.conn.close()
 
+    def is_exist(self, ayah_number: int) -> bool:
+
+        query = "SELECT 1 FROM bookmarks WHERE ayah_number = ?;"
+        try:
+            self.cursor.execute(query, (ayah_number,))
+            result = self.cursor.fetchall()
+        except Exception as e:
+            print(e)
+            Logger.error(str(e))
+
+        if result:
+            return True
+        else:
+            return False

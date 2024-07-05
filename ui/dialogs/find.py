@@ -186,7 +186,7 @@ class SearchResultsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("نتائج البحث")
 
-        self.total_label = QLabel("عدد النتائج: {}".format(len(search_result)))
+        self.total_label = QLabel("عدد النتائج: {}.".format(len(search_result)))
         self.label = QLabel("النتائج:")
         self.list_widget = QListWidget(self)
         self.list_widget.setAccessibleDescription(self.label.text())
