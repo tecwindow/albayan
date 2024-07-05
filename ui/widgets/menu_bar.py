@@ -55,6 +55,7 @@ class MenuBar(QMenuBar):
         self.save_position_action.setShortcut(QKeySequence("Ctrl+S"))
         self.save_position_action.triggered.connect(self.parent.OnSaveCurrentPosition)
         self.save_bookmark_action = QAction("حفظ علامة", self)
+        self.save_bookmark_action.setShortcut(QKeySequence("Ctrl+D"))
         self.save_bookmark_action.triggered.connect(self.parent.OnSaveBookmark)
         #self.surah_info_action = QAction("معلومات السورة", self)
         #self.surah_info_action.setShortcut(QKeySequence("Shift+S"))
