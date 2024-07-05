@@ -32,7 +32,6 @@ from utils.update import UpdateManager
 from utils.sound_Manager import SoundManager
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
-from utils.exceptions import DuplicateEntryError
 
 
 class QuranInterface(QMainWindow):
@@ -263,17 +262,18 @@ class QuranInterface(QMainWindow):
             
     def OnSaveBookmark(self):
 
+        bookmark_manager= BookmarkManager()
         aya_info = self.get_current_ayah_info()
         criteria_number = self.quran.type
+
+        if bookmark_manager.is_exist(aya_info[1]):
+            QMessageBox.critical(self, "خطأ", f"تم حفظ العلامة المرجعية مسبقًا.")
+            return
+
         name, ok = QInputDialog.getText(self, "اسم العلامة", "أدخل اسم العلامة:")
         if ok and name:
-
-            try:
-                BookmarkManager().insert_bookmark(name, aya_info[1], aya_info[3], aya_info[0], aya_info[2], criteria_number)
-            except DuplicateEntryError as e:
-                QMessageBox.critical(self, "خطأ", f"تم حفظ العلامة المرجعية مسبقًا.")
-            finally:
-                self.quran_view.setFocus()
+            bookmark_manager.insert_bookmark(name, aya_info[1], aya_info[3], aya_info[0], aya_info[2], criteria_number)
+            self.quran_view.setFocus()
 
     def check_auto_update(self):
         check_update_enabled = SettingsManager.current_settings["general"]["check_update_enabled"]
