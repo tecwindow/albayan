@@ -3,6 +3,9 @@ import os
 from abc import ABC, abstractmethod
 
 class Base(ABC):
+    @abstractmethod
+    def __init__(self, ayah_number: int) -> None:
+        pass
 
     def _connect(self, file_path) -> sqlite3.Connection:
         
@@ -52,7 +55,7 @@ class E3rab(Base):
 
 
 class TanzilAyah(Base):
-    def __init__(self, ayah_number:int) -> None:
+    def __init__(self, ayah_number: int) -> None:
         self._ayah_number = ayah_number
         file_path = os.path.join("database", "other", "tanzil.db")
         self._conn = self._connect(file_path)
@@ -68,3 +71,54 @@ class TanzilAyah(Base):
             return self.remove_empty_lines(result["text"])
         else:
             return ""
+
+
+class AyaInfo(Base):
+    def __init__(self, ayah_number: int) -> None:
+        self._ayah_number = ayah_number
+        file_path = os.path.join("database", "quran", "quran.DB")
+        self._conn = self._connect(file_path)
+        self.cursor = self._conn.cursor()
+
+    @property
+    def text(self) -> str:
+
+        sql = """
+        SELECT sura_name, numberInSurah, juz, hizb, page, hizbQuarter, 
+        CASE 
+            WHEN sajda = 1 THEN 'نعم'
+            ELSE 'لا'
+        END AS sajda,
+        CASE 
+            WHEN sajdaObligation = 1 THEN 'نعم'
+            ELSE 'لا'
+        END AS sajdaObligation
+        FROM quran 
+        WHERE number = ?;
+        """
+
+        self.cursor.execute(sql, (self._ayah_number,))
+        result = self.cursor.fetchone()
+
+        if result:
+            return self.format_text(result)
+        else:
+            return ""
+
+    @staticmethod
+    def format_text(result: dict) -> str:
+        text = """|
+        <ul>
+            <li><strong>رقم الآية:</strong> {}</li>
+            <li><strong>السورة:</strong> {}</li>
+            <li><strong>رقم الصفحة:</strong> {}</li>
+            <li><strong>رقم الجزء:</strong> {}</li>
+            <li><strong>رقم الحزب:</strong> {}</li>
+            <li><strong>رقم الربع:</strong> {}</li>
+            <li><strong>سجدة:</strong> {}</li>
+            <li><strong>سجدة واجبة:</strong> {}</li>
+        </ul>
+        """.format(result["numberInSurah"], result["sura_name"], result["page"], result["juz"], result["hizb"], result["hizbQuarter"], result["sajda"], result["sajdaObligation"])
+
+        return text
+    
