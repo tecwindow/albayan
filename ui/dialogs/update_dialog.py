@@ -1,9 +1,8 @@
 import requests
 import subprocess
 import os
-from threading import Thread
-from packaging import version
 from PyQt6.QtWidgets import (
+    QApplication,
     QDialog,
     QVBoxLayout,
     QHBoxLayout,
@@ -18,7 +17,16 @@ from PyQt6.QtGui import QKeySequence
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.const import program_name, temp_folder
 
+
 class UpdateDialog(QDialog):
+
+    # Remove the files in temp folder
+    for file in os.listdir(temp_folder):
+        file_path = os.path.join(temp_folder,file )
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        del file_path
+
     def __init__(self, parent, release_notes, download_url, latest_version):
         super().__init__(parent)
         self.download_url = download_url
@@ -64,7 +72,7 @@ class UpdateDialog(QDialog):
         QTimer.singleShot(300, self.release_notes_edit.setFocus)
 
     def on_update(self):
-        self.progress_dialog = QProgressDialog("Updating...", "Cancel", 0, 100, self)
+        self.progress_dialog = QProgressDialog("جارٍ التحديث...", "إغلاق", 0, 100, self)
         self.progress_dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.progress_dialog.setWindowTitle("يجري التحديث")
         self.progress_dialog.canceled.connect(self.on_cancel)
@@ -77,8 +85,8 @@ class UpdateDialog(QDialog):
 
     def on_download_finished(self, file_path):
         self.progress_dialog.hide()
-        subprocess.run([file_path, "/SILENT", "/NOCANCEL", "/SUPPRESSMSGBOXES", "/NORESTART"])
-        self.accept()
+        subprocess.Popen([file_path, "/SILENT", "/NOCANCEL", "/SUPPRESSMSGBOXES", "/NORESTART"])
+        QApplication.exit()
 
     def on_cancel(self):
         self.download_thread.terminate()
