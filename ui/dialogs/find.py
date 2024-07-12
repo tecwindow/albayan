@@ -12,10 +12,11 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QCheckBox,
 QListWidget,
+QListWidgetItem,
 QMessageBox,
 )
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QKeyEvent, QTextCursor, QKeySequence
+from PyQt6.QtCore import Qt, QRegularExpression
+from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator
 from core_functions.search import SearchCriteria, QuranSearchManager
 from utils.settings import SettingsManager
 from utils.universal_speech import UniversalSpeech
@@ -35,6 +36,9 @@ class SearchDialog(QDialog):
     def initUI(self):
         self.search_label = QLabel('اكتب ما تريد البحث عنه:')
         self.search_box = QLineEdit()
+        regex = QRegularExpression("[\u0621-\u0652\u0670\u0671]+") # Arabic letters, hamzas, and diacritics
+        validator = QRegularExpressionValidator(regex)
+        self.search_box.setValidator(validator)
         self.search_box.textChanged.connect(self.OnEdit)
         self.search_box.setAccessibleName(self.search_label.text())
         self.advanced_search_checkbox = QCheckBox('البحث المتقدم')
@@ -184,14 +188,19 @@ _to=search_to
 class SearchResultsDialog(QDialog):
     def __init__(self, parent=None, search_result=[]):
         super().__init__(parent)
+        self.search_result = search_result
         self.setWindowTitle("نتائج البحث")
 
         self.total_label = QLabel("عدد النتائج: {}.".format(len(search_result)))
         self.label = QLabel("النتائج:")
         self.list_widget = QListWidget(self)
         self.list_widget.setAccessibleDescription(self.label.text())
-        for row in search_result:
-            self.list_widget.addItem(self.format_result(row))
+
+        for i, row in enumerate(search_result):
+            item = QListWidgetItem(self.format_result(row))
+            item.setData(Qt.ItemDataRole.AccessibleDescriptionRole, f"{i+1} من {len(search_result)}")
+            item.setToolTip(row["text"])
+            self.list_widget.addItem(item)
             
         self.go_to_button = QPushButton("الذهاب للنتيجة")
         self.go_to_button.clicked.connect(self.accept)
@@ -209,6 +218,7 @@ class SearchResultsDialog(QDialog):
         self.setLayout(layout)
         self.list_widget.setCurrentRow(0)
 
+
     def format_result(self, row:dict) -> str:
         text = row["text"]
         # take first 5 words from text
@@ -219,6 +229,12 @@ class SearchResultsDialog(QDialog):
         return "{} | الآية {} من {}".format(text, row["numberInSurah"], row["sura_name"])
 
     def keyPressEvent(self, event: QKeyEvent | None) -> None:
+
         if event.key() == Qt.Key.Key_I and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
             UniversalSpeech.say(self.total_label.text())
+        elif event.key() == Qt.Key.Key_R and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            current_row = self.list_widget.currentRow()
+            text = self.search_result[current_row]["text"]
+            UniversalSpeech.say(text)
+
         return super().keyPressEvent(event)
