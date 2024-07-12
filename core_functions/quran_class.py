@@ -22,6 +22,26 @@ import sqlite3
 from core_functions.ayah_data import AyahData
 
 
+class QuranConst:
+    max_page = 604
+    max_surah_number = 114
+    max_juz = 30
+    max_hizb = 60
+    max_hizb_quarter = 240
+    _max = (max_page, max_surah_number, max_hizb_quarter, max_hizb, max_juz)
+    _category_labels = ("صفحة", "سورة", "ربع", "حزب", "جزء")
+
+    @classmethod
+    def get_max(cls, category_number: int) -> int:
+        assert isinstance(category_number, int), "category_number must be integer"
+        return cls._max[category_number]
+
+    @classmethod
+    def get_category_label(cls, category_number: int) -> str:
+        assert isinstance(category_number, int), "category_number must be integer"
+        return cls._category_labels[category_number]
+
+
 class quran_mgr:
     def __init__(self):
         self.show_ayah_number = True
