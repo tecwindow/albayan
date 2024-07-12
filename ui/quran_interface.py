@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QIcon, QAction, QTextCursor, QKeySequence, QShortcut
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
-from core_functions.info import E3rab, TanzilAyah
+from core_functions.info import E3rab, TanzilAyah, AyaInfo
 from core_functions.bookmark import BookmarkManager
 from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog
@@ -214,6 +214,8 @@ class QuranInterface(QMainWindow):
 
         save_current_position.triggered.connect(self.OnSaveCurrentPosition)
         save_bookmark.triggered.connect(self.OnSaveBookmark)
+        ayah_info = menu.addAction("معلومات الآية")
+        ayah_info.triggered.connect(self.OnAyahInfo)
         get_verse_syntax = menu.addAction("إعراب الآية")
         get_verse_syntax.triggered.connect(self.OnSyntax)
         get_verse_reasons = menu.addAction("أسباب نزول الآية")
@@ -229,6 +231,7 @@ class QuranInterface(QMainWindow):
             #get_sura_info.setEnabled(False)
             get_interpretation_verse.setEnabled(False)
             submenu.setEnabled(False)
+            ayah_info.setEnabled(False)
             get_verse_syntax.setEnabled(False)
             get_verse_reasons.setEnabled(False)
 
@@ -259,6 +262,13 @@ class QuranInterface(QMainWindow):
             InfoDialog(title, label, text).exec()
         else:
             QMessageBox.information(self, "لا يتوفر معلومات للآية", "للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
+
+    def OnAyahInfo(self):
+        aya_info = self.get_current_ayah_info()
+        title = "معلومات آية رقم {} من {}".format(aya_info[3], aya_info[2])
+        label = "معلومات الآية:"
+        text = AyaInfo(aya_info[1]).text
+        InfoDialog(title, label, text, is_html_content=True).exec()
             
     def OnSaveBookmark(self):
 
