@@ -5,11 +5,12 @@ from PyQt6.QtGui import QKeySequence
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 
 class InfoDialog(QDialog):
-    def __init__(self, title, label, text):
+    def __init__(self, title: str, label: str, text: str, is_html_content: bool=False):
         super().__init__()
         self.title = title
         self.label = label
         self.text = text
+        self.is_html_content = is_html_content
         self.init_ui()
 
 
@@ -22,8 +23,11 @@ class InfoDialog(QDialog):
         label = QLabel(self.label, self)
         
         text_edit = ReadOnlyTextEdit(self)
-        text_edit.setText(self.text)
         text_edit.setAccessibleName(self.label)
+        if self.is_html_content:
+            text_edit.setHtml(self.text)
+        else:
+            text_edit.setText(self.text)
 
         close_button = QPushButton('إغلاق', self)
         close_button.setShortcut(QKeySequence("Ctrl+W"))
