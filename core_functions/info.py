@@ -84,7 +84,14 @@ class AyaInfo(Base):
     def text(self) -> str:
 
         sql = """
-        SELECT sura_name, numberInSurah, juz, hizb, page, hizbQuarter, 
+        SELECT 
+        sura_name,
+        sura_number,
+          numberInSurah,
+          juz,
+          hizb, 
+          page,
+          hizbQuarter,
         CASE 
             WHEN sajda = 1 THEN 'نعم'
             ELSE 'لا'
@@ -109,16 +116,17 @@ class AyaInfo(Base):
     def format_text(result: dict) -> str:
         text = """|
         <ul>
-            <li><strong>رقم الآية:</strong> {}</li>
-            <li><strong>السورة:</strong> {}</li>
-            <li><strong>رقم الصفحة:</strong> {}</li>
-            <li><strong>رقم الجزء:</strong> {}</li>
-            <li><strong>رقم الحزب:</strong> {}</li>
-            <li><strong>رقم الربع:</strong> {}</li>
-            <li><strong>سجدة:</strong> {}</li>
-            <li><strong>سجدة واجبة:</strong> {}</li>
+            <li><strong>رقم الآية:</strong> {}.</li>
+            <li><strong>السورة:</strong> {}.</li>
+            <li><strong>رقم السورة:</strong> {}.</li>
+            <li><strong>رقم الصفحة:</strong> {}.</li>
+            <li><strong>رقم الجزء:</strong> {}.</li>
+            <li><strong>رقم الحزب:</strong> {}.</li>
+            <li><strong>رقم الربع:</strong> {}.</li>
+            <li><strong>سجدة:</strong> {}.</li>
+            <li><strong>سجدة واجبة:</strong> {}.</li>
         </ul>
-        """.format(result["numberInSurah"], result["sura_name"], result["page"], result["juz"], result["hizb"], result["hizbQuarter"], result["sajda"], result["sajdaObligation"])
+        """.format(result["numberInSurah"], result["sura_name"], result["sura_number"], result["page"], result["juz"], result["hizb"], result["hizbQuarter"], result["sajda"], result["sajdaObligation"])
 
         return text
     
