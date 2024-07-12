@@ -1,3 +1,4 @@
+
 import sys
 import os
 from cx_Freeze import setup, Executable
@@ -28,7 +29,7 @@ if sys.platform == "win32":
 
 setup(
     name="albayan",
-    version="1.1.0",
+    version="1.2.0",
     description=description,
     options={"build_exe": build_exe_options},
     executables=[Executable("main.py", base=base)]
