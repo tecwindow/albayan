@@ -3,13 +3,13 @@ from PyQt6.QtGui import QIcon, QAction, QKeySequence, QDesktopServices
 from PyQt6.QtCore import Qt, QUrl
 from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
+from ui.dialogs.go_to import GoToDialog
+from core_functions.quran_class import QuranConst
 from utils.update import UpdateManager
 from utils.settings import SettingsManager
 from utils.logger import Logger
+from utils.const import program_name, program_version, website
 from theme import ThemeManager
-from utils.const import program_name
-from utils.const import program_version
-from utils.const import website
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
@@ -37,6 +37,9 @@ class MenuBar(QMenuBar):
         self.search_action = QAction("البحث", self)
         self.search_action.triggered.connect(self.parent.OnSearch)        
         self.search_action.setShortcut(QKeySequence("Ctrl+F"))
+        self.go_to_action = QAction("اذهب إلى", self)
+        self.go_to_action.triggered.connect(self.OnGoTo)
+        self.go_to_action.setShortcut(QKeySequence("Ctrl+G"))
         self.quick_access_action = QAction("الوصول السريع", self)
         self.quick_access_action.triggered.connect(self.parent.OnQuickAccess)
         self.quick_access_action.setShortcut(QKeySequence("Ctrl+Q"))
@@ -47,6 +50,7 @@ class MenuBar(QMenuBar):
         navigation_menu.addAction(self.next_action)
         navigation_menu.addAction(self.previous_action)
         navigation_menu.addAction(self.search_action)
+        navigation_menu.addAction(self.go_to_action)
         navigation_menu.addAction(self.quick_access_action)
         navigation_menu.addAction(self.exit_action)
 
@@ -185,3 +189,17 @@ class MenuBar(QMenuBar):
             f"الموقع الرسمي للبرنامج: {website}\n"
         )
         QMessageBox.about(self, "حول البرنامج", about_text)
+
+    def OnGoTo(self):
+        category_number = self.parent.quran.type
+        current_position = self.parent.quran.current_pos
+        max = QuranConst.get_max(category_number)
+        category_label = QuranConst.get_category_label(category_number)
+        go_to_dialog = GoToDialog(self.parent, current_position, max, category_label)
+        if go_to_dialog.exec():
+            value = go_to_dialog.get_input_value()
+            text = self.parent.quran.goto(value)
+            self.parent.quran_view.setText(text)
+        self.parent.set_text_ctrl_label()
+        self.parent.quran_view.setFocus()
+
