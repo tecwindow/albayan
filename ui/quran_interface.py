@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QApplication,
     QTextEdit
 )
-from PyQt6.QtGui import QIcon, QAction, QTextCursor, QKeySequence, QShortcut
+from PyQt6.QtGui import QIcon, QAction, QShowEvent, QTextCursor, QKeySequence, QShortcut
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
 from core_functions.info import E3rab, TanzilAyah, AyaInfo
@@ -29,7 +29,7 @@ from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
 from utils.settings import SettingsManager
 from utils.update import UpdateManager
-from utils.sound_Manager import SoundManager
+from utils.sound_Manager import EffectsManager, BasmalaManager
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
 
@@ -42,9 +42,7 @@ class QuranInterface(QMainWindow):
         self.quran = quran_mgr()
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
         self.quran.aya_to_line = True
-        # Initialize SoundManager to handle audio files
-        self.sound_manager = SoundManager()
-        self.sound_manager.play_random_sound_from_folder(os.path.join("Audio", "basmala"))
+        self.effects_manager = EffectsManager("Audio/sounds")
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
         self.create_widgets()
@@ -129,14 +127,14 @@ class QuranInterface(QMainWindow):
     def OnNext(self):
         self.quran_view.setText(self.quran.next())
         self.set_text_ctrl_label()
-        self.sound_manager.play_sound("next")
+        self.effects_manager.play("next")
         if self.quran.current_pos == self.quran.max_pos:
             self.quran_view.setFocus()
 
     def OnBack(self):
         self.quran_view.setText(self.quran.back())
         self.set_text_ctrl_label()
-        self.sound_manager.play_sound("previous")
+        self.effects_manager.play("previous")
         if self.quran.current_pos == 1:            
             self.quran_view.setFocus()
     
@@ -308,6 +306,12 @@ class QuranInterface(QMainWindow):
             self.quran_view.setText(self.quran.get_by_ayah_number(ayah_number)["full_text"])
             self.set_text_ctrl_label()
             self.set_focus_to_ayah(ayah_number)
+
+    def showEvent(self, a0: QShowEvent | None) -> None:
+        self.check_auto_update()
+        basmala_manager = BasmalaManager("Audio/basmala")
+        basmala_manager.play()
+        return super().showEvent(a0)
 
     def closeEvent(self, event):
         if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:

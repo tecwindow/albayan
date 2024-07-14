@@ -17,7 +17,6 @@ def main():
         main_window.show()
         main_window.setFocus()
         QTimer.singleShot(500, main_window.quran_view.setFocus)
-        main_window.check_auto_update()
         sys.exit(app.exec())
     except Exception as e:
         print(e)
