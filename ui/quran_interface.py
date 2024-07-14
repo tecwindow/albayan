@@ -42,7 +42,9 @@ class QuranInterface(QMainWindow):
         self.quran = quran_mgr()
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
         self.quran.aya_to_line = True
+        # Initialize SoundManager to handle audio files
         self.sound_manager = SoundManager()
+        self.sound_manager.play_random_sound_from_folder(os.path.join("Audio", "basmala"))
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
         self.create_widgets()
