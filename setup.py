@@ -7,8 +7,8 @@ import PyQt6
 pyqt_path = os.path.dirname(PyQt6.__file__)
 
 # Include additional files and DLLs
-include_files = [("database", "database"), ("sounds", "sounds")]
-dll_files = ["Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Multimedia.dll"]
+include_files = [("database", "database"), ("Audio", "Audio"), ("bass.dll", "bass.dll")]
+dll_files = ["Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Network.dll"]
 for file in dll_files:
     include_files.append((os.path.join(pyqt_path, "Qt6", "bin", file), os.path.join("lib", file)))
 
@@ -29,7 +29,7 @@ if sys.platform == "win32":
 
 setup(
     name="albayan",
-    version="1.2.0",
+    version="1.2.1",
     description=description,
     options={"build_exe": build_exe_options},
     executables=[Executable("main.py", base=base)]
