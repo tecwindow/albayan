@@ -23,7 +23,12 @@ from utils.universal_speech import UniversalSpeech
 
 
 class SearchDialog(QDialog):
-    #search_phrase = ""
+    search_phrase = ""
+
+    @classmethod
+    def set_search_phrase(cls, search_phrase: str) -> None:
+        cls.search_phrase = search_phrase
+
     def __init__(self, parent, title):
         super().__init__(parent)
         self.parent = parent
@@ -37,6 +42,7 @@ class SearchDialog(QDialog):
     def initUI(self):
         self.search_label = QLabel('اكتب ما تريد البحث عنه:')
         self.search_box = QLineEdit()
+        self.search_box.setText(self.search_phrase)
         regex = QRegularExpression("[\u0621-\u0652\u0670\u0671\s]+")  # Arabic letters, hamzas, diacritics, and spaces.
         validator = QRegularExpressionValidator(regex)
         self.search_box.setValidator(validator)
@@ -129,6 +135,7 @@ class SearchDialog(QDialog):
     def on_submit(self):
         self.set_options_search()
         search_text = self.search_box. text()
+        self.set_search_phrase(search_text)
         search_result = self.search_manager.search(search_text)
         if not search_result:
             QMessageBox.warning(self, "لا توجد نتائج", "لا توجد نتائج متاحة لبحثك.")
