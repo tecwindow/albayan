@@ -87,5 +87,6 @@ class EffectsManager(SoundManager):
 
 class BasmalaManager(SoundManager):
     def play(self) -> None:
-        random_sound = choice(list(self.sounds.keys()))
-        super().play(random_sound)
+        if SettingsManager.current_settings["general"]["start_with_basmala_enabled"]:
+            random_sound = choice(list(self.sounds.keys()))
+            super().play(random_sound)

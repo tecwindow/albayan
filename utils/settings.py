@@ -11,7 +11,8 @@ class SettingsManager:
         "general": {
             "language": "Arabic",
             "sound_effect_enabled": True,
-            "speak_actions_enabled": True,
+            "start_with_basmala_enabled": True,
+            "speak_actions_enabled": True,            
             "auto_save_position_enabled": False,
             "check_update_enabled": True,
             "logging_enabled": False
