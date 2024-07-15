@@ -36,7 +36,7 @@ class SearchDialog(QDialog):
     def initUI(self):
         self.search_label = QLabel('اكتب ما تريد البحث عنه:')
         self.search_box = QLineEdit()
-        regex = QRegularExpression("[\u0621-\u0652\u0670\u0671]+") # Arabic letters, hamzas, and diacritics
+        regex = QRegularExpression("[\u0621-\u0652\u0670\u0671\s]+")  # Arabic letters, hamzas, diacritics, and spaces.
         validator = QRegularExpressionValidator(regex)
         self.search_box.setValidator(validator)
         self.search_box.textChanged.connect(self.OnEdit)
