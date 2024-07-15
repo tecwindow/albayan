@@ -23,6 +23,7 @@ from utils.universal_speech import UniversalSpeech
 
 
 class SearchDialog(QDialog):
+    #search_phrase = ""
     def __init__(self, parent, title):
         super().__init__(parent)
         self.parent = parent
@@ -36,7 +37,7 @@ class SearchDialog(QDialog):
     def initUI(self):
         self.search_label = QLabel('اكتب ما تريد البحث عنه:')
         self.search_box = QLineEdit()
-        regex = QRegularExpression("[\u0621-\u0652\u0670\u0671]+") # Arabic letters, hamzas, and diacritics
+        regex = QRegularExpression("[\u0621-\u0652\u0670\u0671\s]+")  # Arabic letters, hamzas, diacritics, and spaces.
         validator = QRegularExpressionValidator(regex)
         self.search_box.setValidator(validator)
         self.search_box.textChanged.connect(self.OnEdit)
@@ -138,9 +139,8 @@ class SearchDialog(QDialog):
             selected_result = result_dialog.list_widget.currentRow()
             ayah_number = search_result[selected_result]["number"]
             ayah_result = self.parent.quran.get_by_ayah_number(ayah_number)
-            ayah_text = ayah_result["ayah_text"]
             self.parent.quran_view.setText(ayah_result["full_text"])
-            self.parent.quran_view.find(ayah_text)
+            self.parent.set_focus_to_ayah(ayah_number)
             self.parent.quran_view.setFocus()
             self.accept()
 

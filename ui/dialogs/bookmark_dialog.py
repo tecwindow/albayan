@@ -132,9 +132,8 @@ class BookmarkDialog(QDialog):
             bookmark = item.data(Qt.ItemDataRole.UserRole)
             self.parent.quran.type = bookmark["criteria_number"]
             ayah_result = self.parent.quran.get_by_ayah_number(bookmark["ayah_number"])
-            ayah_text = ayah_result["ayah_text"]
             self.parent.quran_view.setText(ayah_result["full_text"])
-            self.parent.quran_view.find(ayah_text)
+            self.parent.set_focus_to_ayah(bookmark["ayah_number"])
             self.parent.quran_view.setFocus()
             self.accept()
 
