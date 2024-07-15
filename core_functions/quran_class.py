@@ -254,9 +254,9 @@ class quran_mgr:
             ayah_number = ayah[4]
             if int(ayah_number) == 1:
                 start_point_text = f"{ayah[2]} {ayah[3]}\n|\n"
-                text += start_point_text
+                ayah_text = start_point_text + ayah_text
                 if  ayah[3] != 1:
-                    ayah_text = ayah_text.replace("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", f"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\n")
+                    ayah_text = ayah_text.replace("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ", f"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\n")
 
             if self.show_ayah_number:
                 ayah_text += f" ({ayah_number})"
