@@ -33,6 +33,7 @@ class QuranViewer(ReadOnlyTextEdit):
         self.parent.menu_bar.save_bookmark_action.setEnabled(status)
         #self.parent.menu_bar.surah_info_action.setEnabled(status)
         self.parent.menu_bar.verse_tafsir_action.setEnabled(status)
+        self.parent.menu_bar.tafaseer_menu.setEnabled(status)
         self.parent.menu_bar.ayah_info_action.setEnabled(status)
         self.parent.menu_bar.verse_info_action.setEnabled(status)
         self.parent.menu_bar.verse_grammar_action.setEnabled(status)

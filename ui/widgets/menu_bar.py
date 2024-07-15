@@ -5,6 +5,7 @@ from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
 from ui.dialogs.go_to import GoToDialog
 from core_functions.quran_class import QuranConst
+from core_functions.tafaseer import Category
 from utils.update import UpdateManager
 from utils.settings import SettingsManager
 from utils.logger import Logger
@@ -66,6 +67,14 @@ class MenuBar(QMenuBar):
         self.verse_tafsir_action = QAction("تفسير الآية", self)
         self.verse_tafsir_action.triggered.connect(self.parent.OnInterpretation)
         self.verse_tafsir_action.setShortcut(QKeySequence("Ctrl+T"))
+
+        self.tafaseer_menu = QMenu("تفسير الآية")
+        arabic_categories = Category.get_categories_in_arabic()
+        for arabic_category in arabic_categories:
+            action = QAction(arabic_category, self)
+            action.triggered.connect(self.parent.OnInterpretation)
+            self.tafaseer_menu.addAction(action)
+
         self.ayah_info_action = QAction("معلومات الآية", self)
         self.ayah_info_action.triggered.connect(self.parent.OnAyahInfo)
         self.ayah_info_action.setShortcut(QKeySequence("Ctrl+I"))
@@ -83,6 +92,7 @@ class MenuBar(QMenuBar):
         actions_menu.addAction(self.save_bookmark_action)
         #actions_menu.addAction(self.surah_info_action)
         actions_menu.addAction(self.verse_tafsir_action)
+        actions_menu.addMenu(self.tafaseer_menu)
         actions_menu.addAction(self.ayah_info_action)
         actions_menu.addAction(self.verse_info_action)
         actions_menu.addAction(self.verse_grammar_action)
