@@ -28,8 +28,7 @@ from ui.widgets.qText_edit import QuranViewer
 from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
 from utils.settings import SettingsManager
-from utils.update import UpdateManager
-from utils.sound_Manager import EffectsManager, BasmalaManager
+from utils.sound_Manager import EffectsManager
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
 
@@ -285,11 +284,6 @@ class QuranInterface(QMainWindow):
             bookmark_manager.insert_bookmark(name, aya_info[1], aya_info[3], aya_info[0], aya_info[2], criteria_number)
             self.quran_view.setFocus()
 
-    def check_auto_update(self):
-        check_update_enabled = SettingsManager.current_settings["general"]["check_update_enabled"]
-        update_manager = UpdateManager(self, check_update_enabled)
-        update_manager.check_auto_update()
-
     def OnSaveCurrentPosition(self):
         UserDataManager().save_position(
             self.get_current_ayah_info()[1],
@@ -306,12 +300,6 @@ class QuranInterface(QMainWindow):
             self.quran_view.setText(self.quran.get_by_ayah_number(ayah_number)["full_text"])
             self.set_text_ctrl_label()
             self.set_focus_to_ayah(ayah_number)
-
-    def showEvent(self, a0: QShowEvent | None) -> None:
-        self.check_auto_update()
-        basmala_manager = BasmalaManager("Audio/basmala")
-        basmala_manager.play()
-        return super().showEvent(a0)
 
     def closeEvent(self, event):
         if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:
