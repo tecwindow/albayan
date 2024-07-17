@@ -230,6 +230,7 @@ class quran_mgr:
         self.cursor.execute(f"SELECT DISTINCT {col_name}, text FROM quran WHERE number = ?", (ayah_number,))
         ayah_result = self.cursor.fetchone()
         self.current_pos = ayah_result[0]
+        self.max_pos = QuranConst.get_max(self.type)
         return {
             "ayah_text": ayah_result[1],
             "full_text": self.get_text()
