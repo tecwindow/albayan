@@ -1,6 +1,6 @@
 ﻿#define MyAppName "Albayan"
-#define MyAppVersion "1.2.2"
-#define AppVersion "1.2.2"
+#define MyAppVersion "1.2.3"
+#define AppVersion "1.2.3"
 #define MyAppPublisher "Tecwindow"
 #define MyAppURL "https://tecwindow.net/"
 #define MyAppExeName "Albayan.exe"
