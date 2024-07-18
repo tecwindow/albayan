@@ -35,6 +35,9 @@ class MenuBar(QMenuBar):
         self.previous_action.triggered.connect(self.parent.OnBack)
         self.previous_action.setShortcuts([QKeySequence("Ctrl+P"), QKeySequence(Qt.Key.Key_PageUp),
                                            QKeySequence("Ctrl+Up"), QKeySequence("Alt+Left")])
+        self.go_to_saved_position_action = QAction("الذهاب إلى الموضع المحفوظ", self)
+        self.go_to_saved_position_action.triggered.connect(self.parent.set_text)
+        self.go_to_saved_position_action.setShortcuts([QKeySequence("Ctrl+BackSpace"), QKeySequence("Ctrl+Down"), QKeySequence("Alt+Right"), QKeySequence(Qt.Key.Key_PageDown)])
         self.search_action = QAction("البحث", self)
         self.search_action.triggered.connect(self.parent.OnSearch)        
         self.search_action.setShortcut(QKeySequence("Ctrl+F"))
@@ -50,6 +53,7 @@ class MenuBar(QMenuBar):
 
         navigation_menu.addAction(self.next_action)
         navigation_menu.addAction(self.previous_action)
+        navigation_menu.addAction(self.go_to_saved_position_action)
         navigation_menu.addAction(self.search_action)
         navigation_menu.addAction(self.go_to_action)
         navigation_menu.addAction(self.quick_access_action)
@@ -216,4 +220,3 @@ class MenuBar(QMenuBar):
             self.parent.quran_view.setText(text)
         self.parent.set_text_ctrl_label()
         self.parent.quran_view.setFocus()
-
