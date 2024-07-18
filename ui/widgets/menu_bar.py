@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QMenuBar, QMenu, QMessageBox
-from PyQt6.QtGui import QIcon, QAction, QKeySequence, QDesktopServices
+from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut, QDesktopServices
 from PyQt6.QtCore import Qt, QUrl
 from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
@@ -73,6 +73,9 @@ class MenuBar(QMenuBar):
         self.verse_tafsir_action.setShortcut(QKeySequence("Ctrl+T"))
 
         self.tafaseer_menu = QMenu("تفسير الآية")
+        self.tafaseer_menu.setAccessibleName("قائمة المفسرين")
+        tafaseershortcut = QShortcut(QKeySequence("Shift+T"), self)
+        tafaseershortcut.activated.connect(self.OnTafaseerMenu)
         arabic_categories = Category.get_categories_in_arabic()
         for arabic_category in arabic_categories:
             action = QAction(arabic_category, self)
@@ -220,3 +223,7 @@ class MenuBar(QMenuBar):
             self.parent.quran_view.setText(text)
         self.parent.set_text_ctrl_label()
         self.parent.quran_view.setFocus()
+
+    def OnTafaseerMenu(self):
+        if self.tafaseer_menu.isEnabled():
+            self.tafaseer_menu.exec()
