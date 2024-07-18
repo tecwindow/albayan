@@ -14,5 +14,5 @@ os.makedirs(albayan_documents_dir, exist_ok=True)
 
 # program information
 program_name = "البيان"
-program_version = "1.2.3"
+program_version = "1.2.4"
 website = "https://tecwindow.net/"
