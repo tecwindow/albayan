@@ -1,9 +1,11 @@
+import os
 from sqlalchemy.orm import sessionmaker
-from models import AthkarCategory, TextAthkar, AudioAthkar, init_db
+from models import AthkarCategory, TextAthkar, AudioAthkar
+from . import init_db
 
 class AthkarDBManager:
-    def __init__(self, db_path: str):
-        self.engine = init_db(db_path)
+    def __init__(self, db_folder: str):
+        self.engine = init_db(os.path.join(db_folder, "athkar.db"))
         self.Session = sessionmaker(bind=self.engine)
 
     def _add_to_db(self, instance):
@@ -26,7 +28,6 @@ class AthkarDBManager:
         with self.Session() as session:
             return session.query(model).filter_by(id=item_id).first()
 
-    # إدارة التصنيفات
     def create_category(self, name, audio_path=None, from_time=None, to_time=None, play_interval=None, status=1):
         new_category = AthkarCategory(
             name=name,
@@ -52,7 +53,6 @@ class AthkarDBManager:
         with self.Session() as session:
             return session.query(AthkarCategory).all()
 
-    # إدارة الأذكار النصية
     def create_text_athkar(self, name, text, category_id):
         new_text_athkar = TextAthkar(name=name, text=text, category_id=category_id)
         self._add_to_db(new_text_athkar)
@@ -71,7 +71,6 @@ class AthkarDBManager:
         with self.Session() as session:
             return session.query(TextAthkar).all()
 
-    # إدارة الأذكار الصوتية
     def create_audio_athkar(self, audio_file_name, description, category_id):
         new_audio_athkar = AudioAthkar(audio_file_name=audio_file_name, description=description, category_id=category_id)
         self._add_to_db(new_audio_athkar)

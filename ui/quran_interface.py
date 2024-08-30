@@ -302,7 +302,9 @@ class QuranInterface(QMainWindow):
             self.set_focus_to_ayah(ayah_number)
 
     def closeEvent(self, event):
+        event.ignore()
+        self.hide()
         if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:
             self.OnSaveCurrentPosition()
-        event.accept()
+        
 
