@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMenuBar, QMenu, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMenuBar, QMenu, QMessageBox
 from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut, QDesktopServices
 from PyQt6.QtCore import Qt, QUrl
 from ui.dialogs.settings_dialog import SettingsDialog
@@ -47,9 +47,12 @@ class MenuBar(QMenuBar):
         self.quick_access_action = QAction("الوصول السريع", self)
         self.quick_access_action.triggered.connect(self.parent.OnQuickAccess)
         self.quick_access_action.setShortcut(QKeySequence("Ctrl+Q"))
+        self.close_action = QAction("إغلاق النافذة", self)
+        self.close_action.setShortcuts([QKeySequence("Ctrl+W"), QKeySequence("Ctrl+F4")])
+        self.close_action.triggered.connect(self.parent.close)
         self.exit_action = QAction("إغلاق البرنامج", self)
-        self.exit_action.setShortcuts([QKeySequence("Ctrl+W"), QKeySequence("Ctrl+F4")])
-        self.exit_action.triggered.connect(self.parent.close)
+        self.exit_action.setShortcuts([QKeySequence("Ctrl+X")])
+        self.exit_action.triggered.connect(self.quit_application)
 
         navigation_menu.addAction(self.next_action)
         navigation_menu.addAction(self.previous_action)
@@ -57,6 +60,7 @@ class MenuBar(QMenuBar):
         navigation_menu.addAction(self.search_action)
         navigation_menu.addAction(self.go_to_action)
         navigation_menu.addAction(self.quick_access_action)
+        navigation_menu.addAction(self.close_action)
         navigation_menu.addAction(self.exit_action)
 
         actions_menu = self.addMenu("الإجرائات(&A)")
@@ -227,3 +231,11 @@ class MenuBar(QMenuBar):
     def OnTafaseerMenu(self):
         if self.tafaseer_menu.isEnabled():
             self.tafaseer_menu.exec()
+
+    def quit_application(self):
+        if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:
+            self.parent.OnSaveCurrentPosition()
+        self.tray_icon.hide()
+        QApplication.quit()
+        
+

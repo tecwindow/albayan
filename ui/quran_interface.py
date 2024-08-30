@@ -304,7 +304,4 @@ class QuranInterface(QMainWindow):
     def closeEvent(self, event):
         event.ignore()
         self.hide()
-        if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:
-            self.OnSaveCurrentPosition()
-        
 
