@@ -27,10 +27,12 @@ from ui.widgets.menu_bar import MenuBar
 from ui.widgets.qText_edit import QuranViewer
 from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
+from ui.widgets.system_tray import SystemTrayManager
 from utils.settings import SettingsManager
 from utils.sound_Manager import EffectsManager
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
+from utils.const import program_name, program_icon
 
 
 class QuranInterface(QMainWindow):
@@ -44,6 +46,7 @@ class QuranInterface(QMainWindow):
         self.effects_manager = EffectsManager("Audio/sounds")
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
+        self.tray_manager = SystemTrayManager(self, program_name, program_icon)
         self.create_widgets()
         self.create_layout()
         self.set_text()

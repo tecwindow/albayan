@@ -10,7 +10,7 @@ from utils.settings import SettingsManager
 from utils.const import program_name, program_icon
 from utils.logger import Logger
 from utils.sound_Manager import BasmalaManager
-from ui.widgets.system_tray import SystemTrayManager
+
 
 class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs):
@@ -83,17 +83,13 @@ def main():
         app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         main_window = QuranInterface(program_name)
         app.set_main_window(main_window)
-
         main_window.show()
-        tray_manager = SystemTrayManager(program_name, program_icon, app, main_window)
         call_after_starting(main_window)
         sys.exit(app.exec())
     except Exception as e:
         print(e)
         Logger.error(str(e))
         QMessageBox.critical(None, "Error", "حدث خطأ. يرجى الاتصال بالدعم للحصول على المساعدة.")
-    finally:
-        tray_manager.tray_icon.hide()
         
 if __name__ == "__main__":    
     freeze_support()

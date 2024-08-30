@@ -235,7 +235,7 @@ class MenuBar(QMenuBar):
     def quit_application(self):
         if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:
             self.parent.OnSaveCurrentPosition()
-        self.tray_icon.hide()
+        self.parent.tray_manager.hide_icon()
         QApplication.quit()
         
 
