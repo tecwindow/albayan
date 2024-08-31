@@ -67,24 +67,30 @@ class AthkarDBManager:
         if text_athkar:
             self._delete_from_db(text_athkar)
 
-    def get_all_text_athkars(self):
+    def get_text_athkar(self, category_id):
         with self.Session() as session:
-            return session.query(TextAthkar).all()
-
-    def create_audio_athkar(self, audio_file_name, description, category_id):
-        new_audio_athkar = AudioAthkar(audio_file_name=audio_file_name, description=description, category_id=category_id)
-        self._add_to_db(new_audio_athkar)
+            return session.query(TextAthkar).filter(TextAthkar.category_id == category_id).all()
+        
+    def add_audio_athkar(self, audio_files, category_id):
+        new_athkar_list = [
+            AudioAthkar(audio_file_name=audio_file, description=f"Audio file {audio_file}", category_id=category_id)
+            for audio_file in audio_files
+        ]
+        with self.Session() as session:
+            session.bulk_save_objects(new_athkar_list)
+            session.commit()
 
     def update_audio_athkar(self, athkar_id, **kwargs):
         audio_athkar = self._get_by_id(AudioAthkar, athkar_id)
         if audio_athkar:
             self._update_in_db(audio_athkar, **kwargs)
 
-    def delete_audio_athkar(self, athkar_id):
-        audio_athkar = self._get_by_id(AudioAthkar, athkar_id)
-        if audio_athkar:
-            self._delete_from_db(audio_athkar)
-
-    def get_all_audio_athkars(self):
+    def delete_audio_athkar(self, athkar_ids):
         with self.Session() as session:
-            return session.query(AudioAthkar).all()
+            session.query(AudioAthkar).filter(AudioAthkar.id.in_(athkar_ids)).delete(synchronize_session='fetch')
+            session.commit()
+
+    def get_audio_athkar(self, category_id):
+        with self.Session() as session:
+            return session.query(AudioAthkar).filter(AudioAthkar.category_id == category_id).all()
+        
