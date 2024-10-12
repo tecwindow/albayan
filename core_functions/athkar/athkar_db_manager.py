@@ -1,6 +1,6 @@
 import os
 from sqlalchemy.orm import sessionmaker
-from models import AthkarCategory, TextAthkar, AudioAthkar
+from .models import AthkarCategory, TextAthkar, AudioAthkar
 from . import init_db
 
 class AthkarDBManager:

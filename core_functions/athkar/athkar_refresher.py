@@ -1,8 +1,10 @@
 import os
+from typing import Dict
+from .athkar_db_manager import AthkarDBManager
 
 
 class AthkarRefresher:
-    def __init__(self, db_manager, folder_path: str, category_id: int) -> None:
+    def __init__(self, db_manager: AthkarDBManager, folder_path: str, category_id: int) -> None:
         self.db_manager = db_manager
         self.folder_path = folder_path
         self.category_id = category_id
@@ -28,9 +30,9 @@ class AthkarRefresher:
             if os.path.isfile(os.path.join(self.folder_path, f)) and self._is_audio_file(f)
         ]
 
-    def _is_audio_file(self, filename) -> bool:
+    def _is_audio_file(self, filename: str) -> bool:
         return any(filename.lower().endswith(ext) for ext in self.audio_extensions)
 
-    def _get_files_in_db(self) -> dict:
+    def _get_files_in_db(self) -> Dict[str, int]:
         audio_athkars = self.db_manager.get_audio_athkar(self.category_id)
         return {athkar.audio_file_name: athkar.id for athkar in audio_athkars}

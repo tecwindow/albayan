@@ -3,3 +3,5 @@ packaging
 requests
 UniversalSpeech
 cx_Freeze
+sqlalchemy
+apscheduler
