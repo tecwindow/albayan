@@ -45,7 +45,8 @@ class AthkarScheduler:
                 continue
             from_time = self._parse_time(category.from_time)
             to_time = self._parse_time(category.to_time)
-            trigger = CronTrigger(minute=f"*/{category.play_interval}", hour=f"{from_time.hour}-{to_time.hour}")
+            minute = "0" if category.play_interval == 60 else f"*/{category.play_interval}"
+            trigger = CronTrigger(minute=minute, hour=f"{from_time.hour}-{to_time.hour}")
             player = AthkarPlayer(self.db_manager, category.audio_path, category.id)
             self.scheduler.add_job(self.job, trigger, args=[player])
 
