@@ -51,6 +51,7 @@ class MenuBar(QMenuBar):
         self.close_action = QAction("إغلاق النافذة", self)
         self.close_action.setShortcuts([QKeySequence("Ctrl+W"), QKeySequence("Ctrl+F4")])
         self.close_action.triggered.connect(self.parent.close)
+        self.close_action.setVisible(SettingsManager.current_settings["general"]["run_in_background_enabled"])
         self.exit_action = QAction("إغلاق البرنامج", self)
         self.exit_action.setShortcuts([QKeySequence("Ctrl+X")])
         self.exit_action.triggered.connect(self.quit_application)
@@ -112,7 +113,8 @@ class MenuBar(QMenuBar):
 
         tools_menu = self.addMenu("الأدوات(&T)")
         athkar_action = QAction("الأذكار", self)
-        athkar_action.triggered.connect(AthkarDialog(self.parent).exec)
+        athkar_action.setShortcut(QKeySequence("Ctrl+D"))
+        athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).exec())
         bookmark_manager_action = QAction("مدير العلامات", self)
         bookmark_manager_action.setShortcut(QKeySequence("Shift+D"))
         bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
@@ -163,6 +165,7 @@ class MenuBar(QMenuBar):
 
     def OnSettings(self):
         SettingsDialog(self.parent).exec()
+        self.close_action.setVisible(SettingsManager.current_settings["general"]["run_in_background_enabled"])
 
     def OnUpdate(self):
          self.update_manager.check_updates()
