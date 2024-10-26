@@ -1,12 +1,12 @@
 import sqlite3
 import os
 import datetime
-from utils.const import albayan_folder
+from utils.const import user_db_path
 
 class UserDataManager:
-    def __init__(self) -> None:
+    def __init__(self, db_path: str) -> None:
         """Initialize the database connection and create table if not exists."""
-        self.db_path = os.path.join(albayan_folder, "user_data.db")
+        self.db_path = db_path
         self.connect()
         self.create_table()
 

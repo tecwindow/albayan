@@ -3,6 +3,7 @@ import os
 tecwindow_folder = os.path.join(os.getenv("AppData"), "tecwindow")
 albayan_folder = os.path.join(tecwindow_folder, "albayan")
 os.makedirs(albayan_folder, exist_ok=True)
+user_db_path = os.path.join(albayan_folder, "user_data.db")
 
 # albayan folder in temp
 temp_folder = os.path.join(os.getenv("TEMP"), "albayan")

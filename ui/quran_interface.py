@@ -32,7 +32,7 @@ from utils.settings import SettingsManager
 from utils.sound_Manager import EffectsManager
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
-from utils.const import program_name, program_icon
+from utils.const import program_name, program_icon, user_db_path
 
 
 class QuranInterface(QMainWindow):
@@ -44,6 +44,7 @@ class QuranInterface(QMainWindow):
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
         self.quran.aya_to_line = True
         self.effects_manager = EffectsManager("Audio/sounds")
+        self.user_data_manager = UserDataManager(user_db_path)
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
         self.tray_manager = SystemTrayManager(self, program_name, program_icon)
@@ -108,7 +109,7 @@ class QuranInterface(QMainWindow):
 
 
     def set_text(self):
-        position_data = UserDataManager().get_last_position()
+        position_data = self.user_data_manager.get_last_position()
         ayah_number = position_data.get("ayah_number", 1)
         current_positiom = position_data.get("position", 1)
         self.quran.type = position_data.get("criteria_number", 0)
@@ -288,7 +289,7 @@ class QuranInterface(QMainWindow):
             self.quran_view.setFocus()
 
     def OnSaveCurrentPosition(self):
-        UserDataManager().save_position(
+        self.user_data_manager.save_position(
             self.get_current_ayah_info()[1],
          self.quran.type,
          self.quran.current_pos

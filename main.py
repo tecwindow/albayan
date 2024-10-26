@@ -8,15 +8,9 @@ from ui.quran_interface import QuranInterface
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
 from utils.update import UpdateManager
 from utils.settings import SettingsManager
-from utils.const import program_name, program_icon
+from utils.const import program_name, program_icon, user_db_path
 from utils.logger import Logger
 from utils.sound_Manager import BasmalaManager
-
-athkar_settings = {
-"from_time": 0,
-            "to_time": 23,
-            "play_interval": 1
-}
 
 class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs):
@@ -82,6 +76,7 @@ def call_after_starting(parent: QuranInterface) -> None:
 
     parent.setFocus()
     QTimer.singleShot(500, parent.quran_view.setFocus)
+    
 
 def main():
     try:
@@ -91,7 +86,6 @@ def main():
         app.set_main_window(main_window)
         main_window.show()
         call_after_starting(main_window)
-        AthkarScheduler("database", "Audio/adkar", athkar_settings).start()
         sys.exit(app.exec())
     except Exception as e:
         print(e)

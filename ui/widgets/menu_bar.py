@@ -4,6 +4,7 @@ from PyQt6.QtCore import Qt, QUrl
 from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
 from ui.dialogs.go_to import GoToDialog
+from ui.dialogs.athkar_dialog import AthkarDialog
 from core_functions.quran_class import QuranConst
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
@@ -110,9 +111,12 @@ class MenuBar(QMenuBar):
         actions_menu.addAction(self.copy_verse_action)
 
         tools_menu = self.addMenu("الأدوات(&T)")
+        athkar_action = QAction("الأذكار", self)
+        athkar_action.triggered.connect(AthkarDialog(self.parent).exec)
         bookmark_manager_action = QAction("مدير العلامات", self)
         bookmark_manager_action.setShortcut(QKeySequence("Shift+D"))
         bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
+        tools_menu.addAction(athkar_action)
         tools_menu.addAction(bookmark_manager_action )
 
         preferences_menu = self.addMenu("التفضيلات(&P)")
