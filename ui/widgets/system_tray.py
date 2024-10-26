@@ -1,11 +1,14 @@
+import utils.const as const
 from PyQt6.QtWidgets import QSystemTrayIcon, QMenu
 from PyQt6.QtGui import QIcon, QAction
+
 
 class SystemTrayManager:
     def __init__(self, main_window, program_name: str, program_icon: str):
         self.tray_icon = QSystemTrayIcon(QIcon(program_icon), main_window)
         self.tray_icon.setToolTip(program_name)
         self.main_window = main_window
+        const.tray_icon = self.tray_icon
         
         tray_menu = QMenu()
         show_action = QAction("إظهار النافذة الرائيسية", main_window)

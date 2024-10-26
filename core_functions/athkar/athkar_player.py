@@ -1,8 +1,12 @@
 import os
+import utils.const as const
 from random import choice
 from core_functions.athkar.athkar_db_manager import AthkarDBManager
+from core_functions.athkar.models import AudioAthkar
 from utils.sound_Manager import AudioPlayerBase
 from utils.logger import Logger
+
+
 
 class AthkarPlayer(AudioPlayerBase):
     def __init__(self, athkar_db: AthkarDBManager, folder: str, category_id: int) -> None:
@@ -22,8 +26,14 @@ class AthkarPlayer(AudioPlayerBase):
             Logger.error(f"Failed to load sounds for category {self.category_id}: {str(e)}")
             
     def play(self) -> None:
+
         if not self.sounds:
             Logger.error("No sounds are loaded to play.")
             return
+
         random_sound = choice(list(self.sounds.keys()))
-        super().play(random_sound)
+        if const.tray_icon is not None:
+            current_file = self.athkar_db._get_by_id(AudioAthkar, random_sound)
+            const.tray_icon.showMessage("الأذكار", current_file.description,msecs=5000)
+
+        return super().play(random_sound)

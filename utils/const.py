@@ -1,4 +1,6 @@
 import os
+from typing import Optional
+from PyQt6.QtWidgets import QSystemTrayIcon
 
 tecwindow_folder = os.path.join(os.getenv("AppData"), "tecwindow")
 albayan_folder = os.path.join(tecwindow_folder, "albayan")
@@ -17,4 +19,5 @@ os.makedirs(albayan_documents_dir, exist_ok=True)
 program_name = "البيان"
 program_version = "1.2.4"
 program_icon = "icon.webp"
+tray_icon: Optional[QSystemTrayIcon] = None
 website = "https://tecwindow.net/"
