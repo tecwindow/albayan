@@ -306,6 +306,9 @@ class QuranInterface(QMainWindow):
             self.set_focus_to_ayah(ayah_number)
 
     def closeEvent(self, event):
-        event.ignore()
-        self.hide()
+        if SettingsManager.current_settings["general"]["run_in_background_enabled"]:
+            event.ignore()
+            self.hide()
+        else:
+            self.tray_manager.hide_icon()
 
