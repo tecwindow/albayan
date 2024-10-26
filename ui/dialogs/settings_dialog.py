@@ -40,6 +40,7 @@ class SettingsDialog(QDialog):
         self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
         self.basmala_checkbox = QCheckBox("تشغيل المؤثرات الصوتية مع فتح البرنامج")
         self.speech_checkbox = QCheckBox("نطق الإجرائات")
+        self.run_in_background_checkbox = QCheckBox("تشغيل البرنامج في الخلفية")
         self.auto_save_position_checkbox = QCheckBox("حفظ الموضع الحالي تلقائيًا عند إغلاق البرنامج")
         self.update_checkbox = QCheckBox("التحقق من التحديثات")
         self.log_checkbox = QCheckBox("تمكين تسجيل الأخطاء")
@@ -49,6 +50,7 @@ class SettingsDialog(QDialog):
         self.group_general_layout.addWidget(self.sound_checkbox)
         self.group_general_layout.addWidget(self.basmala_checkbox)
         self.group_general_layout.addWidget(self.speech_checkbox)
+        self.group_general_layout.addWidget(self.run_in_background_checkbox)
         self.group_general_layout.addWidget(self.auto_save_position_checkbox)
         self.group_general_layout.addWidget(self.update_checkbox)
         self.group_general_layout.addWidget(self.log_checkbox)
@@ -132,6 +134,7 @@ class SettingsDialog(QDialog):
             "sound_effect_enabled": self.sound_checkbox.isChecked(),
             "start_with_basmala_enabled": self.basmala_checkbox.isChecked(),
             "speak_actions_enabled": self.speech_checkbox.isChecked(),
+            "run_in_background_enabled": self.run_in_background_checkbox.isChecked(),
             "auto_save_position_enabled": self.auto_save_position_checkbox.isChecked(),
             "check_update_enabled": self.update_checkbox.isChecked(),
             "logging_enabled": self.log_checkbox.isChecked()
@@ -169,6 +172,7 @@ class SettingsDialog(QDialog):
         self.sound_checkbox.setChecked(current_settings["general"]["sound_effect_enabled"])
         self.basmala_checkbox.setChecked(current_settings["general"]["start_with_basmala_enabled"])
         self.speech_checkbox.setChecked(current_settings["general"]["speak_actions_enabled"])
+        self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])
         self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
         self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
         self.log_checkbox.setChecked(current_settings["general"]["logging_enabled"])
