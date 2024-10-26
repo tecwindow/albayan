@@ -1,3 +1,4 @@
+from typing import Optional
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
     QCheckBox, QComboBox, QPushButton, QGroupBox
@@ -9,15 +10,28 @@ from core_functions.athkar.athkar_scheduler import AthkarScheduler
 from utils.const import user_db_path
 
 class AthkarDialog(QDialog):
-    athkar_Scheduler = AthkarScheduler(user_db_path, "Audio/adkar")
-    athkar_Scheduler.start()
+    athkar_scheduler = AthkarScheduler(user_db_path, "Audio/adkar")
+    athkar_scheduler.start()
 
     def __init__(self, parent):
         super().__init__(parent)
         self.setWindowTitle("الأذكار")
         self.resize(400, 350)
-        self.athkar_db = AthkarDBManager(user_db_path)
+        self.athkar_db = AthkarDBManager(user_db_path)        
+
+        self.interval_options_dict = {
+            5: "5 دقيقة",
+            10: "10 دقيقة",
+            15: "15 دقيقة",
+            30: "30 دقيقة",
+            59: "ساعة"
+        }
+
+        self.init_ui()
+        self.connect_signals()
+        self.load_categories()
         
+    def init_ui(self):
         main_layout = QVBoxLayout()
 
         section_label = QLabel("القسم:")
@@ -26,32 +40,16 @@ class AthkarDialog(QDialog):
         main_layout.addWidget(section_label)
         main_layout.addWidget(self.section_list)
 
-        for category in self.athkar_db.get_all_categories():
-            category_name  = category.name if category.name != "default" else "الافتراضي"
-            item = QListWidgetItem(category_name)
-            item.setData(Qt.ItemDataRole.UserRole, category)
-            self.section_list.addItem(item)
-        self.section_list.setCurrentRow(0)
-
         self.enable_checkbox = QCheckBox("تفعيل القسم")
-        selected_category = self.get_selected_category()
-        self.enable_checkbox.setChecked(selected_category.status)
         main_layout.addWidget(self.enable_checkbox)
 
+        # Duration setup
         duration_group = QGroupBox("مدة التشغيل")
         duration_layout = QHBoxLayout()
         from_label = QLabel("من:")
-        self.from_combobox = QComboBox()
-        self.from_combobox.setAccessibleName(from_label.text())
+        self.from_combobox = self.create_time_combobox()
         to_label = QLabel("إلى:")
-        self.to_combobox = QComboBox()
-        self.to_combobox.setAccessibleName(to_label.text())
-    
-        time_options = [f"{hour:02d}:00" for hour in range(24)]
-        self.from_combobox.addItems(time_options)
-        self.to_combobox.addItems(time_options)
-        self.from_combobox.setCurrentText(selected_category.from_time)
-        self.to_combobox.setCurrentText(selected_category.to_time)
+        self.to_combobox = self.create_time_combobox()
 
         duration_layout.addWidget(from_label)
         duration_layout.addWidget(self.from_combobox)
@@ -60,15 +58,15 @@ class AthkarDialog(QDialog):
         duration_group.setLayout(duration_layout)
         main_layout.addWidget(duration_group)
 
+        # Interval setup
         interval_label = QLabel("التكرار كل:")
         self.interval_combobox = QComboBox()
         self.interval_combobox.setAccessibleName(interval_label.text())
-        interval_options = [f"{minutes}د" for minutes in range(1, 61, 2) if 60 % minutes == 0]
-        self.interval_combobox.addItems(interval_options)
-        self.interval_combobox.setCurrentText(f"{selected_category.play_interval}د")
+        self.interval_combobox.addItems(self.interval_options_dict.values())
         main_layout.addWidget(interval_label)
         main_layout.addWidget(self.interval_combobox)
 
+        # Buttons
         button_layout = QHBoxLayout()
         self.reset_button = QPushButton("إعادة ضبط الخيارات")
         self.save_button = QPushButton("حفظ")
@@ -81,16 +79,43 @@ class AthkarDialog(QDialog):
 
         self.setLayout(main_layout)
 
-        self.reset_button.clicked.connect(self.reset_settings)
-        self.save_button.clicked.connect(self.Onsave)
-        self.cancel_button.clicked.connect(self.reject)
+    def create_time_combobox(self) -> QComboBox:
+        combobox = QComboBox()
+        time_options = [f"{hour:02d}:00" for hour in range(24)]
+        combobox.addItems(time_options)
+        return combobox
 
-    def get_selected_category(self) -> AthkarCategory:
-        selected_item = self.section_list.selectedItems()
-        if  selected_item:
-            selected_item = selected_item[0]
-            category = selected_item.data(Qt.ItemDataRole.UserRole)
-            return category
+    def connect_signals(self):
+        self.reset_button.clicked.connect(self.reset_settings)
+        self.save_button.clicked.connect(self.on_save)
+        self.cancel_button.clicked.connect(self.reject)
+        self.section_list.currentItemChanged.connect(self.update_ui_based_on_selection)
+
+    def load_categories(self):
+        for category in self.athkar_db.get_all_categories():
+            category_name = category.name if category.name != "default" else "الافتراضي"
+            item = QListWidgetItem(category_name)
+            item.setData(Qt.ItemDataRole.UserRole, category)
+            self.section_list.addItem(item)
+        self.section_list.setCurrentRow(0)
+        self.update_ui_based_on_selection()
+
+    def get_selected_category(self) -> Optional[AthkarCategory]:
+        selected_item = self.section_list.currentItem()
+        if selected_item:
+            return selected_item.data(Qt.ItemDataRole.UserRole)
+        return None
+
+    def update_ui_based_on_selection(self):
+        selected_category = self.get_selected_category()
+        if selected_category:
+            self.enable_checkbox.setChecked(selected_category.status)
+            self.from_combobox.setCurrentText(selected_category.from_time)
+            self.to_combobox.setCurrentText(selected_category.to_time)
+            interval_text = self.interval_options_dict.get(
+                selected_category.play_interval, "5 دقيقة"
+            )
+            self.interval_combobox.setCurrentText(interval_text)
 
     def reset_settings(self):
         self.enable_checkbox.setChecked(False)
@@ -98,16 +123,23 @@ class AthkarDialog(QDialog):
         self.to_combobox.setCurrentIndex(self.to_combobox.count() - 1)
         self.interval_combobox.setCurrentIndex(0)
 
-    def Onsave(self) -> None:
+    def on_save(self) -> None:
         selected_category = self.get_selected_category()
+        if not selected_category:
+            return
+        
+        play_interval_text = self.interval_combobox.currentText()
+        play_interval = next(
+            (key for key, value in self.interval_options_dict.items() if value == play_interval_text), 
+            5
+        )
+        
         self.athkar_db.update_category(
             category_id=selected_category.id,
-            from_time= self.from_combobox.currentText(),
-            to_time= self.to_combobox.currentText(),
-            play_interval=self.interval_combobox.currentText().replace("د", ""),
+            from_time=self.from_combobox.currentText(),
+            to_time=self.to_combobox.currentText(),
+            play_interval=play_interval,
             status=int(self.enable_checkbox.isChecked())
         )
-        self.athkar_Scheduler.refresh()
+        self.athkar_scheduler.refresh()
         self.accept()
-
-
