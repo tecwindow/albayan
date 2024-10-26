@@ -1,10 +1,11 @@
 import os
 import ctypes
+from abc import ABC, abstractmethod
 from  random import choice
 from utils.settings import SettingsManager
 from utils.logger import Logger
 
-class SoundManager():
+class AudioPlayerBase(ABC):
     bass = None
 
     @classmethod
@@ -79,14 +80,15 @@ class SoundManager():
         except Exception as e:
             Logger.error(f"Error playing sound '{name}': {str(e)}")
 
-class EffectsManager(SoundManager):
+class EffectsManager(AudioPlayerBase):
     def play(self, name: str) -> None:
         if SettingsManager.current_settings["general"]["sound_effect_enabled"]:
             super().play(name)
             
 
-class BasmalaManager(SoundManager):
+class BasmalaManager(AudioPlayerBase):
     def play(self) -> None:
         if SettingsManager.current_settings["general"]["start_with_basmala_enabled"]:
             random_sound = choice(list(self.sounds.keys()))
             super().play(random_sound)
+            
