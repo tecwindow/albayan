@@ -4,8 +4,8 @@ from .models import AthkarCategory, TextAthkar, AudioAthkar
 from . import init_db
 
 class AthkarDBManager:
-    def __init__(self, db_folder: str):
-        self.engine = init_db(os.path.join(db_folder, "athkar.db"))
+    def __init__(self, db_file_path: str):
+        self.engine = init_db(db_file_path)
         self.Session = sessionmaker(bind=self.engine)
 
     def _add_to_db(self, instance):
@@ -17,6 +17,7 @@ class AthkarDBManager:
         with self.Session() as session:
             for key, value in kwargs.items():
                 setattr(instance, key, value)
+                session.merge(instance)
             session.commit()
 
     def _delete_from_db(self, instance):
@@ -28,7 +29,7 @@ class AthkarDBManager:
         with self.Session() as session:
             return session.query(model).filter_by(id=item_id).first()
 
-    def create_category(self, name, audio_path=None, from_time=None, to_time=None, play_interval=None, status=1):
+    def create_category(self, name, audio_path=None, from_time="00:00", to_time="23:00", play_interval="5", status=1):
         new_category = AthkarCategory(
             name=name,
             audio_path=audio_path,
@@ -73,7 +74,7 @@ class AthkarDBManager:
         
     def add_audio_athkar(self, audio_files, category_id):
         new_athkar_list = [
-            AudioAthkar(audio_file_name=audio_file, description=f"Audio file {audio_file}", category_id=category_id)
+            AudioAthkar(audio_file_name=audio_file, description="اذكر الله", category_id=category_id)
             for audio_file in audio_files
         ]
         with self.Session() as session:

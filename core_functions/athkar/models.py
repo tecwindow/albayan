@@ -12,7 +12,7 @@ class AthkarCategory(Base):
     audio_path = Column(String, unique=True)
     from_time = Column(String)
     to_time = Column(String)
-    play_interval = Column(Integer)
+    play_interval = Column(Integer, default=5)
     status = Column(Integer, default=1)
     
     text_athkars = relationship('TextAthkar', back_populates='category', cascade='all, delete-orphan')
@@ -36,6 +36,7 @@ class AudioAthkar(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     audio_file_name = Column(String, nullable=False)
     description = Column(Text)
+    is_enabled = Column(Integer, default=1)
     category_id = Column(Integer, ForeignKey('athkar_categories.id', ondelete='CASCADE'))
     
     category = relationship('AthkarCategory', back_populates='audio_athkars')
