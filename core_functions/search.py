@@ -1,4 +1,5 @@
 import sqlite3
+import re
 import os
 
 
@@ -33,6 +34,7 @@ class QuranSearchManager:
     def __init__(self):
         self.no_tashkil = False
         self.no_hamza = False
+        self.match_whole_word = False
         self._criteria = None
         self._from = None
         self._to = None
@@ -42,7 +44,7 @@ class QuranSearchManager:
         self._cursor = None
         self._connect()
 
-    def set(self, no_tashkil:bool=False, no_hamza:bool=False, criteria:str=None, _from:int=None, _to:int=None, from_ayah:int=None, to_ayah:int=None) -> None:
+    def set(self, no_tashkil:bool=False, no_hamza:bool=False, match_whole_word:bool=False, criteria:str=None, _from:int=None, _to:int=None, from_ayah:int=None, to_ayah:int=None) -> None:
         assert SearchCriteria.is_valid(criteria), "You must set a valid search criteria."
         assert self._conn is not None, "You must connect to database."
 
@@ -67,6 +69,7 @@ class QuranSearchManager:
 # Set attributes
         self.no_tashkil = no_tashkil
         self.no_hamza = no_hamza
+        self.match_whole_word = match_whole_word
         self._from = _from
         self._to = _to
         self._from_ayah = from_ayah
@@ -81,6 +84,7 @@ class QuranSearchManager:
         # connect to database
         self._conn = sqlite3.connect(file_path)
         self._conn.row_factory = sqlite3.Row
+        self._conn.create_function("REGEXP", 2, lambda expr, item: re.search(expr, item) is not None)
         self._cursor = self._conn.cursor()
 
     def search(self, search_text:str) -> list:
@@ -90,7 +94,14 @@ class QuranSearchManager:
         if not search_text:
             return None
 
-        query = f"SELECT * FROM quran WHERE {self._criteria} >= ? AND {self._criteria} <= ? AND text LIKE '%' || ? || '%';"
+        if self.match_whole_word:
+            operator = "REGEXP"
+            search_text = rf"\b{search_text}\b"
+        else:
+            operator = "LIKE"
+            search_text = f"%{search_text}%"
+
+        query = f"SELECT * FROM quran WHERE {self._criteria} >= ? AND {self._criteria} <= ? AND text {operator} ?;"
         if self.no_tashkil:
             # remove all tashkil from the text to search
             tashkil = ['َ', 'ً', 'ُ', 'ٌ', 'ِ', 'ٍ', 'ْ', 'ّ']

@@ -64,9 +64,11 @@ class SettingsDialog(QDialog):
         self.group_search_layout = QVBoxLayout()
         self.ignore_tashkeel_checkbox = QCheckBox("تجاهل التشكيل")
         self.ignore_hamza_checkbox = QCheckBox("تجاهل الهمزات")
+        self.match_whole_word_checkbox = QCheckBox("تطابق الكلمة بأكملها")
 
         self.group_search_layout.addWidget(self.ignore_tashkeel_checkbox)
         self.group_search_layout.addWidget(self.ignore_hamza_checkbox)
+        self.group_search_layout.addWidget(self.match_whole_word_checkbox)
         self.group_search_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))  # Spacer item
         self.group_search.setLayout(self.group_search_layout)
         self.group_search.setVisible(False)
@@ -143,7 +145,8 @@ class SettingsDialog(QDialog):
         # Collect search settings
         search_settings = {
             "ignore_tashkeel": self.ignore_tashkeel_checkbox.isChecked(),
-            "ignore_hamza": self.ignore_hamza_checkbox.isChecked()
+            "ignore_hamza": self.ignore_hamza_checkbox.isChecked(),
+            "match_whole_word": self.match_whole_word_checkbox.isChecked()
         }
 
         # Update the current settings
@@ -178,3 +181,4 @@ class SettingsDialog(QDialog):
         self.log_checkbox.setChecked(current_settings["general"]["logging_enabled"])
         self.ignore_tashkeel_checkbox.setChecked(current_settings["search"]["ignore_tashkeel"])
         self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])
+        self.match_whole_word_checkbox.setChecked(current_settings["search"]["match_whole_word"])

@@ -21,6 +21,7 @@ class SettingsManager:
         "search": {
             "ignore_tashkeel": True,
             "ignore_hamza": True,
+            "match_whole_word": False,
         },
         "preferences": {
             "theme": "default"

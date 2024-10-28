@@ -75,7 +75,9 @@ class SearchDialog(QDialog):
         self.ignore_diacritics_checkbox.setChecked(self.current_settings["search"]["ignore_tashkeel"])
         self.ignore_hamza_checkbox = QCheckBox('تجاهل الهمزات')
         self.ignore_hamza_checkbox.setChecked(self.current_settings["search"]["ignore_hamza"])
-        
+        self.match_whole_word_checkbox = QCheckBox('تطابق الكلمة بأكملها')
+        self.match_whole_word_checkbox.setChecked(self.current_settings["search"]["match_whole_word"])
+
         self.search_type_layout = QVBoxLayout()
         self.search_type_layout.addWidget(self.search_type_radio_page)
         self.search_type_layout.addWidget(self.search_type_radio_sura)
@@ -95,6 +97,7 @@ class SearchDialog(QDialog):
         self.search_options_layout.addLayout(self.search_from_to_layout)
         self.search_options_layout.addWidget(self.ignore_diacritics_checkbox)
         self.search_options_layout.addWidget(self.ignore_hamza_checkbox)
+        self.search_options_layout.addWidget(self.match_whole_word_checkbox)
 
         self.advanced_search_groupbox.setLayout(self.search_options_layout)
 
@@ -186,6 +189,7 @@ class SearchDialog(QDialog):
         self.search_manager.set(
             no_tashkil=self.ignore_diacritics_checkbox.isChecked(),
             no_hamza=self.ignore_hamza_checkbox.isChecked(),
+            match_whole_word=self.match_whole_word_checkbox.isChecked(),
             criteria=self.criteria,
             _from=search_from,
 _to=search_to
