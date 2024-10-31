@@ -7,8 +7,12 @@ tecwindow_folder = os.path.join(os.getenv("AppData"), "tecwindow")
 albayan_folder = os.path.join(tecwindow_folder, "albayan")
 os.makedirs(albayan_folder, exist_ok=True)
 user_db_path = os.path.join(albayan_folder, "user_data.db")
-athkar_db_path = Path(albayan_folder)/"athkar.db"
 data_folder = Path("database")
+
+#athkar
+athkar_db_path = Path(albayan_folder) / "athkar.db"
+default_athkar_path = Path(albayan_folder) / "audio" / "athkar"
+test_athkar_path = Path("audio/athkar")
 
 # albayan folder in temp
 temp_folder = os.path.join(os.getenv("TEMP"), "albayan")

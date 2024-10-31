@@ -7,10 +7,10 @@ from PyQt6.QtCore import Qt
 from core_functions.athkar.athkar_db_manager import AthkarDBManager
 from core_functions.athkar.models import AthkarCategory
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
-from utils.const import user_db_path, data_folder, athkar_db_path
+from utils.const import user_db_path, data_folder, athkar_db_path, default_athkar_path
 
 class AthkarDialog(QDialog):
-    athkar_scheduler = AthkarScheduler(athkar_db_path, "Audio/adkar", data_folder/"athkar/text_athkar.json")
+    athkar_scheduler = AthkarScheduler(athkar_db_path, default_athkar_path, data_folder/"athkar/text_athkar.json")
     athkar_scheduler.start()
 
     def __init__(self, parent):
