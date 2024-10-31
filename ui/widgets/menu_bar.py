@@ -113,7 +113,7 @@ class MenuBar(QMenuBar):
 
         tools_menu = self.addMenu("الأدوات(&T)")
         athkar_action = QAction("الأذكار", self)
-        athkar_action.setShortcut(QKeySequence("Ctrl+D"))
+        athkar_action.setShortcut(QKeySequence("Ctrl+Shift+D"))
         athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).exec())
         bookmark_manager_action = QAction("مدير العلامات", self)
         bookmark_manager_action.setShortcut(QKeySequence("Shift+D"))
