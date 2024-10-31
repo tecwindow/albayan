@@ -12,7 +12,7 @@ class SystemTrayManager:
         const.tray_icon = self.tray_icon
         
         tray_menu = QMenu()
-        show_action = QAction("إظهار النافذة الرائيسية", main_window)
+        show_action = QAction("إظهار النافذة الرئيسية", main_window)
         show_action.triggered.connect(self.show_main_window)
         tray_menu.addAction(show_action)
         
