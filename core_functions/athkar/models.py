@@ -13,7 +13,8 @@ class AthkarCategory(Base):
     from_time = Column(String)
     to_time = Column(String)
     play_interval = Column(Integer, default=5)
-    status = Column(Integer, default=1)
+    audio_athkar_enabled = Column(Integer, default=0)
+    text_athkar_enabled = Column(Integer, default=0)
     
     text_athkars = relationship('TextAthkar', back_populates='category', cascade='all, delete-orphan')
     audio_athkars = relationship('AudioAthkar', back_populates='category', cascade='all, delete-orphan')

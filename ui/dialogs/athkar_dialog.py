@@ -7,17 +7,17 @@ from PyQt6.QtCore import Qt
 from core_functions.athkar.athkar_db_manager import AthkarDBManager
 from core_functions.athkar.models import AthkarCategory
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
-from utils.const import user_db_path
+from utils.const import user_db_path, data_folder, athkar_db_path
 
 class AthkarDialog(QDialog):
-    athkar_scheduler = AthkarScheduler(user_db_path, "Audio/adkar")
+    athkar_scheduler = AthkarScheduler(athkar_db_path, "Audio/adkar", data_folder/"athkar/text_athkar.json")
     athkar_scheduler.start()
 
     def __init__(self, parent):
         super().__init__(parent)
         self.setWindowTitle("الأذكار")
         self.resize(400, 350)
-        self.athkar_db = AthkarDBManager(user_db_path)        
+        self.athkar_db = AthkarDBManager(athkar_db_path)
 
         self.interval_options_dict = {
             5: "5 دقيقة",
@@ -40,16 +40,20 @@ class AthkarDialog(QDialog):
         main_layout.addWidget(section_label)
         main_layout.addWidget(self.section_list)
 
-        self.enable_checkbox = QCheckBox("تفعيل القسم")
-        main_layout.addWidget(self.enable_checkbox)
+        self.audio_athkar_enable_checkbox = QCheckBox("تفعيل الأذكار الصوتية")
+        self.text_athkar_enable_checkbox = QCheckBox("تفعيل الأذكار النصية")
+        main_layout.addWidget(self.audio_athkar_enable_checkbox)
+        main_layout.addWidget(self.text_athkar_enable_checkbox)
 
         # Duration setup
         duration_group = QGroupBox("مدة التشغيل")
         duration_layout = QHBoxLayout()
         from_label = QLabel("من:")
         self.from_combobox = self.create_time_combobox()
+        self.from_combobox.setAccessibleName(from_label.text())
         to_label = QLabel("إلى:")
         self.to_combobox = self.create_time_combobox()
+        self.to_combobox.setAccessibleName(to_label.text())
 
         duration_layout.addWidget(from_label)
         duration_layout.addWidget(self.from_combobox)
@@ -109,7 +113,8 @@ class AthkarDialog(QDialog):
     def update_ui_based_on_selection(self):
         selected_category = self.get_selected_category()
         if selected_category:
-            self.enable_checkbox.setChecked(selected_category.status)
+            self.audio_athkar_enable_checkbox.setChecked(selected_category.audio_athkar_enabled)
+            self.text_athkar_enable_checkbox.setChecked(selected_category.text_athkar_enabled)
             self.from_combobox.setCurrentText(selected_category.from_time)
             self.to_combobox.setCurrentText(selected_category.to_time)
             interval_text = self.interval_options_dict.get(
@@ -118,7 +123,8 @@ class AthkarDialog(QDialog):
             self.interval_combobox.setCurrentText(interval_text)
 
     def reset_settings(self):
-        self.enable_checkbox.setChecked(False)
+        self.audio_athkar_enable_checkbox.setChecked(False)
+        self.text_athkar_enable_checkbox.setChecked(False)
         self.from_combobox.setCurrentIndex(0)
         self.to_combobox.setCurrentIndex(self.to_combobox.count() - 1)
         self.interval_combobox.setCurrentIndex(0)
@@ -139,7 +145,8 @@ class AthkarDialog(QDialog):
             from_time=self.from_combobox.currentText(),
             to_time=self.to_combobox.currentText(),
             play_interval=play_interval,
-            status=int(self.enable_checkbox.isChecked())
+            audio_athkar_enabled=int(self.audio_athkar_enable_checkbox.isChecked()),
+            text_athkar_enabled=int(self.text_athkar_enable_checkbox.isChecked())
         )
         self.athkar_scheduler.refresh()
         self.accept()

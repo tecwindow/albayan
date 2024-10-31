@@ -7,7 +7,6 @@ from utils.sound_Manager import AudioPlayerBase
 from utils.logger import Logger
 
 
-
 class AthkarPlayer(AudioPlayerBase):
     def __init__(self, athkar_db: AthkarDBManager, folder: str, category_id: int) -> None:
         self.athkar_db = athkar_db
@@ -32,8 +31,8 @@ class AthkarPlayer(AudioPlayerBase):
             return
 
         random_sound = choice(list(self.sounds.keys()))
-        if const.tray_icon is not None:
-            current_file = self.athkar_db._get_by_id(AudioAthkar, random_sound)
-            const.tray_icon.showMessage("الأذكار", current_file.description,msecs=5000)
+        #if const.tray_icon is not None:
+            #current_file = self.athkar_db._get_by_id(AudioAthkar, random_sound)
+            #const.tray_icon.showMessage("الأذكار", current_file.description,msecs=5000)
 
         return super().play(random_sound)
