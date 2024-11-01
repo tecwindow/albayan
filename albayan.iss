@@ -54,6 +54,8 @@ Source: "Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar
 
 [CustomMessages]
 arabic.AppLNGfile=Arabic
+english.DeleteSettingsPrompt=Do you want to delete the settings folder?
+arabic.DeleteSettingsPrompt=هل تريد حذف مجلد الإعدادات؟
 
 [Icons]
 Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"
