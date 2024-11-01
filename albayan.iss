@@ -84,3 +84,24 @@ begin
     DeleteAthkarFolder();
   end;
 end;
+
+procedure DeleteSettingsFolder();
+begin
+  DelTree(ExpandConstant('{userappdata}\tecwindow\albayan'), True, True, True);
+end;
+
+function AskDeleteSettingsFolder(): Boolean;
+begin
+  Result := MsgBox(ExpandConstant('{cm:DeleteSettingsPrompt}') + #13#10 + ExpandConstant('{userappdata}\tecwindow\albayan'), mbConfirmation, MB_YESNO) = IDYES;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usUninstall then
+  begin
+    if AskDeleteSettingsFolder() then
+    begin
+      DeleteSettingsFolder();
+    end;
+  end;
+end;
