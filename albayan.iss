@@ -70,3 +70,17 @@ Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
+
+[Code]
+procedure DeleteAthkarFolder();
+begin
+  DelTree(ExpandConstant('{app}\Audio\athkar'), True, True, True);
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+  begin
+    DeleteAthkarFolder();
+  end;
+end;
