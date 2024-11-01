@@ -50,6 +50,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "Albayan\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Albayan\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [CustomMessages]
 arabic.AppLNGfile=Arabic
