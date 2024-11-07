@@ -24,7 +24,7 @@ os.makedirs(albayan_documents_dir, exist_ok=True)
 
 # program information
 program_name = "البيان"
-program_version = "1.2.4"
+program_version = "1.3.0"
 program_icon = "icon.webp"
 tray_icon: Optional[QSystemTrayIcon] = None
 website = "https://tecwindow.net/"

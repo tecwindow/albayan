@@ -29,7 +29,7 @@ if sys.platform == "win32":
 
 setup(
     name="albayan",
-    version="1.2.3",
+    version="1.3.0",
     description=description,
     options={"build_exe": build_exe_options},
     executables=[Executable("main.py", base=base)]

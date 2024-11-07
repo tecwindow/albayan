@@ -7,7 +7,7 @@ cd /d "%~dp0"
 set /p create_activate=Do you want to Create or Activate the environment? (C/A):
 
 if /i !create_activate! equ C (
-    start /wait python -m venv env
+    start /wait py -3.12 -m venv env
           start cmd.exe /k "call env\Scripts\activate.bat && cd /d ""%~dp0"" && pip install -r requirements.txt"
 ) else if /i !create_activate! equ A (
     start cmd.exe /k "call env\Scripts\activate.bat"

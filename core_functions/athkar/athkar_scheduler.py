@@ -44,7 +44,7 @@ class AthkarScheduler:
 
     def text_athkar_job(self, category_id: int) -> None:
         random_text_athkar = choice(self.db_manager.get_text_athkar(category_id))
-        const.tray_icon.showMessage("البيان", random_text_athkar.text,msecs=5000)
+        const.tray_icon.showMessage("البيان", random_text_athkar.text,msecs=10000)
 
     @staticmethod
     def _parse_time(time_str: str) -> time:
