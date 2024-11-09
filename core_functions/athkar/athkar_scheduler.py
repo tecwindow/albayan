@@ -10,7 +10,7 @@ from apscheduler.triggers.cron import CronTrigger
 from sqlalchemy.exc import IntegrityError 
 from .athkar_db_manager import AthkarDBManager
 from .athkar_refresher import AthkarRefresher
-from .athkar_player import AthkarPlayer
+from utils.audio_player import AthkarPlayer
 
 class AthkarScheduler:
     def __init__(self, athkar_db_folder: Union[Path, str], default_category_path: Optional[Union[Path, str]] = None, text_athkar_path: Optional[Union[Path, str]] = None, default_category_settings: Optional[Dict[str, int]] = None) -> None:
@@ -39,12 +39,13 @@ class AthkarScheduler:
             refresher = AthkarRefresher(self.db_manager, category.audio_path, category.id)
             refresher.refresh_data()
 
-    def audio_athkar_job(self, player: AthkarPlayer) -> None:
-        player.play()
+    def audio_athkar_job(self, category_id: int, audio_path: str) -> None:
+        with AthkarPlayer(audio_path, self.db_manager.get_audio_athkar(category_id)) as player:
+            player.play()
 
     def text_athkar_job(self, category_id: int) -> None:
         random_text_athkar = choice(self.db_manager.get_text_athkar(category_id))
-        const.tray_icon.showMessage("البيان", random_text_athkar.text,msecs=10000)
+        const.tray_icon.showMessage("البيان", random_text_athkar.text,msecs=5000)
 
     @staticmethod
     def _parse_time(time_str: str) -> time:
@@ -58,8 +59,7 @@ class AthkarScheduler:
             minute = "0" if category.play_interval == 60 else f"*/{category.play_interval}"
             trigger = CronTrigger(minute=minute, hour=f"{from_time.hour}-{to_time.hour}")
             if category.audio_athkar_enabled :
-                player = AthkarPlayer(self.db_manager, category.audio_path, category.id)
-                self.scheduler.add_job(self.audio_athkar_job, trigger, args=[player])
+                self.scheduler.add_job(self.audio_athkar_job, trigger, args=[category.id, category.audio_path])
             if category.text_athkar_enabled:
                 self.scheduler.add_job(self.text_athkar_job, trigger, args=[category.id])
 

@@ -29,10 +29,11 @@ from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
 from ui.widgets.system_tray import SystemTrayManager
 from utils.settings import SettingsManager
-from utils.sound_Manager import EffectsManager
+from utils.audio_player import SoundEffectPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
 from utils.const import program_name, program_icon, user_db_path
+from utils.audio_player import bass
 
 
 class QuranInterface(QMainWindow):
@@ -43,7 +44,7 @@ class QuranInterface(QMainWindow):
         self.quran = quran_mgr()
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
         self.quran.aya_to_line = True
-        self.effects_manager = EffectsManager("Audio/sounds")
+        self.effects_manager = SoundEffectPlayer("Audio/sounds", True)
         self.user_data_manager = UserDataManager(user_db_path)
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
@@ -311,4 +312,5 @@ class QuranInterface(QMainWindow):
             self.hide()
         else:
             self.tray_manager.hide_icon()
+            bass.BASS_Free()
 
