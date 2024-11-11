@@ -36,7 +36,7 @@ jobs:
     - name: Download and install Inno Setup
       run: |
         Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile is.exe
-        Start-Process -Wait -FilePath .\is.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+        Start-Process -Wait -FilePath .\is.exe -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP'
 
     - name: Download Arabic and Vietnamese language files
       run: |
