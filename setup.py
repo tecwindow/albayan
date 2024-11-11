@@ -1,4 +1,4 @@
-
+import shutil
 import sys
 import os
 from cx_Freeze import setup, Executable
@@ -29,8 +29,16 @@ if sys.platform == "win32":
 
 setup(
     name="albayan",
-    version="1.3.0",
+    version="1.2.3",
     description=description,
     options={"build_exe": build_exe_options},
     executables=[Executable("main.py", base=base)]
 )
+
+#clean
+folder_paths = ["albayan_build/lib/PyQt6/Qt6/bin", "albayan_build/lib/PyQt6/Qt6/translations"]
+for folder in folder_paths:
+    try:
+        shutil.rmtree(os.path.abspath(folder))
+    except:
+        pass
