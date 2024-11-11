@@ -37,4 +37,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: albayan-beta-cx-freeze-build
-        path: build/
+        path: albayan_build/
