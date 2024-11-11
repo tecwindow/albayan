@@ -10,7 +10,7 @@ from utils.update import UpdateManager
 from utils.settings import SettingsManager
 from utils.const import program_name, program_icon, user_db_path
 from utils.logger import Logger
-from utils.sound_Manager import BasmalaManager
+from utils.audio_player import SoundEffectPlayer
 
 class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs):
@@ -67,8 +67,8 @@ class SingleInstanceApplication(QApplication):
 
 def call_after_starting(parent: QuranInterface) -> None:
         
-    basmala_manager = BasmalaManager("Audio/basmala")
-    basmala_manager.play()
+    basmala = SoundEffectPlayer("Audio/basmala", True, True)
+    basmala.play()
 
     check_update_enabled = SettingsManager.current_settings["general"].get("check_update_enabled", False)
     update_manager = UpdateManager(parent, check_update_enabled)
