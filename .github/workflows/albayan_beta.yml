@@ -33,6 +33,20 @@ jobs:
       run: |
         python setup.py build
 
+    - name: Download and install Inno Setup
+      run: |
+        Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile is.exe
+        Start-Process -Wait -FilePath .\is.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+
+    - name: Download Arabic and Vietnamese language files
+      run: |
+        Invoke-WebRequest -Uri https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/Arabic.isl -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\Arabic.isl"
+        Invoke-WebRequest -Uri https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/Vietnamese.isl -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\Vietnamese.isl"
+
+    - name: Package with Inno Setup
+      run: |
+        "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" albayan.iss
+
     - name: Compress build output
       run: |
         Compress-Archive -Path albayan_build\* -DestinationPath albayan_build.zip
