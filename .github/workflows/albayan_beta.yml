@@ -35,11 +35,10 @@ jobs:
 
     - name: Compress build output
       run: |
-        zip -r albayan_build.zip albayan_build/
+        Compress-Archive -Path albayan_build\* -DestinationPath albayan_build.zip
         
     - name: Upload compressed build output
       uses: actions/upload-artifact@v3
       with:
         name: albayan-beta-cx-freeze-build
         path: albayan_build.zip
-        
