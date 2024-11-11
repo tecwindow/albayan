@@ -33,8 +33,13 @@ jobs:
       run: |
         python setup.py build
 
-    - name: Archive build output
+    - name: Compress build output
+      run: |
+        zip -r albayan_build.zip albayan_build/
+        
+    - name: Upload compressed build output
       uses: actions/upload-artifact@v3
       with:
         name: albayan-beta-cx-freeze-build
-        path: albayan_build/
+        path: albayan_build.zip
+        
