@@ -48,9 +48,9 @@ Name: "arabic"; MessagesFile: "compiler:Languages\Arabic.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-Source: "Albayan\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Albayan\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "albayan_build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "albayan_build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "albayan_build\Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [CustomMessages]
 arabic.AppLNGfile=Arabic
