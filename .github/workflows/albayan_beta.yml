@@ -49,7 +49,7 @@ jobs:
 
     - name: Compress build output
       run: |
-        Compress-Archive -Path AlbayanSetup.exe -DestinationPath albayan_build.zip
+        Compress-Archive -Path Albayan\AlbayanSetup.exe -DestinationPath albayan_build.zip
         
     - name: Upload compressed build output
       uses: actions/upload-artifact@v3
