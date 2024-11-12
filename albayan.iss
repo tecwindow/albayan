@@ -28,7 +28,7 @@ DefaultDirName={sd}\program files\tecwindow\{#MyAppName}
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non-administrative install mode (install for the current user only.)
 PrivilegesRequired=admin
-OutputDir=Albayan
+OutputDir=albayan_build
 OutputBaseFilename=AlbayanSetup
 Compression=lzma
 CloseApplications=force
