@@ -61,7 +61,7 @@ class SettingsDialog(QDialog):
 
 
 
-        self.group_audio = QGroupBox("الصوت")
+        self.group_audio = QGroupBox("إعدادات الصوت")
         self.group_audio_layout = QVBoxLayout()
         self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
         self.basmala_checkbox = QCheckBox("تشغيل المؤثرات الصوتية مع فتح البرنامج")
