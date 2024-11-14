@@ -10,13 +10,17 @@ class SettingsManager:
     default_settings = {
         "general": {
             "language": "Arabic",
-            "sound_effect_enabled": True,
-            "start_with_basmala_enabled": True,
-            "speak_actions_enabled": True,            
             "run_in_background_enabled": False,
             "auto_save_position_enabled": False,
             "check_update_enabled": True,
             "logging_enabled": False
+        },
+        "audio": {
+            "sound_effect_enabled": True,
+            "start_with_basmala_enabled": True,
+            "speak_actions_enabled": True,
+            "volume_level": 100,
+            "athkar_volume_level": 100
         },
         "search": {
             "ignore_tashkeel": True,
