@@ -69,12 +69,12 @@ class SettingsDialog(QDialog):
         self.volume_label = QLabel("مستوى الصوت")
         self.volume = QSlider(Qt.Orientation.Horizontal)
         self.volume.setRange(0, 100)
-        self.volume.setAccessibleName("مستوى الصوت")
+        self.volume.setAccessibleName(self.volume_label.text())
         self.volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.athkar_volume_label = QLabel("مستوى صوت الأذكار")
         self.athkar_volume = QSlider(Qt.Orientation.Horizontal)
         self.athkar_volume.setRange(0, 100)
-        self.athkar_volume.setAccessibleName("مستوى صوت الأذكار")
+        self.athkar_volume.setAccessibleName(self.athkar_volume_label.text())
         self.athkar_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
 
 
