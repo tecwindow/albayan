@@ -1,16 +1,13 @@
 import os
 from typing import Optional
-from random  import choice
 from .bass_player import AudioPlayer
+from utils.settings import SettingsManager
 
 class SoundEffectPlayer(AudioPlayer):
-    def __init__(self, sounds_folder: str, is_effect_enabled: Optional[bool], play_random: Optional[bool] = False) -> None:
+    def __init__(self, sounds_folder: str) -> None:
         super().__init__()
         self.sounds_folder = sounds_folder
-        self.is_effect_enabled = is_effect_enabled
-        self.play_random = play_random
         self.sounds = {}
-        self.supported_extensions = ('.wav', '.mp3', '.ogg')
         self.load_sound_effects()
         
     def load_sound_effects(self) -> None:
@@ -22,11 +19,8 @@ class SoundEffectPlayer(AudioPlayer):
 
     def play(self, file_name: Optional[str]= None) -> None:
         """Plays a specified or random sound effect if enabled."""
-        if not self.is_effect_enabled:
+        if not SettingsManager.current_settings["audio"]["sound_effect_enabled"]:
             return
-
-        if self.play_random and not file_name:
-            file_name = choice(list(self.sounds.keys()))
 
         if file_name not in self.sounds:
             raise ValueError(f"Invalid file name '{file_name}'. Available sounds: {list(self.sounds.keys())}")
