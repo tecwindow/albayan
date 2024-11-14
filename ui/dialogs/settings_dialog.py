@@ -126,29 +126,6 @@ class SettingsDialog(QDialog):
         main_layout.addLayout(buttons_layout)
         self.setLayout(main_layout)
 
-    def change_category(self, current, previous):
-        if current is None:
-            return
-        if current.text() == "الإعدادات العامة":
-            self.group_general.setVisible(True)
-            self.group_audio.setVisible(False)
-            self.group_search.setVisible(False)
-        elif current.text == "الصوت":
-            self.group_general.setVisible(False)
-            self.group_audio.setVisible(True)
-            self.group_search.setVisible(False)
-        elif current.text() == "البحث":
-            self.group_general.setVisible(False)
-            self.group_audio.setVisible(False)
-            self.group_search.setVisible(True)
-
-    def save_settings(self):
-        # Implement save settings logic here
-        pass
-
-    def set_current_settings(self):
-        # Implement logic to set current settings here
-        pass
 
     def OnReset(self):
         reply = QMessageBox.question(self, 'رسالة', "هل تريد استعادة الإعدادات الافتراضية؟", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
