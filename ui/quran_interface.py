@@ -44,7 +44,7 @@ class QuranInterface(QMainWindow):
         self.quran = quran_mgr()
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
         self.quran.aya_to_line = True
-        self.effects_manager = SoundEffectPlayer("Audio/sounds", True)
+        self.effects_manager = SoundEffectPlayer("Audio/sounds")
         self.user_data_manager = UserDataManager(user_db_path)
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
