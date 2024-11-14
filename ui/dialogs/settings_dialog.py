@@ -126,22 +126,6 @@ class SettingsDialog(QDialog):
         main_layout.addLayout(buttons_layout)
         self.setLayout(main_layout)
 
-
-    def OnReset(self):
-        reply = QMessageBox.question(self, 'رسالة', "هل تريد استعادة الإعدادات الافتراضية؟", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
-        if reply == QMessageBox.StandardButton.Yes:
-            self.sound_checkbox.setChecked(False)
-            self.speech_checkbox.setChecked(False)
-            self.update_checkbox.setChecked(False)
-            self.log_checkbox.setChecked(False)
-            self.ignore_tashkeel_checkbox.setChecked(False)
-            self.ignore_hamza_checkbox.setChecked(False)
-
-
-
-
-
-
     def change_category(self, current, previous):
         if current:
             if current.text() == "الإعدادات العامة":
