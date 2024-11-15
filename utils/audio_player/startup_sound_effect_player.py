@@ -9,7 +9,6 @@ class StartupSoundEffectPlayer(AudioPlayer):
         super().__init__()
         self.sounds_folder = sounds_folder
         
-
     def play(self):
         if not SettingsManager.current_settings["audio"]["start_with_basmala_enabled"]:
             return

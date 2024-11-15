@@ -1,4 +1,3 @@
-import asyncio
 import os
 import time
 from ctypes import CDLL, c_float
@@ -18,6 +17,7 @@ class AudioPlayer:
     def __init__(self) -> None:
         self.current_channel: Optional[int] = None
         self.volume: float = 0.5
+        self.supported_extensions = ('.wav', '.mp3', '.ogg')
     
     def load_audio(self, source: str) -> None:
         """Loads an audio file or a URL for playback."""
