@@ -65,6 +65,17 @@ class MenuBar(QMenuBar):
         navigation_menu.addAction(self.close_action)
         navigation_menu.addAction(self.exit_action)
 
+        player_menu = self.addMenu("المشغل(&P)")
+        self.play_pause_action = QAction("استماع الآية الحالية", self)
+        self.play_pause_action.setShortcut(QKeySequence("Ctrl+Shift+P"))
+        self.play_pause_action.triggered.connect(self.parent.toolbar.toggle_play_pause)
+        self.stop_action = QAction("إيقاف", self)
+        self.stop_action.setShortcut(QKeySequence("Ctrl+E"))
+        self.stop_action.triggered.connect(self.parent.toolbar.stop_audio)
+
+        player_menu.addAction(self.play_pause_action)
+        player_menu.addAction(self.stop_action)
+
         actions_menu = self.addMenu("الإجرائات(&A)")
         self.save_position_action = QAction("حفظ الموضع الحالي", self)
         self.save_position_action.setShortcut(QKeySequence("Ctrl+S"))

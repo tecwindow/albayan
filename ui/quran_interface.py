@@ -47,10 +47,12 @@ class QuranInterface(QMainWindow):
         self.quran.aya_to_line = True
         self.effects_manager = SoundEffectPlayer("Audio/sounds")
         self.user_data_manager = UserDataManager(user_db_path)
+
+        self.toolbar = AudioToolBar(self)
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
-        toolbar = AudioToolBar(self)
-        self.addToolBar(toolbar)
+        self.addToolBar(self.toolbar)
+
         self.tray_manager = SystemTrayManager(self, program_name, program_icon)
         self.create_widgets()
         self.create_layout()
