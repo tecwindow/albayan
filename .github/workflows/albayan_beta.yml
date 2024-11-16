@@ -52,7 +52,7 @@ jobs:
         Start-Process -Wait -FilePath "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" -ArgumentList "albayan.iss"
         
     - name: Upload compressed build output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: albayan-beta-build
         path: albayan_build\AlbayanSetup.exe

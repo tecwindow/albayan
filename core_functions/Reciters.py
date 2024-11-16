@@ -15,7 +15,7 @@ class RecitersManager:
         """Fetches all reciters from the database."""
         with self._connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM reciters")
+            cursor.execute("SELECT * FROM reciters ORDER BY name;")
             return cursor.fetchall()
 
     @lru_cache(maxsize=1)
