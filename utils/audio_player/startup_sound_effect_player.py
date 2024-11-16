@@ -15,7 +15,7 @@ class StartupSoundEffectPlayer(AudioPlayer):
 
         audio_files =  [
             file for file in os.listdir(self.sounds_folder)
-            if file.endswith(self.supported_extensions)
+            if file.lower().endswith(self.supported_extensions)
             ]
         random_file = choice(audio_files)
         file_path = os.path.join(self.sounds_folder, random_file)
