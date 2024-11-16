@@ -28,6 +28,7 @@ from ui.widgets.qText_edit import QuranViewer
 from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
 from ui.widgets.system_tray import SystemTrayManager
+from ui.widgets.toolbar import AudioToolBar
 from utils.settings import SettingsManager
 from utils.audio_player import SoundEffectPlayer
 from utils.universal_speech import UniversalSpeech
@@ -48,6 +49,8 @@ class QuranInterface(QMainWindow):
         self.user_data_manager = UserDataManager(user_db_path)
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
+        toolbar = AudioToolBar(self)
+        self.addToolBar(toolbar)
         self.tray_manager = SystemTrayManager(self, program_name, program_icon)
         self.create_widgets()
         self.create_layout()

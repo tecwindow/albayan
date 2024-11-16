@@ -15,6 +15,7 @@ if not bass.BASS_Init(-1, 44100, 0, 0, 0):
 
 class AudioPlayer:
     def __init__(self) -> None:
+        self.source: Optional[str] = None
         self.current_channel: Optional[int] = None
         self.volume: float = 0.5
         self.supported_extensions = ('.wav', '.mp3', '.ogg')
@@ -42,6 +43,7 @@ class AudioPlayer:
         if not self.current_channel:
             raise RuntimeError("Failed to load audio file or URL")
         
+        self.source = source
         self.set_volume(self.volume) 
     
     def play(self) -> None:
