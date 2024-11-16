@@ -1,17 +1,18 @@
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
-QLabel,
-    QListWidget,
-    QHBoxLayout,
-    QListWidgetItem,
+    QLabel,
+    QTreeWidget,
+    QTreeWidgetItem,
     QCheckBox,
     QPushButton,
     QGroupBox,
     QMessageBox,
     QSlider,
     QSpacerItem,
-    QSizePolicy
+    QSizePolicy,
+    QHBoxLayout,
+    QStackedWidget
 )
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtCore import Qt
@@ -29,16 +30,19 @@ class SettingsDialog(QDialog):
         main_layout = QVBoxLayout()
         taps_layout = QHBoxLayout()
 
-        list_widget = QListWidget()
-        general_item = QListWidgetItem("الإعدادات العامة")
-        audio_item = QListWidgetItem("الصوت")
-        search_item = QListWidgetItem("البحث")
-        list_widget.addItem(general_item)
-        list_widget.addItem(audio_item)
-        list_widget.addItem(search_item)
-        list_widget.currentItemChanged.connect(self.change_category)
-        taps_layout.addWidget(list_widget, stretch=1)
-
+        tree_widget = QTreeWidget()
+        tree_widget.setHeaderHidden(True)
+        
+        general_item = QTreeWidgetItem(["الإعدادات العامة"])
+        audio_item = QTreeWidgetItem(["الصوت"])
+        search_item = QTreeWidgetItem(["البحث"])
+        
+        tree_widget.addTopLevelItem(general_item)
+        tree_widget.addTopLevelItem(audio_item)
+        tree_widget.addTopLevelItem(search_item)
+        
+        self.stacked_widget = QStackedWidget()
+        
         self.group_general = QGroupBox("الإعدادات العامة")
         self.group_general_layout = QVBoxLayout()
         self.run_in_background_checkbox = QCheckBox("تشغيل البرنامج في الخلفية")
@@ -48,19 +52,14 @@ class SettingsDialog(QDialog):
         self.reset_button = QPushButton("استعادة الإعدادات الافتراضية")
         self.reset_button.clicked.connect(self.OnReset)
         
-
         self.group_general_layout.addWidget(self.run_in_background_checkbox)
         self.group_general_layout.addWidget(self.auto_save_position_checkbox)
         self.group_general_layout.addWidget(self.update_checkbox)
         self.group_general_layout.addWidget(self.log_checkbox)
-        self.group_general_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))  # Spacer item
+        self.group_general_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_general_layout.addWidget(self.reset_button)
         self.group_general.setLayout(self.group_general_layout)
-        self.group_general.setVisible(False)
-        taps_layout.addWidget(self.group_general, stretch=2)
-
-
-
+        
         self.group_audio = QGroupBox("إعدادات الصوت")
         self.group_audio_layout = QVBoxLayout()
         self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
@@ -77,25 +76,16 @@ class SettingsDialog(QDialog):
         self.athkar_volume.setAccessibleName(self.athkar_volume_label.text())
         self.athkar_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
 
-
         self.group_audio_layout.addWidget(self.sound_checkbox)
         self.group_audio_layout.addWidget(self.basmala_checkbox)
         self.group_audio_layout.addWidget(self.speech_checkbox)
-        
         self.group_audio_layout.addWidget(self.volume_label)
         self.group_audio_layout.addWidget(self.volume)
         self.group_audio_layout.addWidget(self.athkar_volume_label)
         self.group_audio_layout.addWidget(self.athkar_volume)
-
-
-
-        # Add a spacer for layout consistency
         self.group_audio_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_audio.setLayout(self.group_audio_layout)
-        self.group_audio.setVisible(False)
-        taps_layout.addWidget(self.group_audio, stretch=2)
-
-
+        
         self.group_search = QGroupBox("إعدادات البحث")
         self.group_search_layout = QVBoxLayout()
         self.ignore_tashkeel_checkbox = QCheckBox("تجاهل التشكيل")
@@ -105,11 +95,18 @@ class SettingsDialog(QDialog):
         self.group_search_layout.addWidget(self.ignore_tashkeel_checkbox)
         self.group_search_layout.addWidget(self.ignore_hamza_checkbox)
         self.group_search_layout.addWidget(self.match_whole_word_checkbox)
-        self.group_search_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))  # Spacer item
+        self.group_search_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_search.setLayout(self.group_search_layout)
-        self.group_search.setVisible(False)
-        taps_layout.addWidget(self.group_search, stretch=2)
+        
+        self.stacked_widget.addWidget(self.group_general)
+        self.stacked_widget.addWidget(self.group_audio)
+        self.stacked_widget.addWidget(self.group_search)
+        
+        tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(tree_widget.indexOfTopLevelItem(current)))
 
+        taps_layout.addWidget(tree_widget, stretch=1)
+        taps_layout.addWidget(self.stacked_widget, stretch=2)
+        
         main_layout.addLayout(taps_layout)
 
         buttons_layout = QHBoxLayout()
@@ -126,24 +123,7 @@ class SettingsDialog(QDialog):
         main_layout.addLayout(buttons_layout)
         self.setLayout(main_layout)
 
-    def change_category(self, current, previous):
-        if current:
-            if current.text() == "الإعدادات العامة":
-                self.group_general.setVisible(True)
-                self.group_audio.setVisible(False)
-                self.group_search.setVisible(False)
-            elif current.text() == "الصوت":
-                self.group_general.setVisible(False)
-                self.group_audio.setVisible(True)
-                self.group_search.setVisible(False)
-            elif current.text() == "البحث":
-                self.group_general.setVisible(False)
-                self.group_audio.setVisible(False)
-                self.group_search.setVisible(True)
-
     def save_settings(self):
-
-        # Collect general settings
         general_settings = {
             "run_in_background_enabled": self.run_in_background_checkbox.isChecked(),
             "auto_save_position_enabled": self.auto_save_position_checkbox.isChecked(),
@@ -151,8 +131,6 @@ class SettingsDialog(QDialog):
             "logging_enabled": self.log_checkbox.isChecked()
         }
 
-
-        # Collect audio settings
         audio_settings = {
             "sound_effect_enabled": self.sound_checkbox.isChecked(),
             "start_with_basmala_enabled": self.basmala_checkbox.isChecked(),
@@ -161,15 +139,12 @@ class SettingsDialog(QDialog):
             "athkar_volume_level": self.athkar_volume.value()
         }
 
-    
-        # Collect search settings
         search_settings = {
             "ignore_tashkeel": self.ignore_tashkeel_checkbox.isChecked(),
             "ignore_hamza": self.ignore_hamza_checkbox.isChecked(),
             "match_whole_word": self.match_whole_word_checkbox.isChecked()
         }
 
-        # Update the current settings
         SettingsManager.write_settings({
             "general": general_settings,
             "audio": audio_settings,
@@ -178,7 +153,6 @@ class SettingsDialog(QDialog):
         self.accept()
 
     def OnReset(self):
-
         msg_box = QMessageBox(self)
         msg_box.setWindowTitle("تحذير")
         msg_box.setText("هل أنت متأكد من إعادة تعيين الإعدادات إلى الإعدادات الافتراضية؟")
