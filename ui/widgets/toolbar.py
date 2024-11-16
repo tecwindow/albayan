@@ -11,45 +11,57 @@ class AudioToolBar(QToolBar):
         self.player = AudioPlayer()
         self.reciters = RecitersManager(data_folder / "quran" / "reciters.db")
         
-        self.play_pause_button = QPushButton("استماع الآية الحالية")
-        self.play_pause_button.clicked.connect(self.toggle_play_pause)
-        self.addWidget(self.play_pause_button)
+        self.play_pause_button = self.create_button("استماع الآية الحالية", self.toggle_play_pause)
+        self.stop_button = self.create_button("إقاف", self.stop_audio)
 
-        stop_button = QPushButton("إقاف")
-        stop_button.clicked.connect(self.stop_audio)
-        self.addWidget(stop_button)
-
-        self.volume_slider = QSlider(Qt.Orientation.Horizontal)
-        self.volume_slider.setRange(0, 100)
-        self.volume_slider.setValue(50)
-        self.volume_slider.setToolTip("شريط التحكم في الصوت")
-        self.volume_slider.valueChanged.connect(self.change_volume)
-        self.addWidget(self.volume_slider)
+        self.volume_slider = self.create_slider(0, 100, 50, self.change_volume)
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_audio_status)
         self.timer.start(500)
 
+    def create_button(self, text, callback):
+        button = QPushButton(text)
+        button.clicked.connect(callback)
+        button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.addWidget(button)
+        return button
+
+    def create_slider(self, min_value, max_value, default_value, callback):
+        slider = QSlider(Qt.Orientation.Horizontal)
+        slider.setRange(min_value, max_value)
+        slider.setValue(default_value)
+        slider.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        slider.valueChanged.connect(callback)
+        self.addWidget(slider)
+        return slider
+
     def toggle_play_pause(self):
+
         if self.player.is_playing():
             self.player.pause()
-            self.play_pause_button.setText("استماع الآية الحالية")
-        else:
+        else:                
             ayah_info = self.parent.get_current_ayah_info()
-            url = self.reciters.get_url(20, ayah_info[0], ayah_info[3])
-            if not self.player.is_paused() or self.player.source != url:
+            url = self.reciters.get_url(68, ayah_info[0], ayah_info[3])
+            if self.player.source != url or self.player.is_stopped():
                 self.player.load_audio(url)
             self.player.play()
 
+        self.update_play_pause_button_text()
+
     def stop_audio(self):
         self.player.stop()
-        self.play_pause_button.setText("استماع الآية الحالية")
+        self.update_play_pause_button_text()
 
     def change_volume(self, value):
         self.player.set_volume(value / 100)
 
     def check_audio_status(self):
-        if not self.player.is_playing() and not self.player.is_paused():
-            self.play_pause_button.setText("استماع الآية الحالية")
-        elif self.player.is_playing():
-            self.play_pause_button.setText("إيقاف مؤقت")
+        self.update_play_pause_button_text()
+
+    def update_play_pause_button_text(self):
+        label = "إيقاف مؤقت" if self.player.is_playing() else "استماع الآية الحالية"
+        self.play_pause_button.setText(label)
+        if hasattr(self.parent, "menu_bar"):
+            self.parent.menu_bar.play_pause_action.setText(label)
+        
