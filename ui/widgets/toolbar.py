@@ -1,8 +1,35 @@
 from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QThread, pyqtSignal
 from core_functions.Reciters import RecitersManager
 from utils.audio_player import AudioPlayer
 from utils.const import data_folder
+
+class AudioPlayerThread(QThread):
+    audio_status_changed = pyqtSignal(str)
+
+    def __init__(self, player, reciters, parent=None):
+        super().__init__(parent)
+        self.player = player
+        self.reciters = reciters
+        self.url = None
+
+    def run(self):
+        if self.url:
+            if self.player.source != self.url or self.player.is_stopped():
+                self.player.load_audio(self.url)
+            self.player.play()
+            self.audio_status_changed.emit("إيقاف مؤقت")
+        
+    def pause_audio(self):
+        self.player.pause()
+        self.audio_status_changed.emit("استماع الآية الحالية")
+
+    def stop_audio(self):
+        self.player.stop()
+        self.audio_status_changed.emit("استماع الآية الحالية")
+
+    def set_audio_url(self, url):
+        self.url = url
 
 class AudioToolBar(QToolBar):
     def __init__(self, parent=None):
@@ -19,6 +46,9 @@ class AudioToolBar(QToolBar):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_audio_status)
         self.timer.start(500)
+
+        self.audio_thread = AudioPlayerThread(self.player, self.reciters)
+        self.audio_thread.audio_status_changed.connect(self.update_play_pause_button_text)
 
     def create_button(self, text, callback):
         button = QPushButton(text)
@@ -37,21 +67,18 @@ class AudioToolBar(QToolBar):
         return slider
 
     def toggle_play_pause(self):
-
         if self.player.is_playing():
-            self.player.pause()
+            self.audio_thread.pause_audio()
         else:                
             ayah_info = self.parent.get_current_ayah_info()
             url = self.reciters.get_url(68, ayah_info[0], ayah_info[3])
-            if self.player.source != url or self.player.is_stopped():
-                self.player.load_audio(url)
-            self.player.play()
+            self.audio_thread.set_audio_url(url)
+            self.audio_thread.start()
 
         self.update_play_pause_button_text()
 
     def stop_audio(self):
-        self.player.stop()
-        self.update_play_pause_button_text()
+        self.audio_thread.stop_audio()
 
     def change_volume(self, value):
         self.player.set_volume(value / 100)
@@ -64,4 +91,3 @@ class AudioToolBar(QToolBar):
         self.play_pause_button.setText(label)
         if hasattr(self.parent, "menu_bar"):
             self.parent.menu_bar.play_pause_action.setText(label)
-        
