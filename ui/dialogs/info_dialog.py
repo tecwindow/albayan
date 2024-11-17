@@ -33,6 +33,7 @@ class InfoDialog(QDialog):
         copy_button = QPushButton('نسخ', self)
         copy_button.clicked.connect(self.copy_text)
         copy_button.setShortcut(QKeySequence("Ctrl+C"))
+        copy_button.setStyleSheet('background-color: red; color: white;')
 
         # close button
         close_button = QPushButton('إغلاق', self)
