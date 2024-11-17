@@ -103,15 +103,18 @@ class SettingsDialog(QDialog):
 
         self.reciters_label = QLabel("القارئ")
         self.reciters_combo = QComboBox()
-# Assuming 'reciters_manager.get_reciters()' returns a dictionary of reciters as in the sample
-
         # Fetch reciters from the database and populate the combo box
         reciters = reciters_manager.get_reciters()
+
         for quality, rows in reciters.items():
             for row in rows:
-                # Format the item text with name, rewaya, and bitrate
-                item_text = f"{row['name']},  {row['rewaya']}, ({row['bitrate']}kbps)"
-                self.reciters_combo.addItem(item_text)
+                # Format the display text to include 'name', 'rewaya' (bitrate)
+                display_text = f"{row['name']} - {row['rewaya']} ({row['bitrate']} kbps)"
+        
+                # Add formatted display text to the combo box
+                # Set the reciter's ID as user data (second argument)
+                self.reciters_combo.addItem(display_text, row["id"])
+
 
 
         self.reciters_combo.setAccessibleName(self.reciters_label.text())
@@ -203,6 +206,8 @@ class SettingsDialog(QDialog):
             "search": search_settings
         })
         self.accept()
+        print(self.reciters_combo.currentData())
+
 
     def OnReset(self):
         msg_box = QMessageBox(self)
