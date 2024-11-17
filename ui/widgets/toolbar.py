@@ -34,6 +34,8 @@ class AudioToolBar(QToolBar):
         self.parent = parent
         self.player = AudioPlayer()
         self.reciters = RecitersManager(data_folder / "quran" / "reciters.db")
+        self.current_surah = 0
+        self.current_ayah = 0
         
         self.play_pause_button = self.create_button("استماع الآية الحالية", self.toggle_play_pause)
         self.stop_button = self.create_button("إقاف", self.stop_audio)
@@ -63,14 +65,43 @@ class AudioToolBar(QToolBar):
             self.player.pause()
         else:                
             ayah_info = self.parent.get_current_ayah_info()
-            url = self.reciters.get_url(68, ayah_info[0], ayah_info[3])
+            self.current_surah = ayah_info[0]
+            self.current_ayah = ayah_info[3]
+            url = self.reciters.get_url(48, self.current_surah, self.current_ayah)
             self.audio_thread.set_audio_url(url)
             self.audio_thread.start()
 
     def stop_audio(self):
         self.player.stop()
 
-    def change_volume(self, value):
+    def OnPlayNext(self) -> None:
+
+        if self.player.is_playing:
+            self.stop_audio()
+
+        aya_range = self.parent.quran.ayah_data.get_ayah_range()
+        surah_range = aya_range.get(self.current_surah)
+        
+        if surah_range:
+            min_ayah = surah_range["min_ayah"]
+            max_ayah = surah_range["max_ayah"]
+            min_surah = min(list(aya_range.keys()))
+            max_surah = max(list(aya_range.keys()))
+            self.current_surah  = min_surah if not self.current_surah else self.current_surah
+            self.current_ayah = min_ayah if not self.current_ayah else self.current_ayah
+            
+            self.current_ayah += 1
+            if self.current_ayah > max_ayah:
+                if self.current_surah < max_surah:
+                    self.current_surah += 1
+                self.current_ayah = min_ayah
+
+            url = self.reciters.get_url(48, self.current_surah, self.current_ayah)
+            self.audio_thread.set_audio_url(url)
+            self.audio_thread.start()
+
+
+    def change_volume(self, value: int) -> None:
         self.player.set_volume(value / 100)
 
     def update_play_pause_button_text(self):

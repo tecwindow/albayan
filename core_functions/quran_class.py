@@ -273,7 +273,7 @@ class quran_mgr:
             first_position = current_position
             current_position += len(ayah_text)
             last_position = current_position - 1
-            ayah_data.insert(ayah[1], first_position, last_position)
+            ayah_data.insert(ayah[1], ayah[3], first_position, last_position)
 
         text = text.strip("\n")
         self.text = text

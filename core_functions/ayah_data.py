@@ -1,4 +1,5 @@
 import sqlite3
+from typing import List, Dict
 
 class AyahData:
     def __init__(self):
@@ -16,6 +17,7 @@ class AyahData:
         self.cursor.execute('''
             CREATE TEMPORARY TABLE IF NOT EXISTS ayah_data (
                 ayah_number INTEGER NOT NULL,
+                            surah_number INTEGER NOT NULL,
                 first_position INTEGER NOT NULL,
                 last_position INTEGER NOT NULL,
                 PRIMARY KEY (ayah_number, first_position, last_position)
@@ -23,13 +25,13 @@ class AyahData:
         ''')
         self.conn.commit()
 
-    def insert(self, ayah_number: int, first_position: int, last_position: int):
+    def insert(self, ayah_number: int, surah_number: int, first_position: int, last_position: int):
         """Insert a new ayah into the table."""
 
         self.cursor.execute('''
-            INSERT INTO ayah_data (ayah_number, first_position, last_position)
-            VALUES (?, ?, ?)
-        ''', (ayah_number, first_position, last_position))
+            INSERT INTO ayah_data (ayah_number, surah_number, first_position, last_position)
+            VALUES (?, ?, ?, ?)
+        ''', (ayah_number, surah_number, first_position, last_position))
         self.conn.commit()
     
     def get(self, position: int) -> int:
@@ -55,6 +57,19 @@ class AyahData:
             return result["first_position"]
         else:
             return 0
+
+    def get_ayah_range(self) -> Dict[int, List[sqlite3.Row]]:
+        """Fetches the maximum and minimum ayah numbers from the ayah_data table."""
+        self.cursor.execute("""
+            SELECT 
+                surah_number,
+                MAX(ayah_number) AS max_ayah,
+                MIN(ayah_number) AS min_ayah
+            FROM ayah_data
+            GROUP BY surah_number;
+        """)
+    
+        return {row["surah_number"]: row for row in self.cursor.fetchall()}
 
     def __del__(self):
         """Close the connection when the object is deleted."""
