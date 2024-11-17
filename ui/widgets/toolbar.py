@@ -7,13 +7,14 @@ from utils.audio_player import AudioPlayer
 from utils.settings import SettingsManager
 from utils.const import data_folder
 
+
 class AudioPlayerThread(QThread):
     statusChanged = pyqtSignal()
-    def __init__(self, player: AudioPlayer, parent: Optional[object]=None):
+
+    def __init__(self, player: AudioPlayer, parent: Optional[object] = None):
         super().__init__(parent)
         self.player = player
         self.url = None
-
 
     def run(self):
         if self.url:
@@ -26,23 +27,26 @@ class AudioPlayerThread(QThread):
             time.sleep(0.01)
         else:
             self.statusChanged.emit()
-        
+
     def set_audio_url(self, url: str):
         self.url = url
         self.quit()
         self.wait()
 
+
 class AudioToolBar(QToolBar):
-    def __init__(self, parent: Optional[object]=None):
+    def __init__(self, parent: Optional[object] = None):
         super().__init__(parent)
         self.parent = parent
         self.player = AudioPlayer()
         self.reciters = RecitersManager(data_folder / "quran" / "reciters.db")
-        self.current_surah = 0
-        self.current_ayah = 0
-        
+        self.current_surah = None
+        self.current_ayah = None
+
         self.play_pause_button = self.create_button("استماع الآية الحالية", self.toggle_play_pause)
-        self.stop_button = self.create_button("إقاف", self.stop_audio)
+        self.stop_button = self.create_button("إيقاف", self.stop_audio)
+        self.previous_button = self.create_button("الآية السابقة", self.OnPlayPrevious)
+        self.next_button = self.create_button("الآية التالية", self.OnPlayNext)
         self.volume_slider = self.create_slider(0, 100, 50, self.change_volume)
 
         self.audio_thread = AudioPlayerThread(self.player, self.parent)
@@ -67,7 +71,7 @@ class AudioToolBar(QToolBar):
     def toggle_play_pause(self):
         if self.player.is_playing():
             self.player.pause()
-        else:                
+        else:
             reciter_id = SettingsManager.current_settings["listening"]["reciter"]
             ayah_info = self.parent.get_current_ayah_info()
             self.current_surah = ayah_info[0]
@@ -79,40 +83,73 @@ class AudioToolBar(QToolBar):
     def stop_audio(self):
         self.player.stop()
 
-    def OnPlayNext(self) -> None:
-        if self.player.is_playing:
+    def navigate_ayah(self, direction: str) -> bool:
+        if self.player.is_playing():
             self.stop_audio()
 
         aya_range = self.parent.quran.ayah_data.get_ayah_range()
-        min_surah = min(list(aya_range.keys()))
-        max_surah = max(list(aya_range.keys()))
-        self.current_surah = self.current_surah or min_surah
+        if self.current_surah not in aya_range:
+            self.current_surah = None
+            self.current_ayah = None
 
-        surah_range = aya_range.get(self.current_surah)
-        if not surah_range:
-            print(f"Error: Surah {self.current_surah} not found in range data.")
-            return
+        if self.current_surah is None:
+            self.current_surah = min(aya_range.keys()) if direction == "next" else max(aya_range.keys())
+        if self.current_ayah is None:
+            self.current_ayah = aya_range[self.current_surah]["min_ayah"] - 1 if direction == "next" else aya_range[self.current_surah]["max_ayah"]
 
-        min_ayah = surah_range["min_ayah"]
-        max_ayah = surah_range["max_ayah"]
-        print(aya_range)
+        self.current_ayah += 1 if direction == "next" else -1
 
-        self.current_ayah = (self.current_ayah or min_ayah - 1) + 1
-        if self.current_ayah > max_ayah:
-            if self.current_surah < max_surah:
-                self.current_surah += 1
-            else:
-                print("End of paged reached.")
-                return
-            self.current_ayah = aya_range[self.current_surah]["min_ayah"]
+        if direction == "next":
+            if self.current_ayah > aya_range[self.current_surah]["max_ayah"]:
+                surah_keys = list(aya_range.keys())
+                current_index = surah_keys.index(self.current_surah)
+                if current_index < len(surah_keys) - 1:
+                    self.current_surah = surah_keys[current_index + 1]
+                    self.current_ayah = aya_range[self.current_surah]["min_ayah"]
+                else:
+                    print("End of Quran reached")
+                    return False 
+        elif direction == "previous":
+            if self.current_ayah < aya_range[self.current_surah]["min_ayah"]:
+                surah_keys = list(aya_range.keys())
+                current_index = surah_keys.index(self.current_surah)
+                if current_index > 0:
+                    self.current_surah = surah_keys[current_index - 1]
+                    self.current_ayah = aya_range[self.current_surah]["max_ayah"]
+                else:
+                    print("Start of Quran reached")
+                    return False 
 
+
+        nex_status  = self.current_surah + 1 > max(list(aya_range.keys())) and self.current_ayah + 1 > aya_range[self.current_surah]["max_ayah"]
+        previous_status  = self.current_surah - 1 < min(list(aya_range.keys())) and self.current_ayah - 1 < aya_range[self.current_surah]["min_ayah"]
+        self.next_button.setEnabled(not nex_status)
+        self.previous_button.setEnabled(not previous_status)
+        self.parent.menu_bar.play_next_action.setEnabled(not nex_status)
+        self.parent.menu_bar.play_previous_action.setEnabled(not previous_status)
+
+        return True
+
+    def play_ayah(self):
         reciter_id = SettingsManager.current_settings["listening"]["reciter"]
         url = self.reciters.get_url(reciter_id, self.current_surah, self.current_ayah)
         self.audio_thread.set_audio_url(url)
         self.audio_thread.start()
 
+    def OnPlayNext(self) -> None:
+        if self.navigate_ayah("next"):
+            self.play_ayah()
+
+    def OnPlayPrevious(self) -> None:
+        if self.navigate_ayah("previous"):
+            self.play_ayah()
+
     def change_volume(self, value: int) -> None:
         self.player.set_volume(value / 100)
+
+    def reset_current_ayah(self) -> None:
+        self.current_ayah = None
+        self.current_surah = None
 
     def update_play_pause_button_text(self):
         label = "إيقاف مؤقت" if self.player.is_playing() else "استماع الآية الحالية"

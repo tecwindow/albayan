@@ -75,10 +75,14 @@ class MenuBar(QMenuBar):
         self.play_next_action = QAction("تشغيل الآية التالية", self)
         self.play_next_action.setShortcut(QKeySequence("Ctrl+Shift+N"))
         self.play_next_action.triggered.connect(self.parent.toolbar.OnPlayNext)
+        self.play_previous_action = QAction("تشغيل الآية السابقة", self)
+        self.play_previous_action.setShortcut(QKeySequence("Ctrl+Shift+B"))
+        self.play_previous_action.triggered.connect(self.parent.toolbar.OnPlayPrevious)
 
         player_menu.addAction(self.play_pause_action)
         player_menu.addAction(self.stop_action)
         player_menu.addAction(self.play_next_action)
+        player_menu.addAction(self.play_previous_action)
 
         actions_menu = self.addMenu("الإجرائات(&A)")
         self.save_position_action = QAction("حفظ الموضع الحالي", self)
