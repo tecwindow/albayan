@@ -47,6 +47,7 @@ class InfoDialog(QDialog):
         layout.addWidget(close_button)
         self.setLayout(layout)
         QTimer.singleShot(300, text_edit.setFocus)
-        
 
-        
+    def copy_text(self):
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.text_edit.toPlainText())
