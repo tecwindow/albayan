@@ -20,7 +20,7 @@ class AudioPlayer:
         self.volume: float = 0.5
         self.supported_extensions = ('.wav', '.mp3', '.ogg')
     
-    def load_audio(self, source: str) -> None:
+    def load_audio(self, source: str, attempts: Optional[int] = 3) -> None:
         """Loads an audio file or a URL for playback."""
 
         # Stop and release the previous file
@@ -41,7 +41,10 @@ class AudioPlayer:
             self.current_channel = bass.BASS_StreamCreateFile(False, source.encode('utf-8'), 0, 0, 0)
 
         if not self.current_channel:
-            raise RuntimeError("Failed to load audio file or URL")
+            if attempts:
+                print(f"Trying too load: {source}.")
+                return self.load_audio(source, attempts - 1)
+            raise RuntimeError("Failed to load audio file or URL: {}".format(source))
         
         self.source = source
         self.set_volume(self.volume) 
@@ -101,7 +104,7 @@ class AudioPlayer:
             return PlaybackStatus.STOPPED  
 
         status = bass.BASS_ChannelIsActive(self.current_channel)
-        if status == PlaybackStatus.PLAYING.value:
+        if status == PlaybackStatus.PLAYING.value or status == PlaybackStatus.FIRST_PLAYING.value:
             return PlaybackStatus.PLAYING
         elif status == PlaybackStatus.PAUSED .value:
             return PlaybackStatus.PAUSED 
