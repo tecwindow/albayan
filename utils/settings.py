@@ -24,7 +24,7 @@ class SettingsManager:
             "athkar_volume_level": 100
         },
         "listening": {
-            "reciter": 0,
+            "reciter": 58,
             "action_after_listening": 0
         },
         "search": {
