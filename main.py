@@ -84,8 +84,9 @@ def main():
         app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         main_window = QuranInterface(program_name)
         app.set_main_window(main_window)
-        main_window.show()
-        call_after_starting(main_window)
+        if "--minimized" not in sys.argv:
+            main_window.show()
+            call_after_starting(main_window)
         sys.exit(app.exec())
     except Exception as e:
         print(e)
