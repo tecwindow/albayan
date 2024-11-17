@@ -1,12 +1,15 @@
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
+    QComboBox,
+    QRadioButton,
     QLabel,
     QTreeWidget,
     QTreeWidgetItem,
     QCheckBox,
     QPushButton,
     QGroupBox,
+    QButtonGroup,
     QMessageBox,
     QSlider,
     QSpacerItem,
@@ -16,7 +19,12 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtCore import Qt
+from core_functions.Reciters import RecitersManager
+from utils.const import data_folder
 from utils.settings import SettingsManager
+reciters_manager = RecitersManager(data_folder / "quran" / "reciters.db")
+
+
 
 class SettingsDialog(QDialog):
     def __init__(self, parent):
@@ -35,10 +43,12 @@ class SettingsDialog(QDialog):
         
         general_item = QTreeWidgetItem(["الإعدادات العامة"])
         audio_item = QTreeWidgetItem(["الصوت"])
+        listening_item = QTreeWidgetItem(["الاستماع"])
         search_item = QTreeWidgetItem(["البحث"])
         
         tree_widget.addTopLevelItem(general_item)
         tree_widget.addTopLevelItem(audio_item)
+        tree_widget.addTopLevelItem(listening_item)
         tree_widget.addTopLevelItem(search_item)
         
         self.stacked_widget = QStackedWidget()
@@ -86,6 +96,47 @@ class SettingsDialog(QDialog):
         self.group_audio_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_audio.setLayout(self.group_audio_layout)
         
+
+        self.group_listening = QGroupBox("إعدادات الاستماع")
+        self.group_listening_layout = QVBoxLayout()
+
+
+        self.reciters_label = QLabel("القارئ")
+        self.reciters_combo = QComboBox()
+# Assuming 'reciters_manager.get_reciters()' returns a dictionary of reciters as in the sample
+
+        # Fetch reciters from the database and populate the combo box
+        reciters = reciters_manager.get_reciters()
+        for quality, rows in reciters.items():
+            for row in rows:
+                # Format the item text with name, rewaya, and bitrate
+                item_text = f"{row['name']},  {row['rewaya']}, ({row['bitrate']}kbps)"
+                self.reciters_combo.addItem(item_text)
+
+
+        self.reciters_combo.setAccessibleName(self.reciters_label.text())
+
+
+        self.action_label = QLabel("الإجراء بعد الاستماع")
+        self.action_combo = QComboBox()
+        self.action_combo.addItems(["إيقاف", "تكرار", "الانتقال إلى الآية التالية"])
+        self.action_combo.setAccessibleName(self.action_label.text())
+
+
+
+        self.group_listening_layout.addWidget(self.reciters_label)
+        self.group_listening_layout.addWidget(self.reciters_combo)
+        self.group_listening_layout.addWidget(self.action_label)
+        self.group_listening_layout.addWidget(self.action_combo)
+
+
+        self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+
+
+        self.group_listening.setLayout(self.group_listening_layout)
+
+
+
         self.group_search = QGroupBox("إعدادات البحث")
         self.group_search_layout = QVBoxLayout()
         self.ignore_tashkeel_checkbox = QCheckBox("تجاهل التشكيل")
@@ -100,6 +151,7 @@ class SettingsDialog(QDialog):
         
         self.stacked_widget.addWidget(self.group_general)
         self.stacked_widget.addWidget(self.group_audio)
+        self.stacked_widget.addWidget(self.group_listening)
         self.stacked_widget.addWidget(self.group_search)
         
         tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(tree_widget.indexOfTopLevelItem(current)))
