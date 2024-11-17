@@ -14,6 +14,7 @@ class AudioPlayerThread(QThread):
         self.player = player
         self.url = None
 
+
     def run(self):
         if self.url:
             if self.player.source != self.url or self.player.is_stopped():
@@ -22,12 +23,14 @@ class AudioPlayerThread(QThread):
             self.statusChanged.emit()
 
         while self.player.is_playing():
-            time.sleep(0.1)
+            time.sleep(0.01)
         else:
             self.statusChanged.emit()
         
     def set_audio_url(self, url: str):
         self.url = url
+        self.quit()
+        self.wait()
 
 class AudioToolBar(QToolBar):
     def __init__(self, parent: Optional[object]=None):
@@ -65,8 +68,7 @@ class AudioToolBar(QToolBar):
         if self.player.is_playing():
             self.player.pause()
         else:                
-            current_settings = SettingsManager.current_settings
-            reciter_id = current_settings["listening"].get("reciter")
+            reciter_id = SettingsManager.current_settings["listening"]["reciter"]
             ayah_info = self.parent.get_current_ayah_info()
             self.current_surah = ayah_info[0]
             self.current_ayah = ayah_info[3]
@@ -78,31 +80,36 @@ class AudioToolBar(QToolBar):
         self.player.stop()
 
     def OnPlayNext(self) -> None:
-
         if self.player.is_playing:
             self.stop_audio()
 
         aya_range = self.parent.quran.ayah_data.get_ayah_range()
+        min_surah = min(list(aya_range.keys()))
+        max_surah = max(list(aya_range.keys()))
+        self.current_surah = self.current_surah or min_surah
+
         surah_range = aya_range.get(self.current_surah)
-        
-        if surah_range:
-            min_ayah = surah_range["min_ayah"]
-            max_ayah = surah_range["max_ayah"]
-            min_surah = min(list(aya_range.keys()))
-            max_surah = max(list(aya_range.keys()))
-            self.current_surah  = min_surah if not self.current_surah else self.current_surah
-            self.current_ayah = min_ayah if not self.current_ayah else self.current_ayah
-            
-            self.current_ayah += 1
-            if self.current_ayah > max_ayah:
-                if self.current_surah < max_surah:
-                    self.current_surah += 1
-                self.current_ayah = min_ayah
+        if not surah_range:
+            print(f"Error: Surah {self.current_surah} not found in range data.")
+            return
 
-            url = self.reciters.get_url(48, self.current_surah, self.current_ayah)
-            self.audio_thread.set_audio_url(url)
-            self.audio_thread.start()
+        min_ayah = surah_range["min_ayah"]
+        max_ayah = surah_range["max_ayah"]
+        print(aya_range)
 
+        self.current_ayah = (self.current_ayah or min_ayah - 1) + 1
+        if self.current_ayah > max_ayah:
+            if self.current_surah < max_surah:
+                self.current_surah += 1
+            else:
+                print("End of paged reached.")
+                return
+            self.current_ayah = aya_range[self.current_surah]["min_ayah"]
+
+        reciter_id = SettingsManager.current_settings["listening"]["reciter"]
+        url = self.reciters.get_url(reciter_id, self.current_surah, self.current_ayah)
+        self.audio_thread.set_audio_url(url)
+        self.audio_thread.start()
 
     def change_volume(self, value: int) -> None:
         self.player.set_volume(value / 100)
