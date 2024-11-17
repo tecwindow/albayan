@@ -1,6 +1,5 @@
 import sqlite3
 from typing import List, Dict, Optional
-from collections import defaultdict
 from functools import lru_cache
 
 
@@ -13,7 +12,7 @@ class RecitersManager:
         conn.row_factory = sqlite3.Row
         return conn
 
-    def get_reciters(self) -> Dict[str, List[sqlite3.Row]]:
+    def get_reciters(self) -> List[sqlite3.Row]:
         """Fetches all reciters from the database."""
         with self._connect() as conn:
             conn.row_factory = sqlite3.Row
@@ -29,11 +28,7 @@ class RecitersManager:
                 ORDER BY name, bitrate;
             """)
 
-            result = defaultdict(list)
-            for row in cursor.fetchall():
-                result[row["quality"]].append(row)
-
-            return result
+            return cursor.fetchall()
 
     @lru_cache(maxsize=1)
     def _get_base_url(self, reciter_id: int) -> Optional[str]:

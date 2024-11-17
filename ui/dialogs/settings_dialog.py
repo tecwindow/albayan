@@ -33,6 +33,7 @@ class SettingsDialog(QDialog):
         self.init_ui()
         self.set_current_settings()
 
+
     def init_ui(self):
         main_layout = QVBoxLayout()
         taps_layout = QHBoxLayout()
@@ -52,7 +53,6 @@ class SettingsDialog(QDialog):
         
         self.stacked_widget = QStackedWidget()
         
-        # إعدادات الإعدادات العامة
         self.group_general = QGroupBox("الإعدادات العامة")
         self.group_general_layout = QVBoxLayout()
         self.run_in_background_checkbox = QCheckBox("تشغيل البرنامج في الخلفية")
@@ -70,7 +70,6 @@ class SettingsDialog(QDialog):
         self.group_general_layout.addWidget(self.reset_button)
         self.group_general.setLayout(self.group_general_layout)
         
-        # إعدادات الصوت
         self.group_audio = QGroupBox("إعدادات الصوت")
         self.group_audio_layout = QVBoxLayout()
         self.volume_label = QLabel("مستوى الصوت")
@@ -104,21 +103,17 @@ class SettingsDialog(QDialog):
         self.group_audio_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_audio.setLayout(self.group_audio_layout)
         
-        # إعدادات الاستماع
         self.group_listening = QGroupBox("إعدادات الاستماع")
         self.group_listening_layout = QVBoxLayout()
 
         self.reciters_label = QLabel("القارئ")
         self.reciters_combo = QComboBox()
         reciters = reciters_manager.get_reciters()
-        for quality, rows in reciters.items():
-            for row in rows:
-                display_text = f"{row['name']} - {row['rewaya']} ({row['bitrate']} kbps)"
-                self.reciters_combo.addItem(display_text, row["id"])
         self.reciters_combo.setAccessibleName(self.reciters_label.text())
+        for  row in reciters:
+            display_text = f"{row['name']} - {row['rewaya']} - {row['type']} - ({row['bitrate']} kbps)"
+            self.reciters_combo.addItem(display_text, row["id"])
 
-
-        # استخدام RadioButton مع GroupBox  بدل من ComboBox
         self.action_after_play = QGroupBox("الإجراء بعد الاستماع")
         self.action_buttons_layout = QVBoxLayout()
         self.action_buttons = QButtonGroup(self)
@@ -127,26 +122,22 @@ class SettingsDialog(QDialog):
         self.repeat_radio = QRadioButton("تكرار")
         self.next_verse_radio = QRadioButton("الانتقال إلى الآية التالية")
 
-        self.action_buttons.addButton(self.stop_radio)
-        self.action_buttons.addButton(self.repeat_radio)
-        self.action_buttons.addButton(self.next_verse_radio)
+        self.action_buttons.addButton(self.stop_radio, 0)
+        self.action_buttons.addButton(self.repeat_radio, 0)
+        self.action_buttons.addButton(self.next_verse_radio, 0)
 
-        # إضافة خيارات الراديو إلى التخطيط
         self.action_buttons_layout.addWidget(self.stop_radio)
         self.action_buttons_layout.addWidget(self.repeat_radio)
         self.action_buttons_layout.addWidget(self.next_verse_radio)
 
-        # تعيين التخطيط لـ QGroupBox
         self.action_after_play.setLayout(self.action_buttons_layout)
 
-        # إضافة الإعدادات إلى التخطيط
         self.group_listening_layout.addWidget(self.reciters_label)
         self.group_listening_layout.addWidget(self.reciters_combo)
         self.group_listening_layout.addWidget(self.action_after_play)
         self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_listening.setLayout(self.group_listening_layout)
 
-        # إعدادات البحث
         self.group_search = QGroupBox("إعدادات البحث")
         self.group_search_layout = QVBoxLayout()
         self.ignore_tashkeel_checkbox = QCheckBox("تجاهل التشكيل")
@@ -204,7 +195,7 @@ class SettingsDialog(QDialog):
 
         listening_settings = {
             "reciter": self.reciters_combo.currentData(),
-            "action_after_listening": "stop" if self.stop_radio.isChecked() else "repeat" if self.repeat_radio.isChecked() else "next_verse",
+            "action_after_listening": self.action_buttons.checkedId(),
         }
 
 
@@ -221,8 +212,6 @@ class SettingsDialog(QDialog):
             "search": search_settings
         })
         self.accept()
-        print(self.reciters_combo.currentData())
-
 
     def OnReset(self):
         msg_box = QMessageBox(self)
@@ -253,20 +242,14 @@ class SettingsDialog(QDialog):
         self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])
         self.match_whole_word_checkbox.setChecked(current_settings["search"]["match_whole_word"])
         # Update the reciter ComboBox
-        reciter_id = current_settings["listening"]["reciter"]  # Get the saved reciter ID
-        combo_box = self.reciters_combo  # Reference to the reciter combo box
-
-        # Find the index of the item with the matching ID
-        for index in range(combo_box.count()):
-            if combo_box.itemData(index) == reciter_id:
-                combo_box.setCurrentIndex(index)
+        reciter_id = current_settings["listening"]["reciter"]
+        for index in range(self.reciters_combo.count()):
+            if self.reciters_combo.itemData(index) == reciter_id:
+                self.reciters_combo.setCurrentIndex(index)
                 break
 
-        # ضبط زر الراديو بناءً على الإعداد المخزن
-        action_after_listening = current_settings.get("listening", {}).get("action_after_listening", "stop")
-        if action_after_listening == "stop":
-            self.stop_radio.setChecked(True)
-        elif action_after_listening == "repeat":
-            self.repeat_radio.setChecked(True)
-        elif action_after_listening == "next_verse":
-            self.next_verse_radio.setChecked(True)
+        action_after_listening = current_settings["listening"]["action_after_listening"]
+        radio_button = self.action_buttons.button(action_after_listening)
+        radio_button.setChecked(True)
+        radio_button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        
