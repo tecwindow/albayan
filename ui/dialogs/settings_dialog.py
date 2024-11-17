@@ -194,6 +194,12 @@ class SettingsDialog(QDialog):
             "athkar_volume_level": self.athkar_volume.value()
         }
 
+
+        listening_settings = {
+            "reciter": self.reciters_combo.currentData()
+        }
+
+
         search_settings = {
             "ignore_tashkeel": self.ignore_tashkeel_checkbox.isChecked(),
             "ignore_hamza": self.ignore_hamza_checkbox.isChecked(),
@@ -203,6 +209,7 @@ class SettingsDialog(QDialog):
         SettingsManager.write_settings({
             "general": general_settings,
             "audio": audio_settings,
+            "listening": listening_settings,
             "search": search_settings
         })
         self.accept()
@@ -236,3 +243,13 @@ class SettingsDialog(QDialog):
         self.ignore_tashkeel_checkbox.setChecked(current_settings["search"]["ignore_tashkeel"])
         self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])
         self.match_whole_word_checkbox.setChecked(current_settings["search"]["match_whole_word"])
+
+        # Update the reciter ComboBox
+        reciter_id = current_settings["listening"]["reciter"]  # Get the saved reciter ID
+        combo_box = self.reciters_combo  # Reference to the reciter combo box
+
+        # Find the index of the item with the matching ID
+        for index in range(combo_box.count()):
+            if combo_box.itemData(index) == reciter_id:
+                combo_box.setCurrentIndex(index)
+                break
