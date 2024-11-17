@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from core_functions.Reciters import RecitersManager
 from utils.audio_player import AudioPlayer
+from utils.settings import SettingsManager
 from utils.const import data_folder
 
 class AudioPlayerThread(QThread):
@@ -62,8 +63,10 @@ class AudioToolBar(QToolBar):
         if self.player.is_playing():
             self.player.pause()
         else:                
+            current_settings = SettingsManager.current_settings
+            reciter_id = current_settings["listening"].get("reciter")
             ayah_info = self.parent.get_current_ayah_info()
-            url = self.reciters.get_url(68, ayah_info[0], ayah_info[3])
+            url = self.reciters.get_url(reciter_id, ayah_info[0], ayah_info[3])
             self.audio_thread.set_audio_url(url)
             self.audio_thread.start()
 
