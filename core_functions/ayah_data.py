@@ -18,6 +18,7 @@ class AyahData:
             CREATE TEMPORARY TABLE IF NOT EXISTS ayah_data (
                 ayah_number INTEGER NOT NULL,
                             surah_number INTEGER NOT NULL,
+                            ayah_number_in_surah INTEGER NOT NULL,
                 first_position INTEGER NOT NULL,
                 last_position INTEGER NOT NULL,
                 PRIMARY KEY (ayah_number, first_position, last_position)
@@ -25,13 +26,13 @@ class AyahData:
         ''')
         self.conn.commit()
 
-    def insert(self, ayah_number: int, surah_number: int, first_position: int, last_position: int):
+    def insert(self, ayah_number: int, surah_number: int, ayah_number_in_surah: int, first_position: int, last_position: int):
         """Insert a new ayah into the table."""
 
         self.cursor.execute('''
-            INSERT INTO ayah_data (ayah_number, surah_number, first_position, last_position)
-            VALUES (?, ?, ?, ?)
-        ''', (ayah_number, surah_number, first_position, last_position))
+            INSERT INTO ayah_data (ayah_number, surah_number, ayah_number_in_surah, first_position, last_position)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (ayah_number, surah_number, ayah_number_in_surah, first_position, last_position))
         self.conn.commit()
     
     def get(self, position: int) -> int:
@@ -63,8 +64,8 @@ class AyahData:
         self.cursor.execute("""
             SELECT 
                 surah_number,
-                MAX(ayah_number) AS max_ayah,
-                MIN(ayah_number) AS min_ayah
+                MAX(ayah_number_in_surah) AS max_ayah,
+                MIN(ayah_number_in_surah) AS min_ayah
             FROM ayah_data
             GROUP BY surah_number;
         """)
