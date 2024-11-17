@@ -72,9 +72,6 @@ class SettingsDialog(QDialog):
         
         self.group_audio = QGroupBox("إعدادات الصوت")
         self.group_audio_layout = QVBoxLayout()
-        self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
-        self.basmala_checkbox = QCheckBox("تشغيل المؤثرات الصوتية مع فتح البرنامج")
-        self.speech_checkbox = QCheckBox("نطق الإجرائات")
         self.volume_label = QLabel("مستوى الصوت")
         self.volume = QSlider(Qt.Orientation.Horizontal)
         self.volume.setRange(0, 100)
@@ -85,14 +82,18 @@ class SettingsDialog(QDialog):
         self.athkar_volume.setRange(0, 100)
         self.athkar_volume.setAccessibleName(self.athkar_volume_label.text())
         self.athkar_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
+        self.basmala_checkbox = QCheckBox("تشغيل المؤثرات الصوتية مع فتح البرنامج")
+        self.speech_checkbox = QCheckBox("نطق الإجرائات")
 
-        self.group_audio_layout.addWidget(self.sound_checkbox)
-        self.group_audio_layout.addWidget(self.basmala_checkbox)
-        self.group_audio_layout.addWidget(self.speech_checkbox)
+
         self.group_audio_layout.addWidget(self.volume_label)
         self.group_audio_layout.addWidget(self.volume)
         self.group_audio_layout.addWidget(self.athkar_volume_label)
         self.group_audio_layout.addWidget(self.athkar_volume)
+        self.group_audio_layout.addWidget(self.sound_checkbox)
+        self.group_audio_layout.addWidget(self.basmala_checkbox)
+        self.group_audio_layout.addWidget(self.speech_checkbox)
         self.group_audio_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_audio.setLayout(self.group_audio_layout)
         
@@ -244,12 +245,3 @@ class SettingsDialog(QDialog):
         self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])
         self.match_whole_word_checkbox.setChecked(current_settings["search"]["match_whole_word"])
 
-        # Update the reciter ComboBox
-        reciter_id = current_settings["listening"]["reciter"]  # Get the saved reciter ID
-        combo_box = self.reciters_combo  # Reference to the reciter combo box
-
-        # Find the index of the item with the matching ID
-        for index in range(combo_box.count()):
-            if combo_box.itemData(index) == reciter_id:
-                combo_box.setCurrentIndex(index)
-                break
