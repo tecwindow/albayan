@@ -25,7 +25,7 @@ class SettingsManager:
         },
         "listening": {
             "reciter": 58,
-            "action_after_listening": 0
+            "action_after_listening": "stop",
         },
         "search": {
             "ignore_tashkeel": True,
