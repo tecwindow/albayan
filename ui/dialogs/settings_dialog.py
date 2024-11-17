@@ -77,6 +77,11 @@ class SettingsDialog(QDialog):
         self.volume.setRange(0, 100)
         self.volume.setAccessibleName(self.volume_label.text())
         self.volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.ayah_volume_label = QLabel("مستوى صوت الآيات")
+        self.ayah_volume = QSlider(Qt.Orientation.Horizontal)
+        self.ayah_volume.setRange(0, 100)
+        self.ayah_volume.setAccessibleName(self.ayah_volume_label.text())
+        self.ayah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.athkar_volume_label = QLabel("مستوى صوت الأذكار")
         self.athkar_volume = QSlider(Qt.Orientation.Horizontal)
         self.athkar_volume.setRange(0, 100)
@@ -89,6 +94,8 @@ class SettingsDialog(QDialog):
 
         self.group_audio_layout.addWidget(self.volume_label)
         self.group_audio_layout.addWidget(self.volume)
+        self.group_audio_layout.addWidget(self.ayah_volume_label)
+        self.group_audio_layout.addWidget(self.ayah_volume)
         self.group_audio_layout.addWidget(self.athkar_volume_label)
         self.group_audio_layout.addWidget(self.athkar_volume)
         self.group_audio_layout.addWidget(self.sound_checkbox)
@@ -192,6 +199,7 @@ class SettingsDialog(QDialog):
             "start_with_basmala_enabled": self.basmala_checkbox.isChecked(),
             "speak_actions_enabled": self.speech_checkbox.isChecked(),
             "volume_level": self.volume.value(),
+            "ayah_volume_level": self.ayah_volume.value(),
             "athkar_volume_level": self.athkar_volume.value()
         }
 
@@ -237,6 +245,7 @@ class SettingsDialog(QDialog):
         self.speech_checkbox.setChecked(current_settings["audio"]["speak_actions_enabled"])
         self.volume.setValue(current_settings["audio"]["volume_level"])
         self.athkar_volume.setValue(current_settings["audio"]["athkar_volume_level"])
+        self.ayah_volume.setValue(current_settings["audio"]["ayah_volume_level"])
         self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])
         self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
         self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
@@ -244,4 +253,13 @@ class SettingsDialog(QDialog):
         self.ignore_tashkeel_checkbox.setChecked(current_settings["search"]["ignore_tashkeel"])
         self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])
         self.match_whole_word_checkbox.setChecked(current_settings["search"]["match_whole_word"])
+        # Update the reciter ComboBox
+        reciter_id = current_settings["listening"]["reciter"]  # Get the saved reciter ID
+        combo_box = self.reciters_combo  # Reference to the reciter combo box
+
+        # Find the index of the item with the matching ID
+        for index in range(combo_box.count()):
+            if combo_box.itemData(index) == reciter_id:
+                combo_box.setCurrentIndex(index)
+                break
 
