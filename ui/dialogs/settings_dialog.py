@@ -1,12 +1,15 @@
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
+    QComboBox,
+    QRadioButton,
     QLabel,
     QTreeWidget,
     QTreeWidgetItem,
     QCheckBox,
     QPushButton,
     QGroupBox,
+    QButtonGroup,
     QMessageBox,
     QSlider,
     QSpacerItem,
@@ -16,7 +19,11 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtCore import Qt
+from core_functions.Reciters import RecitersManager
+from utils.const import data_folder
 from utils.settings import SettingsManager
+
+reciters_manager = RecitersManager(data_folder / "quran" / "reciters.db")
 
 class SettingsDialog(QDialog):
     def __init__(self, parent):
@@ -35,14 +42,17 @@ class SettingsDialog(QDialog):
         
         general_item = QTreeWidgetItem(["الإعدادات العامة"])
         audio_item = QTreeWidgetItem(["الصوت"])
+        listening_item = QTreeWidgetItem(["الاستماع"])
         search_item = QTreeWidgetItem(["البحث"])
         
         tree_widget.addTopLevelItem(general_item)
         tree_widget.addTopLevelItem(audio_item)
+        tree_widget.addTopLevelItem(listening_item)
         tree_widget.addTopLevelItem(search_item)
         
         self.stacked_widget = QStackedWidget()
         
+        # إعدادات الإعدادات العامة
         self.group_general = QGroupBox("الإعدادات العامة")
         self.group_general_layout = QVBoxLayout()
         self.run_in_background_checkbox = QCheckBox("تشغيل البرنامج في الخلفية")
@@ -60,32 +70,83 @@ class SettingsDialog(QDialog):
         self.group_general_layout.addWidget(self.reset_button)
         self.group_general.setLayout(self.group_general_layout)
         
+        # إعدادات الصوت
         self.group_audio = QGroupBox("إعدادات الصوت")
         self.group_audio_layout = QVBoxLayout()
-        self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
-        self.basmala_checkbox = QCheckBox("تشغيل المؤثرات الصوتية مع فتح البرنامج")
-        self.speech_checkbox = QCheckBox("نطق الإجرائات")
         self.volume_label = QLabel("مستوى الصوت")
         self.volume = QSlider(Qt.Orientation.Horizontal)
         self.volume.setRange(0, 100)
         self.volume.setAccessibleName(self.volume_label.text())
         self.volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.ayah_volume_label = QLabel("مستوى صوت الآيات")
+        self.ayah_volume = QSlider(Qt.Orientation.Horizontal)
+        self.ayah_volume.setRange(0, 100)
+        self.ayah_volume.setAccessibleName(self.ayah_volume_label.text())
+        self.ayah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.athkar_volume_label = QLabel("مستوى صوت الأذكار")
         self.athkar_volume = QSlider(Qt.Orientation.Horizontal)
         self.athkar_volume.setRange(0, 100)
         self.athkar_volume.setAccessibleName(self.athkar_volume_label.text())
         self.athkar_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
+        self.basmala_checkbox = QCheckBox("تشغيل المؤثرات الصوتية مع فتح البرنامج")
+        self.speech_checkbox = QCheckBox("نطق الإجرائات")
 
+        self.group_audio_layout.addWidget(self.volume_label)
+        self.group_audio_layout.addWidget(self.volume)
+        self.group_audio_layout.addWidget(self.ayah_volume_label)
+        self.group_audio_layout.addWidget(self.ayah_volume)
+        self.group_audio_layout.addWidget(self.athkar_volume_label)
+        self.group_audio_layout.addWidget(self.athkar_volume)
         self.group_audio_layout.addWidget(self.sound_checkbox)
         self.group_audio_layout.addWidget(self.basmala_checkbox)
         self.group_audio_layout.addWidget(self.speech_checkbox)
-        self.group_audio_layout.addWidget(self.volume_label)
-        self.group_audio_layout.addWidget(self.volume)
-        self.group_audio_layout.addWidget(self.athkar_volume_label)
-        self.group_audio_layout.addWidget(self.athkar_volume)
         self.group_audio_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_audio.setLayout(self.group_audio_layout)
         
+        # إعدادات الاستماع
+        self.group_listening = QGroupBox("إعدادات الاستماع")
+        self.group_listening_layout = QVBoxLayout()
+
+        self.reciters_label = QLabel("القارئ")
+        self.reciters_combo = QComboBox()
+        reciters = reciters_manager.get_reciters()
+        for quality, rows in reciters.items():
+            for row in rows:
+                display_text = f"{row['name']} - {row['rewaya']} ({row['bitrate']} kbps)"
+                self.reciters_combo.addItem(display_text, row["id"])
+        self.reciters_combo.setAccessibleName(self.reciters_label.text())
+
+
+        # استخدام RadioButton مع GroupBox  بدل من ComboBox
+        self.action_after_play = QGroupBox("الإجراء بعد الاستماع")
+        self.action_buttons_layout = QVBoxLayout()
+        self.action_buttons = QButtonGroup(self)
+
+        self.stop_radio = QRadioButton("إيقاف")
+        self.repeat_radio = QRadioButton("تكرار")
+        self.next_verse_radio = QRadioButton("الانتقال إلى الآية التالية")
+
+        self.action_buttons.addButton(self.stop_radio)
+        self.action_buttons.addButton(self.repeat_radio)
+        self.action_buttons.addButton(self.next_verse_radio)
+
+        # إضافة خيارات الراديو إلى التخطيط
+        self.action_buttons_layout.addWidget(self.stop_radio)
+        self.action_buttons_layout.addWidget(self.repeat_radio)
+        self.action_buttons_layout.addWidget(self.next_verse_radio)
+
+        # تعيين التخطيط لـ QGroupBox
+        self.action_after_play.setLayout(self.action_buttons_layout)
+
+        # إضافة الإعدادات إلى التخطيط
+        self.group_listening_layout.addWidget(self.reciters_label)
+        self.group_listening_layout.addWidget(self.reciters_combo)
+        self.group_listening_layout.addWidget(self.action_after_play)
+        self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        self.group_listening.setLayout(self.group_listening_layout)
+
+        # إعدادات البحث
         self.group_search = QGroupBox("إعدادات البحث")
         self.group_search_layout = QVBoxLayout()
         self.ignore_tashkeel_checkbox = QCheckBox("تجاهل التشكيل")
@@ -100,6 +161,7 @@ class SettingsDialog(QDialog):
         
         self.stacked_widget.addWidget(self.group_general)
         self.stacked_widget.addWidget(self.group_audio)
+        self.stacked_widget.addWidget(self.group_listening)
         self.stacked_widget.addWidget(self.group_search)
         
         tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(tree_widget.indexOfTopLevelItem(current)))
@@ -136,8 +198,15 @@ class SettingsDialog(QDialog):
             "start_with_basmala_enabled": self.basmala_checkbox.isChecked(),
             "speak_actions_enabled": self.speech_checkbox.isChecked(),
             "volume_level": self.volume.value(),
+            "ayah_volume_level": self.ayah_volume.value(),
             "athkar_volume_level": self.athkar_volume.value()
         }
+
+        listening_settings = {
+            "reciter": self.reciters_combo.currentData(),
+            "action_after_listening": "stop" if self.stop_radio.isChecked() else "repeat" if self.repeat_radio.isChecked() else "next_verse",
+        }
+
 
         search_settings = {
             "ignore_tashkeel": self.ignore_tashkeel_checkbox.isChecked(),
@@ -148,9 +217,12 @@ class SettingsDialog(QDialog):
         SettingsManager.write_settings({
             "general": general_settings,
             "audio": audio_settings,
+            "listening": listening_settings,
             "search": search_settings
         })
         self.accept()
+        print(self.reciters_combo.currentData())
+
 
     def OnReset(self):
         msg_box = QMessageBox(self)
@@ -172,6 +244,7 @@ class SettingsDialog(QDialog):
         self.speech_checkbox.setChecked(current_settings["audio"]["speak_actions_enabled"])
         self.volume.setValue(current_settings["audio"]["volume_level"])
         self.athkar_volume.setValue(current_settings["audio"]["athkar_volume_level"])
+        self.ayah_volume.setValue(current_settings["audio"]["ayah_volume_level"])
         self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])
         self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
         self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
@@ -179,3 +252,21 @@ class SettingsDialog(QDialog):
         self.ignore_tashkeel_checkbox.setChecked(current_settings["search"]["ignore_tashkeel"])
         self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])
         self.match_whole_word_checkbox.setChecked(current_settings["search"]["match_whole_word"])
+        # Update the reciter ComboBox
+        reciter_id = current_settings["listening"]["reciter"]  # Get the saved reciter ID
+        combo_box = self.reciters_combo  # Reference to the reciter combo box
+
+        # Find the index of the item with the matching ID
+        for index in range(combo_box.count()):
+            if combo_box.itemData(index) == reciter_id:
+                combo_box.setCurrentIndex(index)
+                break
+
+        # ضبط زر الراديو بناءً على الإعداد المخزن
+        action_after_listening = current_settings.get("listening", {}).get("action_after_listening", "stop")
+        if action_after_listening == "stop":
+            self.stop_radio.setChecked(True)
+        elif action_after_listening == "repeat":
+            self.repeat_radio.setChecked(True)
+        elif action_after_listening == "next_verse":
+            self.next_verse_radio.setChecked(True)

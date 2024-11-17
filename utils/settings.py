@@ -20,7 +20,12 @@ class SettingsManager:
             "start_with_basmala_enabled": True,
             "speak_actions_enabled": True,
             "volume_level": 100,
+            "ayah_volume_level": 100,
             "athkar_volume_level": 100
+        },
+        "listening": {
+            "reciter": 58,
+            "action_after_listening": "stop",
         },
         "search": {
             "ignore_tashkeel": True,
