@@ -29,6 +29,12 @@ class InfoDialog(QDialog):
         else:
             text_edit.setText(self.text)
 
+        # Copy button
+        copy_button = QPushButton('نسخ', self)
+        copy_button.clicked.connect(self.copy_text)
+        copy_button.setShortcut(QKeySequence("Ctrl+C"))
+
+        # close button
         close_button = QPushButton('إغلاق', self)
         close_button.setShortcut(QKeySequence("Ctrl+W"))
         close_button.clicked.connect(self.reject)
