@@ -56,6 +56,7 @@ class SettingsDialog(QDialog):
         self.group_general = QGroupBox("الإعدادات العامة")
         self.group_general_layout = QVBoxLayout()
         self.run_in_background_checkbox = QCheckBox("تشغيل البرنامج في الخلفية")
+        self.start_on_system_start_checkbox = QCheckBox("تشغيل عند بدء تشغيل النظام")
         self.auto_save_position_checkbox = QCheckBox("حفظ الموضع الحالي تلقائيًا عند إغلاق البرنامج")
         self.update_checkbox = QCheckBox("التحقق من التحديثات")
         self.log_checkbox = QCheckBox("تمكين تسجيل الأخطاء")
@@ -63,13 +64,20 @@ class SettingsDialog(QDialog):
         self.reset_button.clicked.connect(self.OnReset)
         
         self.group_general_layout.addWidget(self.run_in_background_checkbox)
+        self.group_general_layout.addWidget(self.start_on_system_start_checkbox)
         self.group_general_layout.addWidget(self.auto_save_position_checkbox)
         self.group_general_layout.addWidget(self.update_checkbox)
         self.group_general_layout.addWidget(self.log_checkbox)
         self.group_general_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_general_layout.addWidget(self.reset_button)
         self.group_general.setLayout(self.group_general_layout)
-        
+
+
+
+        self.run_in_background_checkbox.toggled.connect(self.updateStartCheckboxState)
+        self.start_on_system_start_checkbox.toggled.connect(self.updateBackgroundCheckboxState)
+
+
         self.group_audio = QGroupBox("إعدادات الصوت")
         self.group_audio_layout = QVBoxLayout()
         self.volume_label = QLabel("مستوى الصوت")
@@ -114,27 +122,19 @@ class SettingsDialog(QDialog):
             display_text = f"{row['name']} - {row['rewaya']} - {row['type']} - ({row['bitrate']} kbps)"
             self.reciters_combo.addItem(display_text, row["id"])
 
-        self.action_after_play = QGroupBox("الإجراء بعد الاستماع")
-        self.action_buttons_layout = QVBoxLayout()
-        self.action_buttons = QButtonGroup(self)
 
-        self.stop_radio = QRadioButton("إيقاف")
-        self.repeat_radio = QRadioButton("تكرار")
-        self.next_verse_radio = QRadioButton("الانتقال إلى الآية التالية")
+        self.action_label = QLabel("الإجراء بعد الاستماع")
+        self.action_combo = QComboBox()
+        items_with_ids = [("إيقاف", 0), ("تكرار", 1), ("الانتقال إلى الآية التالية", 2)]
+        [self.action_combo.addItem(text, id) for text, id in items_with_ids]
+        self.action_combo.setAccessibleName(self.action_label.text())
 
-        self.action_buttons.addButton(self.stop_radio, 0)
-        self.action_buttons.addButton(self.repeat_radio, 0)
-        self.action_buttons.addButton(self.next_verse_radio, 0)
 
-        self.action_buttons_layout.addWidget(self.stop_radio)
-        self.action_buttons_layout.addWidget(self.repeat_radio)
-        self.action_buttons_layout.addWidget(self.next_verse_radio)
 
-        self.action_after_play.setLayout(self.action_buttons_layout)
 
         self.group_listening_layout.addWidget(self.reciters_label)
         self.group_listening_layout.addWidget(self.reciters_combo)
-        self.group_listening_layout.addWidget(self.action_after_play)
+        self.group_listening_layout.addWidget(self.action_combo)
         self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_listening.setLayout(self.group_listening_layout)
 
@@ -176,9 +176,27 @@ class SettingsDialog(QDialog):
         main_layout.addLayout(buttons_layout)
         self.setLayout(main_layout)
 
+
+    def updateBackgroundCheckboxState(self):
+        # Check if 'start_on_system_start_checkbox' is checked
+        if self.start_on_system_start_checkbox.isChecked():
+            # If 'start_on_system_start_checkbox' is checked, automatically check 'run_in_background_checkbox'
+            self.run_in_background_checkbox.setChecked(True)
+
+
+    def updateStartCheckboxState(self):
+
+        # Check if 'run_in_background_checkbox' is unchecked, then uncheck 'start_on_system_start_checkbox'
+        if not self.run_in_background_checkbox.isChecked():
+            self.start_on_system_start_checkbox.setChecked(False)
+
+
+
+
     def save_settings(self):
         general_settings = {
             "run_in_background_enabled": self.run_in_background_checkbox.isChecked(),
+            "start_on_system_starts_enabled": self.start_on_system_start_checkbox.isChecked(),
             "auto_save_position_enabled": self.auto_save_position_checkbox.isChecked(),
             "check_update_enabled": self.update_checkbox.isChecked(),
             "logging_enabled": self.log_checkbox.isChecked()
@@ -195,7 +213,7 @@ class SettingsDialog(QDialog):
 
         listening_settings = {
             "reciter": self.reciters_combo.currentData(),
-            "action_after_listening": self.action_buttons.checkedId(),
+            "action_after_listening": self.action_combo.currentData()
         }
 
 
@@ -235,6 +253,7 @@ class SettingsDialog(QDialog):
         self.athkar_volume.setValue(current_settings["audio"]["athkar_volume_level"])
         self.ayah_volume.setValue(current_settings["audio"]["ayah_volume_level"])
         self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])
+        self.start_on_system_start_checkbox.setChecked(current_settings["general"]["start_on_system_starts_enabled"])
         self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
         self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
         self.log_checkbox.setChecked(current_settings["general"]["logging_enabled"])
@@ -248,8 +267,8 @@ class SettingsDialog(QDialog):
                 self.reciters_combo.setCurrentIndex(index)
                 break
 
-        action_after_listening = current_settings["listening"]["action_after_listening"]
-        radio_button = self.action_buttons.button(action_after_listening)
-        radio_button.setChecked(True)
-        radio_button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        
+        stored_id = current_settings["listening"]["action_after_listening"]
+        index = self.action_combo.findData(stored_id)
+        if index != -1:
+            self.action_combo.setCurrentIndex(index)
+
