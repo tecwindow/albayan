@@ -10,6 +10,8 @@ from utils.const import data_folder
 
 class AudioPlayerThread(QThread):
     statusChanged = pyqtSignal()
+    waiting_to_load = pyqtSignal(bool)
+    playback_finished = pyqtSignal()
 
     def __init__(self, player: AudioPlayer, parent: Optional[object] = None):
         super().__init__(parent)
@@ -19,19 +21,23 @@ class AudioPlayerThread(QThread):
     def run(self):
         if self.url:
             if self.player.source != self.url or self.player.is_stopped():
+                self.waiting_to_load.emit(False)
                 self.player.load_audio(self.url)
             self.player.play()
             self.statusChanged.emit()
+            self.waiting_to_load.emit(True)
 
-        while self.player.is_playing():
-            time.sleep(0.01)
-        else:
-            self.statusChanged.emit()
+            while self.player.is_playing():
+                time.sleep(0.00)
+            else:
+                self.statusChanged.emit()            
+                self.playback_finished.emit()
 
     def set_audio_url(self, url: str):
         self.url = url
         self.quit()
         self.wait()
+        
 
 
 class AudioToolBar(QToolBar):
@@ -42,15 +48,19 @@ class AudioToolBar(QToolBar):
         self.reciters = RecitersManager(data_folder / "quran" / "reciters.db")
         self.current_surah = None
         self.current_ayah = None
+        self.next_status = True
+        self.previous_status = False
 
         self.play_pause_button = self.create_button("استماع الآية الحالية", self.toggle_play_pause)
         self.stop_button = self.create_button("إيقاف", self.stop_audio)
         self.previous_button = self.create_button("الآية السابقة", self.OnPlayPrevious)
         self.next_button = self.create_button("الآية التالية", self.OnPlayNext)
+        self.set_buttons_status()
         self.volume_slider = self.create_slider(0, 100, 50, self.change_volume)
 
         self.audio_thread = AudioPlayerThread(self.player, self.parent)
         self.audio_thread.statusChanged.connect(self.update_play_pause_button_text)
+        self.audio_thread.waiting_to_load.connect(self.set_buttons_status)
 
     def create_button(self, text, callback):
         button = QPushButton(text)
@@ -121,12 +131,9 @@ class AudioToolBar(QToolBar):
                     return False 
 
 
-        nex_status  = self.current_surah + 1 > max(list(aya_range.keys())) and self.current_ayah + 1 > aya_range[self.current_surah]["max_ayah"]
-        previous_status  = self.current_surah - 1 < min(list(aya_range.keys())) and self.current_ayah - 1 < aya_range[self.current_surah]["min_ayah"]
-        self.next_button.setEnabled(not nex_status)
-        self.previous_button.setEnabled(not previous_status)
-        self.parent.menu_bar.play_next_action.setEnabled(not nex_status)
-        self.parent.menu_bar.play_previous_action.setEnabled(not previous_status)
+        self.next_status = not (self.current_surah + 1 > max(list(aya_range.keys())) and self.current_ayah + 1 > aya_range[self.current_surah]["max_ayah"])
+        self.previous_status = not (self.current_surah - 1 < min(list(aya_range.keys())) and self.current_ayah - 1 < aya_range[self.current_surah]["min_ayah"])
+        self.set_buttons_status()
 
         return True
 
@@ -156,3 +163,14 @@ class AudioToolBar(QToolBar):
         self.play_pause_button.setText(label)
         if hasattr(self.parent, "menu_bar"):
             self.parent.menu_bar.play_pause_action.setText(label)
+
+    def set_buttons_status(self, status: bool = True) -> None:
+        next_status = self.next_status if status else False
+        previous_status = self.previous_status if status else False
+        self.next_button.setEnabled(next_status)
+        self.previous_button.setEnabled(previous_status)
+        self.play_pause_button.setEnabled(status)
+        if hasattr(self.parent, "menu_bar"):
+            self.parent.menu_bar.play_next_action.setEnabled(next_status)
+            self.parent.menu_bar.play_previous_action.setEnabled(previous_status)
+            self.parent.menu_bar.play_pause_action.setEnabled(status)
