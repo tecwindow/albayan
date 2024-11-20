@@ -23,6 +23,10 @@ class QuranViewer(ReadOnlyTextEdit):
         self.parent = parent
         self.textChanged.connect(self.set_ctrl)
 
+    def setText(self, text):
+        self.parent.toolbar.navigation.reset_position()
+        self.parent.toolbar.set_buttons_status()
+        return super().setText(text)
 
     def set_ctrl(self):
         current_line_text = self.textCursor().block().text()

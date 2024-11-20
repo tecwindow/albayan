@@ -57,7 +57,7 @@ class NavigationManager:
     def reset_position(self):
         self.initialize_ayah_range()
         self.current_surah = min(self.ayah_range.keys())
-        self.current_ayah = self.ayah_range[self.current_surah]["min_ayah"]
+        self.current_ayah = self.ayah_range[self.current_surah]["min_ayah"] - 1
 
     def set_position(self, surah_number: int, ayah_number: int) -> None:
         self.initialize_ayah_range()
@@ -85,6 +85,7 @@ class NavigationManager:
                 self.current_surah -= 1
                 self.current_ayah = self.ayah_range[self.current_surah]["max_ayah"]
             else:
+                self.current_ayah = self.ayah_range[self.current_surah]["min_ayah"]
                 return False
 
         return True
@@ -166,6 +167,7 @@ class AudioToolBar(QToolBar):
         url = self.reciters.get_url(reciter_id, self.navigation.current_surah, self.navigation.current_ayah)
         self.audio_thread.set_audio_url(url)
         self.audio_thread.start()
+        self.set_buttons_status()
 
     def OnPlayNext(self) -> None:
         if self.navigation.navigate("next"):
@@ -194,6 +196,7 @@ class AudioToolBar(QToolBar):
     def set_buttons_status(self, status: bool = 2) -> None:
         next_status = self.navigation.get_navigation_status("next") if status else False
         previous_status = self.navigation.get_navigation_status("previous") if status else False
+        print(self.navigation.get_navigation_status("previous"))
         self.next_button.setEnabled(next_status)
         self.previous_button.setEnabled(previous_status)
         self.play_pause_button.setEnabled(status)
