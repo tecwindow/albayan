@@ -152,14 +152,35 @@ class QuranInterface(QMainWindow):
         label = ""
         if self.quran.type == 0:
             label = f"الصفحة {self.quran.current_pos}"
+            self.next_to.setText("الصفحة التالية")
+            self.menu_bar.next_action.setText("الصفحة التالية")
+            self.back_to.setText("الصفحة السابقة")
+            self.menu_bar.previous_action.setText("الصفحة السابقة")
         elif self.quran.type == 1:
             label = self.quran.data_list[-1][2]
+            self.next_to.setText("السورة التالية")
+            self.menu_bar.next_action.setText("السورة التالية")
+            self.back_to.setText("السورة السابقة")
+            self.menu_bar.previous_action.setText("السورة السابقة")    
         elif self.quran.type == 2:
             label = f"الربع {self.quran.current_pos}"
+            self.next_to.setText("الربع التالي")
+            self.menu_bar.next_action.setText("الربع التالي")
+            self.back_to.setText("الربع السابق")
+            self.menu_bar.previous_action.setText("الربع السابق")
         elif self.quran.type == 3:
             label = f"الحزب {self.quran.current_pos}"
+            self.next_to.setText("الحزب التالي")
+            self.menu_bar.next_action.setText("الحزب التالي")
+            self.back_to.setText("الحزب السابق")
+            self.menu_bar.previous_action.setText("الحزب السابق")
         elif self.quran.type == 4:
             label = f"الجزء {self.quran.current_pos}"
+            self.next_to.setText("الجزء التالي")
+            self.menu_bar.next_action.setText("الجزء التالي")
+            self.back_to.setText("الجزء السابق")
+            self.menu_bar.previous_action.setText("الجزء السابق")
+
 
         # set the label
         self.quran_title.setText(label)
