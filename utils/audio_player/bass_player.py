@@ -104,12 +104,15 @@ class AudioPlayer:
             return PlaybackStatus.STOPPED  
 
         status = bass.BASS_ChannelIsActive(self.current_channel)
-        if status == PlaybackStatus.PLAYING.value or status == PlaybackStatus.FIRST_PLAYING.value:
-            return PlaybackStatus.PLAYING
-        elif status == PlaybackStatus.PAUSED .value:
-            return PlaybackStatus.PAUSED 
-        else:
-            return PlaybackStatus.STOPPED
+        match status:
+            case PlaybackStatus.PLAYING.value:
+                return PlaybackStatus.PLAYING
+            case PlaybackStatus.PAUSED.value:
+                return PlaybackStatus.PAUSED
+            case PlaybackStatus.STALLED.value:
+                return PlaybackStatus.STALLED
+            case other:
+                return PlaybackStatus.STOPPED
 
     def is_playing(self) -> bool:
         """Checks if the audio is currently playing."""
@@ -119,7 +122,11 @@ class AudioPlayer:
         """Checks if the audio is currently paused."""
         return self.get_playback_status() == PlaybackStatus.PAUSED
 
+    def is_stalled(self) -> bool:
+        """Checks if the channel is activ but stalled waiting for more data"""
+        return self.get_playback_status() == PlaybackStatus.STALLED
+    
     def is_stopped(self) -> bool:
         """Checks if the audio is currently stopped."""
-        return self.get_playback_status() == PlaybackStatus.STOPPED    
+        return self.get_playback_status() == PlaybackStatus.STOPPED   
     
