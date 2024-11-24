@@ -33,7 +33,7 @@ from utils.settings import SettingsManager
 from utils.audio_player import SoundEffectPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
-from utils.const import program_name, program_icon, user_db_path
+from utils.const import program_name, program_icon, user_db_path, data_folder
 from utils.audio_player import bass
 
 
@@ -97,6 +97,11 @@ class QuranInterface(QMainWindow):
         self.save_current_position.setEnabled(False)
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
 
+        
+        self.random_messages = EnterButton("رسالة عشوائية")
+        self.random_messages.clicked.connect(self.OnRandomMessages)
+    
+
     def create_layout(self):
         layout = QVBoxLayout()
         layout.addWidget(self.quran_title, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -109,7 +114,9 @@ class QuranInterface(QMainWindow):
         buttons_layout.addWidget(self.quick_access)
         buttons_layout.addWidget(self.search_in_quran)
         buttons_layout.addWidget(self.save_current_position)
+        buttons_layout.addWidget(self.random_messages)
 
+        
         layout.addLayout(buttons_layout)
         self.centralWidget().setLayout(layout)
 
