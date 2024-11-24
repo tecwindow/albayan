@@ -33,7 +33,7 @@ from utils.settings import SettingsManager
 from utils.audio_player import SoundEffectPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
-from utils.const import program_name, program_icon, user_db_path
+from utils.const import program_name, program_icon, user_db_path, data_folder
 from utils.audio_player import bass
 
 
@@ -345,4 +345,12 @@ class QuranInterface(QMainWindow):
         else:
             self.tray_manager.hide_icon()
             bass.BASS_Free()
+
+    def OnRandomMessages(self):
+            # قراءة البيانات من ملف QuotesMessages.json
+            with open(data_folder/"quotes/QuotesMessages.json", "r", encoding="utf-8") as file:
+                quotes_list = json.load(file)  # قراءة العناصر من الملف
+            # اختيار عنصر عشوائي
+            message = random.choice(quotes_list)
+            InfoDialog('اقتباس عشوائي', 'رسالة لك', message, is_html_content=False).exec()
 
