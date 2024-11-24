@@ -33,7 +33,7 @@ from utils.settings import SettingsManager
 from utils.audio_player import SoundEffectPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
-from utils.const import program_name, program_icon, user_db_path
+from utils.const import program_name, program_icon, user_db_path, data_folder
 from utils.audio_player import bass
 
 
@@ -97,6 +97,10 @@ class QuranInterface(QMainWindow):
         self.save_current_position.setEnabled(False)
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
 
+        self.random_messages = EnterButton("رسالة عشوائية")
+        self.random_messages.clicked.connect(self.OnRandomMessages)
+
+
     def create_layout(self):
         layout = QVBoxLayout()
         layout.addWidget(self.quran_title, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -109,6 +113,8 @@ class QuranInterface(QMainWindow):
         buttons_layout.addWidget(self.quick_access)
         buttons_layout.addWidget(self.search_in_quran)
         buttons_layout.addWidget(self.save_current_position)
+        buttons_layout.addWidget(self.random_messages)
+
 
         layout.addLayout(buttons_layout)
         self.centralWidget().setLayout(layout)
@@ -152,14 +158,35 @@ class QuranInterface(QMainWindow):
         label = ""
         if self.quran.type == 0:
             label = f"الصفحة {self.quran.current_pos}"
+            self.next_to.setText("الصفحة التالية")
+            self.menu_bar.next_action.setText("الصفحة التالية")
+            self.back_to.setText("الصفحة السابقة")
+            self.menu_bar.previous_action.setText("الصفحة السابقة")
         elif self.quran.type == 1:
             label = self.quran.data_list[-1][2]
+            self.next_to.setText("السورة التالية")
+            self.menu_bar.next_action.setText("السورة التالية")
+            self.back_to.setText("السورة السابقة")
+            self.menu_bar.previous_action.setText("السورة السابقة")    
         elif self.quran.type == 2:
             label = f"الربع {self.quran.current_pos}"
+            self.next_to.setText("الربع التالي")
+            self.menu_bar.next_action.setText("الربع التالي")
+            self.back_to.setText("الربع السابق")
+            self.menu_bar.previous_action.setText("الربع السابق")
         elif self.quran.type == 3:
             label = f"الحزب {self.quran.current_pos}"
+            self.next_to.setText("الحزب التالي")
+            self.menu_bar.next_action.setText("الحزب التالي")
+            self.back_to.setText("الحزب السابق")
+            self.menu_bar.previous_action.setText("الحزب السابق")
         elif self.quran.type == 4:
             label = f"الجزء {self.quran.current_pos}"
+            self.next_to.setText("الجزء التالي")
+            self.menu_bar.next_action.setText("الجزء التالي")
+            self.back_to.setText("الجزء السابق")
+            self.menu_bar.previous_action.setText("الجزء السابق")
+
 
         # set the label
         self.quran_title.setText(label)
@@ -318,4 +345,12 @@ class QuranInterface(QMainWindow):
         else:
             self.tray_manager.hide_icon()
             bass.BASS_Free()
+
+    def OnRandomMessages(self):
+            # قراءة البيانات من ملف QuotesMessages.json
+            with open(data_folder/"quotes/QuotesMessages.json", "r", encoding="utf-8") as file:
+                quotes_list = json.load(file)  # قراءة العناصر من الملف
+            # اختيار عنصر عشوائي
+            message = random.choice(quotes_list)
+            InfoDialog('اقتباس عشوائي', 'رسالة لك', message, is_html_content=False).exec()
 
