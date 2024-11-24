@@ -340,3 +340,12 @@ class QuranInterface(QMainWindow):
             self.tray_manager.hide_icon()
             bass.BASS_Free()
 
+
+    def OnRandomMessages(self):
+            # قراءة البيانات من ملف QuotesMessages.json
+            with open(data_folder/"quotes/QuotesMessages.json", "r", encoding="utf-8") as file:
+                quotes_list = json.load(file)  # قراءة العناصر من الملف
+            # اختيار عنصر عشوائي
+            message = random.choice(quotes_list)
+            InfoDialog('اقتباس عشوائي', 'رسالة لك', message, is_html_content=False).exec()
+
