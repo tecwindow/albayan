@@ -1,5 +1,8 @@
 import os
 import re
+import json
+import random
+
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QWidget,
