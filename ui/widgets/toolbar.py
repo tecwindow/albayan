@@ -41,8 +41,7 @@ class AudioPlayerThread(QThread):
     def set_audio_url(self, url: str):
         self.url = url
         self.quit()
-        self.wait()
-        
+        self.wait()        
 
 class NavigationManager:
     def __init__(self, quran):
@@ -162,7 +161,6 @@ class AudioToolBar(QToolBar):
         self.player.stop()
 
     def play_current_ayah(self):
-        self.stop_audio()
         reciter_id = SettingsManager.current_settings["listening"]["reciter"]
         url = self.reciters.get_url(reciter_id, self.navigation.current_surah, self.navigation.current_ayah)
         self.audio_thread.set_audio_url(url)
@@ -170,10 +168,12 @@ class AudioToolBar(QToolBar):
         self.set_buttons_status()
 
     def OnPlayNext(self) -> None:
+        self.stop_audio()
         if self.navigation.navigate("next"):
             self.play_current_ayah()
 
     def OnPlayPrevious(self) -> None:
+        self.stop_audio()
         if self.navigation.navigate("previous"):
             self.play_current_ayah()
 
@@ -188,7 +188,7 @@ class AudioToolBar(QToolBar):
         self.player.set_volume(value / 100)
 
     def update_play_pause_button_text(self):
-        label = "إيقاف مؤقت" if self.player.is_playing() else "استماع الآية الحالية"
+        label = "إيقاف مؤقت" if self.player.is_playing() or self.player.is_stalled() else "استماع الآية الحالية"
         self.play_pause_button.setText(label)
         if hasattr(self.parent, "menu_bar"):
             self.parent.menu_bar.play_pause_action.setText(label)
@@ -196,7 +196,6 @@ class AudioToolBar(QToolBar):
     def set_buttons_status(self, status: bool = 2) -> None:
         next_status = self.navigation.get_navigation_status("next") if status else False
         previous_status = self.navigation.get_navigation_status("previous") if status else False
-        print(self.navigation.get_navigation_status("previous"))
         self.next_button.setEnabled(next_status)
         self.previous_button.setEnabled(previous_status)
         self.play_pause_button.setEnabled(status)
