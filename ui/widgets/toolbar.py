@@ -35,7 +35,7 @@ class AudioPlayerThread(QThread):
         if not self.player.is_playing():
             self.timer.stop()
             self.statusChanged.emit()
-            if not self.player.is_paused() and not self.manually_stopped:
+            if not (self.player.is_paused() or self.player.is_stalled())and not self.manually_stopped:
                 self.playback_finished.emit()
 
     def set_audio_url(self, url: str):
