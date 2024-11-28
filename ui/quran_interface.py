@@ -141,6 +141,7 @@ class QuranInterface(QMainWindow):
         cursor = QTextCursor(self.quran_view.document())
         cursor.setPosition(text_position)
         self.quran_view.setTextCursor(cursor)
+        
 
     def OnNext(self):
         self.quran_view.setText(self.quran.next())
@@ -195,7 +196,7 @@ class QuranInterface(QMainWindow):
         self.quran_title.setText(label)
         self.quran_view.setAccessibleName(label)
         UniversalSpeech.say(label)
-
+        
         # Enable back and next item
         next_status = self.quran.current_pos < self.quran.max_pos
         back_status = self.quran.current_pos > 1
@@ -203,7 +204,8 @@ class QuranInterface(QMainWindow):
         self.menu_bar.next_action.setEnabled(next_status)
         self.back_to.setEnabled(back_status)
         self.menu_bar.previous_action.setEnabled(back_status)
-
+        self.toolbar.navigation.reset_position()
+        
     def OnQuickAccess(self):
         dialog = QuickAccess(self, "الوصول السريع")
         if not dialog.exec():
@@ -338,9 +340,9 @@ class QuranInterface(QMainWindow):
             ayah_number = ayah_info[1]
             self.quran.type = mode
             self.quran_view.setText(self.quran.get_by_ayah_number(ayah_number)["full_text"])
-            self.set_text_ctrl_label()
             self.set_focus_to_ayah(ayah_number)
-
+            self.set_text_ctrl_label()
+            
     def closeEvent(self, event):
         if SettingsManager.current_settings["general"]["run_in_background_enabled"]:
             event.ignore()

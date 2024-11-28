@@ -2,6 +2,7 @@ import time
 from typing import Optional
 from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
+from core_functions.quran_class import quran_mgr
 from core_functions.Reciters import RecitersManager
 from utils.audio_player import AudioPlayer
 from utils.settings import SettingsManager
@@ -33,7 +34,6 @@ class AudioPlayerThread(QThread):
 
     def check_playback_status(self):
         if not self.player.is_playing() and not self.player.is_stalled():
-            print(self.player.get_playback_status())
             self.timer.stop()
             self.statusChanged.emit()
             if not self.player.is_paused() and not self.manually_stopped:
@@ -45,7 +45,8 @@ class AudioPlayerThread(QThread):
         self.wait()        
 
 class NavigationManager:
-    def __init__(self, quran):
+    def __init__(self, parent, quran: quran_mgr):
+        self.parent = parent
         self.quran = quran
         self.ayah_range = None
         self.current_surah = None
@@ -56,8 +57,10 @@ class NavigationManager:
 
     def reset_position(self):
         self.initialize_ayah_range()
-        self.current_surah = min(self.ayah_range.keys())
-        self.current_ayah = self.ayah_range[self.current_surah]["min_ayah"] - 1
+        ayah_info = self.parent.get_current_ayah_info()
+        if ayah_info[0] != self.current_surah or not (self.ayah_range[self.current_surah]["min_ayah"] < ayah_info[3] < self.ayah_range[self.current_surah]["max_ayah"]):
+            self.current_surah = min(self.ayah_range.keys())
+            self.current_ayah = self.ayah_range[self.current_surah]["min_ayah"] - 1    
 
     def set_position(self, surah_number: int, ayah_number: int) -> None:
         self.initialize_ayah_range()
@@ -118,7 +121,7 @@ class AudioToolBar(QToolBar):
         self.parent = parent
         self.player = AudioPlayer()
         self.reciters = RecitersManager(data_folder / "quran" / "reciters.db")
-        self.navigation = NavigationManager(self.parent.quran)
+        self.navigation = NavigationManager(self.parent, self.parent.quran)
         self.audio_thread = AudioPlayerThread(self.player, self.parent)
 
         self.play_pause_button = self.create_button("استماع الآية الحالية", self.toggle_play_pause)
