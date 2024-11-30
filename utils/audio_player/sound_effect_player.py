@@ -4,11 +4,13 @@ from .bass_player import AudioPlayer
 from utils.settings import SettingsManager
 
 class SoundEffectPlayer(AudioPlayer):
+    instances = []
     def __init__(self, sounds_folder: str) -> None:
-        super().__init__()
+        super().__init__(SettingsManager.current_settings["audio"]["volume_level"])
         self.sounds_folder = sounds_folder
         self.sounds = {}
         self.load_sound_effects()
+        SoundEffectPlayer.instances.append(self)
         
     def load_sound_effects(self) -> None:
         """Loads sound effects from the specified folder into a dictionary."""

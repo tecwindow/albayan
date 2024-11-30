@@ -5,9 +5,11 @@ from utils.settings import SettingsManager
 
 
 class StartupSoundEffectPlayer(AudioPlayer):
+    instances = []
     def __init__(self, sounds_folder: str) -> None:
-        super().__init__()
+        super().__init__(SettingsManager.current_settings["audio"]["volume_level"])
         self.sounds_folder = sounds_folder
+        StartupSoundEffectPlayer.instances.append(self)
         
     def play(self):
         if not SettingsManager.current_settings["audio"]["start_with_basmala_enabled"]:

@@ -119,7 +119,7 @@ class AudioToolBar(QToolBar):
     def __init__(self, parent: Optional[object] = None):
         super().__init__(parent)
         self.parent = parent
-        self.player = AudioPlayer()
+        self.player = AudioPlayer(SettingsManager.current_settings["audio"]["ayah_volume_level"])
         self.reciters = RecitersManager(data_folder / "quran" / "reciters.db")
         self.navigation = NavigationManager(self.parent, self.parent.quran)
         self.audio_thread = AudioPlayerThread(self.player, self.parent)
