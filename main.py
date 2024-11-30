@@ -1,10 +1,8 @@
-import keyboard
 import sys
 import os
 from multiprocessing import freeze_support
 from PyQt6.QtWidgets import QApplication, QMessageBox
-from PyQt6.QtCore import QTimer, Qt, QSharedMemory
-from PyQt6.QtGui import QKeySequence, QShortcut
+from PyQt6.QtCore import QTimer, Qt, QSharedMemory, QEvent
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from ui.quran_interface import QuranInterface
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
@@ -22,11 +20,8 @@ class SingleInstanceApplication(QApplication):
         self.local_server = QLocalServer(self)
         self.shared_memory = QSharedMemory("Albayan")
         self.is_running = self.shared_memory.attach()
-
         self.volume_controller = VolumeController()
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.set_shortcut)
-        self.timer.start(100)
+        self.installEventFilter(self)  # تثبيت فلتر الأحداث على مستوى التطبيق
 
         if not self.is_running:
             if not self.shared_memory.create(1):
@@ -37,6 +32,24 @@ class SingleInstanceApplication(QApplication):
             self.notify_existing_instance()
             sys.exit(0)
 
+    def eventFilter(self, obj, event):
+
+        if event.type() == QEvent.Type.KeyPress:
+            key = event.key()
+            if key == Qt.Key.Key_F5:
+                self.volume_controller.switch_category("next")
+                return True 
+            elif key == Qt.Key.Key_F6:
+                self.volume_controller.switch_category("previous")
+                return True
+            elif key == Qt.Key.Key_F7:
+                self.volume_controller.adjust_volume(-1)
+                return True
+            elif key == Qt.Key.Key_F8:
+                self.volume_controller.adjust_volume(1)
+                return True
+        return super().eventFilter(obj, event)
+    
     def setup_local_server(self) -> None:
         if not self.local_server.listen(self.server_name):
             Logger.error(f"Failed to start local server: {self.local_server.errorString()}")
@@ -69,17 +82,6 @@ class SingleInstanceApplication(QApplication):
 
     def set_main_window(self, main_window) -> None:
         self.main_window = main_window
-
-    def set_shortcut(self) -> None: 
-            if self.activeWindow():
-                if keyboard.is_pressed('F5'):
-                    self.volume_controller.switch_category("next")
-                elif keyboard.is_pressed('F6'):
-                    self.volume_controller.switch_category("previous")
-                elif keyboard.is_pressed('F7'):
-                    self.volume_controller.adjust_volume(10)
-                elif keyboard.is_pressed('F8'):
-                    self.volume_controller.adjust_volume(-10)
 
 def call_after_starting(parent: QuranInterface) -> None:
         

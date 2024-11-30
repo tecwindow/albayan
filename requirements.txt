@@ -5,4 +5,3 @@ UniversalSpeech
 cx_Freeze
 sqlalchemy
 apscheduler
-keyboard
