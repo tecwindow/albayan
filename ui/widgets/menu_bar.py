@@ -172,11 +172,11 @@ class MenuBar(QMenuBar):
             contact_us_menu.addAction(name_action)
 
         update_program_action = QAction("تحديث البرنامج", self)
-        update_program_action.setShortcuts([QKeySequence("F5"), QKeySequence("Ctrl+U")])
+        #update_program_action.setShortcuts([QKeySequence("F5"), QKeySequence("Ctrl+U")])
         update_program_action.triggered.connect(self.OnUpdate)
 
         about_program_action = QAction("حول البرنامج", self)
-        about_program_action.setShortcuts([QKeySequence("F6")])
+        #about_program_action.setShortcuts([QKeySequence("F6")])
         about_program_action.triggered.connect(self.OnAbout)
 
 #        help_menu.addAction(user_guide_action)
