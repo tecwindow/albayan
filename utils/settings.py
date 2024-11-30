@@ -20,9 +20,9 @@ class SettingsManager:
             "sound_effect_enabled": True,
             "start_with_basmala_enabled": True,
             "speak_actions_enabled": True,
-            "volume_level": 100,
-            "ayah_volume_level": 100,
-            "athkar_volume_level": 100
+            "volume_level": 50,
+            "ayah_volume_level": 50,
+            "athkar_volume_level": 50
         },
         "listening": {
             "reciter": 58,
@@ -65,6 +65,8 @@ class SettingsManager:
                         current_settings[section][setting] = cls.config.getboolean(section, setting)
                     elif isinstance(default_value, int):
                         current_settings[section][setting] = cls.config.getint(section, setting)
+                    elif isinstance(default_value, float):
+                        current_settings[section][setting] = cls.config.getfloat(section, setting)
                     else:
                         current_settings[section][setting] = cls.config.get(section, setting)
                 except Exception as e:
