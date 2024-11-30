@@ -1,8 +1,10 @@
+import keyboard
 import sys
 import os
 from multiprocessing import freeze_support
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtCore import QTimer, Qt, QSharedMemory
+from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from ui.quran_interface import QuranInterface
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
@@ -10,17 +12,21 @@ from utils.update import UpdateManager
 from utils.settings import SettingsManager
 from utils.const import program_name, program_icon, user_db_path
 from utils.logger import Logger
-from utils.audio_player import StartupSoundEffectPlayer
+from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 
 class SingleInstanceApplication(QApplication):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.setApplicationName(program_name)
         self.server_name = "Albayan"
         self.local_server = QLocalServer(self)
-
         self.shared_memory = QSharedMemory("Albayan")
         self.is_running = self.shared_memory.attach()
+
+        self.volume_controller = VolumeController()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.set_shortcut)
+        self.timer.start(100)
 
         if not self.is_running:
             if not self.shared_memory.create(1):
@@ -31,13 +37,13 @@ class SingleInstanceApplication(QApplication):
             self.notify_existing_instance()
             sys.exit(0)
 
-    def setup_local_server(self):
+    def setup_local_server(self) -> None:
         if not self.local_server.listen(self.server_name):
             Logger.error(f"Failed to start local server: {self.local_server.errorString()}")
             sys.exit(1)
         self.local_server.newConnection.connect(self.handle_new_connection)
 
-    def notify_existing_instance(self):
+    def notify_existing_instance(self) -> None:
         socket = QLocalSocket()
         socket.connectToServer(self.server_name)
         if socket.waitForConnected(1000):
@@ -48,12 +54,12 @@ class SingleInstanceApplication(QApplication):
         else:
             Logger.error("Failed to connect to existing instance.")
 
-    def handle_new_connection(self):
+    def handle_new_connection(self) -> None:
         socket = self.local_server.nextPendingConnection()
         if socket:
             socket.readyRead.connect(lambda: self.read_message(socket))
 
-    def read_message(self, socket):
+    def read_message(self, socket) -> None:
         message = socket.readAll().data().decode()
         if message == "SHOW" and hasattr(self, 'main_window'):
                 self.main_window.show()
@@ -61,9 +67,19 @@ class SingleInstanceApplication(QApplication):
                 self.main_window.activateWindow()
                 socket.disconnectFromServer()
 
-    def set_main_window(self, main_window):
+    def set_main_window(self, main_window) -> None:
         self.main_window = main_window
 
+    def set_shortcut(self) -> None: 
+            if self.activeWindow():
+                if keyboard.is_pressed('F5'):
+                    self.volume_controller.switch_category("next")
+                elif keyboard.is_pressed('F6'):
+                    self.volume_controller.switch_category("previous")
+                elif keyboard.is_pressed('F7'):
+                    self.volume_controller.adjust_volume(10)
+                elif keyboard.is_pressed('F8'):
+                    self.volume_controller.adjust_volume(-10)
 
 def call_after_starting(parent: QuranInterface) -> None:
         
