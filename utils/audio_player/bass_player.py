@@ -9,6 +9,9 @@ from .status import PlaybackStatus
 bass_path = os.path.abspath("bass.dll")
 bass = CDLL(bass_path)
 
+# Constants
+BASS_STREAM_AUTOFREE = 0x40000  # Automatically free the stream when it stops/ends
+
 # Initialize BASS
 if not bass.BASS_Init(-1, 44100, 0, 0, 0):
     raise RuntimeError("BASS initialization failed")
@@ -16,11 +19,12 @@ if not bass.BASS_Init(-1, 44100, 0, 0, 0):
 class AudioPlayer:
     instances = []
 
-    def __init__(self, volume: float) -> None:
+    def __init__(self, volume: float, auto_free: bool =True) -> None:
         self.source: Optional[str] = None
         self.current_channel: Optional[int] = None
         self.volume = volume
         self.supported_extensions = ('.wav', '.mp3', '.ogg')
+        self.auto_free = auto_free
         AudioPlayer.instances.append(self)
     
     def load_audio(self, source: str, attempts: Optional[int] = 3) -> None:
@@ -36,16 +40,17 @@ class AudioPlayer:
         parsed_url = urlparse(source)
         if parsed_url.scheme in ("http", "https") and parsed_url.netloc:
             # Stream from URL
-            self.current_channel = bass.BASS_StreamCreateURL(source.encode(), 0, 0, None, None)
+            self.current_channel = bass.BASS_StreamCreateURL(source.encode(), 0, BASS_STREAM_AUTOFREE if self.auto_free else 0, None, None)
         else:
             # Load from local file
             if not os.path.isfile(source):
                 raise FileNotFoundError(f"Audio file '{source}' not found")
-            self.current_channel = bass.BASS_StreamCreateFile(False, source.encode('utf-8'), 0, 0, 0)
+            self.current_channel = bass.BASS_StreamCreateFile(False, source.encode('utf-8'), 0, 0, BASS_STREAM_AUTOFREE if self.auto_free else 0)
 
         if not self.current_channel:
             if attempts:
                 print(f"Trying too load: {source}.")
+                time.sleep(0.1)
                 return self.load_audio(source, attempts - 1)
             raise RuntimeError("Failed to load audio file or URL: {}".format(source))
         
