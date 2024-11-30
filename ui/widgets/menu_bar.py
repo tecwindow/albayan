@@ -71,6 +71,7 @@ class MenuBar(QMenuBar):
         self.play_pause_action.triggered.connect(self.parent.toolbar.toggle_play_pause)
         self.stop_action = QAction("إيقاف", self)
         self.stop_action.setShortcut(QKeySequence("Ctrl+E"))
+        self.stop_action.setEnabled(False)
         self.stop_action.triggered.connect(self.parent.toolbar.stop_audio)
         self.play_next_action = QAction("تشغيل الآية التالية", self)
         self.play_next_action.setShortcut(QKeySequence("Ctrl+Shift+N"))

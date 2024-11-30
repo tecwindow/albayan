@@ -126,11 +126,13 @@ class AudioToolBar(QToolBar):
 
         self.play_pause_button = self.create_button("استماع الآية الحالية", self.toggle_play_pause)
         self.stop_button = self.create_button("إيقاف", self.stop_audio)
+        self.stop_button.setEnabled(False)
         self.previous_button = self.create_button("الآية السابقة", self.OnPlayPrevious)
         self.previous_button.setEnabled(False)
         self.next_button = self.create_button("الآية التالية", self.OnPlayNext)
         self.next_button.setEnabled(False)
         self.volume_slider = self.create_slider(0, 100, 50, self.change_volume)
+        self.set_volume()
 
         self.audio_thread.statusChanged.connect(self.update_play_pause_button_text)
         self.audio_thread.waiting_to_load.connect(self.set_buttons_status)
@@ -163,6 +165,7 @@ class AudioToolBar(QToolBar):
     def stop_audio(self):
         self.audio_thread.manually_stopped = True
         self.player.stop()
+        self.set_buttons_status()
 
     def play_current_ayah(self):
         reciter_id = SettingsManager.current_settings["listening"]["reciter"]
@@ -182,6 +185,7 @@ class AudioToolBar(QToolBar):
             self.play_current_ayah()
 
     def OnActionAfterListening(self):
+        self.set_buttons_status()
         action_after_listening = SettingsManager.current_settings["listening"]["action_after_listening"]
         if action_after_listening == 1:
             self.play_current_ayah()
@@ -189,7 +193,10 @@ class AudioToolBar(QToolBar):
             self.OnPlayNext()
 
     def change_volume(self, value: int) -> None:
-        self.player.set_volume(value / 100)
+        self.player.set_volume(value)
+
+    def set_volume(self) -> None:
+        self.volume_slider.setValue(SettingsManager.current_settings["audio"]["ayah_volume_level"])
 
     def update_play_pause_button_text(self):
         label = "إيقاف مؤقت" if self.player.is_playing() or self.player.is_stalled() else "استماع الآية الحالية"
@@ -203,9 +210,11 @@ class AudioToolBar(QToolBar):
         self.next_button.setEnabled(next_status)
         self.previous_button.setEnabled(previous_status)
         self.play_pause_button.setEnabled(status)
+        self.stop_button.setEnabled(not self.player.is_stopped())
         if hasattr(self.parent, "menu_bar"):
             self.parent.menu_bar.play_next_action.setEnabled(next_status)
             self.parent.menu_bar.play_previous_action.setEnabled(previous_status)
             self.parent.menu_bar.play_pause_action.setEnabled(status)
+            self.parent.menu_bar.stop_action.setEnabled(not self.player.is_stopped())
             if  status == True:
                 self.audio_thread.timer.start(100)
