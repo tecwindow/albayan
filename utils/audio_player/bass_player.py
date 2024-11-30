@@ -1,7 +1,7 @@
 import os
 import time
 from ctypes import CDLL, c_float
-from typing import Optional
+from typing import List, Optional
 from urllib.parse import urlparse
 from .status import PlaybackStatus
 
@@ -14,11 +14,14 @@ if not bass.BASS_Init(-1, 44100, 0, 0, 0):
     raise RuntimeError("BASS initialization failed")
 
 class AudioPlayer:
-    def __init__(self) -> None:
+    instances = []
+
+    def __init__(self, volume: float) -> None:
         self.source: Optional[str] = None
         self.current_channel: Optional[int] = None
-        self.volume: float = 0.5
+        self.volume = volume
         self.supported_extensions = ('.wav', '.mp3', '.ogg')
+        AudioPlayer.instances.append(self)
     
     def load_audio(self, source: str, attempts: Optional[int] = 3) -> None:
         """Loads an audio file or a URL for playback."""
@@ -69,6 +72,9 @@ class AudioPlayer:
 
     def set_volume(self, volume: float) -> None:
         """Sets the playback volume (0.0 to 1.0)."""
+        if volume > 1:
+            volume = volume / 100
+
         self.volume = max(0.0, min(volume, 1.0))  # Clamp volume between 0.0 and 1.0
         if self.current_channel:
             bass.BASS_ChannelSetAttribute(self.current_channel, 2, c_float(self.volume))
