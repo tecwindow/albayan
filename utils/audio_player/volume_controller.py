@@ -26,9 +26,9 @@ class VolumeController:
         """Switch between categories in the specified direction ('next' or 'previous')."""
         categories = list(self.categories.keys())
         if direction == 'next':
-            self.current_category_index = (self.current_category_index + 1) % len(categories)  # Move to the next category
+            self.current_category_index = (self.current_category_index + 1) % len(categories)  
         elif direction == 'previous':
-            self.current_category_index = (self.current_category_index - 1) % len(categories)  # Move to the previous category
+            self.current_category_index = (self.current_category_index - 1) % len(categories)  
 
         current_category = self.get_category_info()
         SettingsManager.write_settings({"audio": {"current_volume_category": self.current_category_index}})

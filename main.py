@@ -21,7 +21,7 @@ class SingleInstanceApplication(QApplication):
         self.shared_memory = QSharedMemory("Albayan")
         self.is_running = self.shared_memory.attach()
         self.volume_controller = VolumeController()
-        self.installEventFilter(self)  # تثبيت فلتر الأحداث على مستوى التطبيق
+        self.installEventFilter(self) 
 
         if not self.is_running:
             if not self.shared_memory.create(1):
