@@ -4,6 +4,7 @@ from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QKeySequence, QClipboard
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
+from utils.audio_player import SoundEffectPlayer
 
 
 class InfoDialog(QDialog):
@@ -14,6 +15,9 @@ class InfoDialog(QDialog):
         self.text = text
         self.is_html_content = is_html_content
         self.init_ui()
+        self.effects_manager = SoundEffectPlayer("Audio/sounds")
+        self.effects_manager.play("open")
+
 
     def init_ui(self):
         self.setWindowTitle(self.title)
@@ -32,7 +36,7 @@ class InfoDialog(QDialog):
         # Copy button
         copy_button = QPushButton('نسخ', self)
         copy_button.clicked.connect(self.copy_text)
-        copy_button.setShortcut(QKeySequence("Ctrl+C"))
+        copy_button.setShortcut(QKeySequence("Shift+C"))
         copy_button.setStyleSheet('background-color: red; color: white;')
 
 
@@ -57,3 +61,9 @@ class InfoDialog(QDialog):
         clipboard = QApplication.clipboard()
         clipboard.setText(self.text_edit.toPlainText())
         UniversalSpeech.say("تم نسخ النص إلى الحافظة")
+
+
+    def reject(self):
+        self.effects_manager.play("clos")
+        super().    reject()
+    
