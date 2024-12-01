@@ -77,19 +77,19 @@ class AudioPlayer:
 
     def set_volume(self, volume: float) -> None:
         """Sets the playback volume (0.0 to 1.0)."""
-        if volume >= 1:
+        if isinstance(volume, int):
             volume = volume / 100
-
-        self.volume = max(0.0, min(volume, 1.0))  # Clamp volume between 0.0 and 1.0
+            
+        self.volume = max(0.0, min(volume, 1.0))  
         if self.current_channel:
             bass.BASS_ChannelSetAttribute(self.current_channel, 2, c_float(self.volume))
     
-    def increase_volume(self, step: float = 0.1) -> None:
+    def increase_volume(self, step: float = 0.01) -> None:
         """Increases the volume by a specified step, default is 0.1 (10%)."""
         new_volume = min(self.volume + step, 1.0)
         self.set_volume(new_volume)
     
-    def decrease_volume(self, step: float = 0.1) -> None:
+    def decrease_volume(self, step: float = 0.01) -> None:
         """Decreases the volume by a specified step, default is 0.1 (10%)."""
         new_volume = max(self.volume - step, 0.0)
         self.set_volume(new_volume)
