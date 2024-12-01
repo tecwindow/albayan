@@ -342,6 +342,7 @@ class QuranInterface(QMainWindow):
             self.quran_view.setText(self.quran.get_by_ayah_number(ayah_number)["full_text"])
             self.set_focus_to_ayah(ayah_number)
             self.set_text_ctrl_label()
+        self.effects_manager.play("change")
             
     def closeEvent(self, event):
         if SettingsManager.current_settings["general"]["run_in_background_enabled"]:
