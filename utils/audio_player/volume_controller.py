@@ -8,7 +8,7 @@ class VolumeController:
     
     def __init__(self) -> None:
         self.categories = self._load_categories()
-        self.current_category_index = 0 
+        self.current_category_index = SettingsManager.current_settings["audio"]["current_volume_category"]
 
     def _load_categories(self) -> dict:
         """Load categories with their custom handling methods."""
@@ -31,6 +31,7 @@ class VolumeController:
             self.current_category_index = (self.current_category_index - 1) % len(categories)  # Move to the previous category
 
         current_category = self.get_category_info()
+        SettingsManager.write_settings({"audio": {"current_volume_category": self.current_category_index}})
         UniversalSpeech.say(current_category["label"])
 
     def adjust_volume(self, change: int) -> None:

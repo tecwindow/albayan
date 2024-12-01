@@ -22,7 +22,8 @@ class SettingsManager:
             "speak_actions_enabled": True,
             "volume_level": 50,
             "ayah_volume_level": 50,
-            "athkar_volume_level": 50
+            "athkar_volume_level": 50,
+            "current_volume_category": 0
         },
         "listening": {
             "reciter": 58,
