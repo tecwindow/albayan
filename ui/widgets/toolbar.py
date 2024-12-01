@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from core_functions.quran_class import quran_mgr
 from core_functions.Reciters import RecitersManager
-from utils.audio_player import AudioPlayer
+from utils.audio_player import AyahPlayer
 from utils.settings import SettingsManager
 from utils.const import data_folder
 
@@ -14,7 +14,7 @@ class AudioPlayerThread(QThread):
     waiting_to_load = pyqtSignal(bool)
     playback_finished = pyqtSignal()
     
-    def __init__(self, player: AudioPlayer, parent: Optional[object] = None):
+    def __init__(self, player: AyahPlayer, parent: Optional[object] = None):
         super().__init__(parent)
         self.player = player
         self.url = None    
@@ -119,7 +119,7 @@ class AudioToolBar(QToolBar):
     def __init__(self, parent: Optional[object] = None):
         super().__init__(parent)
         self.parent = parent
-        self.player = AudioPlayer(SettingsManager.current_settings["audio"]["ayah_volume_level"])
+        self.player = AyahPlayer()
         self.reciters = RecitersManager(data_folder / "quran" / "reciters.db")
         self.navigation = NavigationManager(self.parent, self.parent.quran)
         self.audio_thread = AudioPlayerThread(self.player, self.parent)

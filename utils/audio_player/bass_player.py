@@ -77,7 +77,7 @@ class AudioPlayer:
 
     def set_volume(self, volume: float) -> None:
         """Sets the playback volume (0.0 to 1.0)."""
-        if volume > 1:
+        if volume >= 1:
             volume = volume / 100
 
         self.volume = max(0.0, min(volume, 1.0))  # Clamp volume between 0.0 and 1.0
