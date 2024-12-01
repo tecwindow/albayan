@@ -6,7 +6,6 @@ from utils.logger import Logger
 class StartupManager:
     STARTUP_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
     app_path = f'"{os.path.abspath(sys.argv[0])}" --minimized'
-    Logger.info(app_path)
 
     @staticmethod
     def add_to_startup(app_name: str) -> None:

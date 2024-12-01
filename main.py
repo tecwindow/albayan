@@ -1,5 +1,8 @@
 import sys
 import os
+current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+os.chdir(current_dir)
+
 from multiprocessing import freeze_support
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtCore import QTimer, Qt, QSharedMemory, QEvent
