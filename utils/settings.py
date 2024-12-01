@@ -11,7 +11,7 @@ class SettingsManager:
         "general": {
             "language": "Arabic",
             "run_in_background_enabled": False,
-            "start_on_system_starts_enabled": False,
+            "auto_start_enabled": True,
             "auto_save_position_enabled": False,
             "check_update_enabled": True,
             "logging_enabled": False

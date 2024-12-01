@@ -20,9 +20,10 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtCore import Qt
 from core_functions.Reciters import RecitersManager
-from utils.const import data_folder
+from utils.const import data_folder, program_english_name
 from utils.settings import SettingsManager
 from utils.audio_player import AthkarPlayer, AyahPlayer, SoundEffectPlayer
+from utils.Startup import StartupManager
 
 
 class SettingsDialog(QDialog):
@@ -194,20 +195,23 @@ class SettingsDialog(QDialog):
             # If 'start_on_system_start_checkbox' is checked, automatically check 'run_in_background_checkbox'
             self.run_in_background_checkbox.setChecked(True)
 
-
     def updateStartCheckboxState(self):
 
         # Check if 'run_in_background_checkbox' is unchecked, then uncheck 'start_on_system_start_checkbox'
         if not self.run_in_background_checkbox.isChecked():
             self.start_on_system_start_checkbox.setChecked(False)
 
-
-
-
     def save_settings(self):
+
+        if SettingsManager.current_settings["general"]["auto_start_enabled"] != self.start_on_system_start_checkbox.isChecked():
+            if self.start_on_system_start_checkbox.isChecked():
+                StartupManager.add_to_startup(program_english_name)
+            else:
+                StartupManager.remove_from_startup(program_english_name)
+
         general_settings = {
             "run_in_background_enabled": self.run_in_background_checkbox.isChecked(),
-            "start_on_system_starts_enabled": self.start_on_system_start_checkbox.isChecked(),
+            "auto_start_enabled": self.start_on_system_start_checkbox.isChecked(),
             "auto_save_position_enabled": self.auto_save_position_checkbox.isChecked(),
             "check_update_enabled": self.update_checkbox.isChecked(),
             "logging_enabled": self.log_checkbox.isChecked()
@@ -264,7 +268,7 @@ class SettingsDialog(QDialog):
         self.athkar_volume.setValue(current_settings["audio"]["athkar_volume_level"])
         self.ayah_volume.setValue(current_settings["audio"]["ayah_volume_level"])
         self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])
-        self.start_on_system_start_checkbox.setChecked(current_settings["general"]["start_on_system_starts_enabled"])
+        self.start_on_system_start_checkbox.setChecked(current_settings["general"]["auto_start_enabled"])
         self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
         self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
         self.log_checkbox.setChecked(current_settings["general"]["logging_enabled"])
