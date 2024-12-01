@@ -22,14 +22,15 @@ from PyQt6.QtCore import Qt
 from core_functions.Reciters import RecitersManager
 from utils.const import data_folder
 from utils.settings import SettingsManager
+from utils.audio_player import AthkarPlayer, AyahPlayer, SoundEffectPlayer
 
-reciters_manager = RecitersManager(data_folder / "quran" / "reciters.db")
 
 class SettingsDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
         self.setWindowTitle("الإعدادات")
         self.resize(500, 400)
+        self.reciters_manager = RecitersManager(data_folder / "quran" / "reciters.db")
         self.init_ui()
         self.set_current_settings()
 
@@ -83,16 +84,19 @@ class SettingsDialog(QDialog):
         self.volume_label = QLabel("مستوى الصوت")
         self.volume = QSlider(Qt.Orientation.Horizontal)
         self.volume.setRange(0, 100)
+        self.volume.valueChanged.connect(self.OnVolume)
         self.volume.setAccessibleName(self.volume_label.text())
         self.volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.ayah_volume_label = QLabel("مستوى صوت الآيات")
         self.ayah_volume = QSlider(Qt.Orientation.Horizontal)
         self.ayah_volume.setRange(0, 100)
+        self.ayah_volume.valueChanged.connect(self.OnAyahVolume)
         self.ayah_volume.setAccessibleName(self.ayah_volume_label.text())
         self.ayah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.athkar_volume_label = QLabel("مستوى صوت الأذكار")
         self.athkar_volume = QSlider(Qt.Orientation.Horizontal)
         self.athkar_volume.setRange(0, 100)
+        self.athkar_volume.valueChanged.connect(self.OnAthkarVolume)
         self.athkar_volume.setAccessibleName(self.athkar_volume_label.text())
         self.athkar_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
@@ -116,21 +120,17 @@ class SettingsDialog(QDialog):
 
         self.reciters_label = QLabel("القارئ")
         self.reciters_combo = QComboBox()
-        reciters = reciters_manager.get_reciters()
+        reciters = self.reciters_manager.get_reciters()
         self.reciters_combo.setAccessibleName(self.reciters_label.text())
         for  row in reciters:
             display_text = f"{row['name']} - {row['rewaya']} - {row['type']} - ({row['bitrate']} kbps)"
             self.reciters_combo.addItem(display_text, row["id"])
-
 
         self.action_label = QLabel("الإجراء بعد الاستماع")
         self.action_combo = QComboBox()
         items_with_ids = [("إيقاف", 0), ("تكرار", 1), ("الانتقال إلى الآية التالية", 2)]
         [self.action_combo.addItem(text, id) for text, id in items_with_ids]
         self.action_combo.setAccessibleName(self.action_label.text())
-
-
-
 
         self.group_listening_layout.addWidget(self.reciters_label)
         self.group_listening_layout.addWidget(self.reciters_combo)
@@ -176,6 +176,17 @@ class SettingsDialog(QDialog):
         main_layout.addLayout(buttons_layout)
         self.setLayout(main_layout)
 
+    def OnAyahVolume(self) -> None:
+        for instance in AyahPlayer.instances:
+            instance.set_volume(self.ayah_volume.value())
+
+    def OnAthkarVolume(self) -> None:
+        for instance in AthkarPlayer.instances:
+            instance.set_volume(self.athkar_volume.value())
+
+    def OnVolume(self) -> None:
+        for instance in SoundEffectPlayer.instances:
+            instance.set_volume(self.volume.value())
 
     def updateBackgroundCheckboxState(self):
         # Check if 'start_on_system_start_checkbox' is checked
