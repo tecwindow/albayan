@@ -36,22 +36,33 @@ class SingleInstanceApplication(QApplication):
             sys.exit(0)
 
     def eventFilter(self, obj, event):
-
         if event.type() == QEvent.Type.KeyPress:
             key = event.key()
+            modifiers = event.modifiers()
+
             if key == Qt.Key.Key_F5:
                 self.volume_controller.switch_category("next")
-                return True 
+                return True
             elif key == Qt.Key.Key_F6:
                 self.volume_controller.switch_category("previous")
                 return True
             elif key == Qt.Key.Key_F7:
-                self.volume_controller.adjust_volume(-1)
+                if modifiers & Qt.KeyboardModifier.ControlModifier:  # Ctrl+F7
+                    self.volume_controller.adjust_volume(-100)  # Set volume to 0
+                else:
+                    self.volume_controller.adjust_volume(-1)  # Adjust volume down
                 return True
             elif key == Qt.Key.Key_F8:
-                self.volume_controller.adjust_volume(1)
+                if modifiers & Qt.KeyboardModifier.ControlModifier:  # Ctrl+F8
+                    self.volume_controller.adjust_volume(100)  # Set volume to 100
+                else:
+                    self.volume_controller.adjust_volume(1)  # Adjust volume up
                 return True
+
         return super().eventFilter(obj, event)
+
+
+
     
     def setup_local_server(self) -> None:
         if not self.local_server.listen(self.server_name):
