@@ -33,12 +33,10 @@ from ui.dialogs.info_dialog import InfoDialog
 from ui.widgets.system_tray import SystemTrayManager
 from ui.widgets.toolbar import AudioToolBar
 from utils.settings import SettingsManager
-from utils.audio_player import SoundEffectPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
-from utils.const import program_name, program_icon, user_db_path, data_folder
-import utils.const as const
-from utils.audio_player import bass
+from utils.const import program_name, program_icon, user_db_path, data_folder, Globals
+from utils.audio_player import bass, SoundEffectPlayer
 
 
 class QuranInterface(QMainWindow):
@@ -49,8 +47,8 @@ class QuranInterface(QMainWindow):
         self.quran = quran_mgr()
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
         self.quran.aya_to_line = True
-        self.effects_manager = SoundEffectPlayer("Audio/sounds")
         self.user_data_manager = UserDataManager(user_db_path)
+        Globals.effects_manager = SoundEffectPlayer("Audio/sounds")
 
         self.toolbar = AudioToolBar(self)
         self.menu_bar = MenuBar(self)
@@ -147,14 +145,14 @@ class QuranInterface(QMainWindow):
     def OnNext(self):
         self.quran_view.setText(self.quran.next())
         self.set_text_ctrl_label()
-        self.effects_manager.play("next")
+        Globals.effects_manager.play("next")
         if self.quran.current_pos == self.quran.max_pos:
             self.quran_view.setFocus()
 
     def OnBack(self):
         self.quran_view.setText(self.quran.back())
         self.set_text_ctrl_label()
-        self.effects_manager.play("previous")
+        Globals.effects_manager.play("previous")
         if self.quran.current_pos == 1:            
             self.quran_view.setFocus()
     
@@ -286,7 +284,7 @@ class QuranInterface(QMainWindow):
         clipboard = QApplication.clipboard()
         clipboard.setText(current_line)
         UniversalSpeech.say("تم نسخ الآية.")
-        self.effects_manager.play("copy")
+        Globals.effects_manager.play("copy")
 
 
     def OnSyntax(self):
@@ -345,22 +343,19 @@ class QuranInterface(QMainWindow):
             self.quran_view.setText(self.quran.get_by_ayah_number(ayah_number)["full_text"])
             self.set_focus_to_ayah(ayah_number)
             self.set_text_ctrl_label()
-        self.effects_manager.play("change")
+        Globals.effects_manager.play("change")
             
     def closeEvent(self, event):
         if SettingsManager.current_settings["general"]["run_in_background_enabled"]:
             event.ignore()
             self.hide()
-            const.tray_icon.showMessage("البيان", "تم تصغير نافذة البيان على صينية النظام, البرنامج يعمل في الخلفية.", msecs=5000)
+            self.tray_manager.tray_icon.showMessage("البيان", "تم تصغير نافذة البيان على صينية النظام, البرنامج يعمل في الخلفية.", msecs=5000)
         else:
             self.tray_manager.hide_icon()
             bass.BASS_Free()
 
     def OnRandomMessages(self):
-            # قراءة البيانات من ملف QuotesMessages.json
             with open(data_folder/"quotes/QuotesMessages.json", "r", encoding="utf-8") as file:
-                quotes_list = json.load(file)  # قراءة العناصر من الملف
-            # اختيار عنصر عشوائي
+                quotes_list = json.load(file)
             message = random.choice(quotes_list)
             InfoDialog('اقتباس عشوائي', 'رسالة لك', message, is_html_content=False).exec()
-

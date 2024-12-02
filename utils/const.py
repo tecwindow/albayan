@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Optional
 from PyQt6.QtWidgets import QSystemTrayIcon
 
 tecwindow_folder = os.path.join(os.getenv("AppData"), "tecwindow")
@@ -27,5 +26,10 @@ program_name = "البيان"
 program_english_name = "Albayan"
 program_version = "1.3.0"
 program_icon = "icon.webp"
-tray_icon: Optional[QSystemTrayIcon] = None
 website = "https://tecwindow.net/"
+
+
+class Globals:
+    """Class for managing global shared objects."""
+    TRAY_ICON = None
+    effects_manager = None

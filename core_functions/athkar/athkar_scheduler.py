@@ -1,6 +1,5 @@
 import os
 import json
-import utils.const as const
 from datetime import datetime, time
 from pathlib import Path
 from typing import Dict, Optional, Union
@@ -11,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from .athkar_db_manager import AthkarDBManager
 from .athkar_refresher import AthkarRefresher
 from utils.audio_player import AthkarPlayer
+from utils.const import Globals
 
 class AthkarScheduler:
     def __init__(self, athkar_db_folder: Union[Path, str], default_category_path: Optional[Union[Path, str]] = None, text_athkar_path: Optional[Union[Path, str]] = None, default_category_settings: Optional[Dict[str, int]] = None) -> None:
@@ -55,7 +55,7 @@ class AthkarScheduler:
             title = "البيان"
             description = text
         
-        const.tray_icon.showMessage(title, description, msecs=5000)
+        Globals.TRAY_ICON.showMessage(title, description, msecs=5000)
 
     @staticmethod
     def _parse_time(time_str: str) -> time:
