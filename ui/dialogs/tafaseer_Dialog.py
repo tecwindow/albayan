@@ -16,6 +16,7 @@ from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
 from utils.universal_speech import UniversalSpeech
 from utils.const import albayan_documents_dir
+from utils.audio_player import SoundEffectPlayer
 
 
 class TafaseerDialog(QDialog):
@@ -28,6 +29,8 @@ class TafaseerDialog(QDialog):
         self.resize(500, 400)
         self.tafaseer_manager = TafaseerManager()
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(self.default_category))
+        self.effects_manager = SoundEffectPlayer("Audio/sounds")
+        self.effects_manager.play("open")
 
 
         self.layout = QVBoxLayout(self)
@@ -56,7 +59,7 @@ class TafaseerDialog(QDialog):
 
         self.close_button = QPushButton("إغلاق")
         self.close_button.setShortcut(QKeySequence("Ctrl+W"))
-        self.close_button.clicked.connect(self.close)
+        self.close_button.clicked.connect(self.reject)
         self.button_layout.addWidget(self.close_button)
 
         self.layout.addLayout(self.button_layout)
@@ -90,13 +93,14 @@ class TafaseerDialog(QDialog):
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(selected_category))
         self.text_edit.setText(self.tafaseer_manager.get_tafaseer(self.ayah_info[0], self.ayah_info[1]))
         self.text_edit.setFocus()
+        self.effects_manager.play("change")
 
     def copy_content(self):
         copied_content = self.text_edit.toPlainText()
         clipboard = QApplication.clipboard()
         clipboard.setText(copied_content) 
         UniversalSpeech.say("تم نسخ التفسير.")
-        
+        self.effects_manager.play("copy")        
     def save_content(self):            
 
         file_name = os.path.join(albayan_documents_dir, self.windowTitle())
@@ -108,3 +112,7 @@ class TafaseerDialog(QDialog):
         if file_path:
             with open(file_path, "w") as file:
                 file.write(self.text_edit.toPlainText())
+
+    def reject(self):
+        self.effects_manager.play("clos")
+        super().    reject()

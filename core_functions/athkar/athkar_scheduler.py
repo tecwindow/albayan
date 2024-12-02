@@ -45,7 +45,17 @@ class AthkarScheduler:
 
     def text_athkar_job(self, category_id: int) -> None:
         random_text_athkar = choice(self.db_manager.get_text_athkar(category_id))
-        const.tray_icon.showMessage("البيان", random_text_athkar.text,msecs=5000)
+        text = random_text_athkar.text
+        
+        if len(text) > 256:
+            # Extract the first 5 words for the title
+            title = " ".join(text.split()[:10])
+            description = " ".join(text.split()[10:])
+        else:
+            title = "البيان"
+            description = text
+        
+        const.tray_icon.showMessage(title, description, msecs=5000)
 
     @staticmethod
     def _parse_time(time_str: str) -> time:

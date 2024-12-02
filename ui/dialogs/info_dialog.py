@@ -61,7 +61,7 @@ class InfoDialog(QDialog):
         clipboard = QApplication.clipboard()
         clipboard.setText(self.text_edit.toPlainText())
         UniversalSpeech.say("تم نسخ النص إلى الحافظة")
-
+        self.effects_manager.play("copy")
 
     def reject(self):
         self.effects_manager.play("clos")
