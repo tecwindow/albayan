@@ -285,6 +285,8 @@ class QuranInterface(QMainWindow):
         clipboard = QApplication.clipboard()
         clipboard.setText(current_line)
         UniversalSpeech.say("تم نسخ الآية.")
+        self.effects_manager.play("copy")
+
 
     def OnSyntax(self):
         aya_info = self.get_current_ayah_info()
