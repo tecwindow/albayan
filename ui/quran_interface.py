@@ -37,6 +37,7 @@ from utils.audio_player import SoundEffectPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
 from utils.const import program_name, program_icon, user_db_path, data_folder
+import utils.const as const
 from utils.audio_player import bass
 
 
@@ -350,6 +351,7 @@ class QuranInterface(QMainWindow):
         if SettingsManager.current_settings["general"]["run_in_background_enabled"]:
             event.ignore()
             self.hide()
+            const.tray_icon.showMessage("البيان", "تم تصغير نافذة البيان على صينية النظام, البرنامج يعمل في الخلفية.", msecs=5000)
         else:
             self.tray_manager.hide_icon()
             bass.BASS_Free()
