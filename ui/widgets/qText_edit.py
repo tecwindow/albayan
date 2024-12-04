@@ -2,6 +2,7 @@ import re
 from PyQt6.QtCore import QEvent, Qt, QLocale
 from PyQt6.QtGui import QKeyEvent
 from PyQt6.QtWidgets import QTextEdit
+from utils.settings import SettingsManager
 
 
 class ReadOnlyTextEdit(QTextEdit):
@@ -42,8 +43,9 @@ class QuranViewer(ReadOnlyTextEdit):
         super().keyPressEvent(e)
         self.set_ctrl()
 
-        #Disable temporarily
-        return
+        if not SettingsManager.current_settings["reading"]["auto_page_turn"]:
+            return
+
         current_line = self.textCursor().block().blockNumber()
         total_lines = self.document().blockCount()
         

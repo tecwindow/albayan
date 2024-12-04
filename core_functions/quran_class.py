@@ -20,6 +20,7 @@ For more information, visit: https://github.com/baaziznasser/qurani
 
 import sqlite3
 from core_functions.ayah_data import AyahData
+from utils.settings import SettingsManager
 
 
 class QuranConst:
@@ -45,7 +46,7 @@ class QuranConst:
 class quran_mgr:
     def __init__(self):
         self.show_ayah_number = True
-        self.aya_to_line = False
+        self.aya_to_line = True
         self.current_pos = 1
         self.max_pos = 604
         self.type = 0
@@ -246,7 +247,7 @@ class quran_mgr:
         if not self.data_list:
             return ""
 
-        text = ""
+        text = "" if self.current_pos == 1 else "\n"
         current_position = 0
         ayah_data = AyahData()
 
@@ -275,7 +276,9 @@ class quran_mgr:
             last_position = current_position - 1
             ayah_data.insert(ayah[1], ayah[3], ayah[4], first_position, last_position)
 
-        text = text.strip("\n")
+        if not SettingsManager.current_settings["reading"]["auto_page_turn"] or self.current_pos == self.max_pos:
+            text = text.strip("\n")
+
         self.text = text
         self.ayah_data = ayah_data
 

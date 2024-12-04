@@ -46,7 +46,6 @@ class QuranInterface(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
         self.quran = quran_mgr()
         self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
-        self.quran.aya_to_line = True
         self.user_data_manager = UserDataManager(user_db_path)
         Globals.effects_manager = SoundEffectPlayer("Audio/sounds")
 
@@ -135,8 +134,12 @@ class QuranInterface(QMainWindow):
         self.set_focus_to_ayah(ayah_number)
 
     def set_focus_to_ayah(self, ayah_number: int):
-        # set the Cursor to ayah_position in the text
-        text_position = self.quran.ayah_data.get_position(ayah_number)
+        """set the Cursor to ayah_position in the text"""
+        if ayah_number == -1:
+            text_position = len(self.quran_view.toPlainText())
+        else:
+            text_position = self.quran.ayah_data.get_position(ayah_number)
+
         cursor = QTextCursor(self.quran_view.document())
         cursor.setPosition(text_position)
         self.quran_view.setTextCursor(cursor)
@@ -155,6 +158,8 @@ class QuranInterface(QMainWindow):
         Globals.effects_manager.play("previous")
         if self.quran.current_pos == 1:            
             self.quran_view.setFocus()
+        if SettingsManager.current_settings["reading"]["auto_page_turn"]:
+            self.set_focus_to_ayah(-1)
     
     def set_text_ctrl_label(self):
 
