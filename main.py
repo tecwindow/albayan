@@ -48,15 +48,23 @@ class SingleInstanceApplication(QApplication):
                 return True
             elif key == Qt.Key.Key_F7:
                 if modifiers & Qt.KeyboardModifier.ControlModifier:  # Ctrl+F7
-                    self.volume_controller.adjust_volume(-100)  # Set volume to 0
-                else:
-                    self.volume_controller.adjust_volume(-1)  # Adjust volume down
+                    self.volume_controller.adjust_volume(-10)
+                elif modifiers & Qt.KeyboardModifier.ShiftModifier:  # Shift+F7
+                    self.volume_controller.adjust_volume(-5)
+                elif modifiers & Qt.KeyboardModifier.AltModifier:  # Alt+F7
+                    self.volume_controller.adjust_volume(-100)
+                else:  # F7
+                    self.volume_controller.adjust_volume(-1)
                 return True
             elif key == Qt.Key.Key_F8:
                 if modifiers & Qt.KeyboardModifier.ControlModifier:  # Ctrl+F8
-                    self.volume_controller.adjust_volume(100)  # Set volume to 100
+                    self.volume_controller.adjust_volume(10)
+                elif modifiers & Qt.KeyboardModifier.ShiftModifier:  # Shift+F8
+                    self.volume_controller.adjust_volume(5)
+                elif modifiers & Qt.KeyboardModifier.AltModifier:  # Alt+F8
+                    self.volume_controller.adjust_volume(100)
                 else:
-                    self.volume_controller.adjust_volume(1)  # Adjust volume up
+                    self.volume_controller.adjust_volume(1)  # Default behavior (no modifiers)
                 return True
 
         return super().eventFilter(obj, event)
