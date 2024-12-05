@@ -121,7 +121,7 @@ class SettingsDialog(QDialog):
         self.group_listening = QGroupBox("إعدادات الاستماع")
         self.group_listening_layout = QVBoxLayout()
 
-        self.reciters_label = QLabel("القارئ")
+        self.reciters_label = QLabel("القارئ:")
         self.reciters_combo = QComboBox()
         reciters = self.reciters_manager.get_reciters()
         self.reciters_combo.setAccessibleName(self.reciters_label.text())
@@ -129,7 +129,7 @@ class SettingsDialog(QDialog):
             display_text = f"{row['name']} - {row['rewaya']} - {row['type']} - ({row['bitrate']} kbps)"
             self.reciters_combo.addItem(display_text, row["id"])
 
-        self.action_label = QLabel("الإجراء بعد الاستماع")
+        self.action_label = QLabel("الإجراء بعد الاستماع:")
         self.action_combo = QComboBox()
         items_with_ids = [("إيقاف", 0), ("تكرار", 1), ("الانتقال إلى الآية التالية", 2)]
         [self.action_combo.addItem(text, id) for text, id in items_with_ids]
@@ -140,6 +140,25 @@ class SettingsDialog(QDialog):
         self.group_listening_layout.addWidget(self.action_combo)
         self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_listening.setLayout(self.group_listening_layout)
+
+
+        self.group_reading = QGroupBox("إعدادات القراءة")
+        self.group_reading_layout = QVBoxLayout()
+        self.font_type_label = QLabel("نوع الخط:")
+        self.font_type_combo = QComboBox()
+        items_with_ids_list = [("الخط الحديث", 0), ("الخط العثماني", 1)]
+        [self.font_type_combo.addItem(text, id) for text, id in items_with_ids_list]
+        self.font_type_combo.setAccessibleName(self.font_type_label.text())
+
+        self.turn_pages_checkbox = QCheckBox("قلب الصفحات تلقائيا")
+
+
+        self.group_reading_layout.addWidget(self.font_type_label)
+        self.group_reading_layout.addWidget(self.font_type_combo)
+        self.group_reading_layout.addWidget(self.turn_pages_checkbox)
+        self.group_reading_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        self.group_reading.setLayout(self.group_reading_layout)
+
 
         self.group_search = QGroupBox("إعدادات البحث")
         self.group_search_layout = QVBoxLayout()
@@ -155,8 +174,6 @@ class SettingsDialog(QDialog):
 
 
 
-        self.group_reading = QGroupBox("الإعدادات العامة")
-        self.group_reading_layout = QVBoxLayout()
 
         
         self.stacked_widget.addWidget(self.group_general)
@@ -240,6 +257,10 @@ class SettingsDialog(QDialog):
             "action_after_listening": self.action_combo.currentData()
         }
 
+        reading_settings = {
+            "font_type": self.font_type_combo.currentData(),
+            "auto_page_turn": self.turn_pages_checkbox.isChecked()
+        }
 
         search_settings = {
             "ignore_tashkeel": self.ignore_tashkeel_checkbox.isChecked(),
@@ -251,6 +272,7 @@ class SettingsDialog(QDialog):
             "general": general_settings,
             "audio": audio_settings,
             "listening": listening_settings,
+            "reading": reading_settings,
             "search": search_settings
         })
         self.accept()
@@ -277,6 +299,7 @@ class SettingsDialog(QDialog):
         self.athkar_volume.setValue(current_settings["audio"]["athkar_volume_level"])
         self.ayah_volume.setValue(current_settings["audio"]["ayah_volume_level"])
         self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])
+        self.turn_pages_checkbox.setChecked(current_settings["reading"]["auto_page_turn"])
         self.start_on_system_start_checkbox.setChecked(current_settings["general"]["auto_start_enabled"])
         self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
         self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
@@ -295,4 +318,11 @@ class SettingsDialog(QDialog):
         index = self.action_combo.findData(stored_id)
         if index != -1:
             self.action_combo.setCurrentIndex(index)
+
+
+        stored_ids = current_settings["reading"]["font_type"]
+        index = self.font_type_combo.findData(stored_ids)
+        if index != -1:
+            self.font_type_combo.setCurrentIndex(index)
+
 
