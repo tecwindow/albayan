@@ -19,8 +19,10 @@ For more information, visit: https://github.com/baaziznasser/qurani
 
 
 import sqlite3
+from typing import Union
 from core_functions.ayah_data import AyahData
 from utils.settings import SettingsManager
+from utils.const import data_folder
 
 
 class QuranConst:
@@ -31,6 +33,9 @@ class QuranConst:
     max_hizb_quarter = 240
     _max = (max_page, max_surah_number, max_hizb_quarter, max_hizb, max_juz)
     _category_labels = ("صفحة", "سورة", "ربع", "حزب", "جزء")
+    quran_folder = data_folder / "quran"
+    databases = [quran_folder/ "quran.DB", quran_folder / "uthmani.DB"]
+
 
     @classmethod
     def get_max(cls, category_number: int) -> int:
@@ -56,8 +61,9 @@ class quran_mgr:
         self.text = ""
         self.ayah_data = None
 
-    def load_quran(self, db_path):
-        self.conn = sqlite3.connect(db_path)
+    def load_quran(self, db_file: Union[str, int]):
+        db_file = QuranConst.databases[db_file] if isinstance(db_file, int) else db_file
+        self.conn = sqlite3.connect(db_file)
         self.cursor = self.conn.cursor()
 
     def get_surah(self, surah_number):
