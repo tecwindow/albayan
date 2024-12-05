@@ -66,6 +66,10 @@ class quran_mgr:
         self.conn = sqlite3.connect(db_file)
         self.cursor = self.conn.cursor()
 
+    def reload_quran(self, db_file: Union[str, int]):
+        self.load_quran(db_file)
+        return self.goto(self.current_pos)
+
     def get_surah(self, surah_number):
         self.current_pos = surah_number
         self.max_pos = 114
