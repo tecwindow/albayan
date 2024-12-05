@@ -46,11 +46,13 @@ class SettingsDialog(QDialog):
         general_item = QTreeWidgetItem(["الإعدادات العامة"])
         audio_item = QTreeWidgetItem(["الصوت"])
         listening_item = QTreeWidgetItem(["الاستماع"])
+        reading_item = QTreeWidgetItem(["القراءة"])
         search_item = QTreeWidgetItem(["البحث"])
         
         tree_widget.addTopLevelItem(general_item)
         tree_widget.addTopLevelItem(audio_item)
         tree_widget.addTopLevelItem(listening_item)
+        tree_widget.addTopLevelItem(reading_item)
         tree_widget.addTopLevelItem(search_item)
         
         self.stacked_widget = QStackedWidget()
@@ -150,10 +152,17 @@ class SettingsDialog(QDialog):
         self.group_search_layout.addWidget(self.match_whole_word_checkbox)
         self.group_search_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_search.setLayout(self.group_search_layout)
+
+
+
+        self.group_reading = QGroupBox("الإعدادات العامة")
+        self.group_reading_layout = QVBoxLayout()
+
         
         self.stacked_widget.addWidget(self.group_general)
         self.stacked_widget.addWidget(self.group_audio)
         self.stacked_widget.addWidget(self.group_listening)
+        self.stacked_widget.addWidget(self.group_reading)
         self.stacked_widget.addWidget(self.group_search)
         
         tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(tree_widget.indexOfTopLevelItem(current)))
