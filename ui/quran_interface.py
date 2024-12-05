@@ -209,6 +209,7 @@ class QuranInterface(QMainWindow):
         self.back_to.setEnabled(back_status)
         self.menu_bar.previous_action.setEnabled(back_status)
         self.toolbar.navigation.reset_position()
+        self.toolbar.set_buttons_status()
         
     def OnQuickAccess(self):
         dialog = QuickAccess(self, "الوصول السريع")
