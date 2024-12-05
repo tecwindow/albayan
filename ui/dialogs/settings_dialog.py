@@ -29,6 +29,7 @@ from utils.Startup import StartupManager
 class SettingsDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
         self.setWindowTitle("الإعدادات")
         self.resize(500, 400)
         self.reciters_manager = RecitersManager(data_folder / "quran" / "reciters.db")
@@ -235,6 +236,9 @@ class SettingsDialog(QDialog):
             else:
                 StartupManager.remove_from_startup(program_english_name)
 
+        if SettingsManager.current_settings["reading"]["font_type"] != self.font_type_combo.currentData():
+            self.parent.quran_view.setText(self.parent.quran.reload_quran(self.font_type_combo.currentData()))
+
         general_settings = {
             "run_in_background_enabled": self.run_in_background_checkbox.isChecked(),
             "auto_start_enabled": self.start_on_system_start_checkbox.isChecked(),
@@ -319,10 +323,7 @@ class SettingsDialog(QDialog):
         if index != -1:
             self.action_combo.setCurrentIndex(index)
 
-
-        stored_ids = current_settings["reading"]["font_type"]
-        index = self.font_type_combo.findData(stored_ids)
+        stored_id = current_settings["reading"]["font_type"]
+        index = self.font_type_combo.findData(stored_id)
         if index != -1:
             self.font_type_combo.setCurrentIndex(index)
-
-
