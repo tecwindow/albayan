@@ -35,7 +35,7 @@ class SettingsManager:
             "match_whole_word": False,
         },
         "reading": {
-            "font_type": "normal",
+            "font_type": 0,
             "auto_page_turn": False,
         },
         "preferences": {
