@@ -45,7 +45,7 @@ class QuranInterface(QMainWindow):
         self.setWindowTitle(title)
         self.setGeometry(100, 100, 800, 600)
         self.quran = quran_mgr()
-        self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
+        self.quran.load_quran(SettingsManager.current_settings["reading"]["font_type"])
         self.user_data_manager = UserDataManager(user_db_path)
         Globals.effects_manager = SoundEffectPlayer("Audio/sounds")
 
