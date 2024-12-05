@@ -47,8 +47,9 @@ class AyahData:
         if result:
             return result['ayah_number']
         else:
-            return None  
-
+            if position > 1:
+                return self.get(position - 1)
+        
     def get_position(self, ayah_number: int) -> int:
         """Get position for Specific ayah"""
         self.cursor.execute("SELECT first_position FROM ayah_data WHERE ayah_number = ?;", (ayah_number,))
