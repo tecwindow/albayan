@@ -257,7 +257,7 @@ class quran_mgr:
         if not self.data_list:
             return ""
 
-        text = "" if self.current_pos == 1 else "\n"
+        text = "" if self.current_pos == 1 else "|\n"
         current_position = 0
         ayah_data = AyahData()
 
@@ -286,9 +286,7 @@ class quran_mgr:
             last_position = current_position - 1
             ayah_data.insert(ayah[1], ayah[3], ayah[4], first_position, last_position)
 
-        if not SettingsManager.current_settings["reading"]["auto_page_turn"] or self.current_pos == self.max_pos:
-            text = text.strip("\n")
-
+        text = text.strip()
         self.text = text
         self.ayah_data = ayah_data
 
