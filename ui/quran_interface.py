@@ -152,13 +152,13 @@ class QuranInterface(QMainWindow):
         if self.quran.current_pos == self.quran.max_pos:
             self.quran_view.setFocus()
 
-    def OnBack(self):
+    def OnBack(self, is_auto_call: bool = False):
         self.quran_view.setText(self.quran.back())
         self.set_text_ctrl_label()
         Globals.effects_manager.play("previous")
         if self.quran.current_pos == 1:            
             self.quran_view.setFocus()
-        if SettingsManager.current_settings["reading"]["auto_page_turn"]:
+        if SettingsManager.current_settings["reading"]["auto_page_turn"] and is_auto_call:
             self.set_focus_to_ayah(-1)
     
     def set_text_ctrl_label(self):

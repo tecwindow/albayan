@@ -286,7 +286,7 @@ class quran_mgr:
             last_position = current_position - 1
             ayah_data.insert(ayah[1], ayah[3], ayah[4], first_position, last_position)
 
-        text = text.strip()
+        text = text + "|" if SettingsManager.current_settings["reading"]["auto_page_turn"] else text.strip()
         self.text = text
         self.ayah_data = ayah_data
 
