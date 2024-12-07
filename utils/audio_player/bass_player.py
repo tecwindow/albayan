@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from .status import PlaybackStatus
 from exceptions.audio_pplayer import (
     AudioFileNotFoundError, LoadFileError, UnsupportedFormatError, PlaybackControlError,
-    InvalidSourceError, PlaybackInitializationError, VolumeOutOfRangeError
+    InvalidSourceError, PlaybackInitializationError, PlaybackControlError
 )
 
 # Load bass.dll
