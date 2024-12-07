@@ -4,6 +4,10 @@ from ctypes import CDLL, c_float
 from typing import List, Optional
 from urllib.parse import urlparse
 from .status import PlaybackStatus
+from exceptions.audio_pplayer import (
+    AudioFileNotFoundError, LoadFileError, UnsupportedFormatError, PlaybackControlError,
+    InvalidSourceError, PlaybackInitializationError, VolumeOutOfRangeError
+)
 
 # Load bass.dll
 bass_path = os.path.abspath("bass.dll")
@@ -14,7 +18,7 @@ BASS_STREAM_AUTOFREE = 0x40000  # Automatically free the stream when it stops/en
 
 # Initialize BASS
 if not bass.BASS_Init(-1, 44100, 0, 0, 0):
-    raise RuntimeError("BASS initialization failed")
+    raise PlaybackInitializationError()
 
 class AudioPlayer:
     instances = []
@@ -34,9 +38,13 @@ class AudioPlayer:
         if self.current_channel:
             self.stop()  
 
-        if not isinstance(source, str):
-            raise ValueError("Source must be a valid file path or URL.")
-        
+        if not isinstance(source, str) or not source:
+            raise InvalidSourceError(source)
+
+        file_name, file_extension = os.path.splitext(source)
+        if file_extension.lower() not in self.supported_extensions:
+            raise UnsupportedFormatError(file_extension)
+
         parsed_url = urlparse(source)
         if parsed_url.scheme in ("http", "https") and parsed_url.netloc:
             # Stream from URL
@@ -44,7 +52,7 @@ class AudioPlayer:
         else:
             # Load from local file
             if not os.path.isfile(source):
-                raise FileNotFoundError(f"Audio file '{source}' not found")
+                raise AudioFileNotFoundError(source)
             self.current_channel = bass.BASS_StreamCreateFile(False, source.encode('utf-8'), 0, 0, BASS_STREAM_AUTOFREE if self.auto_free else 0)
 
         if not self.current_channel:
@@ -52,7 +60,7 @@ class AudioPlayer:
                 print(f"Trying too load: {source}.")
                 time.sleep(0.1)
                 return self.load_audio(source, attempts - 1)
-            raise RuntimeError("Failed to load audio file or URL: {}".format(source))
+            raise LoadFileError(source)
         
         self.source = source
         self.set_volume(self.volume) 
@@ -60,7 +68,7 @@ class AudioPlayer:
     def play(self) -> None:
         """Plays the currently loaded audio."""
         if not self.current_channel:
-            raise RuntimeError("No audio file loaded. Use load_audio() first.")
+            raise PlaybackControlError("play", "No audio file loaded. Use load_audio() first.")
         bass.BASS_ChannelPlay(self.current_channel, False)
     
     def pause(self) -> None:
@@ -75,11 +83,11 @@ class AudioPlayer:
             bass.BASS_StreamFree(self.current_channel)
             self.current_channel = None
 
-    def set_volume(self, volume: float) -> None:
-        """Sets the playback volume (0.0 to 1.0)."""
+    def set_volume(self, volume: float) -> None:        
+        """Sets the playback volume (0.0 to 1.0)."""    
         if isinstance(volume, int):
             volume = volume / 100
-            
+
         self.volume = max(0.0, min(volume, 1.0))  
         if self.current_channel:
             bass.BASS_ChannelSetAttribute(self.current_channel, 2, c_float(self.volume))
