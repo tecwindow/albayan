@@ -153,6 +153,8 @@ class SearchDialog(QDialog):
             self.parent.set_focus_to_ayah(ayah_number)
             self.parent.quran_view.setFocus()
             self.accept()
+            self.deleteLater()
+
 
     def on_radio_toggled(self):
 
@@ -249,3 +251,8 @@ class SearchResultsDialog(QDialog):
             UniversalSpeech.say(text)
 
         return super().keyPressEvent(event)
+
+
+    def reject(self):
+        self.deleteLater()
+        

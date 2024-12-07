@@ -114,4 +114,4 @@ class TafaseerDialog(QDialog):
 
     def reject(self):
         Globals.effects_manager.play("clos")
-        super().    reject()
+        self.deleteLater()
