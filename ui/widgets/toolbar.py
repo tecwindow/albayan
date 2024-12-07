@@ -1,19 +1,22 @@
+import logging
 import time
 from typing import Optional
-from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider
+from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider, QMessageBox
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from core_functions.quran_class import quran_mgr
 from core_functions.Reciters import RecitersManager
 from utils.audio_player import AyahPlayer
 from utils.settings import SettingsManager
 from utils.const import data_folder
+from exceptions.base import ErrorMessage
 
 
 class AudioPlayerThread(QThread):
     statusChanged = pyqtSignal()
     waiting_to_load = pyqtSignal(bool)
     playback_finished = pyqtSignal()
-    
+    error_signal = pyqtSignal(ErrorMessage) 
+
     def __init__(self, player: AyahPlayer, parent: Optional[object] = None):
         super().__init__(parent)
         self.player = player
@@ -26,11 +29,18 @@ class AudioPlayerThread(QThread):
         if self.url:
             if self.player.source != self.url or self.player.is_stopped():
                 self.waiting_to_load.emit(False)
-                self.player.load_audio(self.url)
-            self.player.play()
-            self.manually_stopped = False
-            self.statusChanged.emit()
-            self.waiting_to_load.emit(True)
+                try:
+                    self.player.load_audio(self.url)
+                    self.player.play()
+                    self.manually_stopped = False
+                except Exception as e:
+                    message = ErrorMessage(e)
+                    logging.error(message.log_message)
+                    self.error_signal.emit(message)
+                    self.manually_stopped = True
+                finally:
+                    self.statusChanged.emit()
+                    self.waiting_to_load.emit(True)
 
     def check_playback_status(self):
         if not self.player.is_playing() and not self.player.is_stalled():
@@ -137,6 +147,7 @@ class AudioToolBar(QToolBar):
         self.audio_thread.statusChanged.connect(self.update_play_pause_button_text)
         self.audio_thread.waiting_to_load.connect(self.set_buttons_status)
         self.audio_thread.playback_finished.connect(self.OnActionAfterListening)
+        self.audio_thread.error_signal.connect(self.show_error_message)
 
     def create_button(self, text, callback):
         button = QPushButton(text)
@@ -218,3 +229,6 @@ class AudioToolBar(QToolBar):
             self.parent.menu_bar.stop_action.setEnabled(not self.player.is_stopped())
             if  status == True:
                 self.audio_thread.timer.start(100)
+
+    def show_error_message(self, message: ErrorMessage):
+        QMessageBox.critical(self.parent, message.title, message.body)
