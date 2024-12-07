@@ -17,6 +17,8 @@ class ReadOnlyTextEdit(QTextEdit):
         font.setPointSize(16)
         self.setFont(font)
         self.setAcceptRichText(True)
+        document = self.document()
+        document.setDefaultCursorMoveStyle(Qt.CursorMoveStyle.VisualMoveStyle)
 
 
 class QuranViewer(ReadOnlyTextEdit):
