@@ -17,7 +17,6 @@ class MenuBar(QMenuBar):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
-        self.is_rtl = True
         self.theme_manager = ThemeManager(self.parent)
         self.update_manager = UpdateManager(self.parent)
         self.our_emails = {
@@ -156,12 +155,19 @@ class MenuBar(QMenuBar):
             theme_menu.addAction(theme_action)
         self.theme_manager.apply_theme(SettingsManager.current_settings["preferences"]["theme"])
         
-        self.text_direction_action = QAction("تغيير اتجاه النص", self)
-        self.text_direction_action.triggered.connect(self.toggle_text_direction)
+        self.text_direction_action = QMenu("تغيير اتجاه النص", self)
+
+        self.rtl_action = QAction("من اليمين لليسار", self)
+        self.rtl_action.triggered.connect(self.set_text_direction_rtl)
+        self.text_direction_action.addAction(self.rtl_action)
+        self.ltr_action = QAction("من اليسار لليمين", self)
+        self.ltr_action.triggered.connect(self.set_text_direction_ltr)
+        self.text_direction_action.addAction(self.ltr_action)
 
         preferences_menu.addAction(settings_action)
         preferences_menu.addMenu(theme_menu)
-        preferences_menu.addAction(self.text_direction_action)
+        preferences_menu.addMenu(self.text_direction_action)
+
 
         help_menu = self.addMenu("المساعدة(&H)")
 #        user_guide_action = QAction("دليل البرنامج", self)
@@ -212,16 +218,14 @@ class MenuBar(QMenuBar):
         }
         SettingsManager.write_settings(theme_setting)
 
-    def toggle_text_direction(self):
+    def set_text_direction_rtl(self):
+        option = self.parent.quran_view.document().defaultTextOption()
+        option.setTextDirection(Qt.LayoutDirection.RightToLeft)
+        self.parent.quran_view.document().setDefaultTextOption(option)
 
-        option = self.parent.quran_view.document().defaultTextOption()                                               
-        if self.is_rtl:
-            option.setTextDirection(Qt.LayoutDirection.LeftToRight)
-            self.is_rtl = False
-        else:
-            option.setTextDirection(Qt.LayoutDirection.RightToLeft)
-            self.is_rtl = True
-
+    def set_text_direction_ltr(self):
+        option = self.parent.quran_view.document().defaultTextOption()
+        option.setTextDirection(Qt.LayoutDirection.LeftToRight)
         self.parent.quran_view.document().setDefaultTextOption(option)
 
     def OnContact(self):

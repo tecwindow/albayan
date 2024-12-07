@@ -47,6 +47,13 @@ class QuranViewer(ReadOnlyTextEdit):
         super().keyPressEvent(e)
         self.set_ctrl()
 
+        if e.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            if e.key() == Qt.Key.Key_Shift:
+                if e.nativeScanCode() == 42:  # Scan code for Left Shift
+                    self.parent.menu_bar.set_text_direction_ltr()
+                elif e.nativeScanCode() == 54: # Scan code for Right Shift
+                    self.parent.menu_bar.set_text_direction_rtl()
+
         if not SettingsManager.current_settings["reading"]["auto_page_turn"]:
             return
 
