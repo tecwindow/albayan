@@ -136,4 +136,8 @@ class BookmarkDialog(QDialog):
             self.parent.set_focus_to_ayah(bookmark["ayah_number"])
             self.parent.quran_view.setFocus()
             self.accept()
+            self.deleteLater()
 
+    def reject(self):
+        self.deleteLater()
+        

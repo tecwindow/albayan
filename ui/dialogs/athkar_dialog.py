@@ -150,3 +150,9 @@ class AthkarDialog(QDialog):
         )
         self.athkar_scheduler.refresh()
         self.accept()
+        self.deleteLater()
+
+
+    def reject(self):
+        self.deleteLater()
+        

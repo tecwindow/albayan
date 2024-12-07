@@ -280,6 +280,7 @@ class SettingsDialog(QDialog):
             "search": search_settings
         })
         self.accept()
+        self.deleteLater()
 
     def OnReset(self):
         msg_box = QMessageBox(self)
@@ -327,3 +328,7 @@ class SettingsDialog(QDialog):
         index = self.font_type_combo.findData(stored_id)
         if index != -1:
             self.font_type_combo.setCurrentIndex(index)
+
+    def reject(self):
+        self.deleteLater()
+        

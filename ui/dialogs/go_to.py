@@ -37,3 +37,9 @@ class GoToDialog(QDialog):
     
     def get_input_value(self):
         return self.input_field.value()
+        self.deleteLater()
+
+    def reject(self):
+
+        self.deleteLater()
+        

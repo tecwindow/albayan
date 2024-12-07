@@ -88,6 +88,7 @@ class QuickAccess(QDialog):
             self.parent.quran_view.setText(self.parent.quran.get_juzz(selected_item))
         self.accept()
         self.effects_manager.play("change")
+        self.deleteLater()
 
     def on_radio_toggled(self):
         if self.sura_radio.isChecked():
@@ -105,3 +106,7 @@ class QuickAccess(QDialog):
         elif self.jus_radio.isChecked():
             self.choices.clear()
             self.choices.addItems(self.jus)
+
+    def reject(self):
+        self.deleteLater()
+        
