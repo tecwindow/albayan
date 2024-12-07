@@ -266,7 +266,6 @@ class quran_mgr:
             ayah_number = ayah[4]
             if int(ayah_number) == 1:
                 start_point_text = f"{ayah[2]} {ayah[3]}\n|\n"
-                start_point_text = f"|\n{start_point_text}" if ayah_index == 0 and self.current_pos != 1 else start_point_text
                 ayah_text = start_point_text + ayah_text
                 if  ayah[3] != 1:
                     ayah_text = ayah_text.replace("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ", f"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\n")
@@ -279,12 +278,13 @@ class quran_mgr:
             else:
                 ayah_text += " "
 
+            ayah_text = f"|\n{ayah_text}" if ayah_index == 0 and self.current_pos != 1 else ayah_text
             text += ayah_text
 
             # Calculate the positions
             first_position = current_position
             current_position += len(ayah_text)
-            last_position = current_position -1
+            last_position = current_position - 1
             ayah_data.insert(ayah[1], ayah[3], ayah[4], first_position, last_position)
 
         text = text + "|" if SettingsManager.current_settings["reading"]["auto_page_turn"] else text.strip()
