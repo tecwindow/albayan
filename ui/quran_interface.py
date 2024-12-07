@@ -195,11 +195,12 @@ class QuranInterface(QMainWindow):
             self.back_to.setText("الجزء السابق")
             self.menu_bar.previous_action.setText("الجزء السابق")
 
-
         # set the label
         self.quran_title.setText(label)
         self.quran_view.setAccessibleName(label)
-        UniversalSpeech.say(label)
+
+        if self.isActiveWindow():
+                UniversalSpeech.say(label)
         
         # Enable back and next item
         next_status = self.quran.current_pos < self.quran.max_pos
