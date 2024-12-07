@@ -23,4 +23,28 @@ class BaseException(ABC, Exception):
             base_message += f" | Cause: {repr(self.cause)}"
         return base_message
 
+class ErrorMessage:
+    def __init__(self, exception: Exception):
+        self.exception = exception
 
+    def get_code(self) -> int:
+        return getattr(self.exception, "code", None)
+
+    @property
+    def title(self) -> str:
+        return "خطأ"
+
+    @property
+    def body(self) -> str:
+        body = "حدث خطأ. يرجى الاتصال بالدعم للحصول على المساعدة."
+        code = self.get_code()
+        if code:
+            body += f"\nرمز الخطأ: {code}"
+        return body
+
+    @property
+    def log_message(self) -> str:
+        code = self.get_code()
+        error_type = type(self.exception).__name__
+        error_message = str(self.exception)
+        return f"Error Type: {error_type}, Code: {code or 'N/A'}, Message: {error_message}"
