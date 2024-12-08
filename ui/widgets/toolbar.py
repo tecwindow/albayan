@@ -1,4 +1,3 @@
-import logging
 import time
 from typing import Optional
 from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider, QMessageBox
@@ -8,6 +7,7 @@ from core_functions.Reciters import RecitersManager
 from utils.audio_player import AyahPlayer
 from utils.settings import SettingsManager
 from utils.const import data_folder
+from utils.logger import Logger
 from exceptions.base import ErrorMessage
 
 
@@ -35,7 +35,7 @@ class AudioPlayerThread(QThread):
                     self.manually_stopped = False
                 except Exception as e:
                     message = ErrorMessage(e)
-                    logging.error(message.log_message)
+                    Logger.error(message.log_message)
                     self.error_signal.emit(message)
                     self.manually_stopped = True
                 finally:

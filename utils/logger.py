@@ -33,7 +33,7 @@ level=logging.INFO,
     @classmethod
     def error(cls, message:str) -> None:
         cls.initialize_logger()
-        logging.error(message)
+        logging.error(message, exc_info=True)
 
     @classmethod
     def show_error_message(cls, message:str) -> None:
