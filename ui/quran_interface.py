@@ -98,7 +98,7 @@ class QuranInterface(QMainWindow):
         self.save_current_position.setEnabled(False)
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
 
-        self.random_messages = EnterButton("رسالة عشوائية")
+        self.random_messages = EnterButton("رسالة لك")
         self.random_messages.clicked.connect(self.OnRandomMessages)
 
 
