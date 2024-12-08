@@ -143,10 +143,10 @@ class SettingsDialog(QDialog):
 
         self.group_listening_layout.addWidget(self.reciters_label)
         self.group_listening_layout.addWidget(self.reciters_combo)
+        self.group_listening_layout.addWidget(self.action_label)
         self.group_listening_layout.addWidget(self.action_combo)
-        self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_listening.setLayout(self.group_listening_layout)
-
+        self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
         self.group_reading = QGroupBox("إعدادات القراءة")
         self.group_reading_layout = QVBoxLayout()
