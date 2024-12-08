@@ -1,4 +1,3 @@
-import logging
 import time
 from typing import Optional
 from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider, QMessageBox
@@ -8,6 +7,7 @@ from core_functions.Reciters import RecitersManager
 from utils.audio_player import AyahPlayer
 from utils.settings import SettingsManager
 from utils.const import data_folder
+from utils.logger import Logger
 from exceptions.base import ErrorMessage
 
 
@@ -27,15 +27,15 @@ class AudioPlayerThread(QThread):
 
     def run(self):
         if self.url:
-            if self.player.source != self.url or self.player.is_stopped():
                 self.waiting_to_load.emit(False)
                 try:
-                    self.player.load_audio(self.url)
+                    if self.player.source != self.url or self.player.is_stopped():
+                        self.player.load_audio(self.url)
                     self.player.play()
                     self.manually_stopped = False
                 except Exception as e:
                     message = ErrorMessage(e)
-                    logging.error(message.log_message)
+                    Logger.error(message.log_message)
                     self.error_signal.emit(message)
                     self.manually_stopped = True
                 finally:
@@ -61,6 +61,7 @@ class NavigationManager:
         self.ayah_range = None
         self.current_surah = None
         self.current_ayah = None
+        self.has_basmala = False
 
     def initialize_ayah_range(self):
             self.ayah_range = self.quran.ayah_data.get_ayah_range()
@@ -179,6 +180,13 @@ class AudioToolBar(QToolBar):
         self.set_buttons_status()
 
     def play_current_ayah(self):
+        
+        if self.navigation.current_ayah == 1 and not self.navigation.has_basmala:
+            self.navigation.current_ayah = 0
+            #self.navigation.has_basmala = True
+        elif self.navigation.current_ayah > 1:
+            self.navigation.has_basmala = False
+                    
         reciter_id = SettingsManager.current_settings["listening"]["reciter"]
         url = self.reciters.get_url(reciter_id, self.navigation.current_surah, self.navigation.current_ayah)
         self.audio_thread.set_audio_url(url)
@@ -198,10 +206,11 @@ class AudioToolBar(QToolBar):
     def OnActionAfterListening(self):
         self.set_buttons_status()
         action_after_listening = SettingsManager.current_settings["listening"]["action_after_listening"]
-        if action_after_listening == 1:
-            self.play_current_ayah()
-        elif action_after_listening == 2:
+        if action_after_listening == 2 or self.navigation.current_ayah == 0:
+            self.navigation.has_basmala = True
             self.OnPlayNext()
+        elif action_after_listening == 1:
+            self.play_current_ayah()
 
     def change_volume(self, value: int) -> None:
         self.player.set_volume(value)
