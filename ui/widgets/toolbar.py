@@ -183,8 +183,8 @@ class AudioToolBar(QToolBar):
         
         if self.navigation.current_ayah == 1 and not self.navigation.has_basmala:
             self.navigation.current_ayah = 0
-            self.navigation.has_basmala = True
-        else:
+            #self.navigation.has_basmala = True
+        elif self.navigation.current_ayah > 1:
             self.navigation.has_basmala = False
                     
         reciter_id = SettingsManager.current_settings["listening"]["reciter"]
@@ -207,6 +207,7 @@ class AudioToolBar(QToolBar):
         self.set_buttons_status()
         action_after_listening = SettingsManager.current_settings["listening"]["action_after_listening"]
         if action_after_listening == 2 or self.navigation.current_ayah == 0:
+            self.navigation.has_basmala = True
             self.OnPlayNext()
         elif action_after_listening == 1:
             self.play_current_ayah()
