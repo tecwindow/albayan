@@ -1,10 +1,12 @@
 import sys
+import json
+import random
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QKeySequence, QClipboard
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
-from utils.const import Globals
+from utils.const import Globals, data_folder
 
 class InfoDialog(QDialog):
     def __init__(self, title: str, label: str, text: str, is_html_content: bool = False):
@@ -37,6 +39,11 @@ class InfoDialog(QDialog):
         copy_button.setShortcut(QKeySequence("Shift+C"))
         copy_button.setStyleSheet('background-color: red; color: white;')
 
+        # Message to you button
+        message_to_you_button = QPushButton('رسالة لك', self)
+        message_to_you_button.clicked.connect(self.message_to_you)
+        message_to_you_button.setShortcut(QKeySequence("Ctrl+M"))
+        message_to_you_button.setStyleSheet('background-color: red; color: white;')
 
         # Close button
         close_button = QPushButton('إغلاق', self)
@@ -49,6 +56,7 @@ class InfoDialog(QDialog):
         layout.addWidget(label)
         layout.addWidget(self.text_edit)
         layout.addWidget(copy_button)
+        layout.addWidget(message_to_you_button)
         layout.addWidget(close_button)
         self.setLayout(layout)
         
@@ -65,3 +73,12 @@ class InfoDialog(QDialog):
         Globals.effects_manager.play("clos")
         self.deleteLater()
         
+    def message_to_you(self):
+        # Load the quotes and choose a random message
+        with open(data_folder/"quotes/QuotesMessages.json", "r", encoding="utf-8") as file:
+            quotes_list = json.load(file)
+        new_message = random.choice(quotes_list)
+
+        # Update the text without opening a new dialog
+        self.text_edit.setText(new_message)
+        UniversalSpeech.say(new_message)
