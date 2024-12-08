@@ -9,12 +9,13 @@ from utils.universal_speech import UniversalSpeech
 from utils.const import Globals, data_folder
 
 class InfoDialog(QDialog):
-    def __init__(self, title: str, label: str, text: str, is_html_content: bool = False):
+    def __init__(self, title: str, label: str, text: str, is_html_content: bool = False, show_message_button: bool = False):
         super().__init__()
         self.title = title
         self.label = label
         self.text = text
         self.is_html_content = is_html_content
+        self.show_message_button = show_message_button
         self.init_ui()
         Globals.effects_manager.play("open")
 
@@ -39,11 +40,12 @@ class InfoDialog(QDialog):
         copy_button.setShortcut(QKeySequence("Shift+C"))
         copy_button.setStyleSheet('background-color: red; color: white;')
 
-        # Message to you button
+        # Message to you button (conditionally added)
         message_to_you_button = QPushButton('رسالة لك', self)
         message_to_you_button.clicked.connect(self.message_to_you)
         message_to_you_button.setShortcut(QKeySequence("Ctrl+M"))
         message_to_you_button.setStyleSheet('background-color: red; color: white;')
+        message_to_you_button.setVisible(self.show_message_button)
 
         # Close button
         close_button = QPushButton('إغلاق', self)
