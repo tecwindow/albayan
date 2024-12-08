@@ -100,6 +100,7 @@ class QuranInterface(QMainWindow):
 
         self.random_messages = EnterButton("رسالة لك")
         self.random_messages.clicked.connect(self.OnRandomMessages)
+        self.random_messages.setShortcut(QKeySequence("Ctrl+M"))
 
 
     def create_layout(self):
@@ -365,4 +366,4 @@ class QuranInterface(QMainWindow):
             with open(data_folder/"quotes/QuotesMessages.json", "r", encoding="utf-8") as file:
                 quotes_list = json.load(file)
             message = random.choice(quotes_list)
-            InfoDialog('اقتباس عشوائي', 'رسالة لك', message, is_html_content=False).exec()
+            InfoDialog('رسالة لك', '', message, is_html_content=False).exec()
