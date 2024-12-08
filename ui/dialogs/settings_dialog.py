@@ -31,7 +31,7 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.parent = parent
         self.setWindowTitle("الإعدادات")
-        self.resize(500, 400)
+        self.resize(600, 450)
         self.reciters_manager = RecitersManager(data_folder / "quran" / "reciters.db")
         self.init_ui()
         self.set_current_settings()
@@ -41,23 +41,30 @@ class SettingsDialog(QDialog):
         main_layout = QVBoxLayout()
         taps_layout = QHBoxLayout()
 
+        # Tree widget for navigation
         tree_widget = QTreeWidget()
         tree_widget.setHeaderHidden(True)
+        tree_widget.setMinimumWidth(200)
+        tree_widget.setStyleSheet("QTreeWidget { font-size: 14px; }")
         
+        # Adding items to the tree
         general_item = QTreeWidgetItem(["الإعدادات العامة"])
         audio_item = QTreeWidgetItem(["الصوت"])
         listening_item = QTreeWidgetItem(["الاستماع"])
         reading_item = QTreeWidgetItem(["القراءة"])
         search_item = QTreeWidgetItem(["البحث"])
         
+        # Adding top-level items
         tree_widget.addTopLevelItem(general_item)
         tree_widget.addTopLevelItem(audio_item)
         tree_widget.addTopLevelItem(listening_item)
         tree_widget.addTopLevelItem(reading_item)
         tree_widget.addTopLevelItem(search_item)
         
+        # Stacked widget to switch views
         self.stacked_widget = QStackedWidget()
         
+        # General settings
         self.group_general = QGroupBox("الإعدادات العامة")
         self.group_general_layout = QVBoxLayout()
         self.run_in_background_checkbox = QCheckBox("تشغيل البرنامج في الخلفية")
@@ -76,8 +83,6 @@ class SettingsDialog(QDialog):
         self.group_general_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_general_layout.addWidget(self.reset_button)
         self.group_general.setLayout(self.group_general_layout)
-
-
 
         self.run_in_background_checkbox.toggled.connect(self.updateStartCheckboxState)
         self.start_on_system_start_checkbox.toggled.connect(self.updateBackgroundCheckboxState)
@@ -174,22 +179,30 @@ class SettingsDialog(QDialog):
         self.group_search.setLayout(self.group_search_layout)
 
 
-
-
-        
+        # Adding to the stacked widget        
         self.stacked_widget.addWidget(self.group_general)
         self.stacked_widget.addWidget(self.group_audio)
         self.stacked_widget.addWidget(self.group_listening)
         self.stacked_widget.addWidget(self.group_reading)
         self.stacked_widget.addWidget(self.group_search)
         
-        tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(tree_widget.indexOfTopLevelItem(current)))
+#        tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(tree_widget.indexOfTopLevelItem(current)))
 
+        # Linking tree widget with stacked widget
+        tree_widget.currentItemChanged.connect(
+            lambda current, previous: self.stacked_widget.setCurrentIndex(
+                tree_widget.indexOfTopLevelItem(current)
+            )
+        )
+
+
+        # Layout adjustments
         taps_layout.addWidget(tree_widget, stretch=1)
         taps_layout.addWidget(self.stacked_widget, stretch=2)
         
         main_layout.addLayout(taps_layout)
 
+        # Buttons at the bottom
         buttons_layout = QHBoxLayout()
         save_button = QPushButton("حفظ")
         save_button.clicked.connect(self.save_settings)
