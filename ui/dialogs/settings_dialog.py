@@ -143,6 +143,7 @@ class SettingsDialog(QDialog):
 
         self.group_listening_layout.addWidget(self.reciters_label)
         self.group_listening_layout.addWidget(self.reciters_combo)
+        self.group_listening_layout.addSpacerItem(QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))  # مسافة نتوسطة
         self.group_listening_layout.addWidget(self.action_label)
         self.group_listening_layout.addWidget(self.action_combo)
         self.group_listening.setLayout(self.group_listening_layout)
@@ -158,9 +159,9 @@ class SettingsDialog(QDialog):
 
         self.turn_pages_checkbox = QCheckBox("قلب الصفحات تلقائيا")
 
-
         self.group_reading_layout.addWidget(self.font_type_label)
         self.group_reading_layout.addWidget(self.font_type_combo)
+        self.group_reading_layout.addSpacerItem(QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))  # مسافة أكبر
         self.group_reading_layout.addWidget(self.turn_pages_checkbox)
         self.group_reading_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_reading.setLayout(self.group_reading_layout)
