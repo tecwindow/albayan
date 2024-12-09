@@ -1,6 +1,8 @@
+import os
 import sqlite3
 from typing import List, Dict, Optional
 from functools import lru_cache
+from exceptions.database import DBNotFoundError
 
 
 class RecitersManager:
@@ -8,14 +10,18 @@ class RecitersManager:
         self.db_path = db_path
 
     def _connect(self) -> sqlite3.Connection:
+
+        if not os.path.isfile(self.db_path):
+            raise DBNotFoundError(self.db_path)
+        
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
+
         return conn
 
     def get_reciters(self) -> List[sqlite3.Row]:
         """Fetches all reciters from the database."""
         with self._connect() as conn:
-            conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT *,

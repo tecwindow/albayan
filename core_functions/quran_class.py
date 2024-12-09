@@ -18,11 +18,13 @@ For more information, visit: https://github.com/baaziznasser/qurani
 #code start here
 
 
+import os
 import sqlite3
 from typing import Union
 from core_functions.ayah_data import AyahData
 from utils.settings import SettingsManager
 from utils.const import data_folder
+from exceptions.database import DBNotFoundError
 
 
 class QuranConst:
@@ -63,6 +65,9 @@ class quran_mgr:
 
     def load_quran(self, db_file: Union[str, int]):
         db_file = QuranConst.databases[db_file] if isinstance(db_file, int) else db_file
+        if not os.path.isfile(db_file):
+            raise DBNotFoundError(db_file)
+        
         self.conn = sqlite3.connect(db_file)
         self.cursor = self.conn.cursor()
 
