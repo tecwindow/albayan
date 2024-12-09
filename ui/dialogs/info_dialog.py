@@ -47,6 +47,8 @@ class InfoDialog(QDialog):
         message_to_you_button.setShortcut(QKeySequence("Ctrl+M"))
         message_to_you_button.setStyleSheet('background-color: red; color: white;')
         message_to_you_button.setVisible(self.show_message_button)
+        message_to_you_button.setDefault(True)
+
 
         # Close button
         close_button = QPushButton('إغلاق', self)
