@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+from utils.const import Globals
 
 
 class BaseException(ABC, Exception):
@@ -28,9 +28,7 @@ class BaseException(ABC, Exception):
 class ErrorMessage:
     def __init__(self, exception: Exception):
         self.exception = exception
-        from utils.audio_player import SoundEffectPlayer
-        self.effects_manager = SoundEffectPlayer("Audio/sounds")
-        self.effects_manager.play("error")
+        Globals.effects_manager.play("error")
 
 
     def get_code(self) -> int:
