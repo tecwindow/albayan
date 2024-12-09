@@ -43,37 +43,74 @@ class QuranViewer(ReadOnlyTextEdit):
         self.parent.menu_bar.verse_grammar_action.setEnabled(status)
         self.parent.menu_bar.copy_verse_action.setEnabled(status)
 
-    def keyPressEvent(self, e):
-        super().keyPressEvent(e)
+    def keyPressEvent(self, e): 
         self.set_ctrl()
 
-        if e.modifiers() & Qt.KeyboardModifier.ControlModifier:
+        # Space Key Handling (Play/Pause or Stop Audio)
+        if e.key() == Qt.Key.Key_Space:
+            if e.modifiers() & Qt.KeyboardModifier.ControlModifier:  # Ctrl + Space
+                if hasattr(self.parent.toolbar, "stop_audio"):
+                    self.parent.toolbar.stop_audio()
+                e.accept()  # Block the event (no space inserted)
+                return
+            elif e.modifiers() & Qt.KeyboardModifier.ShiftModifier:  # Shift + Space
+                if hasattr(self.parent.toolbar, "toggle_play_pause"):
+                    self.parent.toolbar.toggle_play_pause()
+                e.accept()  # Block the event (no space inserted)
+                return
+            else:  # Space without modifiers (default case)
+                if hasattr(self.parent.toolbar, "toggle_play_pause"):
+                    self.parent.toolbar.toggle_play_pause()
+                e.accept()  # Block the event (no space inserted)
+                return
+
+        # Shift Key with Modifiers Handling (Left/Right Shift)
+        if e.modifiers() & Qt.KeyboardModifier.ShiftModifier:
             if e.key() == Qt.Key.Key_Shift:
                 if e.nativeScanCode() == 42:  # Scan code for Left Shift
                     self.parent.menu_bar.set_text_direction_ltr()
-                elif e.nativeScanCode() == 54: # Scan code for Right Shift
+                    e.accept()  # Block the event
+                    return
+                elif e.nativeScanCode() == 54:  # Scan code for Right Shift
                     self.parent.menu_bar.set_text_direction_rtl()
+                    e.accept()  # Block the event
+                    return
 
+        # Auto Page Turn Feature
         if not SettingsManager.current_settings["reading"]["auto_page_turn"]:
+            super().keyPressEvent(e)  # Call default implementation for unhandled keys
             return
 
         current_line = self.textCursor().block().blockNumber()
         total_lines = self.document().blockCount()
-        
+
+        # Reset page-turn alert flag if not at the first or last line
         if current_line >= 1 and current_line + 1 != total_lines:
             self.is_page_turn_alert = False
 
+        # Handle Up Key
         if e.key() == Qt.Key.Key_Up:
-            if (current_line == 0) and (self.parent.quran.current_pos > 1):
+            if current_line == 0 and self.parent.quran.current_pos > 1:
                 if not self.is_page_turn_alert:
                     self.is_page_turn_alert = True
                     Globals.effects_manager.play("alert")
+                    e.accept()  # Block the event
                     return
                 self.parent.OnBack(is_auto_call=True)
+                e.accept()  # Block the event
+                return
+
+        # Handle Down Key
         elif e.key() == Qt.Key.Key_Down:
-            if (current_line == total_lines - 1) and (self.parent.quran.current_pos < self.parent.quran.max_pos):
+            if current_line == total_lines - 1 and self.parent.quran.current_pos < self.parent.quran.max_pos:
                 if not self.is_page_turn_alert:
                     self.is_page_turn_alert = True
                     Globals.effects_manager.play("alert")
+                    e.accept()  # Block the event
                     return
                 self.parent.OnNext()
+                e.accept()  # Block the event
+                return
+
+        # Call default implementation for unhandled keys
+        super().keyPressEvent(e)

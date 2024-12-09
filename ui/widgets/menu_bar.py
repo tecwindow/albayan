@@ -37,7 +37,7 @@ class MenuBar(QMenuBar):
                                            QKeySequence("Ctrl+Up"), QKeySequence("Alt+Left")])
         self.go_to_saved_position_action = QAction("الذهاب إلى الموضع المحفوظ", self)
         self.go_to_saved_position_action.triggered.connect(self.parent.set_text)
-        self.go_to_saved_position_action.setShortcuts([QKeySequence("Ctrl+BackSpace"), QKeySequence("Ctrl+P")])
+        self.go_to_saved_position_action.setShortcut("Ctrl+Backspace")
         self.search_action = QAction("البحث", self)
         self.search_action.triggered.connect(self.parent.OnSearch)        
         self.search_action.setShortcut(QKeySequence("Ctrl+F"))
@@ -65,8 +65,8 @@ class MenuBar(QMenuBar):
         navigation_menu.addAction(self.exit_action)
 
         player_menu = self.addMenu("المشغل(&P)")
-        self.play_pause_action = QAction("استماع الآية الحالية", self)
-        self.play_pause_action.setShortcut(QKeySequence("Ctrl+Shift+P"))
+        self.play_pause_action = QAction("تشغيل الآية الحالية", self)
+        self.play_pause_action.setShortcut(QKeySequence("Ctrl+P"))
         self.play_pause_action.triggered.connect(self.parent.toolbar.toggle_play_pause)
         self.stop_action = QAction("إيقاف", self)
         self.stop_action.setShortcut(QKeySequence("Ctrl+E"))
@@ -142,7 +142,7 @@ class MenuBar(QMenuBar):
         tools_menu.addAction(athkar_action)
         tools_menu.addAction(bookmark_manager_action )
 
-        preferences_menu = self.addMenu("التفضيلات(&P)")
+        preferences_menu = self.addMenu("التفضيلات(&R)")
         settings_action = QAction("الإعدادات", self)
         settings_action.setShortcut(QKeySequence("F3"))
         settings_action.setShortcuts([QKeySequence("F3"), QKeySequence("Alt+S")])
