@@ -9,11 +9,12 @@ from utils.universal_speech import UniversalSpeech
 from utils.const import Globals, data_folder
 
 class InfoDialog(QDialog):
-    def __init__(self, title: str, label: str, text: str, is_html_content: bool = False, show_message_button: bool = False):
-        super().__init__()
+    def __init__(self, parent, title: str, label: str, text: str, is_html_content: bool = False, show_message_button: bool = False):
+        super().__init__(parent)
         self.title = title
         self.label = label
         self.text = text
+        self.parent = parent
         self.is_html_content = is_html_content
         self.show_message_button = show_message_button
         self.init_ui()

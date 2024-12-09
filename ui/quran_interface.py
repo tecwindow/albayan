@@ -300,7 +300,7 @@ class QuranInterface(QMainWindow):
         title = "إعراب آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "الإعراب"
         text = E3rab(aya_info[0], aya_info[1]).text
-        InfoDialog(title, label, text).exec()
+        InfoDialog(self, title, label, text).exec()
 
     def OnVerseReasons(self):
         aya_info = self.get_current_ayah_info()
@@ -309,7 +309,7 @@ class QuranInterface(QMainWindow):
         text = TanzilAyah(aya_info[1]).text
 
         if text:
-            InfoDialog(title, label, text).exec()
+            InfoDialog(self, title, label, text).exec()
         else:
             QMessageBox.information(self, "لا يتوفر معلومات للآية", "للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
 
@@ -318,7 +318,7 @@ class QuranInterface(QMainWindow):
         title = "معلومات آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "معلومات الآية:"
         text = AyaInfo(aya_info[1]).text
-        InfoDialog(title, label, text, is_html_content=True).exec()
+        InfoDialog(self, title, label, text, is_html_content=True).exec()
             
     def OnSaveBookmark(self):
 
@@ -366,4 +366,4 @@ class QuranInterface(QMainWindow):
             with open(data_folder/"quotes/QuotesMessages.json", "r", encoding="utf-8") as file:
                 quotes_list = json.load(file)
             message = random.choice(quotes_list)
-            InfoDialog('رسالة لك', '', message, is_html_content=False).exec()
+            InfoDialog(self, 'رسالة لك', '', message, is_html_content=False).exec()
