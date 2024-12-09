@@ -22,6 +22,7 @@ class AudioPlayerThread(QThread):
         self.player = player
         self.url = None    
         self.manually_stopped = False
+        self.send_error_signal = True
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_playback_status)
 
@@ -36,8 +37,9 @@ class AudioPlayerThread(QThread):
                 except Exception as e:
                     message = ErrorMessage(e)
                     Logger.error(message.log_message)
-                    self.error_signal.emit(message)
-                    self.manually_stopped = True
+                    if self.send_error_signal:
+                        self.error_signal.emit(message)
+                        self.manually_stopped = True
                 finally:
                     self.statusChanged.emit()
                     self.waiting_to_load.emit(True)
@@ -49,8 +51,9 @@ class AudioPlayerThread(QThread):
             if not self.player.is_paused() and not self.manually_stopped:
                 self.playback_finished.emit()
 
-    def set_audio_url(self, url: str):
+    def set_audio_url(self, url: str, send_error_signal: bool = True):
         self.url = url
+        self.send_error_signal = send_error_signal
         self.quit()
         self.wait()        
 
@@ -181,16 +184,15 @@ class AudioToolBar(QToolBar):
         self.set_buttons_status()
 
     def play_current_ayah(self):
-        
+
         if self.navigation.current_ayah == 1 and not self.navigation.has_basmala:
             self.navigation.current_ayah = 0
-            #self.navigation.has_basmala = True
         elif self.navigation.current_ayah > 1:
             self.navigation.has_basmala = False
                     
         reciter_id = SettingsManager.current_settings["listening"]["reciter"]
         url = self.reciters.get_url(reciter_id, self.navigation.current_surah, self.navigation.current_ayah)
-        self.audio_thread.set_audio_url(url)
+        self.audio_thread.set_audio_url(url, send_error_signal=False if self.navigation.current_ayah == 0 else True)
         self.audio_thread.start()
         self.set_buttons_status()
 
