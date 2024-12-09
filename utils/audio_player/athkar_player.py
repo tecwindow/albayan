@@ -5,6 +5,7 @@ from random import choice
 from .bass_player import AudioPlayer
 from core_functions.athkar.models import AudioAthkar
 from utils.settings import SettingsManager
+from exceptions.error_decorators import exception_handler
 
 class AthkarPlayer(AudioPlayer):
     instances = []
@@ -17,6 +18,7 @@ class AthkarPlayer(AudioPlayer):
     def __enter__(self):
         return self
     
+    @exception_handler
     def play(self) -> None:
         """Plays a random Athkar audio file"""
 
