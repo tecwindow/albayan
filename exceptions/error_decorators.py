@@ -1,0 +1,32 @@
+from functools import wraps
+from .base import ErrorMessage
+from utils.logger import Logger
+
+def exception_handler(func=None, *, ui_element=None, exception_types=(Exception,)):
+    """
+    General decorator to handle exceptions in a specific context.
+
+    Args:
+        func: The function being decorated.
+        ui_element: UI element (e.g., QLabel, QMessageBox) to display error messages, or None.
+        exception_types: Tuple of exception classes to catch. Defaults to (Exception,).
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except exception_types as e:
+            # Create and log the error message
+            message = ErrorMessage(e)
+            Logger.error(message.log_message)
+
+            # Handle UI element display
+            if ui_element:
+                if hasattr(ui_element, "critical"):
+                    ui_element.critical(None, message.title, message.body)
+                elif hasattr(ui_element, "setText"):
+                    ui_element.setText(f"{message.title}: {message.body}")
+                else:
+                    Logger.warning("UI element provided does not support error display.")
+
+    return wrapper
