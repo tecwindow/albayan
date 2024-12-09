@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+
+
 class BaseException(ABC, Exception):
     """
     Abstract base class for custom exceptions. 
@@ -26,6 +28,10 @@ class BaseException(ABC, Exception):
 class ErrorMessage:
     def __init__(self, exception: Exception):
         self.exception = exception
+        from utils.audio_player import SoundEffectPlayer
+        self.effects_manager = SoundEffectPlayer("Audio/sounds")
+        self.effects_manager.play("error")
+
 
     def get_code(self) -> int:
         return getattr(self.exception, "code", None)
