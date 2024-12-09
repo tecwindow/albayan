@@ -2,6 +2,7 @@ import os
 from random import choice
 from .bass_player import AudioPlayer
 from utils.settings import SettingsManager
+from exceptions.error_decorators import exception_handler
 
 
 class StartupSoundEffectPlayer(AudioPlayer):
@@ -11,6 +12,7 @@ class StartupSoundEffectPlayer(AudioPlayer):
         self.sounds_folder = sounds_folder
         StartupSoundEffectPlayer.instances.append(self)
         
+    @exception_handler
     def play(self):
         if not SettingsManager.current_settings["audio"]["start_with_basmala_enabled"]:
             return
