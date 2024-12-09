@@ -2,6 +2,7 @@ import os
 from typing import Optional
 from .bass_player import AudioPlayer
 from utils.settings import SettingsManager
+from exceptions.error_decorators import exception_handler
 
 class SoundEffectPlayer(AudioPlayer):
     instances = []
@@ -11,7 +12,8 @@ class SoundEffectPlayer(AudioPlayer):
         self.sounds = {}
         self.load_sound_effects()
         SoundEffectPlayer.instances.append(self)
-        
+
+    @exception_handler
     def load_sound_effects(self) -> None:
         """Loads sound effects from the specified folder into a dictionary."""
         for file in os.listdir(self.sounds_folder):
@@ -19,6 +21,7 @@ class SoundEffectPlayer(AudioPlayer):
                 name, extension = os.path.splitext(file)
                 self.sounds[name] = os.path.join(self.sounds_folder, file)
 
+    @exception_handler
     def play(self, file_name: Optional[str]= None) -> None:
         """Plays a specified or random sound effect if enabled."""
         if not SettingsManager.current_settings["audio"]["sound_effect_enabled"]:
