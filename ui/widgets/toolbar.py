@@ -67,6 +67,7 @@ class NavigationManager:
             self.ayah_range = self.quran.ayah_data.get_ayah_range()
 
     def reset_position(self):
+        self.has_basmala = False
         self.initialize_ayah_range()
         ayah_info = self.parent.get_current_ayah_info()
         if ayah_info[0] != self.current_surah or not (self.ayah_range[self.current_surah]["min_ayah"] < ayah_info[3] < self.ayah_range[self.current_surah]["max_ayah"]):
