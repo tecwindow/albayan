@@ -366,4 +366,4 @@ class QuranInterface(QMainWindow):
             with open(data_folder/"quotes/QuotesMessages.json", "r", encoding="utf-8") as file:
                 quotes_list = json.load(file)
             message = random.choice(quotes_list)
-            InfoDialog(self, 'رسالة لك', '', message, is_html_content=False).exec()
+            InfoDialog(self, 'رسالة لك', '', message, is_html_content=False, show_message_button=True).exec()
