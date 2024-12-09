@@ -28,7 +28,6 @@ class BaseException(ABC, Exception):
 class ErrorMessage:
     def __init__(self, exception: Exception):
         self.exception = exception
-        Globals.effects_manager.play("error")
 
 
     def get_code(self) -> int:
@@ -40,6 +39,7 @@ class ErrorMessage:
 
     @property
     def body(self) -> str:
+        Globals.effects_manager.play("error")
         body = "حدث خطأ. يرجى الاتصال بالدعم للحصول على المساعدة."
         code = self.get_code()
         if code:
@@ -52,3 +52,7 @@ class ErrorMessage:
         error_type = type(self.exception).__name__
         error_message = str(self.exception)
         return f"Error Type: {error_type}, Code: {code or 'N/A'}, Message: {error_message}"
+
+    def __str__(self) -> str:
+        return self.log_message
+
