@@ -87,3 +87,4 @@ class InfoDialog(QDialog):
         # Update the text without opening a new dialog
         self.text_edit.setText(new_message)
         UniversalSpeech.say(new_message)
+        Globals.effects_manager.play("message")
