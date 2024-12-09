@@ -11,6 +11,10 @@ def exception_handler(func=None, *, ui_element=None, exception_types=(Exception,
         ui_element: UI element (e.g., QLabel, QMessageBox) to display error messages, or None.
         exception_types: Tuple of exception classes to catch. Defaults to (Exception,).
     """
+    if func is None:
+        # Allow decorator to be used with or without arguments
+        return lambda f: exception_handler(f, ui_element=ui_element, exception_types=exception_types)
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
