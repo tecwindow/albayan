@@ -213,8 +213,9 @@ class QuranInterface(QMainWindow):
         self.menu_bar.previous_action.setEnabled(back_status)
         self.toolbar.navigation.reset_position()
         self.toolbar.set_buttons_status()
-        
-    def OnQuickAccess(self):
+
+    @exception_handler(ui_element=QMessageBox)
+    def OnQuickAccess(self, event):
         dialog = QuickAccess(self, "الوصول السريع")
         if not dialog.exec():
             return
@@ -222,7 +223,8 @@ class QuranInterface(QMainWindow):
         self.set_text_ctrl_label()
         self.quran_view.setFocus()
 
-    def OnSearch(self):
+    @exception_handler(ui_element=QMessageBox)
+    def OnSearch(self, event):
         search_dialog = SearchDialog(self, "بحث")
         if search_dialog.exec():
             self.set_text_ctrl_label()
@@ -235,6 +237,7 @@ class QuranInterface(QMainWindow):
 
         return ayah_info
     
+    @exception_handler(ui_element=QMessageBox)
     def OnInterpretation(self):
 
         selected_category = self.sender().text()
@@ -295,15 +298,16 @@ class QuranInterface(QMainWindow):
         UniversalSpeech.say("تم نسخ الآية.")
         Globals.effects_manager.play("copy")
 
-
-    def OnSyntax(self):
+    @exception_handler(ui_element=QMessageBox)
+    def OnSyntax(self, event):
         aya_info = self.get_current_ayah_info()
         title = "إعراب آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "الإعراب"
         text = E3rab(aya_info[0], aya_info[1]).text
         InfoDialog(self, title, label, text).exec()
 
-    def OnVerseReasons(self):
+    @exception_handler(ui_element=QMessageBox)
+    def OnVerseReasons(self, event):
         aya_info = self.get_current_ayah_info()
         title = "أسباب نزول آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "الأسباب"
@@ -314,14 +318,16 @@ class QuranInterface(QMainWindow):
         else:
             QMessageBox.information(self, "لا يتوفر معلومات للآية", "للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
 
-    def OnAyahInfo(self):
+    @exception_handler(ui_element=QMessageBox)
+    def OnAyahInfo(self, event):
         aya_info = self.get_current_ayah_info()
         title = "معلومات آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "معلومات الآية:"
         text = AyaInfo(aya_info[1]).text
         InfoDialog(self, title, label, text, is_html_content=True).exec()
-            
-    def OnSaveBookmark(self):
+
+    @exception_handler(ui_element=QMessageBox)
+    def OnSaveBookmark(self, event):
 
         bookmark_manager= BookmarkManager()
         aya_info = self.get_current_ayah_info()
