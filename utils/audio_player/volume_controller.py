@@ -30,16 +30,20 @@ class VolumeController:
         elif direction == 'previous':
             self.current_category_index = (self.current_category_index - 1) % len(categories)  
 
-        current_category = self.get_category_info()
+        current_category = self.get_current_category()  # Get the current category key
+        current_label = self.categories[current_category]["label"]  # Access label
+        current_volume = self._get_volume(current_category)  # Get current volume
+
         SettingsManager.write_settings({"audio": {"current_volume_category": self.current_category_index}})
-        UniversalSpeech.say(current_category["label"])
+        UniversalSpeech.say(f"{current_label}: {current_volume}%")
 
     def adjust_volume(self, change: int) -> None:
         """Adjust the volume for the current category with special handling if needed."""
         current_category = self.get_current_category()
         current_volume = self._get_volume(current_category)
         new_volume = max(0, min(100, current_volume + change))
-        UniversalSpeech.say(f"{new_volume}%")
+        current_label = self.categories[current_category]["label"]
+        UniversalSpeech.say(f"{new_volume}%: {current_label}")
         SettingsManager.write_settings({"audio": {current_category: new_volume}})
 
         # Apply the custom volume handler if it exists for the current category
