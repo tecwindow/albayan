@@ -41,6 +41,7 @@ class InfoDialog(QDialog):
         copy_button.setShortcut(QKeySequence("Shift+C"))
         copy_button.setStyleSheet('background-color: red; color: white;')
 
+
         # Message to you button (conditionally added)
         message_to_you_button = QPushButton('رسالة لك', self)
         message_to_you_button.clicked.connect(self.message_to_you)
@@ -48,6 +49,10 @@ class InfoDialog(QDialog):
         message_to_you_button.setStyleSheet('background-color: red; color: white;')
         message_to_you_button.setVisible(self.show_message_button)
         message_to_you_button.setDefault(True)
+
+
+        if not self.show_message_button:
+                    copy_button.setDefault(True)
 
 
         # Close button
