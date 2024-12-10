@@ -131,6 +131,7 @@ class SearchDialog(QDialog):
         self.search_type_radio_quarter.toggled.connect(self.on_radio_toggled)
 
         self.on_radio_toggled()
+        self.OnEdit()
 
     def OnEdit(self):
         self.search_button.setEnabled(bool(self.search_box.text()))
