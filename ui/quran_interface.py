@@ -38,7 +38,6 @@ from utils.user_data import UserDataManager
 from utils.const import program_name, program_icon, user_db_path, data_folder, Globals
 from utils.audio_player import bass, SoundEffectPlayer
 from exceptions.error_decorators import exception_handler
-from exceptions.json import JSONFileNotFoundError, InvalidJSONFormatError
 
 
 class QuranInterface(QMainWindow):
@@ -364,17 +363,8 @@ class QuranInterface(QMainWindow):
             self.tray_manager.hide_icon()
             bass.BASS_Free()
 
-    @exception_handler(ui_element=QMessageBox   )
+    @exception_handler(ui_element=QMessageBox)
     def OnRandomMessages(self, event):
-        file_path = data_folder/"quotes/QuotesMessages.json"
-        if not file_path.exists():
-            raise JSONFileNotFoundError(file_path)
-            
-        try:
-            with open(file_path, "r", encoding="utf-8") as file:
-                quotes_list = json.load(file)
-                message = random.choice(quotes_list)
-        except json.JSONDecodeError as e:
-                raise InvalidJSONFormatError(file_path, e)
-
-        InfoDialog(self, 'رسالة لك', '', message, is_html_content=False, show_message_button=True).exec()
+        info_dialog = InfoDialog(self, 'رسالة لك', '', "", is_html_content=False, show_message_button=True)
+        info_dialog.choose_QuotesMessage()
+        info_dialog.exec()
