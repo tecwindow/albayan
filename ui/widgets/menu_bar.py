@@ -10,7 +10,8 @@ from core_functions.tafaseer import Category
 from utils.update import UpdateManager
 from utils.settings import SettingsManager
 from utils.logger import Logger
-from utils.const import program_name, program_version, website
+from utils.const import program_name, program_version, website, Globals
+
 from theme import ThemeManager
 
 class MenuBar(QMenuBar):
@@ -37,6 +38,7 @@ class MenuBar(QMenuBar):
                                            QKeySequence("Ctrl+Up"), QKeySequence("Alt+Left")])
         self.go_to_saved_position_action = QAction("الذهاب إلى الموضع المحفوظ", self)
         self.go_to_saved_position_action.triggered.connect(self.parent.set_text)
+        self.go_to_saved_position_action.triggered.connect(lambda: Globals.effects_manager.play("move"))
         self.go_to_saved_position_action.setShortcut("Ctrl+Backspace")
         self.search_action = QAction("البحث", self)
         self.search_action.triggered.connect(self.parent.OnSearch)        

@@ -20,6 +20,9 @@ from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator
 from core_functions.search import SearchCriteria, QuranSearchManager
 from utils.settings import SettingsManager
 from utils.universal_speech import UniversalSpeech
+from utils.const import Globals
+
+
 
 
 class SearchDialog(QDialog):
@@ -217,6 +220,7 @@ class SearchResultsDialog(QDialog):
             
         self.go_to_button = QPushButton("الذهاب للنتيجة")
         self.go_to_button.clicked.connect(self.accept)
+        self.go_to_button.clicked.connect(lambda: Globals.effects_manager.play("move"))
         self.cancel_button = QPushButton("إلغاء")
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
         self.cancel_button.clicked.connect(self.reject)

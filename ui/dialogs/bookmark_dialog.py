@@ -13,6 +13,9 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QKeySequence
 from core_functions.bookmark import BookmarkManager
+from utils.const import Globals
+
+
 
 
 class BookmarkDialog(QDialog):
@@ -136,6 +139,7 @@ class BookmarkDialog(QDialog):
             self.parent.set_focus_to_ayah(bookmark["ayah_number"])
             self.parent.quran_view.setFocus()
             self.accept()
+            Globals.effects_manager.play("move")
             self.deleteLater()
 
     def reject(self):
