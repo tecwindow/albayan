@@ -344,6 +344,7 @@ class QuranInterface(QMainWindow):
          self.quran.current_pos
          )
         UniversalSpeech.say("تم حفظ الموضع الحالي.")
+        Globals.effects_manager.play("save")
 
     def OnChangeNavigationMode(self, mode):
         ayah_info = self.get_current_ayah_info()
