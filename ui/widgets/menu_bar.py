@@ -117,7 +117,7 @@ class MenuBar(QMenuBar):
         self.verse_info_action = QAction("أسباب نزول الآية", self)
         self.verse_info_action.triggered.connect(self.parent.OnVerseReasons)
         self.verse_info_action.setShortcut(QKeySequence("Shift+A"))
-        self.verse_grammar_action = QAction("اعراب الآية", self)
+        self.verse_grammar_action = QAction("إعراب الآية", self)
         self.verse_grammar_action.triggered.connect(self.parent.OnSyntax)
         self.verse_grammar_action.setShortcut(QKeySequence("Shift+E"))
         self.copy_verse_action = QAction("نسخ الآية", self)

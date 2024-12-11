@@ -90,7 +90,7 @@ class SettingsDialog(QDialog):
 
         self.group_audio = QGroupBox("إعدادات الصوت")
         self.group_audio_layout = QVBoxLayout()
-        self.volume_label = QLabel("مستوى الصوت")
+        self.volume_label = QLabel("مستوى صوت البرنامج")
         self.volume = QSlider(Qt.Orientation.Horizontal)
         self.volume.setRange(0, 100)
         self.volume.valueChanged.connect(self.OnVolume)
@@ -109,7 +109,7 @@ class SettingsDialog(QDialog):
         self.athkar_volume.setAccessibleName(self.athkar_volume_label.text())
         self.athkar_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
-        self.basmala_checkbox = QCheckBox("تشغيل المؤثرات الصوتية مع فتح البرنامج")
+        self.basmala_checkbox = QCheckBox("تفعيل البسملة مع فتح البرنامج")
         self.speech_checkbox = QCheckBox("نطق الإجرائات")
 
         self.group_audio_layout.addWidget(self.volume_label)
