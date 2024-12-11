@@ -1,12 +1,14 @@
 import sys
 import json
 import random
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication, QMessageBox
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QKeySequence, QClipboard
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
 from utils.const import Globals, data_folder
+from exceptions.json import JSONFileNotFoundError, InvalidJSONFormatError
+from exceptions.error_decorators import exception_handler
 
 class InfoDialog(QDialog):
     def __init__(self, parent, title: str, label: str, text: str, is_html_content: bool = False, show_message_button: bool = False):
@@ -44,7 +46,7 @@ class InfoDialog(QDialog):
 
         # Message to you button (conditionally added)
         message_to_you_button = QPushButton('رسالة لك', self)
-        message_to_you_button.clicked.connect(self.message_to_you)
+        message_to_you_button.clicked.connect(self.OnNewMessage)
         message_to_you_button.setShortcut(QKeySequence("Ctrl+M"))
         message_to_you_button.setStyleSheet('background-color: red; color: white;')
         message_to_you_button.setVisible(self.show_message_button)
@@ -82,14 +84,23 @@ class InfoDialog(QDialog):
     def reject(self):
         Globals.effects_manager.play("clos")
         self.deleteLater()
-        
-    def message_to_you(self):
-        # Load the quotes and choose a random message
-        with open(data_folder/"quotes/QuotesMessages.json", "r", encoding="utf-8") as file:
-            quotes_list = json.load(file)
-        new_message = random.choice(quotes_list)
 
-        # Update the text without opening a new dialog
-        self.text_edit.setText(new_message)
-        UniversalSpeech.say(new_message)
+    def choose_QuotesMessage(self):
+        file_path = data_folder/"quotes/QuotesMessages.json"
+        if not file_path.exists():
+            raise JSONFileNotFoundError(file_path)
+            
+        try:
+            with open(file_path, "r", encoding="utf-8") as file:
+                quotes_list = json.load(file)
+                message = random.choice(quotes_list)
+        except json.JSONDecodeError as e:
+                raise InvalidJSONFormatError(file_path, e)
+
+        self.text_edit.setText(message)
+        UniversalSpeech.say(message)
+        
+    def OnNewMessage(self):
+        self.choose_QuotesMessage()
         Globals.effects_manager.play("message")
+        
