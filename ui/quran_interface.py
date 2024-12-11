@@ -238,7 +238,7 @@ class QuranInterface(QMainWindow):
         return ayah_info
     
     @exception_handler(ui_element=QMessageBox)
-    def OnInterpretation(self):
+    def OnInterpretation(self, event):
 
         selected_category = self.sender().text()
         if selected_category not in Category.get_categories_in_arabic():
