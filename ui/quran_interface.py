@@ -257,7 +257,7 @@ class QuranInterface(QMainWindow):
         get_interpretation_verse = menu.addAction("تفسير الآية")
         get_interpretation_verse.triggered.connect(self.OnInterpretation)
 
-        submenu = menu.addMenu("تفسير الآية")
+        submenu = menu.addMenu("التفسير")
         arabic_categories = Category.get_categories_in_arabic()
         for arabic_category in arabic_categories:
             action = QAction(arabic_category, self)

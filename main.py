@@ -131,7 +131,7 @@ def main():
     except Exception as e:
         print(e)
         Logger.error(str(e))
-        QMessageBox.critical(None, "Error", "حدث خطأ. يرجى الاتصال بالدعم للحصول على المساعدة.")
+        QMessageBox.critical(None, "Error", "حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")
         
 if __name__ == "__main__":    
     freeze_support()

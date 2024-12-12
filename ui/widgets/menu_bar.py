@@ -101,7 +101,7 @@ class MenuBar(QMenuBar):
         self.verse_tafsir_action.triggered.connect(self.parent.OnInterpretation)
         self.verse_tafsir_action.setShortcut(QKeySequence("Ctrl+T"))
 
-        self.tafaseer_menu = QMenu("تفسير الآية")
+        self.tafaseer_menu = QMenu("التفسير")
         self.tafaseer_menu.setAccessibleName("قائمة المفسرين")
         tafaseershortcut = QShortcut(QKeySequence("Shift+T"), self)
         tafaseershortcut.activated.connect(self.OnTafaseerMenu)

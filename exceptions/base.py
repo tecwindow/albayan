@@ -40,7 +40,7 @@ class ErrorMessage:
     @property
     def body(self) -> str:
         Globals.effects_manager.play("error")
-        body = "حدث خطأ. يرجى الاتصال بالدعم للحصول على المساعدة."
+        body = "حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين."
         code = self.get_code()
         if code:
             body += f"\nرمز الخطأ: {code}"

@@ -55,4 +55,4 @@ level=logging.INFO,
 
         cls.error(error_message)
         print(error_message)
-        cls.show_error_message("حدث خطأ. يرجى الاتصال بالدعم للحصول على المساعدة.")
+        cls.show_error_message("حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")
