@@ -11,17 +11,17 @@ class SettingsManager:
         "general": {
             "language": "Arabic",
             "run_in_background_enabled": False,
-            "auto_start_enabled": True,
+            "auto_start_enabled": False,
             "auto_save_position_enabled": False,
             "check_update_enabled": True,
-            "logging_enabled": False
+            "logging_enabled": True
         },
         "audio": {
             "sound_effect_enabled": True,
             "start_with_basmala_enabled": True,
             "speak_actions_enabled": True,
-            "volume_level": 50,
-            "ayah_volume_level": 50,
+            "volume_level": 75,
+            "ayah_volume_level": 100,
             "athkar_volume_level": 50,
             "current_volume_category": 0
         },
@@ -39,7 +39,7 @@ class SettingsManager:
             "auto_page_turn": False,
         },
         "preferences": {
-            "theme": "default"
+            "theme": "FlatDark"
         }
     }
 
