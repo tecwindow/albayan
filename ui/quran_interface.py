@@ -98,6 +98,7 @@ class QuranInterface(QMainWindow):
         self.save_current_position = EnterButton("حفظ الموضع الحالي")
         self.save_current_position.setEnabled(False)
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
+        self.save_current_position.clicked.connect(self.OnSave_alert)
 
         self.random_messages = EnterButton("رسالة لك")
         self.random_messages.clicked.connect(self.OnRandomMessages)
@@ -265,6 +266,7 @@ class QuranInterface(QMainWindow):
             submenu.addAction(action)
 
         save_current_position.triggered.connect(self.OnSaveCurrentPosition)
+        save_current_position.triggered.connect(self.OnSave_alert)
         save_bookmark.triggered.connect(self.OnSaveBookmark)
         ayah_info = menu.addAction("معلومات الآية")
         ayah_info.triggered.connect(self.OnAyahInfo)
@@ -348,6 +350,9 @@ class QuranInterface(QMainWindow):
          self.quran.type,
          self.quran.current_pos
          )
+
+
+    def OnSave_alert(self):
         UniversalSpeech.say("تم حفظ الموضع الحالي.")
         Globals.effects_manager.play("save")
 

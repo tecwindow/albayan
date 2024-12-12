@@ -92,6 +92,7 @@ class MenuBar(QMenuBar):
         self.save_position_action = QAction("حفظ الموضع الحالي", self)
         self.save_position_action.setShortcut(QKeySequence("Ctrl+S"))
         self.save_position_action.triggered.connect(self.parent.OnSaveCurrentPosition)
+        self.save_position_action.triggered.connect(self.parent.OnSave_alert)
         self.save_bookmark_action = QAction("حفظ علامة", self)
         self.save_bookmark_action.setShortcut(QKeySequence("Ctrl+D"))
         self.save_bookmark_action.triggered.connect(self.parent.OnSaveBookmark)
