@@ -1,8 +1,11 @@
 import sys
 import os
+current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+os.chdir(current_dir)
+
 from multiprocessing import freeze_support
 from PyQt6.QtWidgets import QApplication, QMessageBox
-from PyQt6.QtCore import QTimer, Qt, QSharedMemory
+from PyQt6.QtCore import QTimer, Qt, QSharedMemory, QEvent
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from ui.quran_interface import QuranInterface
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
@@ -10,17 +13,18 @@ from utils.update import UpdateManager
 from utils.settings import SettingsManager
 from utils.const import program_name, program_icon, user_db_path
 from utils.logger import Logger
-from utils.sound_Manager import BasmalaManager
+from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 
 class SingleInstanceApplication(QApplication):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.setApplicationName(program_name)
         self.server_name = "Albayan"
         self.local_server = QLocalServer(self)
-
         self.shared_memory = QSharedMemory("Albayan")
         self.is_running = self.shared_memory.attach()
+        self.volume_controller = VolumeController()
+        self.installEventFilter(self) 
 
         if not self.is_running:
             if not self.shared_memory.create(1):
@@ -31,13 +35,50 @@ class SingleInstanceApplication(QApplication):
             self.notify_existing_instance()
             sys.exit(0)
 
-    def setup_local_server(self):
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Type.KeyPress:
+            key = event.key()
+            modifiers = event.modifiers()
+
+            if key == Qt.Key.Key_F5:
+                self.volume_controller.switch_category("next")
+                return True
+            elif key == Qt.Key.Key_F6:
+                self.volume_controller.switch_category("previous")
+                return True
+            elif key == Qt.Key.Key_F7:
+                if modifiers & Qt.KeyboardModifier.ControlModifier:  # Ctrl+F7
+                    self.volume_controller.adjust_volume(-10)
+                elif modifiers & Qt.KeyboardModifier.ShiftModifier:  # Shift+F7
+                    self.volume_controller.adjust_volume(-5)
+                elif modifiers & Qt.KeyboardModifier.AltModifier:  # Alt+F7
+                    self.volume_controller.adjust_volume(-100)
+                else:  # F7
+                    self.volume_controller.adjust_volume(-1)
+                return True
+            elif key == Qt.Key.Key_F8:
+                if modifiers & Qt.KeyboardModifier.ControlModifier:  # Ctrl+F8
+                    self.volume_controller.adjust_volume(10)
+                elif modifiers & Qt.KeyboardModifier.ShiftModifier:  # Shift+F8
+                    self.volume_controller.adjust_volume(5)
+                elif modifiers & Qt.KeyboardModifier.AltModifier:  # Alt+F8
+                    self.volume_controller.adjust_volume(100)
+                else:
+                    self.volume_controller.adjust_volume(1)  # Default behavior (no modifiers)
+                return True
+
+        return super().eventFilter(obj, event)
+
+
+
+    
+    def setup_local_server(self) -> None:
         if not self.local_server.listen(self.server_name):
             Logger.error(f"Failed to start local server: {self.local_server.errorString()}")
             sys.exit(1)
         self.local_server.newConnection.connect(self.handle_new_connection)
 
-    def notify_existing_instance(self):
+    def notify_existing_instance(self) -> None:
         socket = QLocalSocket()
         socket.connectToServer(self.server_name)
         if socket.waitForConnected(1000):
@@ -48,12 +89,12 @@ class SingleInstanceApplication(QApplication):
         else:
             Logger.error("Failed to connect to existing instance.")
 
-    def handle_new_connection(self):
+    def handle_new_connection(self) -> None:
         socket = self.local_server.nextPendingConnection()
         if socket:
             socket.readyRead.connect(lambda: self.read_message(socket))
 
-    def read_message(self, socket):
+    def read_message(self, socket) -> None:
         message = socket.readAll().data().decode()
         if message == "SHOW" and hasattr(self, 'main_window'):
                 self.main_window.show()
@@ -61,14 +102,13 @@ class SingleInstanceApplication(QApplication):
                 self.main_window.activateWindow()
                 socket.disconnectFromServer()
 
-    def set_main_window(self, main_window):
+    def set_main_window(self, main_window) -> None:
         self.main_window = main_window
-
 
 def call_after_starting(parent: QuranInterface) -> None:
         
-    basmala_manager = BasmalaManager("Audio/basmala")
-    basmala_manager.play()
+    basmala = StartupSoundEffectPlayer("Audio/basmala")
+    basmala.play()
 
     check_update_enabled = SettingsManager.current_settings["general"].get("check_update_enabled", False)
     update_manager = UpdateManager(parent, check_update_enabled)
@@ -84,13 +124,14 @@ def main():
         app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         main_window = QuranInterface(program_name)
         app.set_main_window(main_window)
-        main_window.show()
+        if "--minimized" not in sys.argv:
+            main_window.show()
         call_after_starting(main_window)
         sys.exit(app.exec())
     except Exception as e:
         print(e)
         Logger.error(str(e))
-        QMessageBox.critical(None, "Error", "حدث خطأ. يرجى الاتصال بالدعم للحصول على المساعدة.")
+        QMessageBox.critical(None, "Error", "حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")
         
 if __name__ == "__main__":    
     freeze_support()

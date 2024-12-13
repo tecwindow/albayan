@@ -2,6 +2,8 @@ import re
 from PyQt6.QtCore import QEvent, Qt, QLocale
 from PyQt6.QtGui import QKeyEvent
 from PyQt6.QtWidgets import QTextEdit
+from utils.settings import SettingsManager
+from utils.const import Globals
 
 
 class ReadOnlyTextEdit(QTextEdit):
@@ -15,14 +17,16 @@ class ReadOnlyTextEdit(QTextEdit):
         font.setPointSize(16)
         self.setFont(font)
         self.setAcceptRichText(True)
+        document = self.document()
+        document.setDefaultCursorMoveStyle(Qt.CursorMoveStyle.VisualMoveStyle)
 
 
 class QuranViewer(ReadOnlyTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
+        self.is_page_turn_alert = False
         self.textChanged.connect(self.set_ctrl)
-
 
     def set_ctrl(self):
         current_line_text = self.textCursor().block().text()
@@ -39,20 +43,48 @@ class QuranViewer(ReadOnlyTextEdit):
         self.parent.menu_bar.verse_grammar_action.setEnabled(status)
         self.parent.menu_bar.copy_verse_action.setEnabled(status)
 
-    def keyPressEvent(self, e):
+    def keyPressEvent(self, e): 
         super().keyPressEvent(e)
         self.set_ctrl()
 
-        #Disable temporarily
-        return
+        if e.key() == Qt.Key.Key_Space:
+            if e.modifiers() & Qt.KeyboardModifier.ControlModifier:  # Ctrl + Space
+                self.parent.toolbar.stop_audio()
+                return
+            elif e.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                self.parent.toolbar.toggle_play_pause()
+                return
+            else:  
+                   self.parent.toolbar.toggle_play_pause()
+            return
+
+        if e.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            if e.key() == Qt.Key.Key_Shift:
+                if e.nativeScanCode() == 42:  # Scan code for Left Shift
+                    self.parent.menu_bar.set_text_direction_ltr()
+                elif e.nativeScanCode() == 54: # Scan code for Right Shift
+                    self.parent.menu_bar.set_text_direction_rtl()
+
+        if not SettingsManager.current_settings["reading"]["auto_page_turn"]:
+            return
+
         current_line = self.textCursor().block().blockNumber()
         total_lines = self.document().blockCount()
         
+        if current_line >= 1 and current_line + 1 != total_lines:
+            self.is_page_turn_alert = False
+
         if e.key() == Qt.Key.Key_Up:
             if (current_line == 0) and (self.parent.quran.current_pos > 1):
-                self.parent.OnBack()
+                if not self.is_page_turn_alert:
+                    self.is_page_turn_alert = True
+                    Globals.effects_manager.play("alert")
+                    return
+                self.parent.OnBack(is_auto_call=True)
         elif e.key() == Qt.Key.Key_Down:
             if (current_line == total_lines - 1) and (self.parent.quran.current_pos < self.parent.quran.max_pos):
+                if not self.is_page_turn_alert:
+                    self.is_page_turn_alert = True
+                    Globals.effects_manager.play("alert")
+                    return
                 self.parent.OnNext()
-
-

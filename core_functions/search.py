@@ -1,6 +1,7 @@
 import sqlite3
 import re
 import os
+from exceptions.database import DBNotFoundError, DatabaseConnectionError, InvalidSearchTextError, InvalidCriteriaError
 
 
 class SearchCriteria:
@@ -45,8 +46,12 @@ class QuranSearchManager:
         self._connect()
 
     def set(self, no_tashkil:bool=False, no_hamza:bool=False, match_whole_word:bool=False, criteria:str=None, _from:int=None, _to:int=None, from_ayah:int=None, to_ayah:int=None) -> None:
-        assert SearchCriteria.is_valid(criteria), "You must set a valid search criteria."
-        assert self._conn is not None, "You must connect to database."
+
+        if not  SearchCriteria.is_valid(criteria):
+            raise InvalidCriteriaError(criteria)
+
+        if self._conn is None:
+                raise DatabaseConnectionError("QuranSearchManager._conn is None, you must connect to database first.")
 
         #Get surah number if the input is surah  name
         if  criteria == SearchCriteria.sura and isinstance(_from, str):
@@ -79,17 +84,21 @@ class QuranSearchManager:
     def _connect(self):
         file_path = os.path.join("database", "quran", 'Verses.DB')
         if not os.path.isfile(file_path):
-            raise FileNotFoundError("There is no  such file in {}.".format(file_path))
+            raise DBNotFoundError(file_path)
         
         # connect to database
-        self._conn = sqlite3.connect(file_path)
-        self._conn.row_factory = sqlite3.Row
-        self._conn.create_function("REGEXP", 2, lambda expr, item: re.search(expr, item) is not None)
-        self._cursor = self._conn.cursor()
-
+        try:
+            self._conn = sqlite3.connect(file_path)
+            self._conn.row_factory = sqlite3.Row
+            self._conn.create_function("REGEXP", 2, lambda expr, item: re.search(expr, item) is not None)
+            self._cursor = self._conn.cursor()
+        except sqlite3.Error as e:
+            raise DatabaseConnectionError(cause=e)
+    
     def search(self, search_text:str) -> list:
-        assert isinstance(search_text, str), "search text must be str."
-        assert SearchCriteria.is_valid(self._criteria), "You must set a valid criteria."
+
+        if  not isinstance(search_text, str):
+            raise InvalidSearchTextError(search_text)
 
         if not search_text:
             return None

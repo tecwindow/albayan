@@ -7,6 +7,6 @@ class UniversalSpeech:
 
     @classmethod
     def say(cls, msg: str) -> None:
-        if SettingsManager.current_settings["general"]["speak_actions_enabled"]:
+        if SettingsManager.current_settings["audio"]["speak_actions_enabled"]:
             cls.universal_speech.say(msg, True)
 

@@ -1,0 +1,58 @@
+# This workflow will install Python dependencies and build the Albayan application using cx-Freeze on Windows.
+
+name: Albayan_beta
+
+on:
+  push:
+    branches: [ "albayan_beta" ]
+  pull_request:
+    branches: [ "albayan_beta" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install cx-Freeze
+        if (Test-Path "requirements.txt") { pip install -r requirements.txt }
+
+    - name: Build with cx-Freeze
+      run: |
+        python setup.py build
+
+    - name: Rename main.exe to albayan.exe
+      run: |
+        Rename-Item -Path "albayan_build\main.exe" -NewName "albayan.exe"
+
+    - name: Download and install Inno Setup
+      run: |
+        Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile is.exe
+        Start-Process -Wait -FilePath .\is.exe -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP'
+
+    - name: Download Arabic and Vietnamese language files
+      run: |
+        Invoke-WebRequest -Uri https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/Arabic.isl -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\Arabic.isl"
+        Invoke-WebRequest -Uri https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/Vietnamese.isl -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\Vietnamese.isl"
+
+    - name: Package with Inno Setup
+      run: |
+        Start-Process -Wait -FilePath "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" -ArgumentList "albayan.iss"
+        
+    - name: Upload compressed build output
+      uses: actions/upload-artifact@v4
+      with:
+        name: albayan-beta-build
+        path: albayan_build\AlbayanSetup.exe

@@ -7,6 +7,7 @@ from utils.logger import Logger
 from utils.settings import SettingsManager
 from utils.const import program_name, program_version
 from ui.dialogs.update_dialog import UpdateDialog
+from exceptions.base import ErrorMessage
 
 
 class UpdateChecker(QThread):
@@ -25,10 +26,10 @@ class UpdateChecker(QThread):
             info = response.json()
             self.update_available.emit(info)
         except requests.exceptions.ConnectionError as e:
-            Logger.error(str(e))
+            Logger.error(ErrorMessage(e))
             self.update_error.emit("لا يوجد اتصال بالإنترنت.")
         except Exception as e:
-            Logger.error(str(e))
+            Logger.error(ErrorMessage(e))
             self.update_error.emit("حدث خطأ أثناء الاتصال بالخادم.")
 
 

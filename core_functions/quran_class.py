@@ -18,8 +18,13 @@ For more information, visit: https://github.com/baaziznasser/qurani
 #code start here
 
 
+import os
 import sqlite3
+from typing import Union
 from core_functions.ayah_data import AyahData
+from utils.settings import SettingsManager
+from utils.const import data_folder
+from exceptions.database import DBNotFoundError
 
 
 class QuranConst:
@@ -30,6 +35,9 @@ class QuranConst:
     max_hizb_quarter = 240
     _max = (max_page, max_surah_number, max_hizb_quarter, max_hizb, max_juz)
     _category_labels = ("صفحة", "سورة", "ربع", "حزب", "جزء")
+    quran_folder = data_folder / "quran"
+    databases = [quran_folder/ "quran.DB", quran_folder / "uthmani.DB"]
+
 
     @classmethod
     def get_max(cls, category_number: int) -> int:
@@ -45,7 +53,7 @@ class QuranConst:
 class quran_mgr:
     def __init__(self):
         self.show_ayah_number = True
-        self.aya_to_line = False
+        self.aya_to_line = True
         self.current_pos = 1
         self.max_pos = 604
         self.type = 0
@@ -55,9 +63,17 @@ class quran_mgr:
         self.text = ""
         self.ayah_data = None
 
-    def load_quran(self, db_path):
-        self.conn = sqlite3.connect(db_path)
+    def load_quran(self, db_file: Union[str, int]):
+        db_file = QuranConst.databases[db_file] if isinstance(db_file, int) else db_file
+        if not os.path.isfile(db_file):
+            raise DBNotFoundError(db_file)
+        
+        self.conn = sqlite3.connect(db_file)
         self.cursor = self.conn.cursor()
+
+    def reload_quran(self, db_file: Union[str, int]):
+        self.load_quran(db_file)
+        return self.goto(self.current_pos)
 
     def get_surah(self, surah_number):
         self.current_pos = surah_number
@@ -267,15 +283,16 @@ class quran_mgr:
             else:
                 ayah_text += " "
 
+            ayah_text = f"|\n{ayah_text}" if ayah_index == 0 and self.current_pos != 1 else ayah_text
             text += ayah_text
 
             # Calculate the positions
             first_position = current_position
             current_position += len(ayah_text)
             last_position = current_position - 1
-            ayah_data.insert(ayah[1], first_position, last_position)
+            ayah_data.insert(ayah[1], ayah[3], ayah[4], first_position, last_position)
 
-        text = text.strip("\n")
+        text = text + "|" if SettingsManager.current_settings["reading"]["auto_page_turn"] else text.strip()
         self.text = text
         self.ayah_data = ayah_data
 

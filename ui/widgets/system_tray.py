@@ -1,7 +1,6 @@
-import utils.const as const
 from PyQt6.QtWidgets import QSystemTrayIcon, QMenu
 from PyQt6.QtGui import QIcon, QAction
-
+from utils.const import Globals
 
 class SystemTrayManager:
     def __init__(self, main_window, program_name: str, program_icon: str):
@@ -9,7 +8,7 @@ class SystemTrayManager:
         self.tray_icon.setToolTip(program_name)
         self.tray_icon.activated.connect(self.on_tray_icon_click)
         self.main_window = main_window
-        const.tray_icon = self.tray_icon
+        Globals.TRAY_ICON = self.tray_icon
         
         tray_menu = QMenu()
         show_action = QAction("إظهار النافذة الرئيسية", main_window)

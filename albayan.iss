@@ -1,10 +1,9 @@
 ﻿#define MyAppName "Albayan"
-#define MyAppVersion "1.3.0"
-#define AppVersion "1.3.0"
+#define MyAppVersion "2.0.0"
+#define AppVersion "2.0.0"
 #define MyAppPublisher "Tecwindow"
 #define MyAppURL "https://tecwindow.net/"
 #define MyAppExeName "Albayan.exe"
-
 
 [Setup]
 AppName={#MyAppName}
@@ -28,7 +27,7 @@ DefaultDirName={sd}\program files\tecwindow\{#MyAppName}
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non-administrative install mode (install for the current user only.)
 PrivilegesRequired=admin
-OutputDir=Albayan
+OutputDir=albayan_build
 OutputBaseFilename=AlbayanSetup
 Compression=lzma
 CloseApplications=force
@@ -44,26 +43,25 @@ MinVersion=0,6.2
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "arabic"; MessagesFile: "compiler:Languages\Arabic.isl"
 
-[Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
-
-[Files]
-Source: "Albayan\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Albayan\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs
-
 [CustomMessages]
 arabic.AppLNGfile=Arabic
 english.DeleteSettingsPrompt=Do you want to delete the settings folder?
 arabic.DeleteSettingsPrompt=هل تريد حذف مجلد الإعدادات؟
 
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+
+[Files]
+Source: "albayan_build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "albayan_build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "albayan_build\Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs
+
 [Icons]
 Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\Albayan"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
-
 [INI]
-Filename: "{userappdata}\tecwindow\{#MyAppName}\Settingss.ini"; Section: "General"; Key: "language"; String: "{cm:AppLNGfile}"
+Filename: "{userappdata}\tecwindow\{#MyAppName}\Settingss.ini"; Section: "general"; Key: "language"; String: "{cm:AppLNGfile}"
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
@@ -72,6 +70,20 @@ Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
 
 [Code]
+procedure DeleteOldInstallation();
+begin
+  if DirExists(ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}\Audio\sounds')) then
+  begin
+    DelTree(ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}\Audio\sounds'), True, True, True);
+  end;
+end;
+
+function InitializeSetup(): Boolean;
+begin
+  DeleteOldInstallation();
+  Result := True;
+end;
+
 procedure DeleteAthkarFolder();
 begin
   DelTree(ExpandConstant('{app}\Audio\athkar'), True, True, True);

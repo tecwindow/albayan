@@ -10,14 +10,14 @@ from core_functions.tafaseer import Category
 from utils.update import UpdateManager
 from utils.settings import SettingsManager
 from utils.logger import Logger
-from utils.const import program_name, program_version, website
+from utils.const import program_name, program_version, website, Globals
+
 from theme import ThemeManager
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
-        self.is_rtl = True
         self.theme_manager = ThemeManager(self.parent)
         self.update_manager = UpdateManager(self.parent)
         self.our_emails = {
@@ -38,7 +38,8 @@ class MenuBar(QMenuBar):
                                            QKeySequence("Ctrl+Up"), QKeySequence("Alt+Left")])
         self.go_to_saved_position_action = QAction("الذهاب إلى الموضع المحفوظ", self)
         self.go_to_saved_position_action.triggered.connect(self.parent.set_text)
-        self.go_to_saved_position_action.setShortcuts([QKeySequence("Ctrl+BackSpace"), QKeySequence("Ctrl+P")])
+        self.go_to_saved_position_action.triggered.connect(lambda: Globals.effects_manager.play("move"))
+        self.go_to_saved_position_action.setShortcut("Ctrl+Backspace")
         self.search_action = QAction("البحث", self)
         self.search_action.triggered.connect(self.parent.OnSearch)        
         self.search_action.setShortcut(QKeySequence("Ctrl+F"))
@@ -65,10 +66,33 @@ class MenuBar(QMenuBar):
         navigation_menu.addAction(self.close_action)
         navigation_menu.addAction(self.exit_action)
 
+        player_menu = self.addMenu("المشغل(&P)")
+        self.play_pause_action = QAction("تشغيل الآية الحالية", self)
+        self.play_pause_action.setShortcut(QKeySequence("Ctrl+P"))
+        self.play_pause_action.triggered.connect(self.parent.toolbar.toggle_play_pause)
+        self.stop_action = QAction("إيقاف", self)
+        self.stop_action.setShortcut(QKeySequence("Ctrl+E"))
+        self.stop_action.setEnabled(False)
+        self.stop_action.triggered.connect(self.parent.toolbar.stop_audio)
+        self.play_next_action = QAction("تشغيل الآية التالية", self)
+        self.play_next_action.setShortcut(QKeySequence("Ctrl+Shift+N"))
+        self.play_next_action.setEnabled(False)
+        self.play_next_action.triggered.connect(self.parent.toolbar.OnPlayNext)
+        self.play_previous_action = QAction("تشغيل الآية السابقة", self)
+        self.play_previous_action.setShortcut(QKeySequence("Ctrl+Shift+B"))
+        self.play_previous_action.setEnabled(False)
+        self.play_previous_action.triggered.connect(self.parent.toolbar.OnPlayPrevious)
+
+        player_menu.addAction(self.play_pause_action)
+        player_menu.addAction(self.stop_action)
+        player_menu.addAction(self.play_next_action)
+        player_menu.addAction(self.play_previous_action)
+
         actions_menu = self.addMenu("الإجرائات(&A)")
         self.save_position_action = QAction("حفظ الموضع الحالي", self)
         self.save_position_action.setShortcut(QKeySequence("Ctrl+S"))
         self.save_position_action.triggered.connect(self.parent.OnSaveCurrentPosition)
+        self.save_position_action.triggered.connect(self.parent.OnSave_alert)
         self.save_bookmark_action = QAction("حفظ علامة", self)
         self.save_bookmark_action.setShortcut(QKeySequence("Ctrl+D"))
         self.save_bookmark_action.triggered.connect(self.parent.OnSaveBookmark)
@@ -78,7 +102,7 @@ class MenuBar(QMenuBar):
         self.verse_tafsir_action.triggered.connect(self.parent.OnInterpretation)
         self.verse_tafsir_action.setShortcut(QKeySequence("Ctrl+T"))
 
-        self.tafaseer_menu = QMenu("تفسير الآية")
+        self.tafaseer_menu = QMenu("التفسير")
         self.tafaseer_menu.setAccessibleName("قائمة المفسرين")
         tafaseershortcut = QShortcut(QKeySequence("Shift+T"), self)
         tafaseershortcut.activated.connect(self.OnTafaseerMenu)
@@ -94,7 +118,7 @@ class MenuBar(QMenuBar):
         self.verse_info_action = QAction("أسباب نزول الآية", self)
         self.verse_info_action.triggered.connect(self.parent.OnVerseReasons)
         self.verse_info_action.setShortcut(QKeySequence("Shift+A"))
-        self.verse_grammar_action = QAction("اعراب الآية", self)
+        self.verse_grammar_action = QAction("إعراب الآية", self)
         self.verse_grammar_action.triggered.connect(self.parent.OnSyntax)
         self.verse_grammar_action.setShortcut(QKeySequence("Shift+E"))
         self.copy_verse_action = QAction("نسخ الآية", self)
@@ -121,7 +145,7 @@ class MenuBar(QMenuBar):
         tools_menu.addAction(athkar_action)
         tools_menu.addAction(bookmark_manager_action )
 
-        preferences_menu = self.addMenu("التفضيلات(&P)")
+        preferences_menu = self.addMenu("التفضيلات(&R)")
         settings_action = QAction("الإعدادات", self)
         settings_action.setShortcut(QKeySequence("F3"))
         settings_action.setShortcuts([QKeySequence("F3"), QKeySequence("Alt+S")])
@@ -134,12 +158,19 @@ class MenuBar(QMenuBar):
             theme_menu.addAction(theme_action)
         self.theme_manager.apply_theme(SettingsManager.current_settings["preferences"]["theme"])
         
-        self.text_direction_action = QAction("تغيير اتجاه النص", self)
-        self.text_direction_action.triggered.connect(self.toggle_text_direction)
+        self.text_direction_action = QMenu("تغيير اتجاه النص", self)
+
+        self.rtl_action = QAction("من اليمين لليسار", self)
+        self.rtl_action.triggered.connect(self.set_text_direction_rtl)
+        self.text_direction_action.addAction(self.rtl_action)
+        self.ltr_action = QAction("من اليسار لليمين", self)
+        self.ltr_action.triggered.connect(self.set_text_direction_ltr)
+        self.text_direction_action.addAction(self.ltr_action)
 
         preferences_menu.addAction(settings_action)
         preferences_menu.addMenu(theme_menu)
-        preferences_menu.addAction(self.text_direction_action)
+        preferences_menu.addMenu(self.text_direction_action)
+
 
         help_menu = self.addMenu("المساعدة(&H)")
 #        user_guide_action = QAction("دليل البرنامج", self)
@@ -151,11 +182,11 @@ class MenuBar(QMenuBar):
             contact_us_menu.addAction(name_action)
 
         update_program_action = QAction("تحديث البرنامج", self)
-        update_program_action.setShortcuts([QKeySequence("F5"), QKeySequence("Ctrl+U")])
+        #update_program_action.setShortcuts([QKeySequence("F5"), QKeySequence("Ctrl+U")])
         update_program_action.triggered.connect(self.OnUpdate)
 
         about_program_action = QAction("حول البرنامج", self)
-        about_program_action.setShortcuts([QKeySequence("F6")])
+        #about_program_action.setShortcuts([QKeySequence("F6")])
         about_program_action.triggered.connect(self.OnAbout)
 
 #        help_menu.addAction(user_guide_action)
@@ -190,16 +221,14 @@ class MenuBar(QMenuBar):
         }
         SettingsManager.write_settings(theme_setting)
 
-    def toggle_text_direction(self):
+    def set_text_direction_rtl(self):
+        option = self.parent.quran_view.document().defaultTextOption()
+        option.setTextDirection(Qt.LayoutDirection.RightToLeft)
+        self.parent.quran_view.document().setDefaultTextOption(option)
 
-        option = self.parent.quran_view.document().defaultTextOption()                                               
-        if self.is_rtl:
-            option.setTextDirection(Qt.LayoutDirection.LeftToRight)
-            self.is_rtl = False
-        else:
-            option.setTextDirection(Qt.LayoutDirection.RightToLeft)
-            self.is_rtl = True
-
+    def set_text_direction_ltr(self):
+        option = self.parent.quran_view.document().defaultTextOption()
+        option.setTextDirection(Qt.LayoutDirection.LeftToRight)
         self.parent.quran_view.document().setDefaultTextOption(option)
 
     def OnContact(self):

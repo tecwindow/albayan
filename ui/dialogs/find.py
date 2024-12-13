@@ -20,6 +20,9 @@ from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator
 from core_functions.search import SearchCriteria, QuranSearchManager
 from utils.settings import SettingsManager
 from utils.universal_speech import UniversalSpeech
+from utils.const import Globals
+
+
 
 
 class SearchDialog(QDialog):
@@ -128,6 +131,7 @@ class SearchDialog(QDialog):
         self.search_type_radio_quarter.toggled.connect(self.on_radio_toggled)
 
         self.on_radio_toggled()
+        self.OnEdit()
 
     def OnEdit(self):
         self.search_button.setEnabled(bool(self.search_box.text()))
@@ -153,6 +157,8 @@ class SearchDialog(QDialog):
             self.parent.set_focus_to_ayah(ayah_number)
             self.parent.quran_view.setFocus()
             self.accept()
+            self.deleteLater()
+
 
     def on_radio_toggled(self):
 
@@ -215,6 +221,7 @@ class SearchResultsDialog(QDialog):
             
         self.go_to_button = QPushButton("الذهاب للنتيجة")
         self.go_to_button.clicked.connect(self.accept)
+        self.go_to_button.clicked.connect(lambda: Globals.effects_manager.play("move"))
         self.cancel_button = QPushButton("إلغاء")
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
         self.cancel_button.clicked.connect(self.reject)
@@ -249,3 +256,8 @@ class SearchResultsDialog(QDialog):
             UniversalSpeech.say(text)
 
         return super().keyPressEvent(event)
+
+
+    def reject(self):
+        self.deleteLater()
+        

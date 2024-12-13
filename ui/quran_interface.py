@@ -1,5 +1,8 @@
 import os
 import re
+import json
+import random
+
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QWidget,
@@ -28,11 +31,13 @@ from ui.widgets.qText_edit import QuranViewer
 from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
 from ui.widgets.system_tray import SystemTrayManager
+from ui.widgets.toolbar import AudioToolBar
 from utils.settings import SettingsManager
-from utils.sound_Manager import EffectsManager
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
-from utils.const import program_name, program_icon, user_db_path
+from utils.const import program_name, program_icon, user_db_path, data_folder, Globals
+from utils.audio_player import bass, SoundEffectPlayer
+from exceptions.error_decorators import exception_handler
 
 
 class QuranInterface(QMainWindow):
@@ -41,12 +46,15 @@ class QuranInterface(QMainWindow):
         self.setWindowTitle(title)
         self.setGeometry(100, 100, 800, 600)
         self.quran = quran_mgr()
-        self.quran.load_quran(os.path.join("database", "quran", "quran.DB"))
-        self.quran.aya_to_line = True
-        self.effects_manager = EffectsManager("Audio/sounds")
+        self.quran.load_quran(SettingsManager.current_settings["reading"]["font_type"])
         self.user_data_manager = UserDataManager(user_db_path)
+        Globals.effects_manager = SoundEffectPlayer("Audio/sounds")
+
+        self.toolbar = AudioToolBar(self)
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
+        self.addToolBar(self.toolbar)
+
         self.tray_manager = SystemTrayManager(self, program_name, program_icon)
         self.create_widgets()
         self.create_layout()
@@ -90,6 +98,12 @@ class QuranInterface(QMainWindow):
         self.save_current_position = EnterButton("حفظ الموضع الحالي")
         self.save_current_position.setEnabled(False)
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
+        self.save_current_position.clicked.connect(self.OnSave_alert)
+
+        self.random_messages = EnterButton("رسالة لك")
+        self.random_messages.clicked.connect(self.OnRandomMessages)
+        self.random_messages.setShortcut(QKeySequence("Ctrl+M"))
+
 
     def create_layout(self):
         layout = QVBoxLayout()
@@ -103,6 +117,8 @@ class QuranInterface(QMainWindow):
         buttons_layout.addWidget(self.quick_access)
         buttons_layout.addWidget(self.search_in_quran)
         buttons_layout.addWidget(self.save_current_position)
+        buttons_layout.addWidget(self.random_messages)
+
 
         layout.addLayout(buttons_layout)
         self.centralWidget().setLayout(layout)
@@ -121,45 +137,74 @@ class QuranInterface(QMainWindow):
         self.set_focus_to_ayah(ayah_number)
 
     def set_focus_to_ayah(self, ayah_number: int):
-        # set the Cursor to ayah_position in the text
-        text_position = self.quran.ayah_data.get_position(ayah_number)
+        """set the Cursor to ayah_position in the text"""
+        if ayah_number == -1:
+            text_position = len(self.quran_view.toPlainText())
+        else:
+            text_position = self.quran.ayah_data.get_position(ayah_number)
+
         cursor = QTextCursor(self.quran_view.document())
         cursor.setPosition(text_position)
         self.quran_view.setTextCursor(cursor)
+        
 
     def OnNext(self):
         self.quran_view.setText(self.quran.next())
         self.set_text_ctrl_label()
-        self.effects_manager.play("next")
+        Globals.effects_manager.play("next")
         if self.quran.current_pos == self.quran.max_pos:
             self.quran_view.setFocus()
 
-    def OnBack(self):
+    def OnBack(self, is_auto_call: bool = False):
         self.quran_view.setText(self.quran.back())
         self.set_text_ctrl_label()
-        self.effects_manager.play("previous")
+        Globals.effects_manager.play("previous")
         if self.quran.current_pos == 1:            
             self.quran_view.setFocus()
+        if SettingsManager.current_settings["reading"]["auto_page_turn"] and is_auto_call:
+            self.set_focus_to_ayah(-1)
     
     def set_text_ctrl_label(self):
 
         label = ""
         if self.quran.type == 0:
             label = f"الصفحة {self.quran.current_pos}"
+            self.next_to.setText("الصفحة التالية")
+            self.menu_bar.next_action.setText("الصفحة التالية")
+            self.back_to.setText("الصفحة السابقة")
+            self.menu_bar.previous_action.setText("الصفحة السابقة")
         elif self.quran.type == 1:
             label = self.quran.data_list[-1][2]
+            self.next_to.setText("السورة التالية")
+            self.menu_bar.next_action.setText("السورة التالية")
+            self.back_to.setText("السورة السابقة")
+            self.menu_bar.previous_action.setText("السورة السابقة")    
         elif self.quran.type == 2:
             label = f"الربع {self.quran.current_pos}"
+            self.next_to.setText("الربع التالي")
+            self.menu_bar.next_action.setText("الربع التالي")
+            self.back_to.setText("الربع السابق")
+            self.menu_bar.previous_action.setText("الربع السابق")
         elif self.quran.type == 3:
             label = f"الحزب {self.quran.current_pos}"
+            self.next_to.setText("الحزب التالي")
+            self.menu_bar.next_action.setText("الحزب التالي")
+            self.back_to.setText("الحزب السابق")
+            self.menu_bar.previous_action.setText("الحزب السابق")
         elif self.quran.type == 4:
             label = f"الجزء {self.quran.current_pos}"
+            self.next_to.setText("الجزء التالي")
+            self.menu_bar.next_action.setText("الجزء التالي")
+            self.back_to.setText("الجزء السابق")
+            self.menu_bar.previous_action.setText("الجزء السابق")
 
         # set the label
         self.quran_title.setText(label)
         self.quran_view.setAccessibleName(label)
-        UniversalSpeech.say(label)
 
+        if self.isActiveWindow():
+                UniversalSpeech.say(label)
+        
         # Enable back and next item
         next_status = self.quran.current_pos < self.quran.max_pos
         back_status = self.quran.current_pos > 1
@@ -167,8 +212,11 @@ class QuranInterface(QMainWindow):
         self.menu_bar.next_action.setEnabled(next_status)
         self.back_to.setEnabled(back_status)
         self.menu_bar.previous_action.setEnabled(back_status)
+        self.toolbar.navigation.reset_position()
+        self.toolbar.set_buttons_status()
 
-    def OnQuickAccess(self):
+    @exception_handler(ui_element=QMessageBox)
+    def OnQuickAccess(self, event):
         dialog = QuickAccess(self, "الوصول السريع")
         if not dialog.exec():
             return
@@ -176,7 +224,8 @@ class QuranInterface(QMainWindow):
         self.set_text_ctrl_label()
         self.quran_view.setFocus()
 
-    def OnSearch(self):
+    @exception_handler(ui_element=QMessageBox)
+    def OnSearch(self, event):
         search_dialog = SearchDialog(self, "بحث")
         if search_dialog.exec():
             self.set_text_ctrl_label()
@@ -189,7 +238,8 @@ class QuranInterface(QMainWindow):
 
         return ayah_info
     
-    def OnInterpretation(self):
+    @exception_handler(ui_element=QMessageBox)
+    def OnInterpretation(self, event):
 
         selected_category = self.sender().text()
         if selected_category not in Category.get_categories_in_arabic():
@@ -208,7 +258,7 @@ class QuranInterface(QMainWindow):
         get_interpretation_verse = menu.addAction("تفسير الآية")
         get_interpretation_verse.triggered.connect(self.OnInterpretation)
 
-        submenu = menu.addMenu("تفسير الآية")
+        submenu = menu.addMenu("التفسير")
         arabic_categories = Category.get_categories_in_arabic()
         for arabic_category in arabic_categories:
             action = QAction(arabic_category, self)
@@ -216,6 +266,7 @@ class QuranInterface(QMainWindow):
             submenu.addAction(action)
 
         save_current_position.triggered.connect(self.OnSaveCurrentPosition)
+        save_current_position.triggered.connect(self.OnSave_alert)
         save_bookmark.triggered.connect(self.OnSaveBookmark)
         ayah_info = menu.addAction("معلومات الآية")
         ayah_info.triggered.connect(self.OnAyahInfo)
@@ -247,33 +298,38 @@ class QuranInterface(QMainWindow):
         clipboard = QApplication.clipboard()
         clipboard.setText(current_line)
         UniversalSpeech.say("تم نسخ الآية.")
+        Globals.effects_manager.play("copy")
 
-    def OnSyntax(self):
+    @exception_handler(ui_element=QMessageBox)
+    def OnSyntax(self, event):
         aya_info = self.get_current_ayah_info()
         title = "إعراب آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "الإعراب"
         text = E3rab(aya_info[0], aya_info[1]).text
-        InfoDialog(title, label, text).exec()
+        InfoDialog(self, title, label, text).exec()
 
-    def OnVerseReasons(self):
+    @exception_handler(ui_element=QMessageBox)
+    def OnVerseReasons(self, event):
         aya_info = self.get_current_ayah_info()
         title = "أسباب نزول آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "الأسباب"
         text = TanzilAyah(aya_info[1]).text
 
         if text:
-            InfoDialog(title, label, text).exec()
+            InfoDialog(self, title, label, text).exec()
         else:
             QMessageBox.information(self, "لا يتوفر معلومات للآية", "للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
 
-    def OnAyahInfo(self):
+    @exception_handler(ui_element=QMessageBox)
+    def OnAyahInfo(self, event):
         aya_info = self.get_current_ayah_info()
         title = "معلومات آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "معلومات الآية:"
         text = AyaInfo(aya_info[1]).text
-        InfoDialog(title, label, text, is_html_content=True).exec()
-            
-    def OnSaveBookmark(self):
+        InfoDialog(self, title, label, text, is_html_content=True).exec()
+
+    @exception_handler(ui_element=QMessageBox)
+    def OnSaveBookmark(self, event):
 
         bookmark_manager= BookmarkManager()
         aya_info = self.get_current_ayah_info()
@@ -294,7 +350,11 @@ class QuranInterface(QMainWindow):
          self.quran.type,
          self.quran.current_pos
          )
+
+
+    def OnSave_alert(self):
         UniversalSpeech.say("تم حفظ الموضع الحالي.")
+        Globals.effects_manager.play("save")
 
     def OnChangeNavigationMode(self, mode):
         ayah_info = self.get_current_ayah_info()
@@ -302,13 +362,21 @@ class QuranInterface(QMainWindow):
             ayah_number = ayah_info[1]
             self.quran.type = mode
             self.quran_view.setText(self.quran.get_by_ayah_number(ayah_number)["full_text"])
-            self.set_text_ctrl_label()
             self.set_focus_to_ayah(ayah_number)
-
+            self.set_text_ctrl_label()
+        Globals.effects_manager.play("change")
+            
     def closeEvent(self, event):
         if SettingsManager.current_settings["general"]["run_in_background_enabled"]:
             event.ignore()
             self.hide()
+            self.tray_manager.tray_icon.showMessage("البيان", "تم تصغير نافذة البيان على صينية النظام, البرنامج يعمل في الخلفية.", msecs=5000)
         else:
             self.tray_manager.hide_icon()
+            bass.BASS_Free()
 
+    @exception_handler(ui_element=QMessageBox)
+    def OnRandomMessages(self, event):
+        info_dialog = InfoDialog(self, 'رسالة لك', '', "", is_html_content=False, show_message_button=True)
+        info_dialog.choose_QuotesMessage()
+        info_dialog.exec()

@@ -1,5 +1,6 @@
 import os
 import json
+from utils.audio_player import SoundEffectPlayer
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -20,6 +21,7 @@ class QuickAccess(QDialog):
         self.parent = parent
         self.setWindowTitle(title)
         self.resize(300, 200)
+        self.effects_manager = SoundEffectPlayer("Audio/sounds")
         self.sura = []
         with open(os.path.join("database", "Surahs.Json"), encoding="UTF-8") as f:
             self.sura = json.load(f)["surahs"]
@@ -85,7 +87,9 @@ class QuickAccess(QDialog):
         elif self.jus_radio.isChecked():
             self.parent.quran_view.setText(self.parent.quran.get_juzz(selected_item))
         self.accept()
-        
+        self.effects_manager.play("change")
+        self.deleteLater()
+
     def on_radio_toggled(self):
         if self.sura_radio.isChecked():
             self.choices.clear()
@@ -102,3 +106,7 @@ class QuickAccess(QDialog):
         elif self.jus_radio.isChecked():
             self.choices.clear()
             self.choices.addItems(self.jus)
+
+    def reject(self):
+        self.deleteLater()
+        

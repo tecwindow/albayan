@@ -1,4 +1,7 @@
 from PyQt6.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QSpinBox, QDialog, QLabel
+from utils.const import Globals
+
+
 
 class GoToDialog(QDialog):
     def __init__(self, parent, current_position: int, max: int, category_label: str):
@@ -25,6 +28,7 @@ class GoToDialog(QDialog):
         self.go_to_button = QPushButton('اذهب', self)
         self.go_to_button.setDefault(True)
         self.go_to_button.clicked.connect(self.accept)
+        self.go_to_button.clicked.connect(lambda: Globals.effects_manager.play("move"))
         button_layout.addWidget(self.go_to_button)
         
         self.cancel_button = QPushButton('إغلاق', self)
@@ -37,3 +41,9 @@ class GoToDialog(QDialog):
     
     def get_input_value(self):
         return self.input_field.value()
+        self.deleteLater()
+
+    def reject(self):
+
+        self.deleteLater()
+        

@@ -10,26 +10,41 @@ class SettingsManager:
     default_settings = {
         "general": {
             "language": "Arabic",
-            "sound_effect_enabled": True,
-            "start_with_basmala_enabled": True,
-            "speak_actions_enabled": True,            
             "run_in_background_enabled": False,
+            "auto_start_enabled": False,
             "auto_save_position_enabled": False,
             "check_update_enabled": True,
-            "logging_enabled": False
+            "logging_enabled": True
+        },
+        "audio": {
+            "sound_effect_enabled": True,
+            "start_with_basmala_enabled": True,
+            "speak_actions_enabled": True,
+            "volume_level": 75,
+            "ayah_volume_level": 100,
+            "athkar_volume_level": 50,
+            "current_volume_category": 0
+        },
+        "listening": {
+            "reciter": 58,
+            "action_after_listening": 0,
         },
         "search": {
             "ignore_tashkeel": True,
             "ignore_hamza": True,
             "match_whole_word": False,
         },
+        "reading": {
+            "font_type": 0,
+            "auto_page_turn": False,
+        },
         "preferences": {
-            "theme": "default"
+            "theme": "FlatDark"
         }
-        }
+    }
 
     @classmethod
-    def write_settings(cls, new_settings:dict, is_reading:bool=False) -> None:
+    def write_settings(cls, new_settings: dict, is_reading: bool = False) -> None:
         try:
             cls.config.read_dict(new_settings)
             with open(cls.path, "w", encoding='utf-8') as config_file:
@@ -52,14 +67,21 @@ class SettingsManager:
             for setting, default_value in cls.default_settings[section].items():
                 try:
                     if isinstance(default_value, bool):
-                        current_settings[section][setting] = cls.config.getboolean(section, setting)
+                        current_settings[section][setting] = cls.config.getboolean(
+                            section, setting)
                     elif isinstance(default_value, int):
-                        current_settings[section][setting] = cls.config.getint(section, setting)
+                        current_settings[section][setting] = cls.config.getint(
+                            section, setting)
+                    elif isinstance(default_value, float):
+                        current_settings[section][setting] = cls.config.getfloat(
+                            section, setting)
                     else:
-                        current_settings[section][setting] = cls.config.get(section, setting)
+                        current_settings[section][setting] = cls.config.get(
+                            section, setting)
                 except Exception as e:
                     print(e)
-                    cls.write_settings({section: {setting: default_value}}, is_reading=True)
+                    cls.write_settings(
+                        {section: {setting: default_value}}, is_reading=True)
                     current_settings[section][setting] = default_value
 
         return current_settings
@@ -74,4 +96,3 @@ class SettingsManager:
         if not hasattr(cls, "_current_settings"):
             cls._current_settings = cls.read_settings()
         return cls._current_settings
-    

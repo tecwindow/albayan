@@ -1,5 +1,6 @@
 import sqlite3
 import os
+from exceptions.database import DBNotFoundError
 
 class Category:
     baghawy = "baghawy"
@@ -46,7 +47,7 @@ class TafaseerManager:
         assert self._tafaseer_category is not None, "You must set tafaseer category."
         file_path = os.path.join("database", "tafaseer", self._tafaseer_category + ".db")
         if not os.path.isfile(file_path):
-            raise FileNotFoundError(f"There's no file: {self._tafaseer_category}.db")
+            raise DBNotFoundError(file_path)
         self._conn = sqlite3.connect(file_path)
         self._conn.row_factory = sqlite3.Row 
         self._cursor = self._conn.cursor()

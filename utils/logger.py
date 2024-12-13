@@ -33,7 +33,7 @@ level=logging.INFO,
     @classmethod
     def error(cls, message:str) -> None:
         cls.initialize_logger()
-        logging.error(message)
+        logging.error(message, exc_info=True)
 
     @classmethod
     def show_error_message(cls, message:str) -> None:
@@ -55,4 +55,4 @@ level=logging.INFO,
 
         cls.error(error_message)
         print(error_message)
-        cls.show_error_message("حدث خطأ. يرجى الاتصال بالدعم للحصول على المساعدة.")
+        cls.show_error_message("حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")
