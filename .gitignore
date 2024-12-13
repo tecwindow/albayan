@@ -3,3 +3,6 @@ __pycache__/
 
 # Ignore virtual environment directory
 albayan_env/
+
+# Ignore build folder directory
+albayan_build
