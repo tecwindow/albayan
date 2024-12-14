@@ -74,6 +74,12 @@ class MenuBar(QMenuBar):
         self.stop_action.setShortcut(QKeySequence("Ctrl+E"))
         self.stop_action.setEnabled(False)
         self.stop_action.triggered.connect(self.parent.toolbar.stop_audio)
+        self.rewind_action = QAction("ترجيع", self)
+        self.rewind_action.setShortcut(QKeySequence("Ctrl+J"))
+        self.rewind_action.triggered.connect(lambda: self.parent.toolbar.player.rewind())
+        self.forward_action = QAction("تقديم", self)
+        self.forward_action.setShortcut(QKeySequence("Ctrl+L"))
+        self.forward_action.triggered.connect(lambda: self.parent.toolbar.player.forward())
         self.play_next_action = QAction("تشغيل الآية التالية", self)
         self.play_next_action.setShortcut(QKeySequence("Ctrl+Shift+N"))
         self.play_next_action.setEnabled(False)
@@ -85,6 +91,8 @@ class MenuBar(QMenuBar):
 
         player_menu.addAction(self.play_pause_action)
         player_menu.addAction(self.stop_action)
+        player_menu.addAction(self.rewind_action)
+        player_menu.addAction(self.forward_action)
         player_menu.addAction(self.play_next_action)
         player_menu.addAction(self.play_previous_action)
 
