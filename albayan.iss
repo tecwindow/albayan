@@ -73,10 +73,11 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 [UninstallRun]
 Filename: "taskkill"; Parameters: "/F /IM Albayan.exe"; Flags: runhidden
 
-
-
 [UninstallDelete]
 Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
+
+[InstallDelete]
+Type: filesandordirs; Name: "{app}\*"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
