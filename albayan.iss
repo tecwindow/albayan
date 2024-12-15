@@ -52,6 +52,7 @@ arabic.autorun=فتح برنامج البيان تلقائيا مع بدء تش�
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+Name: "autorun"; Description: "{cm:autorun}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
 Source: "albayan_build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
