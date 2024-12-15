@@ -64,7 +64,8 @@ Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\Albayan"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [INI]
-
+Filename: "{userappdata}\tecwindow\{#MyAppName}\config.ini"; Section: "general"; Key: "run_in_background_enabled"; String: "true"; Tasks: autorun
+Filename: "{userappdata}\tecwindow\{#MyAppName}\config.ini"; Section: "general"; Key: "auto_start_enabled"; String: "true"; Tasks: autorun
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
