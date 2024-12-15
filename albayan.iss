@@ -70,6 +70,9 @@ Filename: "{userappdata}\tecwindow\{#MyAppName}\config.ini"; Section: "general";
 [Registry]
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "albayan"; ValueData: "{app}\albayan.exe --minimized"; Flags: uninsdeletevalue; Tasks: autorun
 
+[UninstallRun]
+Filename: "taskkill"; Parameters: "/F /IM Albayan.exe"; Flags: runhidden
+
 
 
 [UninstallDelete]
