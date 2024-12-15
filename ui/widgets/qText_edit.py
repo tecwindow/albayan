@@ -1,6 +1,6 @@
 import re
 from PyQt6.QtCore import QEvent, Qt, QLocale
-from PyQt6.QtGui import QKeyEvent
+from PyQt6.QtGui import QKeyEvent, QTextCursor
 from PyQt6.QtWidgets import QTextEdit
 from utils.settings import SettingsManager
 from utils.const import Globals
@@ -44,7 +44,35 @@ class QuranViewer(ReadOnlyTextEdit):
         self.parent.menu_bar.copy_verse_action.setEnabled(status)
 
     def keyPressEvent(self, e): 
-        super().keyPressEvent(e)
+
+
+        cursor = self.textCursor()  # Get the current text cursor
+
+        if e.key() == Qt.Key.Key_Right:
+            if e.modifiers() & Qt.KeyboardModifier.ControlModifier:
+                cursor.movePosition(cursor.MoveOperation.NextWord)  # Move to the start of the next word
+            else:
+                if cursor.atBlockEnd():  # If at the end of the line, move to the start of the next line
+                    cursor.movePosition(cursor.MoveOperation.NextBlock)
+                else:
+                    cursor.movePosition(cursor.MoveOperation.Left)  # Move one character to the right
+            self.setTextCursor(cursor)
+
+        elif e.key() == Qt.Key.Key_Left:
+            if e.modifiers() & Qt.KeyboardModifier.ControlModifier:
+                cursor.movePosition(cursor.MoveOperation.PreviousWord)  # Move to the start of the previous word
+            else:
+                if cursor.atBlockStart():  # If at the beginning of the line, move to the end of the previous line
+                    cursor.movePosition(cursor.MoveOperation.PreviousBlock)
+                    cursor.movePosition(cursor.MoveOperation.EndOfBlock)
+                else:
+                    cursor.movePosition(cursor.MoveOperation.Right)  # Move one character to the left
+            self.setTextCursor(cursor)
+
+        else:
+            super().keyPressEvent(e)
+
+
         self.set_ctrl()
 
         if e.key() == Qt.Key.Key_Space:
@@ -61,9 +89,13 @@ class QuranViewer(ReadOnlyTextEdit):
         if e.modifiers() & Qt.KeyboardModifier.ControlModifier:
             if e.key() == Qt.Key.Key_Shift:
                 if e.nativeScanCode() == 42:  # Scan code for Left Shift
+                    self.document().setDefaultCursorMoveStyle(Qt.CursorMoveStyle.LogicalMoveStyle)
                     self.parent.menu_bar.set_text_direction_ltr()
+                    self.document().setDefaultCursorMoveStyle(Qt.CursorMoveStyle.VisualMoveStyle)
                 elif e.nativeScanCode() == 54: # Scan code for Right Shift
+                    self.document().setDefaultCursorMoveStyle(Qt.CursorMoveStyle.LogicalMoveStyle)
                     self.parent.menu_bar.set_text_direction_rtl()
+                    self.document().setDefaultCursorMoveStyle(Qt.CursorMoveStyle.VisualMoveStyle)
 
         if not SettingsManager.current_settings["reading"]["auto_page_turn"]:
             return
