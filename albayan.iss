@@ -64,7 +64,7 @@ Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\Albayan"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [INI]
-Filename: "{userappdata}\tecwindow\{#MyAppName}\Settingss.ini"; Section: "general"; Key: "language"; String: "{cm:AppLNGfile}"
+
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
