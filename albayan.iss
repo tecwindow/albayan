@@ -83,30 +83,21 @@ Type: filesandordirs; Name: "{app}\*"
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
 
 [Code]
-procedure DeleteOldInstallation();
-begin
-  if DirExists(ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}\Audio\sounds')) then
-  begin
-    DelTree(ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}\Audio\sounds'), True, True, True);
-  end;
-end;
-
 function InitializeSetup(): Boolean;
 begin
-  DeleteOldInstallation();
   Result := True;
 end;
 
-procedure DeleteAthkarFolder();
-begin
-  DelTree(ExpandConstant('{app}\Audio\athkar'), True, True, True);
-end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if CurStep = ssPostInstall then
+  if CurStep = ssInstall then
   begin
-    DeleteAthkarFolder();
+    if FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini')) then
+begin
+RenameFile(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini'), ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\config.ini'));
+end;
+
   end;
 end;
 
