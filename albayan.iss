@@ -47,6 +47,8 @@ Name: "arabic"; MessagesFile: "compiler:Languages\Arabic.isl"
 arabic.AppLNGfile=Arabic
 english.DeleteSettingsPrompt=Do you want to delete the settings folder?
 arabic.DeleteSettingsPrompt=هل تريد حذف مجلد الإعدادات؟
+english.autorun=auto start albayan with windows?
+arabic.autorun=فتح برنامج البيان تلقائيا مع بدء تشغيل النظام
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
