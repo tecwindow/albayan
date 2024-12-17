@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QSpacerItem,
     QSizePolicy,
     QHBoxLayout,
+    QSpinBox,
     QStackedWidget
 )
 from PyQt6.QtGui import QKeySequence
@@ -141,11 +142,20 @@ class SettingsDialog(QDialog):
         [self.action_combo.addItem(text, id) for text, id in items_with_ids]
         self.action_combo.setAccessibleName(self.action_label.text())
 
+        self.duration_label = QLabel("مدة التقديم والترجيع (بالثواني):")
+        self.duration_spinbox = QSpinBox()
+        self.duration_spinbox.setAccessibleName(self.duration_label.text())        
+        self.duration_spinbox.setRange(2, 15)
+        self.duration_spinbox.setSingleStep(1)
+
+
         self.group_listening_layout.addWidget(self.reciters_label)
         self.group_listening_layout.addWidget(self.reciters_combo)
         self.group_listening_layout.addSpacerItem(QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))  # مسافة نتوسطة
         self.group_listening_layout.addWidget(self.action_label)
         self.group_listening_layout.addWidget(self.action_combo)
+        self.group_listening_layout.addWidget(self.duration_label)
+        self.group_listening_layout.addWidget(self.duration_spinbox)
         self.group_listening.setLayout(self.group_listening_layout)
         self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
@@ -272,7 +282,8 @@ class SettingsDialog(QDialog):
 
         listening_settings = {
             "reciter": self.reciters_combo.currentData(),
-            "action_after_listening": self.action_combo.currentData()
+            "action_after_listening": self.action_combo.currentData(),
+            "forward_time": self.duration_spinbox.value()
         }
 
         reading_settings = {
@@ -322,6 +333,7 @@ class SettingsDialog(QDialog):
         self.start_on_system_start_checkbox.setChecked(current_settings["general"]["auto_start_enabled"])
         self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
         self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
+        self.duration_spinbox.setValue(current_settings["listening"]["forward_time"])
         self.log_checkbox.setChecked(current_settings["general"]["logging_enabled"])
         self.ignore_tashkeel_checkbox.setChecked(current_settings["search"]["ignore_tashkeel"])
         self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])
