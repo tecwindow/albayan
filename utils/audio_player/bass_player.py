@@ -114,7 +114,7 @@ class AudioPlayer:
             new_seconds = max(0.0, new_seconds)
 
         duration = self.BASS_ChannelBytes2Seconds(self.current_channel, bass.BASS_ChannelGetLength( self.current_channel, 0))
-        new_seconds = min(new_seconds, duration)    
+        new_seconds = min(new_seconds, duration-1)    
         new_position = self.BASS_ChannelSeconds2Bytes(self.current_channel, new_seconds)
         self.BASS_ChannelSetPosition(self.current_channel, new_position, 0)
 

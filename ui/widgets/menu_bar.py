@@ -82,7 +82,7 @@ class MenuBar(QMenuBar):
         self.forward_action.triggered.connect(lambda: self.parent.toolbar.player.forward(SettingsManager.current_settings["listening"]["forward_time"]))
         self.replay_action = QAction("إعادة", self)
         self.replay_action.setShortcut(QKeySequence("Ctrl+J"))
-        self.replay_action.triggered.connect(lambda: self.parent.toolbar.player.rewind(500))
+        self.replay_action.triggered.connect(lambda: self.parent.toolbar.player.set_position(0))
 
         self.play_next_action = QAction("تشغيل الآية التالية", self)
         self.play_next_action.setShortcut(QKeySequence("Ctrl+Shift+N"))
