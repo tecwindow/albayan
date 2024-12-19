@@ -76,10 +76,14 @@ class MenuBar(QMenuBar):
         self.stop_action.triggered.connect(self.parent.toolbar.stop_audio)
         self.rewind_action = QAction("ترجيع", self)
         self.rewind_action.setShortcuts([QKeySequence("J"), QKeySequence("Ctrl+Alt+Left")])
-        self.rewind_action.triggered.connect(lambda: self.parent.toolbar.player.rewind())
+        self.rewind_action.triggered.connect(lambda: self.parent.toolbar.player.rewind(SettingsManager.current_settings["listening"]["forward_time"]))
         self.forward_action = QAction("تقديم", self)
         self.forward_action.setShortcuts([QKeySequence("L"), QKeySequence("Ctrl+Alt+Right")])
-        self.forward_action.triggered.connect(lambda: self.parent.toolbar.player.forward())
+        self.forward_action.triggered.connect(lambda: self.parent.toolbar.player.forward(SettingsManager.current_settings["listening"]["forward_time"]))
+        self.replay_action = QAction("إعادة", self)
+        self.replay_action.setShortcut(QKeySequence("Ctrl+J"))
+        self.replay_action.triggered.connect(lambda: self.parent.toolbar.player.set_position(0))
+
         self.play_next_action = QAction("تشغيل الآية التالية", self)
         self.play_next_action.setShortcut(QKeySequence("Ctrl+Shift+N"))
         self.play_next_action.setEnabled(False)
@@ -93,8 +97,10 @@ class MenuBar(QMenuBar):
         player_menu.addAction(self.stop_action)
         player_menu.addAction(self.rewind_action)
         player_menu.addAction(self.forward_action)
+        player_menu.addAction(self.replay_action)
         player_menu.addAction(self.play_next_action)
         player_menu.addAction(self.play_previous_action)
+
 
         actions_menu = self.addMenu("الإجرائات(&A)")
         self.save_position_action = QAction("حفظ الموضع الحالي", self)
