@@ -43,6 +43,7 @@ class TafaseerDialog(QDialog):
         self.button_layout = QHBoxLayout()  # استخدام QHBoxLayout بدلاً من QVBoxLayout
 
         self.category_button = QPushButton(self.default_category, self)
+        self.category_button.setShortcut(QKeySequence("Alt+C"))
         self.category_button.clicked.connect(self.show_menu)
         self.button_layout.addWidget(self.category_button)
 
