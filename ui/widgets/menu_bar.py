@@ -11,8 +11,9 @@ from utils.update import UpdateManager
 from utils.settings import SettingsManager
 from utils.logger import Logger
 from utils.const import program_name, program_version, website, Globals
-
+from utils.audio_player import bass
 from theme import ThemeManager
+
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
@@ -287,5 +288,7 @@ class MenuBar(QMenuBar):
             self.parent.OnSaveCurrentPosition()
         self.parent.tray_manager.hide_icon()
         QApplication.quit()
+        bass.BASS_Free()
+        
         
 

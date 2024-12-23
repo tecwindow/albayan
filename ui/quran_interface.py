@@ -36,7 +36,7 @@ from utils.settings import SettingsManager
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
 from utils.const import program_name, program_icon, user_db_path, data_folder, Globals
-from utils.audio_player import bass, SoundEffectPlayer
+from utils.audio_player import SoundEffectPlayer
 from exceptions.error_decorators import exception_handler
 
 
@@ -373,8 +373,7 @@ class QuranInterface(QMainWindow):
             self.tray_manager.tray_icon.showMessage("البيان", "تم تصغير نافذة البيان على صينية النظام, البرنامج يعمل في الخلفية.", msecs=5000)
         else:
             self.tray_manager.hide_icon()
-            bass.BASS_Free()
-
+            
     @exception_handler(ui_element=QMessageBox)
     def OnRandomMessages(self, event):
         info_dialog = InfoDialog(self, 'رسالة لك', '', "", is_html_content=False, show_message_button=True)
