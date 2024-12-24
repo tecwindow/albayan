@@ -1,37 +1,30 @@
 import os
 import time
 import ctypes
+from ctypes import c_int, c_int64, c_long, c_uint, c_longlong, c_void_p
 func_type = ctypes.WINFUNCTYPE
 QWORD = ctypes.c_int64
 
 from typing import List, Optional
 from urllib.parse import urlparse
 from .status import PlaybackStatus
+from .bass_init import BassInitializer, BassFlag
 from exceptions.audio_pplayer import (
     AudioFileNotFoundError, LoadFileError, UnsupportedFormatError, PlaybackControlError,
     InvalidSourceError, PlaybackInitializationError, PlaybackControlError
 )
 
-# Load bass.dll
-bass_path = os.path.abspath("bass.dll")
-bass = ctypes.CDLL(bass_path)
-
-# Constants
-BASS_STREAM_AUTOFREE = 0x40000  # Automatically free the stream when it stops/ends
-
-# Initialize BASS
-if not bass.BASS_Init(-1, 44100, 0, 0, 0):
-    raise PlaybackInitializationError()
+bass = BassInitializer().initialize()
 
 class AudioPlayer:
     instances = []
 
-    def __init__(self, volume: float, auto_free: bool =True) -> None:
+    def __init__(self, volume: float, flag: int = BassFlag.AUTO_FREE) -> None:
         self.source: Optional[str] = None
         self.current_channel: Optional[int] = None
         self.volume = volume
         self.supported_extensions = ('.wav', '.mp3', '.ogg')
-        self.auto_free = auto_free
+        self.flag = flag
         self.BASS_ChannelBytes2Seconds = func_type(ctypes.c_double, ctypes.c_ulong, QWORD)(('BASS_ChannelBytes2Seconds', bass))
         self.BASS_ChannelSeconds2Bytes = func_type(QWORD, ctypes.c_ulong, ctypes.c_double)(('BASS_ChannelSeconds2Bytes', bass))
         self.BASS_ChannelSetPosition = func_type(ctypes.c_bool, ctypes.c_ulong, QWORD, ctypes.c_ulong)(('BASS_ChannelSetPosition', bass))
@@ -54,12 +47,12 @@ class AudioPlayer:
         parsed_url = urlparse(source)
         if parsed_url.scheme in ("http", "https") and parsed_url.netloc:
             # Stream from URL
-            self.current_channel = bass.BASS_StreamCreateURL(source.encode(), 0, BASS_STREAM_AUTOFREE if self.auto_free else 0, None, None)
+            self.current_channel = bass.BASS_StreamCreateURL(source.encode(), 0, self.flag, None, None)
         else:
             # Load from local file
             if not os.path.isfile(source):
                 raise AudioFileNotFoundError(source)
-            self.current_channel = bass.BASS_StreamCreateFile(False, source.encode('utf-8'), 0, 0, BASS_STREAM_AUTOFREE if self.auto_free else 0)
+            self.current_channel = bass.BASS_StreamCreateFile(False, source.encode('utf-8'), 0, 0, self.flag)
 
         if not self.current_channel:
             if attempts:
