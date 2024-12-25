@@ -1,6 +1,6 @@
 import os
 import ctypes
-from ctypes import c_int, c_longlong, c_void_p, c_uint
+from ctypes import c_int, c_longlong, c_void_p, c_uint, c_double
 from enum import IntFlag
 from exceptions.audio_pplayer import PlaybackInitializationError
 
@@ -8,11 +8,13 @@ from exceptions.audio_pplayer import PlaybackInitializationError
 class BassFlag(IntFlag):
     AUTO_FREE = 0x40000  # Automatically free the stream when it stops/ends
     STREAM_BLOCK = 0x100000  # Download/play internet file stream in small blocks
+    MUSIC_NOSAMPLE = 0x100000
+    STREAM_STATUS = 0x800000
+    STREAM_RESTRATE = 0x80000
 
 
 class BassInitializer:
     def __init__(self, bass_library_path: str = "bass.dll"):
-        """Initialize the BassInitializer object without loading the library or initializing BASS."""
         self.bass_library_path = os.path.abspath(bass_library_path)
         self.bass = None
         self.setup()
@@ -26,8 +28,22 @@ class BassInitializer:
         self.bass = ctypes.CDLL(self.bass_library_path)
 
         # Setup argument and return types for BASS functions
+        self.bass.BASS_Init.argtypes = [c_int, c_uint, c_uint, c_void_p, c_void_p]
+        self.bass.BASS_Init.restype = c_int
         self.bass.BASS_StreamCreateFile.argtypes = [c_int, c_void_p, c_longlong, c_longlong, c_uint]
         self.bass.BASS_StreamCreateFile.restype = c_int
+        self.bass.BASS_StreamCreateURL.argtypes = [c_void_p, c_int, c_uint, c_void_p, c_void_p]
+        self.bass.BASS_StreamCreateURL.restype = c_int
+        self.bass.BASS_ChannelBytes2Seconds.argtypes = [c_int, c_longlong]
+        self.bass.BASS_ChannelBytes2Seconds.restype = c_double
+        self.bass.BASS_ChannelSeconds2Bytes.argtypes = [c_int, c_double]
+        self.bass.BASS_ChannelSeconds2Bytes.restype = c_longlong
+        self.bass.BASS_ChannelSetPosition.argtypes = [c_int, c_longlong, c_uint]
+        self.bass.BASS_ChannelSetPosition.restype = c_int
+        self.bass.BASS_ChannelGetLength.argtypes = [c_int, c_uint]
+        self.bass.BASS_ChannelGetLength.restype = c_longlong
+        self.bass.BASS_ChannelGetPosition.argtypes = [c_int, c_uint]
+        self.bass.BASS_ChannelGetPosition.restype = c_longlong
         self.bass.BASS_ErrorGetCode.restype = c_int
 
     def initialize(self):

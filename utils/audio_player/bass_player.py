@@ -1,10 +1,6 @@
 import os
 import time
 import ctypes
-from ctypes import c_int, c_int64, c_long, c_uint, c_longlong, c_void_p
-func_type = ctypes.WINFUNCTYPE
-QWORD = ctypes.c_int64
-
 from typing import List, Optional
 from urllib.parse import urlparse
 from .status import PlaybackStatus
@@ -25,9 +21,6 @@ class AudioPlayer:
         self.volume = volume
         self.supported_extensions = ('.wav', '.mp3', '.ogg')
         self.flag = flag
-        self.BASS_ChannelBytes2Seconds = func_type(ctypes.c_double, ctypes.c_ulong, QWORD)(('BASS_ChannelBytes2Seconds', bass))
-        self.BASS_ChannelSeconds2Bytes = func_type(QWORD, ctypes.c_ulong, ctypes.c_double)(('BASS_ChannelSeconds2Bytes', bass))
-        self.BASS_ChannelSetPosition = func_type(ctypes.c_bool, ctypes.c_ulong, QWORD, ctypes.c_ulong)(('BASS_ChannelSetPosition', bass))
         AudioPlayer.instances.append(self)
     
     def load_audio(self, source: str, attempts: Optional[int] = 3) -> None:
@@ -106,10 +99,10 @@ class AudioPlayer:
         if self.current_channel:
             new_seconds = max(0.0, new_seconds)
 
-        duration = self.BASS_ChannelBytes2Seconds(self.current_channel, bass.BASS_ChannelGetLength( self.current_channel, 0))
+        duration = bass.BASS_ChannelBytes2Seconds(self.current_channel, bass.BASS_ChannelGetLength( self.current_channel, 0))
         new_seconds = min(new_seconds, duration-1)    
-        new_position = self.BASS_ChannelSeconds2Bytes(self.current_channel, new_seconds)
-        self.BASS_ChannelSetPosition(self.current_channel, new_position, 0)
+        new_position = bass.BASS_ChannelSeconds2Bytes(self.current_channel, new_seconds)
+        bass.BASS_ChannelSetPosition(self.current_channel, new_position, 0)
 
     def forward(self, seconds: int = 5) -> None:
         """Forwards the audio playback by the specified number of seconds."""
@@ -119,7 +112,7 @@ class AudioPlayer:
                 print("Error getting current position.")
                 return
         
-            current_seconds = self.BASS_ChannelBytes2Seconds(self.current_channel, current_position)
+            current_seconds = bass.BASS_ChannelBytes2Seconds(self.current_channel, current_position)
             new_seconds = round(current_seconds + seconds)
             self.set_position(new_seconds)
 
@@ -131,7 +124,7 @@ class AudioPlayer:
                 print("Error getting current position.")
                 return
         
-            current_seconds = self.BASS_ChannelBytes2Seconds(self.current_channel, current_position)
+            current_seconds = bass.BASS_ChannelBytes2Seconds(self.current_channel, current_position)
             new_seconds = current_seconds - seconds
             self.set_position(new_seconds)
 
