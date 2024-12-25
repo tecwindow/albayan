@@ -10,7 +10,8 @@ from exceptions.audio_pplayer import (
     InvalidSourceError, PlaybackInitializationError, PlaybackControlError
 )
 
-bass = BassInitializer().initialize()
+bass_initializer = BassInitializer()
+bass = bass_initializer.initialize()
 
 class AudioPlayer:
     instances = []
