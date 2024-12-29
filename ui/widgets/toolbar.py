@@ -3,7 +3,7 @@ from typing import Optional
 from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider, QMessageBox
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from core_functions.quran_class import quran_mgr
-from core_functions.Reciters import RecitersManager
+from core_functions.Reciters import AyahReciter
 from utils.audio_player import AyahPlayer
 from utils.settings import SettingsManager
 from utils.const import data_folder
@@ -135,7 +135,7 @@ class AudioToolBar(QToolBar):
         super().__init__(parent)
         self.parent = parent
         self.player = AyahPlayer()
-        self.reciters = RecitersManager(data_folder / "quran" / "reciters.db")
+        self.reciters = AyahReciter(data_folder / "quran" / "reciters.db")
         self.navigation = NavigationManager(self.parent, self.parent.quran)
         self.audio_thread = AudioPlayerThread(self.player, self.parent)
 

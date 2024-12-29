@@ -20,7 +20,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtCore import Qt
-from core_functions.Reciters import RecitersManager
+from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name
 from utils.settings import SettingsManager
 from utils.audio_player import AthkarPlayer, AyahPlayer, SoundEffectPlayer
@@ -33,7 +33,7 @@ class SettingsDialog(QDialog):
         self.parent = parent
         self.setWindowTitle("الإعدادات")
         self.resize(600, 450)
-        self.reciters_manager = RecitersManager(data_folder / "quran" / "reciters.db")
+        self.reciters_manager = AyahReciter(data_folder / "quran" / "reciters.db")
         self.init_ui()
         self.set_current_settings()
 
