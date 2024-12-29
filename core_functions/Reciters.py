@@ -60,7 +60,7 @@ class SurahReciter(RecitersManager):
     def get_url(self, reciter_id: int, surah_number: int) -> Optional[str]:
         base_url = self._get_base_url(reciter_id)
         if base_url:
-            return f"{base_url}{surah_number:03}.mp3"
+            return f"{base_url}/{surah_number:03}.mp3"
         return None
     
 
