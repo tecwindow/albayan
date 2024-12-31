@@ -5,6 +5,7 @@ from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
 from ui.dialogs.go_to import GoToDialog
 from ui.dialogs.athkar_dialog import AthkarDialog
+from ui.dialogs.sura_player_ import SuraPlayerDialog
 from core_functions.quran_class import QuranConst
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
@@ -157,8 +158,12 @@ class MenuBar(QMenuBar):
         bookmark_manager_action = QAction("مدير العلامات", self)
         bookmark_manager_action.setShortcut(QKeySequence("Shift+D"))
         bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
+        sura_player__action = QAction("مشغل القرآن", self)
+        sura_player__action.setShortcut(QKeySequence("Shift+P"))
+        sura_player__action.triggered.connect(self.OnSuraPlayer)
         tools_menu.addAction(athkar_action)
-        tools_menu.addAction(bookmark_manager_action )
+        tools_menu.addAction(bookmark_manager_action)
+        tools_menu.addAction(sura_player__action)
 
         preferences_menu = self.addMenu("التفضيلات(&R)")
         settings_action = QAction("الإعدادات", self)
@@ -220,6 +225,9 @@ class MenuBar(QMenuBar):
         dialog = BookmarkDialog(self.parent)
         if dialog.exec():
             self.parent.set_text_ctrl_label()
+
+    def OnSuraPlayer(self):
+        dialog = SuraPlayerDialog(self.parent)
 
     def OnTheme    (self):
 
