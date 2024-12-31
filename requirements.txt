@@ -5,3 +5,4 @@ UniversalSpeech
 cx_Freeze
 sqlalchemy
 apscheduler
+qtawesome
