@@ -5,7 +5,7 @@ from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
 from ui.dialogs.go_to import GoToDialog
 from ui.dialogs.athkar_dialog import AthkarDialog
-from ui.dialogs.sura_player_ import SuraPlayerDialog
+from ui.sura_player_ui import SuraPlayerWindow
 from core_functions.quran_class import QuranConst
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
@@ -227,7 +227,12 @@ class MenuBar(QMenuBar):
             self.parent.set_text_ctrl_label()
 
     def OnSuraPlayer(self):
-        dialog = SuraPlayerDialog(self.parent)
+        self.sura_player_window = SuraPlayerWindow(self.parent)
+        self.sura_player_window.show()
+        self.sura_player_window.activateWindow()
+
+
+
 
     def OnTheme    (self):
 
