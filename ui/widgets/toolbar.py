@@ -189,7 +189,9 @@ class AudioToolBar(QToolBar):
             self.navigation.current_ayah = 0
         elif self.navigation.current_ayah > 1:
             self.navigation.has_basmala = False
-                    
+            print(self.navigation.has_basmala)
+
+        #print(self.navigation.has_basmala)
         reciter_id = SettingsManager.current_settings["listening"]["reciter"]
         url = self.reciters.get_url(reciter_id, self.navigation.current_surah, self.navigation.current_ayah)
         self.audio_thread.set_audio_url(url, send_error_signal=False if self.navigation.current_ayah == 0 else True)
@@ -210,7 +212,8 @@ class AudioToolBar(QToolBar):
         self.set_buttons_status()
         action_after_listening = SettingsManager.current_settings["listening"]["action_after_listening"]
         if action_after_listening == 2 or self.navigation.current_ayah == 0:
-            self.navigation.has_basmala = True
+            self.navigation.has_basmala = True if self.navigation.current_ayah < 2 else False
+
             self.OnPlayNext()
         elif action_after_listening == 1:
             self.play_current_ayah()
