@@ -85,12 +85,12 @@ class AudioPlayer:
         if self.current_channel:
             bass.BASS_ChannelSetAttribute(self.current_channel, 2, ctypes.c_float(self.volume))
     
-    def increase_volume(self, step: float = 0.01) -> None:
+    def increase_volume(self, step: float = 0.1) -> None:
         """Increases the volume by a specified step, default is 0.1 (10%)."""
         new_volume = min(self.volume + step, 1.0)
         self.set_volume(new_volume)
     
-    def decrease_volume(self, step: float = 0.01) -> None:
+    def decrease_volume(self, step: float = 0.1) -> None:
         """Decreases the volume by a specified step, default is 0.1 (10%)."""
         new_volume = max(self.volume - step, 0.0)
         self.set_volume(new_volume)
@@ -100,34 +100,50 @@ class AudioPlayer:
         if self.current_channel:
             new_seconds = max(0.0, new_seconds)
 
-        duration = bass.BASS_ChannelBytes2Seconds(self.current_channel, bass.BASS_ChannelGetLength( self.current_channel, 0))
+        duration = self.get_length()
         new_seconds = min(new_seconds, duration-1)    
         new_position = bass.BASS_ChannelSeconds2Bytes(self.current_channel, new_seconds)
-        bass.BASS_ChannelSetPosition(self.current_channel, new_position, 0)
+        return bass.BASS_ChannelSetPosition(self.current_channel, new_position, 0)
 
     def forward(self, seconds: int = 5) -> None:
         """Forwards the audio playback by the specified number of seconds."""
         if self.current_channel:
-            current_position = bass.BASS_ChannelGetPosition(self.current_channel, 0)
+            current_position = self.get_position()
             if current_position == -1:
                 print("Error getting current position.")
                 return
         
-            current_seconds = bass.BASS_ChannelBytes2Seconds(self.current_channel, current_position)
-            new_seconds = round(current_seconds + seconds)
+            new_seconds = current_position + seconds
             self.set_position(new_seconds)
 
     def rewind(self, seconds: int = 5) -> None:
         """Rewinds the audio playback by the specified number of seconds."""
         if self.current_channel:
-            current_position = bass.BASS_ChannelGetPosition(self.current_channel, 0)
+            current_position = self.get_position()
             if current_position == -1:
                 print("Error getting current position.")
                 return
         
-            current_seconds = bass.BASS_ChannelBytes2Seconds(self.current_channel, current_position)
-            new_seconds = current_seconds - seconds
+            new_seconds = current_position - seconds
             self.set_position(new_seconds)
+
+    def get_length(self) -> float:
+        if not self.current_channel:
+            return 0
+
+        length = bass.BASS_ChannelGetLength( self.current_channel, 0)
+        duration = bass.BASS_ChannelBytes2Seconds(self.current_channel, length)
+
+        return duration
+    
+    def get_position(self) -> float:
+        if not self.current_channel:
+            return 0
+        
+        current_position = bass.BASS_ChannelGetPosition(self.current_channel, 0)
+        current_seconds = bass.BASS_ChannelBytes2Seconds(self.current_channel, current_position)
+
+        return current_seconds
 
     def get_playback_status(self) -> PlaybackStatus:
         """Returns the current playback status."""
@@ -164,8 +180,4 @@ class AudioPlayer:
     
     def get_error(self) -> int:
         return bass.BASS_ErrorGetCode()
-    
-    def get_length(self) -> int:
-        length = int(bass.BASS_ChannelGetLength( self.current_channel, 0))
-        return self.BASS_ChannelBytes2Seconds(self.current_channel, length)
     
