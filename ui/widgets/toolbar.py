@@ -16,6 +16,7 @@ class AudioPlayerThread(QThread):
     waiting_to_load = pyqtSignal(bool)
     playback_finished = pyqtSignal()
     error_signal = pyqtSignal(ErrorMessage) 
+    playback_time_changed = pyqtSignal(float, float)
 
     def __init__(self, player: AyahPlayer, parent: Optional[object] = None):
         super().__init__(parent)
@@ -45,6 +46,7 @@ class AudioPlayerThread(QThread):
                     self.waiting_to_load.emit(True)
 
     def check_playback_status(self):
+        self.playback_time_changed.emit(self.player.get_position(), self.player.get_length())
         if not self.player.is_playing() and not self.player.is_stalled():
             self.timer.stop()
             self.statusChanged.emit()
