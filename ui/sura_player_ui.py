@@ -1,13 +1,16 @@
 import os
 import qtawesome as qta
 from PyQt6.QtWidgets import (
-    QApplication, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
+    QApplication, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QComboBox, QGroupBox, QSlider, QWidget, QMainWindow
 )
 from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
 from core_functions.Reciters import SurahReciter
+from core_functions.quran_class import QuranConst
+from ui.widgets.toolbar import AudioPlayerThread
 from utils.const import data_folder
+from utils.audio_player import SurahPlayer
 
 
 class SuraPlayerWindow(QMainWindow):
@@ -15,20 +18,16 @@ class SuraPlayerWindow(QMainWindow):
         super().__init__(parent)
         self.setWindowTitle("مشغل القرآن")
         self.resize(600, 400)
-
-        # Dropdown menus for reciters and surahs
         self.reciters = SurahReciter(data_folder / "quran" / "reciters.db")
-        self.surahs = [str(i) for i in range(1, 115)]
+        self.player = SurahPlayer()
+        self.audio_player_thread = AudioPlayerThread(self.player, self)
 
-        # Set up central widget and layout
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
         self.setCentralWidget(central_widget)
 
-        # Status bar for info display
         self.statusBar().showMessage("مرحبًا بك في مشغل القرآن")
 
-        # Dropdowns for reciters and surahs
         self.selection_group = QGroupBox("التحديدات")
         selection_layout = QHBoxLayout()
 
@@ -42,7 +41,8 @@ class SuraPlayerWindow(QMainWindow):
         self.surah_label = QLabel("السورة:")
         self.surah_combo = QComboBox()
         self.surah_combo.setAccessibleName(self.surah_label.text())
-        self.surah_combo.addItems(self.surahs)
+        for surah_name, surah_number in QuranConst.SURAS:
+            self.surah_combo.addItem(surah_name, surah_number)
 
         selection_layout.addWidget(self.reciter_label)
         selection_layout.addWidget(self.reciter_combo)
@@ -50,7 +50,6 @@ class SuraPlayerWindow(QMainWindow):
         selection_layout.addWidget(self.surah_combo)
         self.selection_group.setLayout(selection_layout)
 
-        # Control buttons
         control_layout = QHBoxLayout()
         self.rewind_button = QPushButton(qta.icon("fa.backward"), "")
         self.rewind_button.setAccessibleName("ترجيع")
@@ -66,7 +65,7 @@ class SuraPlayerWindow(QMainWindow):
         self.volume_down_button.setAccessibleName("خفض الصوت")
         self.volume_up_button = QPushButton(qta.icon("fa.volume-up"), "")
         self.volume_up_button.setAccessibleName("رفع الصوت")
-        
+
         control_layout.addWidget(self.volume_down_button)
         control_layout.addWidget(self.previous_surah_button)
         control_layout.addWidget(self.rewind_button)
@@ -75,14 +74,13 @@ class SuraPlayerWindow(QMainWindow):
         control_layout.addWidget(self.next_surah_button)
         control_layout.addWidget(self.volume_up_button)
 
-        # Sliders for progress and volume
         self.progress_group = QGroupBox("شريط التقدم")
         progress_layout = QVBoxLayout()
         self.time_slider = QSlider(Qt.Orientation.Horizontal)
         self.time_slider.setAccessibleName("TimeSlider")
         self.time_slider.setRange(0, 100)
         self.time_slider.setValue(0)
-        
+
         self.volume_slider = QSlider(Qt.Orientation.Horizontal)
         self.volume_slider.setAccessibleName("VolumeSlider")
         self.volume_slider.setRange(0, 100)
@@ -100,93 +98,96 @@ class SuraPlayerWindow(QMainWindow):
         progress_layout.addLayout(time_layout)
         self.progress_group.setLayout(progress_layout)
 
-        # Add elements to the main layout
         layout.addWidget(self.selection_group)
         layout.addLayout(control_layout)
         layout.addWidget(self.progress_group)
 
-        # Connect signals to events
         self.reciter_combo.currentIndexChanged.connect(self.update_current_reciter)
         self.surah_combo.currentIndexChanged.connect(self.update_current_surah)
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
+        self.forward_button.clicked.connect(self.forward)
+        self.rewind_button.clicked.connect(self.rewind)
+        self.volume_up_button.clicked.connect(lambda: self.player.increase_volume())
+        self.volume_down_button.clicked.connect(lambda: self.player.decrease_volume())
+        self.next_surah_button.clicked.connect(self.next_surah)
+        self.previous_surah_button.clicked.connect(self.previous_surah)
         self.volume_slider.valueChanged.connect(self.update_volume)
-        self.time_slider.sliderMoved.connect(self.update_time)
-
-        # Disable focus on elements
-        self.disable_focus()
-
-        # Set up keyboard shortcuts
-        self.setup_shortcuts()
-
-    def disable_focus(self):
-        """Disable focus on all elements."""
-        widgets = [
-            self.rewind_button,
-            self.play_pause_button,
-            self.forward_button,
-            self.previous_surah_button,
-            self.next_surah_button,
-            self.volume_up_button,
-            self.volume_down_button,
-            self.reciter_combo,
-            self.surah_combo,
-            self.time_slider,
-            self.volume_slider
-        ]
-        for widget in widgets:
-            widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-
-    def setup_shortcuts(self):
-        """Set up keyboard shortcuts."""
-        #QShortcut(QKeySequence(Qt.Key.Key_Right), self, self.forward)
-        #QShortcut(QKeySequence(Qt.Key.Key_Left), self, self.rewind)
-        #QShortcut(QKeySequence(Qt.Key.Key_Up), self, self.volume_up)
-        #QShortcut(QKeySequence(Qt.Key.Key_Down), self, self.volume_down)
-        QShortcut(QKeySequence("N"), self, self.next_surah)
-        QShortcut(QKeySequence("B"), self, self.previous_surah)
-        QShortcut(QKeySequence(Qt.Key.Key_Space), self, self.toggle_play_pause)
+        self.time_slider.valueChanged.connect(self.update_time)
+        self.audio_player_thread.playback_time_changed.connect(self.OnUpdateTime)
+        self.audio_player_thread.waiting_to_load.connect(self.set_buttons_status)
 
     def update_current_reciter(self):
-        """Update the currently selected reciter."""
         current_reciter = self.reciter_combo.currentText()
         self.statusBar().showMessage(f"القارئ الحالي: {current_reciter}")
 
     def update_current_surah(self):
-        """Update the currently selected surah."""
         current_surah = self.surah_combo.currentText()
         self.statusBar().showMessage(f"السورة الحالية: {current_surah}")
 
     def toggle_play_pause(self):
-        """Toggle between play and pause."""
-        if self.play_pause_button.icon().name() == "fa.play":
-            self.play_pause_button.setIcon(qta.icon("fa.pause"))
-            self.statusBar().showMessage("تشغيل")
-        else:
+        if self.player.is_playing():
+            self.player.pause()
             self.play_pause_button.setIcon(qta.icon("fa.play"))
+            self.play_pause_button.setAccessibleName("تشغيل")
             self.statusBar().showMessage("إيقاف مؤقت")
+        else:
+            self.play_current_surah()
+            self.play_pause_button.setIcon(qta.icon("fa.pause"))
+            self.play_pause_button.setAccessibleName("إيقاف مؤقت")
+            self.statusBar().showMessage("تشغيل")
+
+    def play_current_surah(self) -> None:
+        reciter_id = self.reciter_combo.currentData()
+        surah_number = self.surah_combo.currentData()
+        url = self.reciters.get_url(reciter_id, surah_number)
+        self.audio_player_thread.set_audio_url(url)
+        self.audio_player_thread.start()
 
     def forward(self):
-        """Skip forward."""
-        self.statusBar().showMessage("تخطي للأمام")
+        self.player.forward(seconds=1)
 
     def rewind(self):
-        """Skip backward."""
-        self.statusBar().showMessage("تخطي للخلف")
+        self.player.rewind(seconds=1)
 
     def next_surah(self):
-        """Go to the next surah."""
-        self.statusBar().showMessage("السورة التالية")
+        current_index = self.surah_combo.currentIndex()
+        if current_index < self.surah_combo.count() - 1:
+            self.surah_combo.setCurrentIndex(current_index + 1)
+            self.play_current_surah()
 
     def previous_surah(self):
-        """Go to the previous surah."""
-        self.statusBar().showMessage("السورة السابقة")
+        current_index = self.surah_combo.currentIndex()
+        if current_index > 0:
+            self.surah_combo.setCurrentIndex(current_index - 1)
+            self.play_current_surah()
 
     def update_volume(self):
-        """Update the volume based on slider position."""
-        volume = self.volume_slider.value()
-        self.statusBar().showMessage(f"الصوت: {volume}%")
+        self.player.set_volume(self.volume_slider.value())
 
     def update_time(self, position):
-        """Update the time slider position."""
-        self.statusBar().showMessage(f"تحديد الوقت: {position}%")
+        total_length = self.player.get_length()
+        new_position = total_length * (position / 100)
+        if not self.player.set_position(new_position):
+            self.time_slider.blockSignals(True)
+            current_position = self.player.get_position()
+            self.time_slider.setValue(int((current_position / total_length) * 100))
+            self.time_slider.blockSignals(False)
+
+    def OnUpdateTime(self, position: float, length: float):
+        if position and length:
+            self.time_slider.blockSignals(True)
+            position = int((position / length) * 100)
+            self.time_slider.setValue(position)
+            self.time_slider.blockSignals(False)
+            self.elapsed_time_label.setText(self._format_time(position))
+            self.remaining_time_label.setText(self._format_time(length - position))
+
+    def _format_time(self, seconds):
+        minutes = int(seconds // 60)
+        seconds = int(seconds % 60)
+        return f"{minutes}:{seconds:02}"
+
+    def set_buttons_status(self, status: bool = 2) -> None:
+        if status == True:
+            self.audio_player_thread.timer.start()
 
