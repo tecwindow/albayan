@@ -22,6 +22,7 @@ class MenuBar(QMenuBar):
         self.parent = parent
         self.theme_manager = ThemeManager(self.parent)
         self.update_manager = UpdateManager(self.parent)
+        self.sura_player_window = None
         self.our_emails = {
             "محمود عاطف": "mahmoud.atef.987123@gmail.com",
             "قيس الرفاعي": "ww258148@gmail.com",
@@ -227,7 +228,8 @@ class MenuBar(QMenuBar):
             self.parent.set_text_ctrl_label()
 
     def OnSuraPlayer(self):
-        self.sura_player_window = SuraPlayerWindow(self.parent)
+        if not self.sura_player_window:
+            self.sura_player_window = SuraPlayerWindow(self.parent)
         self.sura_player_window.show()
         self.sura_player_window.activateWindow()
 
