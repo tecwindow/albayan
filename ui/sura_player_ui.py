@@ -1,16 +1,17 @@
 import os
 import qtawesome as qta
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QKeySequence, QShortcut, QKeyEvent
 from PyQt6.QtWidgets import (
     QApplication, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QComboBox, QGroupBox, QSlider, QWidget, QMainWindow
+    QComboBox, QGroupBox, QSlider, QWidget, QMainWindow, QLineEdit
 )
-from PyQt6.QtGui import QKeySequence, QShortcut
-from PyQt6.QtCore import Qt
 from core_functions.Reciters import SurahReciter
 from core_functions.quran_class import QuranConst
 from ui.widgets.toolbar import AudioPlayerThread
 from utils.const import data_folder
 from utils.audio_player import SurahPlayer
+from utils.universal_speech import UniversalSpeech
 
 
 class SuraPlayerWindow(QMainWindow):
@@ -18,16 +19,30 @@ class SuraPlayerWindow(QMainWindow):
         super().__init__(parent)
         self.setWindowTitle("مشغل القرآن")
         self.resize(600, 400)
+
         self.reciters = SurahReciter(data_folder / "quran" / "reciters.db")
         self.player = SurahPlayer()
         self.audio_player_thread = AudioPlayerThread(self.player, self)
+        self.filter_mode = False
 
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
         self.setCentralWidget(central_widget)
 
         self.statusBar().showMessage("مرحبًا بك في مشغل القرآن")
+        self.create_selection_group()
+        self.create_control_buttons()
+        self.create_progress_group()
+        self.connect_signals()
+        self.disable_focus()
+        self.setup_shortcuts()
 
+        layout.addWidget(self.selection_group)
+        layout.addLayout(self.control_layout)
+        layout.addWidget(self.progress_group)
+
+
+    def create_selection_group(self):
         self.selection_group = QGroupBox("التحديدات")
         selection_layout = QHBoxLayout()
 
@@ -50,11 +65,14 @@ class SuraPlayerWindow(QMainWindow):
         selection_layout.addWidget(self.surah_combo)
         self.selection_group.setLayout(selection_layout)
 
-        control_layout = QHBoxLayout()
+    def create_control_buttons(self):
+        self.control_layout = QHBoxLayout()
         self.rewind_button = QPushButton(qta.icon("fa.backward"), "")
         self.rewind_button.setAccessibleName("ترجيع")
         self.play_pause_button = QPushButton(qta.icon("fa.play"), "")
         self.play_pause_button.setAccessibleName("تشغيل")
+        self.stop_button = QPushButton(qta.icon("fa.stop"), "")
+        self.stop_button.setAccessibleName("إيقاف التشغيل")
         self.forward_button = QPushButton(qta.icon("fa.forward"), "")
         self.forward_button.setAccessibleName("تقديم")
         self.previous_surah_button = QPushButton(qta.icon("fa.step-backward"), "")
@@ -68,26 +86,29 @@ class SuraPlayerWindow(QMainWindow):
         self.close_button = QPushButton(qta.icon("fa.window-close"), "")
         self.close_button.setAccessibleName("إغلاق المشغل")
 
-        control_layout.addWidget(self.volume_down_button)
-        control_layout.addWidget(self.previous_surah_button)
-        control_layout.addWidget(self.rewind_button)
-        control_layout.addWidget(self.play_pause_button)
-        control_layout.addWidget(self.forward_button)
-        control_layout.addWidget(self.next_surah_button)
-        control_layout.addWidget(self.volume_up_button)
-        control_layout.addWidget(self.close_button  )
+        self.buttons = [
+            self.volume_down_button, self.previous_surah_button, self.rewind_button,
+            self.play_pause_button, self.stop_button, self.forward_button,
+             self.next_surah_button, self.volume_up_button, self.close_button
+        ]
 
+        for button in self.buttons:
+            self.control_layout.addWidget(button)
+
+    def create_progress_group(self):
         self.progress_group = QGroupBox("شريط التقدم")
         progress_layout = QVBoxLayout()
+
         self.time_slider = QSlider(Qt.Orientation.Horizontal)
-        self.time_slider.setAccessibleName("TimeSlider")
         self.time_slider.setRange(0, 100)
         self.time_slider.setValue(0)
+        self.time_slider.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.time_slider.setEnabled(False)
 
         self.volume_slider = QSlider(Qt.Orientation.Horizontal)
-        self.volume_slider.setAccessibleName("VolumeSlider")
         self.volume_slider.setRange(0, 100)
-        self.volume_slider.setValue(50)
+        self.volume_slider.setValue(self.player.volume)
+        self.volume_slider.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
 
         self.elapsed_time_label = QLabel("0:00")
         self.remaining_time_label = QLabel("0:00")
@@ -101,69 +122,108 @@ class SuraPlayerWindow(QMainWindow):
         progress_layout.addLayout(time_layout)
         self.progress_group.setLayout(progress_layout)
 
-        layout.addWidget(self.selection_group)
-        layout.addLayout(control_layout)
-        layout.addWidget(self.progress_group)
-
+    def connect_signals(self):
         self.reciter_combo.currentIndexChanged.connect(self.update_current_reciter)
         self.surah_combo.currentIndexChanged.connect(self.update_current_surah)
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
+        self.stop_button.clicked.connect(self.stop)
         self.forward_button.clicked.connect(self.forward)
         self.rewind_button.clicked.connect(self.rewind)
         self.volume_up_button.clicked.connect(lambda: self.player.increase_volume())
         self.volume_down_button.clicked.connect(lambda: self.player.decrease_volume())
         self.next_surah_button.clicked.connect(self.next_surah)
         self.previous_surah_button.clicked.connect(self.previous_surah)
-        self.close_button.clicked.connect(self.Onclose)
+        self.close_button.clicked.connect(self.on_close)
         self.volume_slider.valueChanged.connect(self.update_volume)
         self.time_slider.valueChanged.connect(self.update_time)
-        self.audio_player_thread.playback_time_changed.connect(self.OnUpdateTime)
-        self.audio_player_thread.waiting_to_load.connect(self.set_buttons_status)
+
+        self.audio_player_thread.playback_time_changed.connect(self.on_update_time)
+        self.audio_player_thread.waiting_to_load.connect(self.update_buttons_status)
+        self.audio_player_thread.statusChanged.connect(self.update_ui_status)
+
+    def disable_focus(self):
+
+        widgets = [
+            self.reciter_combo, self.surah_combo,
+            self.time_slider, self.volume_slider
+        ] + self.buttons
+
+        for widget in widgets:
+            widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
+    def setup_shortcuts(self):
+
+        shortcuts = {
+            self.play_pause_button: "Space",
+            self.forward_button: "Right",
+            self.rewind_button: "Left",
+            self.volume_up_button: "Up",
+            self.volume_down_button: "Down",
+            self.stop_button: "S",
+            self.close_button: "Ctrl+Q",
+            self.next_surah_button: "Ctrl+Right",
+            self.previous_surah_button: "Ctrl+Left",
+    }
+
+        for button, key_sequence in shortcuts.items():
+            button.setShortcut(QKeySequence(key_sequence))
+
+        QShortcut(QKeySequence("Ctrl+Down"), self).activated.connect(self.next_reciter)
+        QShortcut(QKeySequence("Ctrl+Up"), self).activated.connect(self.previous_reciter)
 
     def update_current_reciter(self):
-        current_reciter = self.reciter_combo.currentText()
-        self.statusBar().showMessage(f"القارئ الحالي: {current_reciter}")
+        self.statusBar().showMessage(f"القارئ الحالي: {self.reciter_combo.currentText()}")
 
     def update_current_surah(self):
-        current_surah = self.surah_combo.currentText()
-        self.statusBar().showMessage(f"السورة الحالية: {current_surah}")
+        self.statusBar().showMessage(f"السورة الحالية: {self.surah_combo.currentText()}")
 
     def toggle_play_pause(self):
         if self.player.is_playing():
             self.player.pause()
-            self.play_pause_button.setIcon(qta.icon("fa.play"))
-            self.play_pause_button.setAccessibleName("تشغيل")
-            self.statusBar().showMessage("إيقاف مؤقت")
         else:
             self.play_current_surah()
-            self.play_pause_button.setIcon(qta.icon("fa.pause"))
-            self.play_pause_button.setAccessibleName("إيقاف مؤقت")
-            self.statusBar().showMessage("تشغيل")
 
-    def play_current_surah(self) -> None:
+    def play_current_surah(self):
         reciter_id = self.reciter_combo.currentData()
         surah_number = self.surah_combo.currentData()
         url = self.reciters.get_url(reciter_id, surah_number)
         self.audio_player_thread.set_audio_url(url)
         self.audio_player_thread.start()
 
+    def stop(self):
+        self.player.stop()
+
     def forward(self):
-        self.player.forward(seconds=1)
+        self.player.forward(10)
 
     def rewind(self):
-        self.player.rewind(seconds=1)
+        self.player.rewind(10)
 
     def next_surah(self):
         current_index = self.surah_combo.currentIndex()
         if current_index < self.surah_combo.count() - 1:
             self.surah_combo.setCurrentIndex(current_index + 1)
+            UniversalSpeech.say(self.surah_combo.currentText())
             self.play_current_surah()
 
     def previous_surah(self):
         current_index = self.surah_combo.currentIndex()
         if current_index > 0:
             self.surah_combo.setCurrentIndex(current_index - 1)
+            UniversalSpeech.say(self.surah_combo.currentText())
             self.play_current_surah()
+
+    def next_reciter(self):
+        current_index = self.reciter_combo.currentIndex()
+        if current_index < self.reciter_combo.count() - 1:
+            self.reciter_combo.setCurrentIndex(current_index + 1)
+            UniversalSpeech.say(self.reciter_combo.currentText())
+
+    def previous_reciter(self):
+        current_index = self.reciter_combo.currentIndex()
+        if current_index > 0:
+            self.reciter_combo.setCurrentIndex(current_index - 1)
+            UniversalSpeech.say(self.reciter_combo.currentText())
 
     def update_volume(self):
         self.player.set_volume(self.volume_slider.value())
@@ -177,25 +237,66 @@ class SuraPlayerWindow(QMainWindow):
             self.time_slider.setValue(int((current_position / total_length) * 100))
             self.time_slider.blockSignals(False)
 
-    def OnUpdateTime(self, position: float, length: float):
-        if position and length:
+    def on_update_time(self, position, length):
+        if length > 0:
             self.time_slider.blockSignals(True)
-            position = int((position / length) * 100)
-            self.time_slider.setValue(position)
-            self.time_slider.blockSignals(False)
-            self.elapsed_time_label.setText(self._format_time(position))
-            self.remaining_time_label.setText(self._format_time(length - position))
+            new_position_percentage = int((position / length) * 100)
+            self.time_slider.setValue(new_position_percentage)
+            self.elapsed_time_label.setText(self.format_time(position))
+            self.remaining_time_label.setText(self.format_time(length - position))
+        self.time_slider.blockSignals(False)
 
-    def _format_time(self, seconds):
+    def format_time(self, seconds):
         minutes = int(seconds // 60)
         seconds = int(seconds % 60)
         return f"{minutes}:{seconds:02}"
 
-    def set_buttons_status(self, status: bool = 2) -> None:
+    def update_buttons_status(self, status):
+        controls = self.buttons + [self.time_slider]
+        for control in controls:
+            control.setEnabled(status)
+
         if status == True:
             self.audio_player_thread.timer.start()
+            
+    def update_ui_status(self):
 
-    def Onclose(self):
+        is_stop = self.player.is_stopped()
+        self.time_slider.setEnabled(not is_stop)
+        self.stop_button.setEnabled(not is_stop)
+
+        if self.player.is_playing() or self.player.is_stalled():
+            self.play_pause_button.setIcon(qta.icon("fa.pause"))
+            self.play_pause_button.setAccessibleName("إيقاف مؤقت")
+            self.statusBar().showMessage("تشغيل")
+        else:
+            self.play_pause_button.setIcon(qta.icon("fa.play"))
+            self.play_pause_button.setAccessibleName("تشغيل")
+            self.statusBar().showMessage("إيقاف مؤقت")
+
+    def filter_reciters(self, text: str):
+        self.reciter_combo.clear()
+        for row in self.reciters.get_reciters():
+            display_text = f"{row['name']} - {row['rewaya']} - ({row['bitrate']} kbps)"
+            if display_text.startswith(text) or  text == "ALL":
+                self.reciter_combo.addItem(display_text, row["id"])
+
+    def toggle_filter_mode(self):
+        self.filter_mode = not self.filter_mode
+        UniversalSpeech.say("وضع الفلترة مفعَّل. اكتب لتصفية القُرَّاء." if self.filter_mode else "وضع الفلترة معطَّل.")
+
+    def keyPressEvent(self, event: QKeyEvent):
+
+        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_F:
+            self.toggle_filter_mode()
+        elif self.filter_mode:
+            if event.text():
+                self.filter_reciters(event.text())
+                return
+
+        super().keyPressEvent(event)
+
+    def on_close(self):
         self.player.stop()
         self.audio_player_thread.quit()
         self.close()
