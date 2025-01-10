@@ -65,6 +65,8 @@ class SuraPlayerWindow(QMainWindow):
         self.volume_down_button.setAccessibleName("خفض الصوت")
         self.volume_up_button = QPushButton(qta.icon("fa.volume-up"), "")
         self.volume_up_button.setAccessibleName("رفع الصوت")
+        self.close_button = QPushButton(qta.icon("fa.window-close"), "")
+        self.close_button.setAccessibleName("إغلاق المشغل")
 
         control_layout.addWidget(self.volume_down_button)
         control_layout.addWidget(self.previous_surah_button)
@@ -73,6 +75,7 @@ class SuraPlayerWindow(QMainWindow):
         control_layout.addWidget(self.forward_button)
         control_layout.addWidget(self.next_surah_button)
         control_layout.addWidget(self.volume_up_button)
+        control_layout.addWidget(self.close_button  )
 
         self.progress_group = QGroupBox("شريط التقدم")
         progress_layout = QVBoxLayout()
@@ -111,6 +114,7 @@ class SuraPlayerWindow(QMainWindow):
         self.volume_down_button.clicked.connect(lambda: self.player.decrease_volume())
         self.next_surah_button.clicked.connect(self.next_surah)
         self.previous_surah_button.clicked.connect(self.previous_surah)
+        self.close_button.clicked.connect(self.Onclose)
         self.volume_slider.valueChanged.connect(self.update_volume)
         self.time_slider.valueChanged.connect(self.update_time)
         self.audio_player_thread.playback_time_changed.connect(self.OnUpdateTime)
@@ -191,3 +195,7 @@ class SuraPlayerWindow(QMainWindow):
         if status == True:
             self.audio_player_thread.timer.start()
 
+    def Onclose(self):
+        self.player.stop()
+        self.audio_player_thread.quit()
+        self.close()
