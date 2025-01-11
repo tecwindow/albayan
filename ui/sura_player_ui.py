@@ -260,7 +260,7 @@ class SuraPlayerWindow(QMainWindow):
             control.setEnabled(status)
 
         if status == True:
-            self.audio_player_thread.timer.start()
+            self.audio_player_thread.timer.start(150)
             
     def update_ui_status(self):
 
