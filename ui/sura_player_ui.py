@@ -1,3 +1,4 @@
+import re
 import os
 import qtawesome as qta
 from PyQt6.QtCore import Qt
@@ -24,6 +25,7 @@ class SuraPlayerWindow(QMainWindow):
         self.player = SurahPlayer()
         self.audio_player_thread = AudioPlayerThread(self.player, self)
         self.filter_mode = False
+        self.search_text = ""
 
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
@@ -151,7 +153,7 @@ class SuraPlayerWindow(QMainWindow):
         for widget in widgets:
             widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-    def setup_shortcuts(self):
+    def setup_shortcuts(self, disable=False, first_time=True):
 
         shortcuts = {
             self.play_pause_button: "Space",
@@ -166,10 +168,11 @@ class SuraPlayerWindow(QMainWindow):
     }
 
         for button, key_sequence in shortcuts.items():
-            button.setShortcut(QKeySequence(key_sequence))
+            button.setShortcut(QKeySequence(None if disable else key_sequence))
 
-        QShortcut(QKeySequence("Ctrl+Down"), self).activated.connect(self.next_reciter)
-        QShortcut(QKeySequence("Ctrl+Up"), self).activated.connect(self.previous_reciter)
+        if first_time:
+            QShortcut(QKeySequence("Ctrl+Down"), self).activated.connect(self.next_reciter)
+            QShortcut(QKeySequence("Ctrl+Up"), self).activated.connect(self.previous_reciter)
 
     def update_current_reciter(self):
         self.statusBar().showMessage(f"القارئ الحالي: {self.reciter_combo.currentText()}")
@@ -217,13 +220,13 @@ class SuraPlayerWindow(QMainWindow):
         current_index = self.reciter_combo.currentIndex()
         if current_index < self.reciter_combo.count() - 1:
             self.reciter_combo.setCurrentIndex(current_index + 1)
-            UniversalSpeech.say(self.reciter_combo.currentText())
+        UniversalSpeech.say(self.reciter_combo.currentText())
 
     def previous_reciter(self):
         current_index = self.reciter_combo.currentIndex()
         if current_index > 0:
             self.reciter_combo.setCurrentIndex(current_index - 1)
-            UniversalSpeech.say(self.reciter_combo.currentText())
+        UniversalSpeech.say(self.reciter_combo.currentText())
 
     def update_volume(self):
         self.player.set_volume(self.volume_slider.value())
@@ -275,24 +278,38 @@ class SuraPlayerWindow(QMainWindow):
             self.statusBar().showMessage("إيقاف مؤقت")
 
     def filter_reciters(self, text: str):
+        current_item = self.reciter_combo.currentText()
         self.reciter_combo.clear()
         for row in self.reciters.get_reciters():
             display_text = f"{row['name']} - {row['rewaya']} - ({row['bitrate']} kbps)"
             if display_text.startswith(text) or  text == "ALL":
                 self.reciter_combo.addItem(display_text, row["id"])
 
+        self.reciter_combo.setCurrentText(current_item)
+
     def toggle_filter_mode(self):
         self.filter_mode = not self.filter_mode
+        self.search_text = "" if not self.filter_mode else self.search_text
+        self.setup_shortcuts(disable=self.filter_mode, first_time=False)
         UniversalSpeech.say("وضع الفلترة مفعَّل. اكتب لتصفية القُرَّاء." if self.filter_mode else "وضع الفلترة معطَّل.")
+        if not self.filter_mode:
+            self.filter_reciters("ALL")
 
     def keyPressEvent(self, event: QKeyEvent):
 
         if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_F:
             self.toggle_filter_mode()
         elif self.filter_mode:
-            if event.text():
-                self.filter_reciters(event.text())
-                return
+            if re.search(r"[أ-يئءؤآإ]", event.text()) and not event.modifiers() == Qt.ControlModifier:
+                self.search_text += event.text().strip()
+                self.filter_reciters(self.search_text)
+            elif event.key() == Qt.Key_Backspace:
+                self.search_text = self.search_text[:-1]
+                self.filter_reciters(self.search_text)
+            elif event.key() == Qt.Key.Key_Return:
+                self.play_current_surah()
+                self.toggle_filter_mode()
+            return
 
         super().keyPressEvent(event)
 
