@@ -44,35 +44,7 @@ class QuranViewer(ReadOnlyTextEdit):
         self.parent.menu_bar.copy_verse_action.setEnabled(status)
 
     def keyPressEvent(self, e): 
-
-
-        cursor = self.textCursor()  # Get the current text cursor
-
-        if e.key() == Qt.Key.Key_Right:
-            if e.modifiers() & Qt.KeyboardModifier.ControlModifier:
-                cursor.movePosition(cursor.MoveOperation.NextWord)  # Move to the start of the next word
-            else:
-                if cursor.atBlockEnd():  # If at the end of the line, move to the start of the next line
-                    cursor.movePosition(cursor.MoveOperation.NextBlock)
-                else:
-                    cursor.movePosition(cursor.MoveOperation.Left)  # Move one character to the right
-            self.setTextCursor(cursor)
-
-        elif e.key() == Qt.Key.Key_Left:
-            if e.modifiers() & Qt.KeyboardModifier.ControlModifier:
-                cursor.movePosition(cursor.MoveOperation.PreviousWord)  # Move to the start of the previous word
-            else:
-                if cursor.atBlockStart():  # If at the beginning of the line, move to the end of the previous line
-                    cursor.movePosition(cursor.MoveOperation.PreviousBlock)
-                    cursor.movePosition(cursor.MoveOperation.EndOfBlock)
-                else:
-                    cursor.movePosition(cursor.MoveOperation.Right)  # Move one character to the left
-            self.setTextCursor(cursor)
-
-        else:
-            super().keyPressEvent(e)
-
-
+        super().keyPressEvent(e)
         self.set_ctrl()
 
         if e.key() == Qt.Key.Key_Space:
