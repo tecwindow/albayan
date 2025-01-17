@@ -1,5 +1,6 @@
 import re
 import os
+from typing import List
 import qtawesome as qta
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut, QKeyEvent
@@ -9,6 +10,7 @@ from PyQt6.QtWidgets import (
 )
 from core_functions.Reciters import SurahReciter
 from core_functions.quran_class import QuranConst
+from .FilterManager import Item, FilterManager
 from ui.widgets.toolbar import AudioPlayerThread
 from utils.const import data_folder
 from utils.audio_player import SurahPlayer
@@ -24,6 +26,7 @@ class SuraPlayerWindow(QMainWindow):
         self.reciters = SurahReciter(data_folder / "quran" / "reciters.db")
         self.player = SurahPlayer()
         self.audio_player_thread = AudioPlayerThread(self.player, self)
+        self.filter_manager = FilterManager()
         self.filter_mode = False
         self.search_text = ""
 
@@ -38,6 +41,7 @@ class SuraPlayerWindow(QMainWindow):
         self.connect_signals()
         self.disable_focus()
         self.setup_shortcuts()
+        
 
         layout.addWidget(self.selection_group)
         layout.addLayout(self.control_layout)
@@ -51,15 +55,23 @@ class SuraPlayerWindow(QMainWindow):
         self.reciter_label = QLabel("القارئ:")
         self.reciter_combo = QComboBox()
         self.reciter_combo.setAccessibleName(self.reciter_label.text())
+        reciters_list = []
         for row in self.reciters.get_reciters():
             display_text = f"{row['name']} - {row['rewaya']} - ({row['bitrate']} kbps)"
             self.reciter_combo.addItem(display_text, row["id"])
+            reciters_list.append(Item(display_text, row["id"]))
+
+        self.filter_manager.set_category("القارء", reciters_list, self.reciter_combo)
 
         self.surah_label = QLabel("السورة:")
         self.surah_combo = QComboBox()
         self.surah_combo.setAccessibleName(self.surah_label.text())
+        suras_list = []
         for surah_name, surah_number in QuranConst.SURAS:
             self.surah_combo.addItem(surah_name, surah_number)
+            suras_list.append(Item(surah_name, surah_number))
+
+        self.filter_manager.set_category("السورة", suras_list, self.surah_combo)
 
         selection_layout.addWidget(self.reciter_label)
         selection_layout.addWidget(self.reciter_combo)
@@ -143,6 +155,13 @@ class SuraPlayerWindow(QMainWindow):
         self.audio_player_thread.waiting_to_load.connect(self.update_buttons_status)
         self.audio_player_thread.statusChanged.connect(self.update_ui_status)
 
+        self.filter_manager.filterModeChanged.connect(self.OnFilterModeChange)
+        self.filter_manager.activeCategoryChanged.connect(self.OnActiveCategoryChanged)
+        self.filter_manager.itemSelectionChanged.connect(self.OnItemSelectionChanged)
+        self.filter_manager.filteredItemsUpdated.connect(self.OnFilteredItemsUpdated)
+        self.filter_manager.itemeSelected.connect(self.play_current_surah)
+        self.filter_manager.searchQueryUpdated.connect(self.OnSearchQueryUpdated)
+
     def disable_focus(self):
 
         widgets = [
@@ -168,7 +187,7 @@ class SuraPlayerWindow(QMainWindow):
     }
 
         for button, key_sequence in shortcuts.items():
-            button.setShortcut(QKeySequence(None if disable else key_sequence))
+            button.setShortcut(QKeySequence(key_sequence) if not disable else None)
 
         if first_time:
             QShortcut(QKeySequence("Ctrl+Down"), self).activated.connect(self.next_reciter)
@@ -277,40 +296,34 @@ class SuraPlayerWindow(QMainWindow):
             self.play_pause_button.setAccessibleName("تشغيل")
             self.statusBar().showMessage("إيقاف مؤقت")
 
-    def filter_reciters(self, text: str):
-        current_item = self.reciter_combo.currentText()
-        self.reciter_combo.clear()
-        for row in self.reciters.get_reciters():
-            display_text = f"{row['name']} - {row['rewaya']} - ({row['bitrate']} kbps)"
-            if display_text.startswith(text) or  text == "ALL":
-                self.reciter_combo.addItem(display_text, row["id"])
+    def OnFilterModeChange(self, active: bool) -> None:
+        for button in self.buttons:
+            button.setEnabled(not active)
+        UniversalSpeech.say("وضع الفلترة مفعَّل. اكتب لتصفية القُرَّاء." if active else "وضع الفلترة معطَّل.")
 
-        self.reciter_combo.setCurrentText(current_item)
+    def OnActiveCategoryChanged(self, label: str) -> None:
+        UniversalSpeech.say(label)
 
-    def toggle_filter_mode(self):
-        self.filter_mode = not self.filter_mode
-        self.search_text = "" if not self.filter_mode else self.search_text
-        self.setup_shortcuts(disable=self.filter_mode, first_time=False)
-        UniversalSpeech.say("وضع الفلترة مفعَّل. اكتب لتصفية القُرَّاء." if self.filter_mode else "وضع الفلترة معطَّل.")
-        if not self.filter_mode:
-            self.filter_reciters("ALL")
+    def OnSearchQueryUpdated(self, search_query: str) -> None:
+        UniversalSpeech.say(search_query)
+        
+    def OnItemSelectionChanged(self, widget: QComboBox, index: int) -> None:
+        widget.setCurrentIndex(index)
+        UniversalSpeech.say(widget.currentText())
+
+    def OnFilteredItemsUpdated(self, widget: QComboBox, items: List[Item]) -> None:
+        current_item = widget.currentText()
+        widget.clear()
+        for item in items:
+            widget.addItem(item.text, item.id)
+
+        widget.setCurrentText(current_item)
 
     def keyPressEvent(self, event: QKeyEvent):
 
-        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_F:
-            self.toggle_filter_mode()
-        elif self.filter_mode:
-            if re.search(r"[أ-يئءؤآإ]", event.text()) and not event.modifiers() == Qt.ControlModifier:
-                self.search_text += event.text().strip()
-                self.filter_reciters(self.search_text)
-            elif event.key() == Qt.Key_Backspace:
-                self.search_text = self.search_text[:-1]
-                self.filter_reciters(self.search_text)
-            elif event.key() == Qt.Key.Key_Return:
-                self.play_current_surah()
-                self.toggle_filter_mode()
+        if self.filter_manager.handle_key_press(event):
             return
-
+            
         super().keyPressEvent(event)
 
     def on_close(self):

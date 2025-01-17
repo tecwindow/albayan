@@ -1,0 +1,118 @@
+import re
+from typing import List, Dict
+from dataclasses import dataclass
+from PyQt6.QtCore import QObject, pyqtSignal, Qt
+from PyQt6.QtGui import QKeyEvent
+from PyQt6.QtWidgets import QComboBox
+
+
+@dataclass
+class Item:
+    text: str
+    id: int
+
+@dataclass
+class Category:
+    label: str
+    items: List[Item]
+    widget : QComboBox
+
+
+class FilterManager(QObject):
+    filterModeChanged = pyqtSignal(bool)
+    activeCategoryChanged = pyqtSignal(str)
+    itemSelectionChanged = pyqtSignal(QComboBox, int)
+    itemeSelected = pyqtSignal()
+    filteredItemsUpdated = pyqtSignal(QComboBox, list)
+    searchQueryUpdated = pyqtSignal(str)
+
+    def __init__(self):
+        super().__init__()
+        self.categories: List[Category] = []
+        self.active = False  
+        self.current_category_index = 0
+        self.search_query = "" 
+
+    def set_category(self, label: str, items: List[Item], widget: QComboBox) -> None:
+        category = Category(label, items, widget)
+        self.categories.append(category)
+
+    def toggle_filter_mode(self) -> None:
+        """Toggle filter mode."""
+        self.active = not self.active
+        self.search_query = "" if not self.active else self.search_query
+        self.filterModeChanged.emit(self.active)
+        if not self.active:
+            self.clear_filters()
+
+    def switch_category(self, direction: int) -> None:
+        """Switch between categories."""
+        self.current_category_index = (self.current_category_index + direction) % len(self.categories)
+        active_category = self.categories[self.current_category_index]
+        self.activeCategoryChanged.emit(active_category.label)
+
+    def navigate_items(self, direction: int) -> None:
+        """Navigate through items in the active category."""
+        active_category = self.categories[self.current_category_index]
+        combo_box = active_category.widget
+        current_index = combo_box.currentIndex()
+        new_index = max(0, min(combo_box.count() - 1, current_index + direction))
+        self.itemSelectionChanged.emit(combo_box, new_index)
+
+    def filter_items(self, char: str):
+        """Filter items in the active category based on the search query."""
+        self.search_query += char
+        self.searchQueryUpdated.emit(self.search_query)
+        self.update_filtered_items()
+
+    def delete_last_char(self):
+        """Delete the last character from the search query."""
+        if self.search_query:
+            self.search_query = self.search_query[:-1]
+            self.searchQueryUpdated.emit(self.search_query)
+            self.update_filtered_items()
+
+    def update_filtered_items(self):
+        """Update the items in the active category based on the search query."""
+        active_category = self.categories[self.current_category_index]
+        combo_box = active_category.widget
+        all_items = active_category.items
+        filtered_items = [item for item in all_items if item.text.startswith(self.search_query)]
+        self.filteredItemsUpdated.emit(combo_box, filtered_items)
+
+    def clear_filters(self):
+        """Clear all search filters."""
+        self.search_query = ""
+        for category in self.categories:
+            combo_box = category.widget
+            self.filteredItemsUpdated.emit(combo_box, category.items)
+
+    def handle_key_press(self, event: QKeyEvent) -> bool:
+        """Handle key press events."""
+        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_F:
+            self.toggle_filter_mode()
+            return True
+        elif self.active:
+            print(event.key() == Qt.Key.Key_Up)
+            if event.key() == Qt.Key.Key_Left:
+                self.switch_category(-1)
+                return True
+            elif event.key() == Qt.Key.Key_Right:
+                self.switch_category(1)
+                return True
+            elif event.key() == Qt.Key.Key_Up:
+                self.navigate_items(-1)
+                return True
+            elif event.key() == Qt.Key.Key_Down:
+                self.navigate_items(1)
+                return True
+            elif event.key() == Qt.Key.Key_Backspace:
+                self.delete_last_char()
+                return True
+            elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+                self.itemeSelected.emit()
+                self.toggle_filter_mode()
+                return True
+            elif re.search(r"[أ-يئءؤآ]", event.text()):
+                self.filter_items(event.text())
+                return True
