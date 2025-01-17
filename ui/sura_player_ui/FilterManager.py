@@ -47,6 +47,7 @@ class FilterManager(QObject):
 
     def switch_category(self, direction: int) -> None:
         """Switch between categories."""
+        self.search_query = ""
         self.current_category_index = (self.current_category_index + direction) % len(self.categories)
         active_category = self.categories[self.current_category_index]
         self.activeCategoryChanged.emit(active_category.label)
