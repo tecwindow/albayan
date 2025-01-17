@@ -78,7 +78,7 @@ class quran_mgr:
         return self.goto(self.current_pos)
 
     def get_suras(self) -> List[Union[str, int]]:
-        self.cursor.execute("SELECT DISTINCT sura_name, sura_number from quran;")
+        self.cursor.execute("SELECT DISTINCT REPLACE(sura_name, 'سورة ', ''), sura_number from quran;")
         return self.cursor.fetchall()
 
     def get_surah(self, surah_number):
