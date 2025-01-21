@@ -107,11 +107,25 @@ class FilterManager(QObject):
             elif event.key() == Qt.Key.Key_Down:
                 self.navigate_items(1)
                 return True
+            elif event.key() == Qt.Key.Key_Home:
+                self.navigate_items(-1000)
+                return True
+            elif event.key() == Qt.Key.Key_End:
+                self.navigate_items(1000)
+                return True
+            elif event.key() == Qt.Key.Key_PageUp:
+                self.navigate_items(-10)
+                return True
+            elif event.key() == Qt.Key.Key_PageDown:
+                self.navigate_items(10)
+                return True
             elif event.key() == Qt.Key.Key_Backspace:
                 self.delete_last_char()
                 return True
             elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
                 self.itemeSelected.emit()
+                self.toggle_filter_mode()
+            elif event.key() == Qt.Key.Key_Escape:
                 self.toggle_filter_mode()
                 return True
             elif re.search(r"[أ-يئءؤآ]", event.text()):

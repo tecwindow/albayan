@@ -61,7 +61,7 @@ class SuraPlayerWindow(QMainWindow):
             self.reciter_combo.addItem(display_text, row["id"])
             reciters_list.append(Item(display_text, row["id"]))
 
-        self.filter_manager.set_category("القارء", reciters_list, self.reciter_combo)
+        self.filter_manager.set_category("القارئ", reciters_list, self.reciter_combo)
 
         self.surah_label = QLabel("السورة:")
         self.surah_combo = QComboBox()
@@ -299,7 +299,7 @@ class SuraPlayerWindow(QMainWindow):
     def OnFilterModeChange(self, active: bool) -> None:
         for button in self.buttons:
             button.setEnabled(not active)
-        UniversalSpeech.say("وضع الفلترة مفعَّل. اكتب لتصفية القُرَّاء." if active else "وضع الفلترة معطَّل.")
+        UniversalSpeech.say("وضع الفلترة مفعَّل. استخدم الأسهم اليمين و اليسار للتنقل بين القرائ و السور, واستخدم الأسهم للأعلى والأسفل لتصفح المحدد, اكتب لتصفية القُرَّاء." if active else "وضع الفلترة معطَّل.")
 
     def OnActiveCategoryChanged(self, label: str) -> None:
         UniversalSpeech.say(label)
