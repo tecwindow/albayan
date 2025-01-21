@@ -54,7 +54,7 @@ class RecitersManager(ABC):
 
 
 class SurahReciter(RecitersManager):
-    def __init__(self, db_path: str, table_name: str ="suras"):
+    def __init__(self, db_path: str, table_name: str ="moshaf"):
         super().__init__(db_path, table_name)
 
     def get_url(self, reciter_id: int, surah_number: int) -> Optional[str]:
