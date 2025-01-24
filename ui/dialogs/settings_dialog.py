@@ -132,9 +132,9 @@ class SettingsDialog(QDialog):
         self.reciters_combo = QComboBox()
         self.reciters_combo.setAccessibleName(self.reciters_label.text())
         reciters = self.reciters_manager.get_reciters()
-        for  id, row in reciters.items():
+        for  row in reciters:
             display_text = f"{row['name']} - {row['rewaya']} - {row['type']} - ({row['bitrate']} kbps)"
-            self.reciters_combo.addItem(display_text, id)
+            self.reciters_combo.addItem(display_text, row["id"])
 
         self.action_label = QLabel("الإجراء بعد الاستماع:")
         self.action_combo = QComboBox()
