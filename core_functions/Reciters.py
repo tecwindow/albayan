@@ -21,7 +21,7 @@ class RecitersManager(ABC):
 
         return conn
 
-    def get_reciters(self) -> List[sqlite3.Row]:
+    def get_reciters(self) -> Dict[int, sqlite3.Row]:
         """Fetches all reciters from the database."""
         with self._connect() as conn:
             cursor = conn.cursor()
@@ -36,7 +36,7 @@ class RecitersManager(ABC):
                 ORDER BY name, bitrate;
             """)
 
-            return cursor.fetchall()
+            return [{row["id"]: row} for row in cursor.fetchall()]
 
     @lru_cache(maxsize=1)
     def _get_base_url(self, reciter_id: int) -> Optional[str]:
