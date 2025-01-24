@@ -59,9 +59,9 @@ class SuraPlayerWindow(QMainWindow):
         for row in self.reciters.get_reciters():
             display_text = f"{row['name']} - {row['rewaya']} - ({row['type']}) - ({row['bitrate']} kbps)"
             self.reciter_combo.addItem(display_text, row["id"])
-            reciters_list.append(Item(display_text, row["id"]))
+            reciters_list.append(Item(row["id"], display_text))
 
-        self.filter_manager.set_category("القارئ", reciters_list, self.reciter_combo)
+        self.filter_manager.set_category(1, "القارئ", reciters_list, self.reciter_combo)
 
         self.surah_label = QLabel("السورة:")
         self.surah_combo = QComboBox()
@@ -69,9 +69,9 @@ class SuraPlayerWindow(QMainWindow):
         suras_list = []
         for surah_name, surah_number in QuranConst.SURAS:
             self.surah_combo.addItem(surah_name, surah_number)
-            suras_list.append(Item(surah_name, surah_number))
+            suras_list.append(Item(surah_number, surah_name))
 
-        self.filter_manager.set_category("السورة", suras_list, self.surah_combo)
+        self.filter_manager.set_category(2, "السورة", suras_list, self.surah_combo)
 
         selection_layout.addWidget(self.reciter_label)
         selection_layout.addWidget(self.reciter_combo)

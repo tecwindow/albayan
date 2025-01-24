@@ -8,11 +8,13 @@ from PyQt6.QtWidgets import QComboBox
 
 @dataclass
 class Item:
-    text: str
     id: int
-
+    text: str
+    
+    
 @dataclass
 class Category:
+    id: int
     label: str
     items: List[Item]
     widget : QComboBox
@@ -33,9 +35,14 @@ class FilterManager(QObject):
         self.current_category_index = 0
         self.search_query = "" 
 
-    def set_category(self, label: str, items: List[Item], widget: QComboBox) -> None:
-        category = Category(label, items, widget)
+    def set_category(self, id, label: str, items: List[Item], widget: QComboBox) -> None:
+        category = Category(id, label, items, widget)
         self.categories.append(category)
+
+    def change_category_items(self, id: int, new_items: List[Item]) -> None:
+        for category in self.categories:
+            if category.id == id:
+                category.items = new_items
 
     def toggle_filter_mode(self) -> None:
         """Toggle filter mode."""
