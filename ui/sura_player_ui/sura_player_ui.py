@@ -194,6 +194,20 @@ class SuraPlayerWindow(QMainWindow):
             QShortcut(QKeySequence("Ctrl+Up"), self).activated.connect(self.previous_reciter)
 
     def update_current_reciter(self):
+        reciter_id = self.reciter_combo.currentData()
+        reciter_data = self.reciters.get_reciter(reciter_id)
+
+        if not reciter_data or not reciter_data["available_suras"]:
+            return
+
+        available_suras = sorted(map(int, reciter_data["available_suras"].split(",")))
+        self.surah_combo.clear()
+
+        sura_items = [Item(sura_number, QuranConst.SURAS[sura_number - 1][0]) for sura_number in available_suras]
+        for item in sura_items:
+            self.surah_combo.addItem(item.text, item.id)
+
+        self.filter_manager.change_category_items(reciter_data["id"], sura_items)
         self.statusBar().showMessage(f"القارئ الحالي: {self.reciter_combo.currentText()}")
 
     def update_current_surah(self):
