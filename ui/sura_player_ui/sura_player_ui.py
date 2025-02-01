@@ -207,7 +207,7 @@ class SuraPlayerWindow(QMainWindow):
         for item in sura_items:
             self.surah_combo.addItem(item.text, item.id)
 
-        self.filter_manager.change_category_items(reciter_data["id"], sura_items)
+        self.filter_manager.change_category_items(2, sura_items)
         self.statusBar().showMessage(f"القارئ الحالي: {self.reciter_combo.currentText()}")
 
     def update_current_surah(self):
