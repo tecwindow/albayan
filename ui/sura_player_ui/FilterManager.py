@@ -18,6 +18,7 @@ class Category:
     label: str
     items: List[Item]
     widget : QComboBox
+    selected_item_text: str = ""
 
 
 class FilterManager(QObject):
@@ -26,6 +27,7 @@ class FilterManager(QObject):
     itemSelectionChanged = pyqtSignal(QComboBox, int)
     itemeSelected = pyqtSignal()
     filteredItemsUpdated = pyqtSignal(QComboBox, list)
+    filterCleaned = pyqtSignal(QComboBox, str)
     searchQueryUpdated = pyqtSignal(str)
 
     def __init__(self):
@@ -43,7 +45,7 @@ class FilterManager(QObject):
         for category in self.categories:
             if category.id == id:
                 category.items = new_items
-
+                
     def toggle_filter_mode(self) -> None:
         """Toggle filter mode."""
         self.active = not self.active
@@ -66,6 +68,7 @@ class FilterManager(QObject):
         current_index = combo_box.currentIndex()
         new_index = max(0, min(combo_box.count() - 1, current_index + direction))
         self.itemSelectionChanged.emit(combo_box, new_index)
+        active_category.selected_item_text = combo_box.currentText()
 
     def filter_items(self, char: str):
         """Filter items in the active category based on the search query."""
@@ -94,6 +97,7 @@ class FilterManager(QObject):
         for category in self.categories:
             combo_box = category.widget
             self.filteredItemsUpdated.emit(combo_box, category.items)
+            self.filterCleaned.emit(combo_box, category.selected_item_text)
 
     def handle_key_press(self, event: QKeyEvent) -> bool:
         """Handle key press events."""
@@ -101,7 +105,6 @@ class FilterManager(QObject):
             self.toggle_filter_mode()
             return True
         elif self.active:
-            print(event.key() == Qt.Key.Key_Up)
             if event.key() == Qt.Key.Key_Left:
                 self.switch_category(-1)
                 return True
@@ -132,6 +135,7 @@ class FilterManager(QObject):
             elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
                 self.itemeSelected.emit()
                 self.toggle_filter_mode()
+                return True
             elif event.key() == Qt.Key.Key_Escape:
                 self.toggle_filter_mode()
                 return True

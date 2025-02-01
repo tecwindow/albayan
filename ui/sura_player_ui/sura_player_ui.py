@@ -159,6 +159,7 @@ class SuraPlayerWindow(QMainWindow):
         self.filter_manager.activeCategoryChanged.connect(self.OnActiveCategoryChanged)
         self.filter_manager.itemSelectionChanged.connect(self.OnItemSelectionChanged)
         self.filter_manager.filteredItemsUpdated.connect(self.OnFilteredItemsUpdated)
+        self.filter_manager.filterCleaned.connect(self.OnFilterCleaned)
         self.filter_manager.itemeSelected.connect(self.play_current_surah)
         self.filter_manager.searchQueryUpdated.connect(self.OnSearchQueryUpdated)
 
@@ -326,12 +327,12 @@ class SuraPlayerWindow(QMainWindow):
         UniversalSpeech.say(widget.currentText())
 
     def OnFilteredItemsUpdated(self, widget: QComboBox, items: List[Item]) -> None:
-        current_item = widget.currentText()
         widget.clear()
         for item in items:
             widget.addItem(item.text, item.id)
 
-        widget.setCurrentText(current_item)
+    def OnFilterCleaned(self, widget: QComboBox, selected_item_text: str) -> None:
+        widget.setCurrentText(selected_item_text)
 
     def keyPressEvent(self, event: QKeyEvent):
 
