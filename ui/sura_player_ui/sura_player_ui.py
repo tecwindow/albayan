@@ -324,7 +324,7 @@ class SuraPlayerWindow(QMainWindow):
         
     def OnItemSelectionChanged(self, widget: QComboBox, index: int) -> None:
         widget.setCurrentIndex(index)
-        UniversalSpeech.say(widget.currentText())
+        UniversalSpeech.say(f"{widget.currentText()} {widget.currentIndex() + 1} من {widget.count()}")
 
     def OnFilteredItemsUpdated(self, widget: QComboBox, items: List[Item]) -> None:
         widget.clear()
