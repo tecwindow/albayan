@@ -337,15 +337,13 @@ class QuranInterface(QMainWindow):
 
         if bookmark_manager.is_exist(aya_info[1]):
             msgBox = QMessageBox(self)
-        msgBox.setIcon(QMessageBox.Critical)
-        msgBox.setWindowTitle("خطأ")
-        msgBox.setText("تم حفظ العلامة المرجعية مسبقًا.")
+            msgBox.setIcon(QMessageBox.Critical)
+            msgBox.setWindowTitle("خطأ")
+            msgBox.setText("تم حفظ العلامة المرجعية مسبقًا.")
+            msgBox.addButton("موافق", QMessageBox.AcceptRole)
+            msgBox.exec()
 
-    
-        msgBox.addButton("موافق", QMessageBox.AcceptRole)
-        msgBox.exec()
-
-        return
+            return
 
 
         dialog = QInputDialog(self)
