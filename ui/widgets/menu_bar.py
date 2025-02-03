@@ -279,7 +279,12 @@ class MenuBar(QMenuBar):
             f"إصدار البرنامج: {program_version}\n"
             f"الموقع الرسمي للبرنامج: {website}\n"
         )
-        QMessageBox.about(self, "حول البرنامج", about_text)
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setWindowTitle("حول البرنامج")
+        msg_box.setText(about_text)
+        ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+        msg_box.exec()
 
     def OnGoTo(self):
         category_number = self.parent.quran.type

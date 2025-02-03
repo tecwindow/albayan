@@ -336,13 +336,45 @@ class QuranInterface(QMainWindow):
         criteria_number = self.quran.type
 
         if bookmark_manager.is_exist(aya_info[1]):
-            QMessageBox.critical(self, "خطأ", f"تم حفظ العلامة المرجعية مسبقًا.")
-            return
+            msgBox = QMessageBox(self)
+        msgBox.setIcon(QMessageBox.Critical)
+        msgBox.setWindowTitle("خطأ")
+        msgBox.setText("تم حفظ العلامة المرجعية مسبقًا.")
 
-        name, ok = QInputDialog.getText(self, "اسم العلامة", "أدخل اسم العلامة:")
-        if ok and name:
-            bookmark_manager.insert_bookmark(name, aya_info[1], aya_info[3], aya_info[0], aya_info[2], criteria_number)
-            self.quran_view.setFocus()
+    
+        msgBox.addButton("موافق", QMessageBox.AcceptRole)
+        msgBox.exec()
+
+        return
+
+
+        dialog = QInputDialog(self)
+        dialog.setWindowTitle("اسم العلامة")
+        dialog.setLabelText("أدخل اسم العلامة:")
+        dialog.setTextValue("")
+    
+
+        dialog.setOkButtonText("إضافة")
+        dialog.setCancelButtonText("إلغاء")
+    
+
+        if dialog.exec() == dialog.Accepted:
+            name = dialog.textValue()
+            if name:
+                bookmark_manager.insert_bookmark(
+                    name, 
+                    aya_info[1], 
+                    aya_info[3], 
+                    aya_info[0], 
+                    aya_info[2], 
+                    criteria_number
+                )
+                self.quran_view.setFocus()
+            else:
+                # Optionally, handle the case where the user accepts without entering a name
+                return
+        else:
+            return
 
     def OnSaveCurrentPosition(self):
         self.user_data_manager.save_position(
