@@ -19,6 +19,7 @@ class Category:
     items: List[Item]
     widget : QComboBox
     selected_item_text: str = ""
+    search_query: str = ""
 
 
 class FilterManager(QObject):
@@ -35,7 +36,6 @@ class FilterManager(QObject):
         self.categories: List[Category] = []
         self.active = False  
         self.current_category_index = 0
-        self.search_query = "" 
 
     def set_category(self, id, label: str, items: List[Item], widget: QComboBox) -> None:
         category = Category(id, label, items, widget)
@@ -49,7 +49,6 @@ class FilterManager(QObject):
     def toggle_filter_mode(self) -> None:
         """Toggle filter mode."""
         self.active = not self.active
-        self.search_query = "" if not self.active else self.search_query
         self.filterModeChanged.emit(self.active)
         if not self.active:
             self.clear_filters()
@@ -60,6 +59,7 @@ class FilterManager(QObject):
         self.current_category_index = (self.current_category_index + direction) % len(self.categories)
         active_category = self.categories[self.current_category_index]
         self.activeCategoryChanged.emit(active_category.label)
+        self.update_filtered_items()
 
     def navigate_items(self, direction: int) -> None:
         """Navigate through items in the active category."""
@@ -72,15 +72,17 @@ class FilterManager(QObject):
 
     def filter_items(self, char: str):
         """Filter items in the active category based on the search query."""
-        self.search_query += char
-        self.searchQueryUpdated.emit(self.search_query)
+        active_category = self.categories[self.current_category_index]
+        active_category.search_query += char
+        self.searchQueryUpdated.emit(active_category.search_query)
         self.update_filtered_items()
 
     def delete_last_char(self):
         """Delete the last character from the search query."""
-        if self.search_query:
-            self.search_query = self.search_query[:-1]
-            self.searchQueryUpdated.emit(self.search_query)
+        active_category = self.categories[self.current_category_index]
+        if active_category.search_query:
+            active_category.search_query = active_category.search_query[:-1]
+            self.searchQueryUpdated.emit(active_category.search_query)
             self.update_filtered_items()
 
     def update_filtered_items(self):
@@ -88,13 +90,14 @@ class FilterManager(QObject):
         active_category = self.categories[self.current_category_index]
         combo_box = active_category.widget
         all_items = active_category.items
-        filtered_items = [item for item in all_items if item.text.startswith(self.search_query)]
+        filtered_items = [item for item in all_items if item.text.startswith(active_category.search_query)]
         self.filteredItemsUpdated.emit(combo_box, filtered_items)
 
     def clear_filters(self):
         """Clear all search filters."""
         self.search_query = ""
         for category in self.categories:
+            category.search_query = ""
             combo_box = category.widget
             self.filteredItemsUpdated.emit(combo_box, category.items)
             self.filterCleaned.emit(combo_box, category.selected_item_text)
