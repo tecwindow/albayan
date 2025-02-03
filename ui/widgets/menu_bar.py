@@ -1,3 +1,4 @@
+import os
 from PyQt6.QtWidgets import QApplication, QMenuBar, QMenu, QMessageBox
 from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut, QDesktopServices
 from PyQt6.QtCore import Qt, QUrl
@@ -162,9 +163,13 @@ class MenuBar(QMenuBar):
         sura_player__action = QAction("مشغل القرآن", self)
         sura_player__action.setShortcut(QKeySequence("Shift+P"))
         sura_player__action.triggered.connect(self.OnSuraPlayer)
+        open_log_action = QAction("فتح ملف السجل", self)
+        open_log_action.setShortcut(QKeySequence("Shift+L"))
+        open_log_action.triggered.connect(self.Onopen_log_file)
         tools_menu.addAction(athkar_action)
         tools_menu.addAction(bookmark_manager_action)
         tools_menu.addAction(sura_player__action)
+        tools_menu.addAction(open_log_action)
 
         preferences_menu = self.addMenu("التفضيلات(&R)")
         settings_action = QAction("الإعدادات", self)
@@ -309,6 +314,10 @@ class MenuBar(QMenuBar):
         self.parent.tray_manager.hide_icon()
         QApplication.quit()
         bass.BASS_Free()
-        
-        
 
+    def Onopen_log_file(self):
+        appdata_path = os.path.expandvars('%appdata%')
+        log_file_path = os.path.join(appdata_path, 'tecwindow', 'albayan', 'albayan.log')
+
+        # Open the log file with the default program for the file type
+        os.startfile(log_file_path)
