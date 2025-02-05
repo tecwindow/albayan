@@ -264,14 +264,16 @@ class SuraPlayerWindow(QMainWindow):
         current_index = self.reciter_combo.currentIndex()
         if current_index < self.reciter_combo.count() - 1:
             self.reciter_combo.setCurrentIndex(current_index + 1)
+            self.play_current_surah()
         UniversalSpeech.say(self.reciter_combo.currentText())
 
     def previous_reciter(self):
         current_index = self.reciter_combo.currentIndex()
         if current_index > 0:
             self.reciter_combo.setCurrentIndex(current_index - 1)
+            self.play_current_surah()
         UniversalSpeech.say(self.reciter_combo.currentText())
-
+        
     def update_volume(self):
         self.player.set_volume(self.volume_slider.value())
 
