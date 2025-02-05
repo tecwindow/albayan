@@ -1,10 +1,12 @@
 import sqlite3
+import logging
 import os
 import datetime
-from utils.const import user_db_path
+from typing import Union, Optional
+from pathlib import Path
 
 class UserDataManager:
-    def __init__(self, db_path: str) -> None:
+    def __init__(self, db_path: Union[Path, str]) -> None:
         """Initialize the database connection and create table if not exists."""
         self.db_path = db_path
         self.connect()
@@ -83,3 +85,55 @@ class UserDataManager:
     def __del__(self):
         """Destructor to ensure database connection is closed."""
         self.close_connection()
+
+
+class PreferencesManager:
+    def __init__(self, db_path: Union[Path, str]):
+        self.db_path = db_path
+        self.conn = sqlite3.connect(self.db_path)
+        self.create_table()
+
+    def create_table(self) -> None:
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS preferences (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        ''')
+        self.conn.commit()
+
+    def set_preference(self, key: str, value: str) -> None:
+        """
+        Insert or update a preference.
+        Uses SQLite's UPSERT (ON CONFLICT) clause.
+        """
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                INSERT INTO preferences (key, value)
+                VALUES (?, ?)
+                ON CONFLICT(key) DO UPDATE SET value=excluded.value
+            ''', (key, value))
+            self.conn.commit()
+        except sqlite3.IntegrityError as e:
+            logging.warning(f"Failed to sett preference: {e}")
+
+    def get(self, key: str, default_value: Optional[str] = None) -> str:
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT value FROM preferences WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        return row[0] if row else default_value
+
+    def get_int(self, key: str, default_value: Optional[int] = None) -> int:
+        return int(self.get(key, default_value))
+
+    def get_float(self, key: str, default_value: Optional[float] = None) -> float:
+        return float(self.get(key, default_value))
+
+    def get_bool(self, key: str, default_value: Optional[bool] = None) -> bool:
+        return self.get(key, default_value) == "True"
+
+    def close(self):
+        self.conn.close()
+
