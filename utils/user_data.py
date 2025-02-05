@@ -126,10 +126,10 @@ class PreferencesManager:
         return row[0] if row else default_value
 
     def get_int(self, key: str, default_value: Optional[int] = None) -> int:
-        return int(self.get(key, default_value))
+        return int(self.get(key, default_value or -1))
 
     def get_float(self, key: str, default_value: Optional[float] = None) -> float:
-        return float(self.get(key, default_value))
+        return float(self.get(key, default_value or -1))
 
     def get_bool(self, key: str, default_value: Optional[bool] = None) -> bool:
         return self.get(key, default_value) == "True"
