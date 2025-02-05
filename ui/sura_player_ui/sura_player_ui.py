@@ -72,9 +72,12 @@ class SuraPlayerWindow(QMainWindow):
         self.surah_combo = QComboBox()
         self.surah_combo.setAccessibleName(self.surah_label.text())
         suras_list = []
+        saved_sura_number = self.preferences_manager.get_int("sura_number")
         for surah_name, surah_number in QuranConst.SURAS:
             self.surah_combo.addItem(surah_name, surah_number)
             suras_list.append(Item(surah_number, surah_name))
+            if surah_number == saved_sura_number:
+                self.surah_combo.setCurrentText(surah_name)
 
         self.filter_manager.set_category(2, "السورة", suras_list, self.surah_combo)
 
