@@ -12,9 +12,10 @@ from core_functions.Reciters import SurahReciter
 from core_functions.quran_class import QuranConst
 from .FilterManager import Item, FilterManager
 from ui.widgets.toolbar import AudioPlayerThread
-from utils.const import data_folder
+from utils.const import data_folder, user_db_path
 from utils.audio_player import SurahPlayer
 from utils.universal_speech import UniversalSpeech
+from utils.user_data import PreferencesManager
 
 
 class SuraPlayerWindow(QMainWindow):
@@ -22,6 +23,7 @@ class SuraPlayerWindow(QMainWindow):
         super().__init__(parent)
         self.setWindowTitle("مشغل القرآن")
         self.resize(600, 400)
+        self.preferences_manager = PreferencesManager(user_db_path)
 
         self.reciters = SurahReciter(data_folder / "quran" / "reciters.db")
         self.player = SurahPlayer()
@@ -56,10 +58,13 @@ class SuraPlayerWindow(QMainWindow):
         self.reciter_combo = QComboBox()
         self.reciter_combo.setAccessibleName(self.reciter_label.text())
         reciters_list = []
+        saved_reciter_id = self.preferences_manager.get_int("reciter_id")
         for row in self.reciters.get_reciters():
             display_text = f"{row['name']} - {row['rewaya']} - ({row['type']}) - ({row['bitrate']} kbps)"
             self.reciter_combo.addItem(display_text, row["id"])
             reciters_list.append(Item(row["id"], display_text))
+            if row["id"] == saved_reciter_id:
+                self.reciter_combo.setCurrentText(display_text)
 
         self.filter_manager.set_category(1, "القارئ", reciters_list, self.reciter_combo)
 
@@ -210,9 +215,11 @@ class SuraPlayerWindow(QMainWindow):
 
         self.filter_manager.change_category_items(2, sura_items)
         self.statusBar().showMessage(f"القارئ الحالي: {self.reciter_combo.currentText()}")
+        self.preferences_manager.set_preference("reciter_id", self.reciter_combo.currentData())
 
     def update_current_surah(self):
         self.statusBar().showMessage(f"السورة الحالية: {self.surah_combo.currentText()}")
+        self.preferences_manager.set_preference("sura_number",  self.surah_combo.currentData())
 
     def toggle_play_pause(self):
         if self.player.is_playing():
