@@ -27,7 +27,7 @@ class FilterManager(QObject):
     activeCategoryChanged = pyqtSignal(str)
     itemSelectionChanged = pyqtSignal(QComboBox, int)
     itemeSelected = pyqtSignal()
-    filteredItemsUpdated = pyqtSignal(QComboBox, list)
+    filteredItemsUpdated = pyqtSignal(QComboBox, list, str)
     filterCleaned = pyqtSignal(QComboBox, str)
     searchQueryUpdated = pyqtSignal(str)
 
@@ -68,7 +68,6 @@ class FilterManager(QObject):
         current_index = combo_box.currentIndex()
         new_index = max(0, min(combo_box.count() - 1, current_index + direction))
         self.itemSelectionChanged.emit(combo_box, new_index)
-        active_category.selected_item_text = combo_box.currentText()
 
     def filter_items(self, char: str):
         """Filter items in the active category based on the search query."""
@@ -90,8 +89,9 @@ class FilterManager(QObject):
         active_category = self.categories[self.current_category_index]
         combo_box = active_category.widget
         all_items = active_category.items
+        active_category.selected_item_text = combo_box.currentText()
         filtered_items = [item for item in all_items if item.text.startswith(active_category.search_query)]
-        self.filteredItemsUpdated.emit(combo_box, filtered_items)
+        self.filteredItemsUpdated.emit(combo_box, filtered_items, active_category.selected_item_text)
 
     def clear_filters(self):
         """Clear all search filters."""
@@ -99,8 +99,7 @@ class FilterManager(QObject):
         for category in self.categories:
             category.search_query = ""
             combo_box = category.widget
-            self.filteredItemsUpdated.emit(combo_box, category.items)
-            self.filterCleaned.emit(combo_box, category.selected_item_text)
+            self.filteredItemsUpdated.emit(combo_box, category.items, category.selected_item_text)
 
     def handle_key_press(self, event: QKeyEvent) -> bool:
         """Handle key press events."""

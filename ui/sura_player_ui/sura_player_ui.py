@@ -227,6 +227,8 @@ class SuraPlayerWindow(QMainWindow):
 
         self.filter_manager.change_category_items(2, sura_items)
         self.statusBar().showMessage(f"القارئ الحالي: {self.reciter_combo.currentText()}")
+        saved_sura = self.surah_combo.findData(self.preferences_manager.get_int("sura_number"))
+        self.surah_combo.setCurrentIndex(saved_sura)
 
     def update_current_surah(self):
         self.statusBar().showMessage(f"السورة الحالية: {self.surah_combo.currentText()}")
@@ -351,11 +353,15 @@ class SuraPlayerWindow(QMainWindow):
         widget.setCurrentIndex(index)
         UniversalSpeech.say(f"{widget.currentText()} {widget.currentIndex() + 1} من {widget.count()}")
 
-    def OnFilteredItemsUpdated(self, widget: QComboBox, items: List[Item]) -> None:
+    def OnFilteredItemsUpdated(self, widget: QComboBox, items: List[Item], selected_item_text: str) -> None:
         widget.clear()
         for item in items:
             widget.addItem(item.text, item.id)
 
+        #Set last selected item before filtering
+        widget.setCurrentText(selected_item_text)
+        print("updated", widget.currentText())
+        
     def OnFilterCleaned(self, widget: QComboBox, selected_item_text: str) -> None:
         widget.setCurrentText(selected_item_text)
 
