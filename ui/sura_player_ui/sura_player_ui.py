@@ -359,3 +359,7 @@ class SuraPlayerWindow(QMainWindow):
         self.player.stop()
         self.audio_player_thread.quit()
         self.close()
+
+    def closeEvent(self, a0):
+        self.on_close()
+    
