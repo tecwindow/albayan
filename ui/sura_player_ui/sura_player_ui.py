@@ -227,11 +227,9 @@ class SuraPlayerWindow(QMainWindow):
 
         self.filter_manager.change_category_items(2, sura_items)
         self.statusBar().showMessage(f"القارئ الحالي: {self.reciter_combo.currentText()}")
-        self.preferences_manager.set_preference("reciter_id", self.reciter_combo.currentData())
 
     def update_current_surah(self):
         self.statusBar().showMessage(f"السورة الحالية: {self.surah_combo.currentText()}")
-        self.preferences_manager.set_preference("sura_number",  self.surah_combo.currentData())
 
     def toggle_play_pause(self):
         if self.player.is_playing():
@@ -245,6 +243,8 @@ class SuraPlayerWindow(QMainWindow):
         url = self.reciters.get_url(reciter_id, surah_number)
         self.audio_player_thread.set_audio_url(url)
         self.audio_player_thread.start()
+        self.preferences_manager.set_preference("reciter_id", self.reciter_combo.currentData())
+        self.preferences_manager.set_preference("sura_number",  self.surah_combo.currentData())
 
     def stop(self):
         self.player.stop()
