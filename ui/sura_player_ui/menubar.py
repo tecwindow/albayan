@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMenuBar
+from PyQt6.QtWidgets import QMenuBar, QApplication
 from PyQt6.QtGui import QAction, QKeyEvent
 from PyQt6.QtCore import Qt, QEvent
 
@@ -29,6 +29,7 @@ class MenuBar(QMenuBar):
         close_window_action = QAction("إغلاق النافذة", self) 
         close_window_action .triggered.connect(self.parent.OnClose)
         close_program_action = QAction("إغلاق البرنامج", self)
+        close_program_action.triggered.connect(QApplication.exit)
 
         # Add Actions to Menu    
         main_menu.addAction(close_window_action)
