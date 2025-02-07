@@ -157,7 +157,7 @@ class SuraPlayerWindow(QMainWindow):
         self.volume_down_button.clicked.connect(lambda: self.player.decrease_volume())
         self.next_surah_button.clicked.connect(self.next_surah)
         self.previous_surah_button.clicked.connect(self.previous_surah)
-        self.close_button.clicked.connect(self.on_close)
+        self.close_button.clicked.connect(self.OnClose)
         self.volume_slider.valueChanged.connect(self.update_volume)
         self.time_slider.valueChanged.connect(self.update_time)
 
@@ -355,11 +355,11 @@ class SuraPlayerWindow(QMainWindow):
             
         super().keyPressEvent(event)
 
-    def on_close(self):
+    def OnClose(self):
         self.player.stop()
         self.audio_player_thread.quit()
         self.close()
 
     def closeEvent(self, a0):
-        self.on_close()
+        self.OnClose()
     

@@ -27,6 +27,7 @@ class MenuBar(QMenuBar):
 
         # Create Actions for Main Menu
         close_window_action = QAction("إغلاق النافذة", self) 
+        close_window_action .triggered.connect(self.parent.OnClose)
         close_program_action = QAction("إغلاق البرنامج", self)
 
         # Add Actions to Menu    
