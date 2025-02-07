@@ -16,6 +16,7 @@ from utils.const import data_folder, user_db_path
 from utils.audio_player import SurahPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import PreferencesManager
+from.menubar import MenuBar
 
 
 class SuraPlayerWindow(QMainWindow):
@@ -43,8 +44,9 @@ class SuraPlayerWindow(QMainWindow):
         self.connect_signals()
         self.disable_focus()
         self.setup_shortcuts()
+        self.setMenuBar(MenuBar(self))
+        self.setFocus()
         
-
         layout.addWidget(self.selection_group)
         layout.addLayout(self.control_layout)
         layout.addWidget(self.progress_group)
