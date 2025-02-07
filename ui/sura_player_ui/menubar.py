@@ -1,3 +1,4 @@
+from typing import List
 from PyQt6.QtWidgets import QMenuBar, QApplication
 from PyQt6.QtGui import QAction, QKeyEvent, QKeySequence
 from PyQt6.QtCore import Qt, QEvent
@@ -14,7 +15,7 @@ class MenuBar(QMenuBar):
         player_menu = self.addMenu("مشغل القرآن(&P)")
         
         # Create Actions for Player Menu
-        self.play_action = QAction("تشغيل", self)  # "Play"
+        self.play_pause_action = QAction("تشغيل", self)  # "Play"
         self.stop_action = QAction("إيقاف", self)  # "Stop"
         self.forward_action = QAction("تقديم", self)  # "Forward"
         self.rewind_action = QAction("إرجاع", self)  # "Rewind"
@@ -22,7 +23,7 @@ class MenuBar(QMenuBar):
         self.down_volume_action = QAction("خفض الصوت", self)
         
         # Add Actions to Menu
-        player_menu.addAction(self.play_action)
+        player_menu.addAction(self.play_pause_action)
         player_menu.addAction(self.stop_action)
         player_menu.addAction(self.forward_action)
         player_menu.addAction(self.rewind_action)
@@ -39,6 +40,9 @@ class MenuBar(QMenuBar):
         main_menu.addAction(self.close_window_action)
         main_menu.addAction(self.close_program_action)
         self.installEventFilter(self)
+
+    def get_player_actions(self) -> List[QAction]:
+        return [self.play_pause_action, self.stop_action, self.forward_action, self.rewind_action, self.up_volume_action, self.down_volume_action]
 
     def eventFilter(self, obj, event: QEvent):
         if obj == self:

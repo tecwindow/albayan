@@ -151,7 +151,7 @@ class SuraPlayerWindow(QMainWindow):
         self.reciter_combo.currentIndexChanged.connect(self.update_current_reciter)
         self.surah_combo.currentIndexChanged.connect(self.update_current_surah)
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
-        self.menubar.play_action.triggered.connect(self.toggle_play_pause)
+        self.menubar.play_pause_action.triggered.connect(self.toggle_play_pause)
         self.stop_button.clicked.connect(self.stop)
         self.menubar.stop_action.triggered.connect(self.stop)
         self.forward_button.clicked.connect(self.forward)
@@ -193,7 +193,7 @@ class SuraPlayerWindow(QMainWindow):
     def setup_shortcuts(self, disable=False, first_time=True):
 
         shortcuts = {
-            self.menubar.play_action: "Space",
+            self.menubar.play_pause_action: "Space",
             self.menubar.forward_action: "Right",
             self.menubar.rewind_action: "Left",
             self.menubar.up_volume_action: "Up",
@@ -204,8 +204,8 @@ class SuraPlayerWindow(QMainWindow):
             self.previous_surah_button: "Ctrl+Left",
     }
 
-        for button, key_sequence in shortcuts.items():
-            button.setShortcut(QKeySequence(key_sequence))
+        for widget, key_sequence in shortcuts.items():
+            widget.setShortcut(QKeySequence(key_sequence))
 
         if first_time:
             QShortcut(QKeySequence("Ctrl+Down"), self).activated.connect(self.next_reciter)
@@ -310,7 +310,7 @@ class SuraPlayerWindow(QMainWindow):
         return f"{minutes}:{seconds:02}"
 
     def update_buttons_status(self, status):
-        controls = self.buttons + [self.time_slider]
+        controls = self.buttons + self.menubar.get_player_actions() + [self.time_slider]
         for control in controls:
             control.setEnabled(status)
 
@@ -322,20 +322,21 @@ class SuraPlayerWindow(QMainWindow):
         is_stop = self.player.is_stopped()
         self.time_slider.setEnabled(not is_stop)
         self.stop_button.setEnabled(not is_stop)
+        self.menubar.stop_action.setEnabled(not is_stop)
 
         if self.player.is_playing() or self.player.is_stalled():
             self.play_pause_button.setIcon(qta.icon("fa.pause"))
             self.play_pause_button.setAccessibleName("إيقاف مؤقت")
+            self.menubar.play_pause_action.setText("إيقاف مؤقت")
             self.statusBar().showMessage("تشغيل")
         else:
             self.play_pause_button.setIcon(qta.icon("fa.play"))
             self.play_pause_button.setAccessibleName("تشغيل")
+            self.menubar.play_pause_action.setText("تشغيل")
             self.statusBar().showMessage("إيقاف مؤقت")
 
     def OnFilterModeChange(self, active: bool) -> None:
-        widgets = self.buttons + [self.menubar.play_action, self.menubar.forward_action,
-                                  self.menubar.rewind_action, self.menubar.stop_action,
-                                  self.menubar.up_volume_action, self.menubar.down_volume_action]
+        widgets = self.buttons + self.menubar.get_player_actions()
         for widget in widgets:
             widget.setEnabled(not active)
         UniversalSpeech.say("وضع الفلترة مفعَّل. استخدم الأسهم اليمين و اليسار للتنقل بين القرائ و السور, واستخدم الأسهم للأعلى والأسفل لتصفح المحدد, اكتب لتصفية القُرَّاء." if active else "وضع الفلترة معطَّل.")
