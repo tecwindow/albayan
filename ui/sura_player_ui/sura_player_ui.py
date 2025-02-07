@@ -25,6 +25,8 @@ class SuraPlayerWindow(QMainWindow):
         self.setWindowTitle("مشغل القرآن")
         self.resize(600, 400)
         self.preferences_manager = PreferencesManager(user_db_path)
+        self.menubar = MenuBar(self)
+        self.setMenuBar(self.menubar)
 
         self.reciters = SurahReciter(data_folder / "quran" / "reciters.db")
         self.player = SurahPlayer()
@@ -44,7 +46,6 @@ class SuraPlayerWindow(QMainWindow):
         self.connect_signals()
         self.disable_focus()
         self.setup_shortcuts()
-        self.setMenuBar(MenuBar(self))
         self.setFocus()
         
         layout.addWidget(self.selection_group)
@@ -150,11 +151,17 @@ class SuraPlayerWindow(QMainWindow):
         self.reciter_combo.currentIndexChanged.connect(self.update_current_reciter)
         self.surah_combo.currentIndexChanged.connect(self.update_current_surah)
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
+        self.menubar.play_action.triggered.connect(self.toggle_play_pause)
         self.stop_button.clicked.connect(self.stop)
+        self.menubar.stop_action.triggered.connect(self.stop)
         self.forward_button.clicked.connect(self.forward)
+        self.menubar.forward_action.triggered.connect(self.forward)
         self.rewind_button.clicked.connect(self.rewind)
+        self.menubar.rewind_action.triggered.connect(self.rewind)
         self.volume_up_button.clicked.connect(lambda: self.player.increase_volume())
+        self.menubar.up_volume_action.triggered.connect(lambda: self.player.increase_volume())
         self.volume_down_button.clicked.connect(lambda: self.player.decrease_volume())
+        self.menubar.down_volume_action.triggered.connect(lambda: self.player.decrease_volume())
         self.next_surah_button.clicked.connect(self.next_surah)
         self.previous_surah_button.clicked.connect(self.previous_surah)
         self.close_button.clicked.connect(self.OnClose)
@@ -186,19 +193,19 @@ class SuraPlayerWindow(QMainWindow):
     def setup_shortcuts(self, disable=False, first_time=True):
 
         shortcuts = {
-            self.play_pause_button: "Space",
-            self.forward_button: "Right",
-            self.rewind_button: "Left",
-            self.volume_up_button: "Up",
-            self.volume_down_button: "Down",
-            self.stop_button: "S",
+            self.menubar.play_action: "Space",
+            self.menubar.forward_action: "Right",
+            self.menubar.rewind_action: "Left",
+            self.menubar.up_volume_action: "Up",
+            self.menubar.down_volume_action: "Down",
+            self.menubar.stop_action: "S",
             self.close_button: "Ctrl+Q",
             self.next_surah_button: "Ctrl+Right",
             self.previous_surah_button: "Ctrl+Left",
     }
 
         for button, key_sequence in shortcuts.items():
-            button.setShortcut(QKeySequence(key_sequence) if not disable else None)
+            button.setShortcut(QKeySequence(key_sequence))
 
         if first_time:
             QShortcut(QKeySequence("Ctrl+Down"), self).activated.connect(self.next_reciter)
@@ -326,8 +333,11 @@ class SuraPlayerWindow(QMainWindow):
             self.statusBar().showMessage("إيقاف مؤقت")
 
     def OnFilterModeChange(self, active: bool) -> None:
-        for button in self.buttons:
-            button.setEnabled(not active)
+        widgets = self.buttons + [self.menubar.play_action, self.menubar.forward_action,
+                                  self.menubar.rewind_action, self.menubar.stop_action,
+                                  self.menubar.up_volume_action, self.menubar.down_volume_action]
+        for widget in widgets:
+            widget.setEnabled(not active)
         UniversalSpeech.say("وضع الفلترة مفعَّل. استخدم الأسهم اليمين و اليسار للتنقل بين القرائ و السور, واستخدم الأسهم للأعلى والأسفل لتصفح المحدد, اكتب لتصفية القُرَّاء." if active else "وضع الفلترة معطَّل.")
 
     def OnActiveCategoryChanged(self, label: str) -> None:

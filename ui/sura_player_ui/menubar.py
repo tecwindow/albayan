@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QMenuBar, QApplication
-from PyQt6.QtGui import QAction, QKeyEvent
+from PyQt6.QtGui import QAction, QKeyEvent, QKeySequence
 from PyQt6.QtCore import Qt, QEvent
 
 
@@ -14,26 +14,30 @@ class MenuBar(QMenuBar):
         player_menu = self.addMenu("مشغل القرآن(&P)")
         
         # Create Actions for Player Menu
-        play_action = QAction("تشغيل", self)  # "Play"
-        stop_action = QAction("إيقاف", self)  # "Stop"
-        forward_action = QAction("تقديم", self)  # "Forward"
-        rewind_action = QAction("إرجاع", self)  # "Rewind"
+        self.play_action = QAction("تشغيل", self)  # "Play"
+        self.stop_action = QAction("إيقاف", self)  # "Stop"
+        self.forward_action = QAction("تقديم", self)  # "Forward"
+        self.rewind_action = QAction("إرجاع", self)  # "Rewind"
+        self.up_volume_action = QAction("رفع الصوت", self)
+        self.down_volume_action = QAction("خفض الصوت", self)
         
         # Add Actions to Menu
-        player_menu.addAction(play_action)
-        player_menu.addAction(stop_action)
-        player_menu.addAction(forward_action)
-        player_menu.addAction(rewind_action)
-
+        player_menu.addAction(self.play_action)
+        player_menu.addAction(self.stop_action)
+        player_menu.addAction(self.forward_action)
+        player_menu.addAction(self.rewind_action)
+        player_menu.addAction(self.up_volume_action)
+        player_menu.addAction(self.down_volume_action)
+        
         # Create Actions for Main Menu
-        close_window_action = QAction("إغلاق النافذة", self) 
-        close_window_action .triggered.connect(self.parent.OnClose)
-        close_program_action = QAction("إغلاق البرنامج", self)
-        close_program_action.triggered.connect(QApplication.exit)
+        self.close_window_action = QAction("إغلاق النافذة", self) 
+        self.close_window_action .triggered.connect(self.parent.OnClose)
+        self.close_program_action = QAction("إغلاق البرنامج", self)
+        self.close_program_action.triggered.connect(QApplication.exit)
 
         # Add Actions to Menu    
-        main_menu.addAction(close_window_action)
-        main_menu.addAction(close_program_action)
+        main_menu.addAction(self.close_window_action)
+        main_menu.addAction(self.close_program_action)
         self.installEventFilter(self)
 
     def eventFilter(self, obj, event: QEvent):
