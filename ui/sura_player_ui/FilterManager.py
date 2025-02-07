@@ -28,7 +28,6 @@ class FilterManager(QObject):
     itemSelectionChanged = pyqtSignal(QComboBox, int)
     itemeSelected = pyqtSignal()
     filteredItemsUpdated = pyqtSignal(QComboBox, list, str)
-    filterCleaned = pyqtSignal(QComboBox, str)
     searchQueryUpdated = pyqtSignal(str)
 
     def __init__(self):
