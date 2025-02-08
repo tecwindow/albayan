@@ -263,15 +263,20 @@ class SuraPlayerWindow(QMainWindow):
     def stop(self):
         self.player.stop()
 
-    def forward(self):
-        self.player.forward(10)
+    def forward(self, step: int = 10):
+        self.player.forward(step)
 
-    def rewind(self):
-        self.player.rewind(10)
+    def rewind(self, step: int = 10):
+        self.player.rewind(step)
 
+    def set_position(self, position: int, by_percent: bool = False) -> None:
+        if by_percent:
+            total_length = self.player.get_length()
+            position = total_length * (position / 100)
+        self.player.set_position(position)
+        
     def replay(self):
         self.player.set_position(0)
-
 
     def next_surah(self):
         current_index = self.surah_combo.currentIndex()
@@ -403,11 +408,15 @@ class SuraPlayerWindow(QMainWindow):
             ord("C"): lambda: UniversalSpeech.say(self.reciter_combo.currentText()),
             ord("V"): lambda: UniversalSpeech.say(self.surah_combo.currentText()),
             ord("I"): lambda: UniversalSpeech.say(F"{self.surah_combo.currentText()}, {self.reciter_combo.currentText()}"),
+            Qt.Key.Key_1: lambda: self.set_position(10, by_percent=True),
         }
         
         key_native = event.nativeVirtualKey()
         if key_native in shortcuts:
             shortcuts[key_native]()
+            return
+        elif event.key() in  shortcuts:
+            shortcuts[event.key()]()
             return
 
         return super().keyPressEvent(event)    
