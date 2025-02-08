@@ -23,6 +23,7 @@ class SettingsManager:
             "speak_actions_enabled": True,
             "volume_level": 75,
             "ayah_volume_level": 100,
+            "surah_volume_level": 100,
             "athkar_volume_level": 50,
             "current_volume_category": 0
         },

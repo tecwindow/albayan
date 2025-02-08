@@ -17,6 +17,7 @@ from utils.const import data_folder, user_db_path
 from utils.audio_player import SurahPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import PreferencesManager
+from utils.settings import SettingsManager
 from.menubar import MenuBar
 
 
@@ -161,10 +162,10 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.forward_action.triggered.connect(self.forward)
         self.rewind_button.clicked.connect(self.rewind)
         self.menubar.rewind_action.triggered.connect(self.rewind)
-        self.volume_up_button.clicked.connect(lambda: self.player.increase_volume())
-        self.menubar.up_volume_action.triggered.connect(lambda: self.player.increase_volume())
-        self.volume_down_button.clicked.connect(lambda: self.player.decrease_volume())
-        self.menubar.down_volume_action.triggered.connect(lambda: self.player.decrease_volume())
+        self.volume_up_button.clicked.connect(self.increase_volume)
+        self.menubar.up_volume_action.triggered.connect(self.increase_volume)
+        self.volume_down_button.clicked.connect(self.decrease_volume)
+        self.menubar.down_volume_action.triggered.connect(self.decrease_volume)
         self.next_surah_button.clicked.connect(self.next_surah)
         self.previous_surah_button.clicked.connect(self.previous_surah)
         self.close_button.clicked.connect(self.OnClose)
@@ -211,12 +212,7 @@ class SuraPlayerWindow(QMainWindow):
 
         shortcuts = {
     "Ctrl+Down": self.next_reciter,
-    "Ctrl+Up": self.previous_reciter,
-    # "E": lambda: UniversalSpeech.say(self.elapsed_time_label.text()),
-    # "R": lambda: UniversalSpeech.say(self.remaining_time_label.text()),
-    # "T": lambda: UniversalSpeech.say(self.total_time.text()),
-    # "C": lambda: UniversalSpeech.say(self.reciter_combo.currentText()),
-    # "V": lambda: UniversalSpeech.say(self.surah_combo.currentText()),
+    "Ctrl+Up": self.previous_reciter
 }
 
         if first_time:
@@ -297,6 +293,16 @@ class SuraPlayerWindow(QMainWindow):
             self.play_current_surah()
         UniversalSpeech.say(self.reciter_combo.currentText())
         
+    def increase_volume(self):
+        self.player.increase_volume()
+        volume = int(self.player.volume * 100)
+        SettingsManager.write_settings({"audio": {"surah_volume_level": volume}})
+
+    def decrease_volume(self):
+        self.player.decrease_volume()
+        volume = int(self.player.volume * 100)
+        SettingsManager.write_settings({"audio": {"surah_volume_level": volume}})
+
     def update_volume(self):
         self.player.set_volume(self.volume_slider.value())
 

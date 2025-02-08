@@ -1,6 +1,6 @@
 from utils.settings import SettingsManager
 from utils.universal_speech import UniversalSpeech
-from utils.audio_player import AyahPlayer, SoundEffectPlayer, AthkarPlayer
+from utils.audio_player import AyahPlayer, SoundEffectPlayer, AthkarPlayer, SurahPlayer
 
 
 class VolumeController:
@@ -15,6 +15,7 @@ class VolumeController:
         return {
             "athkar_volume_level": {"label": "مستوى صوت الأذكار", "custom_volume_handler": None, "instances": AthkarPlayer.instances},
             "ayah_volume_level": {"label": "مستوى صوت استماع الآيات", "custom_volume_handler": None, "instances": AyahPlayer.instances},
+            "surah_volume_level": {"label": "مستوى صوت استماع السور", "custom_volume_handler": None, "instances": SurahPlayer.instances},
             "volume_level": {"label": "مستوى  صوت البرنامج", "custom_volume_handler": None, "instances": SoundEffectPlayer.instances},
         }
 
