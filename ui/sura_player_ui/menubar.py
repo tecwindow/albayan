@@ -18,17 +18,27 @@ class MenuBar(QMenuBar):
         self.play_pause_action = QAction("تشغيل", self)  # "Play"
         self.stop_action = QAction("إيقاف", self)  # "Stop"
         self.forward_action = QAction("تقديم", self)  # "Forward"
-        self.rewind_action = QAction("إرجاع", self)  # "Rewind"
+        self.rewind_action = QAction("ترجيع", self)  # "Rewind"
+        self.replay_action = QAction("إعادة", self)  # "Replay"
         self.up_volume_action = QAction("رفع الصوت", self)
         self.down_volume_action = QAction("خفض الصوت", self)
+        self.next_surah_action = QAction("السورة التالية", self)
+        self.previous_surah_action = QAction("السورة السابقة", self)
+        self.next_reciter_action = QAction("القارئ التالي", self)
+        self.previous_reciter_action = QAction("القارئ السابق", self)
         
         # Add Actions to Menu
         player_menu.addAction(self.play_pause_action)
         player_menu.addAction(self.stop_action)
         player_menu.addAction(self.forward_action)
         player_menu.addAction(self.rewind_action)
+        player_menu.addAction(self.replay_action)
         player_menu.addAction(self.up_volume_action)
         player_menu.addAction(self.down_volume_action)
+        player_menu.addAction(self.next_surah_action)
+        player_menu.addAction(self.previous_surah_action)
+        player_menu.addAction(self.next_reciter_action)
+        player_menu.addAction(self.previous_reciter_action)
         
         # Create Actions for Main Menu
         self.close_window_action = QAction("إغلاق النافذة", self) 
@@ -42,7 +52,7 @@ class MenuBar(QMenuBar):
         self.installEventFilter(self)
 
     def get_player_actions(self) -> List[QAction]:
-        return [self.play_pause_action, self.stop_action, self.forward_action, self.rewind_action, self.up_volume_action, self.down_volume_action]
+        return [self.play_pause_action, self.stop_action, self.forward_action, self.rewind_action, self.replay_action, self.up_volume_action, self.down_volume_action, self.next_surah_action, self.previous_surah_action, self.next_reciter_action, self.previous_reciter_action]
 
     def eventFilter(self, obj, event: QEvent):
         if obj == self:

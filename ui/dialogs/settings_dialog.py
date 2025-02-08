@@ -23,7 +23,7 @@ from PyQt6.QtCore import Qt
 from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name
 from utils.settings import SettingsManager
-from utils.audio_player import AthkarPlayer, AyahPlayer, SoundEffectPlayer
+from utils.audio_player import AthkarPlayer, AyahPlayer, SurahPlayer, SoundEffectPlayer
 from utils.Startup import StartupManager
 
 
@@ -103,6 +103,12 @@ class SettingsDialog(QDialog):
         self.ayah_volume.valueChanged.connect(self.OnAyahVolume)
         self.ayah_volume.setAccessibleName(self.ayah_volume_label.text())
         self.ayah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.surah_volume_label = QLabel("مستوى صوت السور")
+        self.surah_volume = QSlider(Qt.Orientation.Horizontal)
+        self.surah_volume.setRange(0, 100)
+        self.surah_volume.valueChanged.connect(self.OnSurahVolume)
+        self.surah_volume.setAccessibleName(self.surah_volume_label.text())
+        self.surah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.athkar_volume_label = QLabel("مستوى صوت الأذكار")
         self.athkar_volume = QSlider(Qt.Orientation.Horizontal)
         self.athkar_volume.setRange(0, 100)
@@ -117,6 +123,8 @@ class SettingsDialog(QDialog):
         self.group_audio_layout.addWidget(self.volume)
         self.group_audio_layout.addWidget(self.ayah_volume_label)
         self.group_audio_layout.addWidget(self.ayah_volume)
+        self.group_audio_layout.addWidget(self.surah_volume_label)
+        self.group_audio_layout.addWidget(self.surah_volume)
         self.group_audio_layout.addWidget(self.athkar_volume_label)
         self.group_audio_layout.addWidget(self.athkar_volume)
         self.group_audio_layout.addWidget(self.sound_checkbox)
@@ -228,6 +236,11 @@ class SettingsDialog(QDialog):
         main_layout.addLayout(buttons_layout)
         self.setLayout(main_layout)
 
+
+    def OnSurahVolume(self) -> None:
+        for instance in SurahPlayer.instances:
+            instance.set_volume(self.surah_volume.value())
+
     def OnAyahVolume(self) -> None:
         for instance in AyahPlayer.instances:
             instance.set_volume(self.ayah_volume.value())
@@ -277,6 +290,7 @@ class SettingsDialog(QDialog):
             "speak_actions_enabled": self.speech_checkbox.isChecked(),
             "volume_level": self.volume.value(),
             "ayah_volume_level": self.ayah_volume.value(),
+            "surah_volume_level": self.surah_volume.value(),
             "athkar_volume_level": self.athkar_volume.value()
         }
 
@@ -328,6 +342,7 @@ class SettingsDialog(QDialog):
         self.volume.setValue(current_settings["audio"]["volume_level"])
         self.athkar_volume.setValue(current_settings["audio"]["athkar_volume_level"])
         self.ayah_volume.setValue(current_settings["audio"]["ayah_volume_level"])
+        self.surah_volume.setValue(current_settings["audio"]["surah_volume_level"])
         self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])
         self.turn_pages_checkbox.setChecked(current_settings["reading"]["auto_page_turn"])
         self.start_on_system_start_checkbox.setChecked(current_settings["general"]["auto_start_enabled"])

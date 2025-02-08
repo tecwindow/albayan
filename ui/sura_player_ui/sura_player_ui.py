@@ -162,12 +162,17 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.forward_action.triggered.connect(self.forward)
         self.rewind_button.clicked.connect(self.rewind)
         self.menubar.rewind_action.triggered.connect(self.rewind)
+        self.menubar.replay_action.triggered.connect(self.replay)
         self.volume_up_button.clicked.connect(self.increase_volume)
         self.menubar.up_volume_action.triggered.connect(self.increase_volume)
         self.volume_down_button.clicked.connect(self.decrease_volume)
         self.menubar.down_volume_action.triggered.connect(self.decrease_volume)
         self.next_surah_button.clicked.connect(self.next_surah)
         self.previous_surah_button.clicked.connect(self.previous_surah)
+        self.menubar.next_surah_action.triggered.connect(self.next_surah)
+        self.menubar.previous_surah_action.triggered.connect(self.previous_surah)
+        self.menubar.next_reciter_action.triggered.connect(self.next_reciter)
+        self.menubar.previous_reciter_action.triggered.connect(self.previous_reciter)
         self.close_button.clicked.connect(self.OnClose)
         self.volume_slider.valueChanged.connect(self.update_volume)
         self.time_slider.valueChanged.connect(self.update_time)
@@ -193,31 +198,29 @@ class SuraPlayerWindow(QMainWindow):
         for widget in widgets:
             widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-    def setup_shortcuts(self, disable=False, first_time=True):
+    def setup_shortcuts(self, disable=False,):
 
         shortcuts = {
-            self.menubar.play_pause_action: "Space",
-            self.menubar.forward_action: "Right",
-            self.menubar.rewind_action: "Left",
+            self.menubar.play_pause_action: ["Space", "K"],
+            self.menubar.forward_action: ["Right", "L"],
+            self.menubar.rewind_action: ["Left", "J"],
+            self.menubar.replay_action: "Home",
             self.menubar.up_volume_action: "Up",
             self.menubar.down_volume_action: "Down",
+            self.menubar.previous_surah_action: "Ctrl+Left",
+            self.menubar.next_surah_action: "Ctrl+Right",
+            self.menubar.next_reciter_action: "Ctrl+Down",
+            self.menubar.previous_reciter_action: "Ctrl+Up",
             self.menubar.stop_action: "S",
-            self.close_button: "Ctrl+Q",
-            self.next_surah_button: "Ctrl+Right",
-            self.previous_surah_button: "Ctrl+Left",
-    }
-
-        for widget, key_sequence in shortcuts.items():
-            widget.setShortcut(QKeySequence(key_sequence))
-
-        shortcuts = {
-    "Ctrl+Down": self.next_reciter,
-    "Ctrl+Up": self.previous_reciter
+            self.menubar.close_window_action: ["Ctrl+W", "Ctrl+F4"],
+            self.menubar.close_program_action: "Ctrl+X",
 }
 
-        if first_time:
-            for key_sequence, function in shortcuts.items():                
-                QShortcut(QKeySequence(key_sequence), self).activated.connect(function)
+        for widget, key_sequence in shortcuts.items():
+            key_sequence = [key_sequence] if isinstance(key_sequence, str) else key_sequence
+            widget.setShortcuts([QKeySequence(key) for key in key_sequence])
+
+
 
     def update_current_reciter(self):
         reciter_id = self.reciter_combo.currentData()
@@ -236,6 +239,7 @@ class SuraPlayerWindow(QMainWindow):
         self.filter_manager.change_category_items(2, sura_items)
         self.statusBar().showMessage(f"القارئ الحالي: {self.reciter_combo.currentText()}")
         saved_sura = self.surah_combo.findData(self.preferences_manager.get_int("sura_number"))
+        saved_sura = 0 if saved_sura == -1 else saved_sura
         self.surah_combo.setCurrentIndex(saved_sura)
 
     def update_current_surah(self):
@@ -264,6 +268,10 @@ class SuraPlayerWindow(QMainWindow):
 
     def rewind(self):
         self.player.rewind(10)
+
+    def replay(self):
+        self.player.set_position(0)
+
 
     def next_surah(self):
         current_index = self.surah_combo.currentIndex()
@@ -382,15 +390,22 @@ class SuraPlayerWindow(QMainWindow):
         
     def keyPressEvent(self, event: QKeyEvent):
 
+
+
+
         if self.filter_manager.handle_key_press(event):
             return
-    
+
+        if event.modifiers() & (Qt.ControlModifier | Qt.ShiftModifier | Qt.AltModifier):
+            return
+
         shortcuts = {
             ord("E"): lambda: UniversalSpeech.say(self.elapsed_time_label.text()),
             ord("R"): lambda: UniversalSpeech.say(self.remaining_time_label.text()),
             ord("T"): lambda: UniversalSpeech.say(self.total_time.text()),
             ord("C"): lambda: UniversalSpeech.say(self.reciter_combo.currentText()),
             ord("V"): lambda: UniversalSpeech.say(self.surah_combo.currentText()),
+            ord("I"): lambda: UniversalSpeech.say(F"{self.surah_combo.currentText()}, {self.reciter_combo.currentText()}"),
         }
         
         key_native = event.nativeVirtualKey()

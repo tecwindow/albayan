@@ -10,7 +10,6 @@ class SettingsManager:
     default_settings = {
         "general": {
             "language": "Arabic",
-            "ltr_direction": False,
             "run_in_background_enabled": False,
             "auto_start_enabled": False,
             "auto_save_position_enabled": False,
