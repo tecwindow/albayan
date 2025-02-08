@@ -204,11 +204,17 @@ class AudioToolBar(QToolBar):
         self.stop_audio()
         if self.navigation.navigate("next"):
             self.play_current_ayah()
+            self.change_ayah_focus()
 
     def OnPlayPrevious(self) -> None:
         self.stop_audio()
         if self.navigation.navigate("previous"):
             self.play_current_ayah()
+            self.change_ayah_focus()
+
+    def change_ayah_focus(self) -> None:
+            aya_number = self.parent.quran.ayah_data.get_ayah_number(self.navigation.current_ayah, self.navigation.current_surah)
+            self.parent.set_focus_to_ayah(aya_number)
 
     def OnActionAfterListening(self):
         self.set_buttons_status()
@@ -216,8 +222,6 @@ class AudioToolBar(QToolBar):
         if action_after_listening == 2 or self.navigation.current_ayah == 0:
             self.navigation.has_basmala = True if self.navigation.current_ayah < 2 else False
             self.OnPlayNext()
-            aya_number = self.parent.quran.ayah_data.get_ayah_number(self.navigation.current_ayah, self.navigation.current_surah)
-            self.parent.set_focus_to_ayah(aya_number)
         elif action_after_listening == 1:
             self.play_current_ayah()
 
