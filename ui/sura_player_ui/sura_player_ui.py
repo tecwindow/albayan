@@ -386,12 +386,9 @@ class SuraPlayerWindow(QMainWindow):
 
         #Set last selected item before filtering
         widget.setCurrentText(selected_item_text)
-        UniversalSpeech.say(widget.currentText(), False)
+        UniversalSpeech.say(f"{widget.currentText()} {widget.currentIndex() + 1} من {widget.count()}", False)
         
     def keyPressEvent(self, event: QKeyEvent):
-
-
-
 
         if self.filter_manager.handle_key_press(event):
             return
