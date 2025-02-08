@@ -158,10 +158,10 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.play_pause_action.triggered.connect(self.toggle_play_pause)
         self.stop_button.clicked.connect(self.stop)
         self.menubar.stop_action.triggered.connect(self.stop)
-        self.forward_button.clicked.connect(self.forward)
-        self.menubar.forward_action.triggered.connect(self.forward)
-        self.rewind_button.clicked.connect(self.rewind)
-        self.menubar.rewind_action.triggered.connect(self.rewind)
+        self.forward_button.clicked.connect(lambda: self.forward())
+        self.menubar.forward_action.triggered.connect(lambda: self.forward())
+        self.rewind_button.clicked.connect(lambda: self.rewind())
+        self.menubar.rewind_action.triggered.connect(lambda: self.rewind())
         self.menubar.replay_action.triggered.connect(self.replay)
         self.volume_up_button.clicked.connect(self.increase_volume)
         self.menubar.up_volume_action.triggered.connect(self.increase_volume)
@@ -263,10 +263,10 @@ class SuraPlayerWindow(QMainWindow):
     def stop(self):
         self.player.stop()
 
-    def forward(self, step: int = 10):
+    def forward(self, step = 10):
         self.player.forward(step)
 
-    def rewind(self, step: int = 10):
+    def rewind(self, step= 10):
         self.player.rewind(step)
 
     def set_position(self, position: int, by_percent: bool = False) -> None:
