@@ -1,5 +1,6 @@
 import re
 import os
+import datetime
 from typing import List
 import qtawesome as qta
 from PyQt6.QtCore import Qt
@@ -137,9 +138,11 @@ class SuraPlayerWindow(QMainWindow):
 
         self.elapsed_time_label = QLabel("0:00")
         self.remaining_time_label = QLabel("0:00")
+        self.total_time = QLabel("0:00")
         time_layout = QHBoxLayout()
         time_layout.addWidget(self.elapsed_time_label)
         time_layout.addWidget(self.remaining_time_label)
+        time_layout.addWidget(self.total_time)
 
         progress_layout.addWidget(self.time_slider)
         progress_layout.addWidget(QLabel("الصوت:"))
@@ -206,9 +209,19 @@ class SuraPlayerWindow(QMainWindow):
         for widget, key_sequence in shortcuts.items():
             widget.setShortcut(QKeySequence(key_sequence))
 
+        shortcuts = {
+    "Ctrl+Down": self.next_reciter,
+    "Ctrl+Up": self.previous_reciter,
+    "E": lambda: UniversalSpeech.say(self.elapsed_time_label.text()),
+    "R": lambda: UniversalSpeech.say(self.remaining_time_label.text()),
+    "T": lambda: UniversalSpeech.say(self.total_time.text()),
+    "C": lambda: UniversalSpeech.say(self.reciter_combo.currentText()),
+    "V": lambda: UniversalSpeech.say(self.surah_combo.currentText()),
+}
+
         if first_time:
-            QShortcut(QKeySequence("Ctrl+Down"), self).activated.connect(self.next_reciter)
-            QShortcut(QKeySequence("Ctrl+Up"), self).activated.connect(self.previous_reciter)
+            for key_sequence, function in shortcuts.items():                
+                QShortcut(QKeySequence(key_sequence), self).activated.connect(function)
 
     def update_current_reciter(self):
         reciter_id = self.reciter_combo.currentData()
@@ -246,7 +259,7 @@ class SuraPlayerWindow(QMainWindow):
         self.audio_player_thread.start()
         self.preferences_manager.set_preference("reciter_id", self.reciter_combo.currentData())
         self.preferences_manager.set_preference("sura_number",  self.surah_combo.currentData())
-
+        
     def stop(self):
         self.player.stop()
 
@@ -303,12 +316,12 @@ class SuraPlayerWindow(QMainWindow):
             self.time_slider.setValue(new_position_percentage)
             self.elapsed_time_label.setText(self.format_time(position))
             self.remaining_time_label.setText(self.format_time(length - position))
+            self.total_time.setText(self.format_time(self.player.get_length()))
         self.time_slider.blockSignals(False)
 
     def format_time(self, seconds):
-        minutes = int(seconds // 60)
-        seconds = int(seconds % 60)
-        return f"{minutes}:{seconds:02}"
+        time_delta = datetime.timedelta(seconds=seconds)
+        return str(time_delta).split(".")[0]
 
     def update_buttons_status(self, status):
         controls = self.buttons + self.menubar.get_player_actions() + [self.time_slider]
