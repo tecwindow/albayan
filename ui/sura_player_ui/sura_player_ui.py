@@ -380,15 +380,16 @@ class SuraPlayerWindow(QMainWindow):
             return
     
         shortcuts = {
-            Qt.Key.Key_E: lambda: UniversalSpeech.say(self.elapsed_time_label.text()),
-            Qt.Key.Key_R: lambda: UniversalSpeech.say(self.remaining_time_label.text()),
-            Qt.Key.Key_T: lambda: UniversalSpeech.say(self.total_time.text()),
-            Qt.Key.Key_C: lambda: UniversalSpeech.say(self.reciter_combo.currentText()),
-            Qt.Key.Key_C: lambda: UniversalSpeech.say(self.surah_combo.currentText())
+            ord("E"): lambda: UniversalSpeech.say(self.elapsed_time_label.text()),
+            ord("R"): lambda: UniversalSpeech.say(self.remaining_time_label.text()),
+            ord("T"): lambda: UniversalSpeech.say(self.total_time.text()),
+            ord("C"): lambda: UniversalSpeech.say(self.reciter_combo.currentText()),
+            ord("V"): lambda: UniversalSpeech.say(self.surah_combo.currentText()),
         }
-
-        if event.key() in shortcuts:
-            shortcuts[event.key()]()
+        
+        key_native = event.nativeVirtualKey()
+        if key_native in shortcuts:
+            shortcuts[key_native]()
             return
 
         return super().keyPressEvent(event)    
