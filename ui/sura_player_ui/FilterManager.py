@@ -54,7 +54,6 @@ class FilterManager(QObject):
 
     def switch_category(self, direction: int) -> None:
         """Switch between categories."""
-        self.search_query = ""
         self.current_category_index = (self.current_category_index + direction) % len(self.categories)
         active_category = self.categories[self.current_category_index]
         self.activeCategoryChanged.emit(active_category.label)
@@ -88,17 +87,16 @@ class FilterManager(QObject):
         active_category = self.categories[self.current_category_index]
         combo_box = active_category.widget
         all_items = active_category.items
-        active_category.selected_item_text = combo_box.currentText()
+        #active_category.selected_item_text = combo_box.currentText()
         filtered_items = [item for item in all_items if item.text.startswith(active_category.search_query)]
-        self.filteredItemsUpdated.emit(combo_box, filtered_items, active_category.selected_item_text)
+        self.filteredItemsUpdated.emit(combo_box, filtered_items, combo_box.currentText())
 
     def clear_filters(self):
         """Clear all search filters."""
-        self.search_query = ""
         for category in self.categories:
             category.search_query = ""
             combo_box = category.widget
-            self.filteredItemsUpdated.emit(combo_box, category.items, category.selected_item_text)
+            self.filteredItemsUpdated.emit(combo_box, category.items, combo_box.currentText())
 
     def handle_key_press(self, event: QKeyEvent) -> bool:
         """Handle key press events."""
@@ -143,3 +141,5 @@ class FilterManager(QObject):
             elif re.search(r"[أ-يئءؤآ]", event.text()):
                 self.filter_items(event.text())
                 return True
+
+        return False

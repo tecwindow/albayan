@@ -212,11 +212,11 @@ class SuraPlayerWindow(QMainWindow):
         shortcuts = {
     "Ctrl+Down": self.next_reciter,
     "Ctrl+Up": self.previous_reciter,
-    "E": lambda: UniversalSpeech.say(self.elapsed_time_label.text()),
-    "R": lambda: UniversalSpeech.say(self.remaining_time_label.text()),
-    "T": lambda: UniversalSpeech.say(self.total_time.text()),
-    "C": lambda: UniversalSpeech.say(self.reciter_combo.currentText()),
-    "V": lambda: UniversalSpeech.say(self.surah_combo.currentText()),
+    # "E": lambda: UniversalSpeech.say(self.elapsed_time_label.text()),
+    # "R": lambda: UniversalSpeech.say(self.remaining_time_label.text()),
+    # "T": lambda: UniversalSpeech.say(self.total_time.text()),
+    # "C": lambda: UniversalSpeech.say(self.reciter_combo.currentText()),
+    # "V": lambda: UniversalSpeech.say(self.surah_combo.currentText()),
 }
 
         if first_time:
@@ -378,8 +378,20 @@ class SuraPlayerWindow(QMainWindow):
 
         if self.filter_manager.handle_key_press(event):
             return
-            
-        super().keyPressEvent(event)
+    
+        shortcuts = {
+            Qt.Key.Key_E: lambda: UniversalSpeech.say(self.elapsed_time_label.text()),
+            Qt.Key.Key_R: lambda: UniversalSpeech.say(self.remaining_time_label.text()),
+            Qt.Key.Key_T: lambda: UniversalSpeech.say(self.total_time.text()),
+            Qt.Key.Key_C: lambda: UniversalSpeech.say(self.reciter_combo.currentText()),
+            Qt.Key.Key_C: lambda: UniversalSpeech.say(self.surah_combo.currentText())
+        }
+
+        if event.key() in shortcuts:
+            shortcuts[event.key()]()
+            return
+
+        return super().keyPressEvent(event)    
 
     def OnClose(self):
         self.player.stop()
