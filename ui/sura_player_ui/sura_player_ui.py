@@ -201,24 +201,42 @@ class SuraPlayerWindow(QMainWindow):
     def setup_shortcuts(self, disable=False,):
 
         shortcuts = {
-            self.menubar.play_pause_action: ["Space", "K"],
-            self.menubar.forward_action: ["Right", "L"],
-            self.menubar.rewind_action: ["Left", "J"],
-            self.menubar.replay_action: "Home",
-            self.menubar.up_volume_action: "Up",
-            self.menubar.down_volume_action: "Down",
-            self.menubar.previous_surah_action: "Ctrl+Left",
-            self.menubar.next_surah_action: "Ctrl+Right",
-            self.menubar.next_reciter_action: "Ctrl+Down",
-            self.menubar.previous_reciter_action: "Ctrl+Up",
-            self.menubar.stop_action: "S",
-            self.menubar.close_window_action: ["Ctrl+W", "Ctrl+F4"],
-            self.menubar.close_program_action: "Ctrl+X",
-}
+        self.menubar.play_pause_action: ["Space", "K"],
+        self.menubar.forward_action: ["Right", "L"],
+        self.menubar.rewind_action: ["Left", "J"],
+        self.menubar.replay_action: ["Home"],  # Wrapped in a list for consistency
+        self.menubar.up_volume_action: ["Up"],
+        self.menubar.down_volume_action: ["Down"],
+        self.menubar.previous_surah_action: ["Alt+Left"],
+        self.menubar.next_surah_action: ["Alt+Right"],
+        self.menubar.next_reciter_action: ["Alt+Down"],
+        self.menubar.previous_reciter_action: ["Alt+Up"],
+        self.menubar.stop_action: ["S"],
+        self.menubar.close_window_action: ["Ctrl+W", "Ctrl+F4"],
+        self.menubar.close_program_action: ["Ctrl+X"],
+        }
+
 
         for widget, key_sequence in shortcuts.items():
             key_sequence = [key_sequence] if isinstance(key_sequence, str) else key_sequence
             widget.setShortcuts([QKeySequence(key) for key in key_sequence])
+
+
+        # Forward Shortcuts
+        shift_forward_shortcut = QShortcut(QKeySequence("Shift+Right"), self)
+        shift_forward_shortcut.activated.connect(lambda: self.forward(10))
+        ctrl_forward_shortcut = QShortcut(QKeySequence("Ctrl+Right"), self)
+        ctrl_forward_shortcut.activated.connect(lambda: self.forward(20))
+        shift_ctrl_forward_shortcut = QShortcut(QKeySequence("Ctrl+Shift+Right"), self)
+        shift_ctrl_forward_shortcut.activated.connect(lambda: self.forward(60))
+
+        # Rewind Shortcuts
+        shift_rewind_shortcut = QShortcut(QKeySequence("Shift+Left"), self)
+        shift_rewind_shortcut.activated.connect(lambda: self.rewind(10))
+        ctrl_rewind_shortcut = QShortcut(QKeySequence("Ctrl+Left"), self)
+        ctrl_rewind_shortcut.activated.connect(lambda: self.rewind(20))
+        shift_ctrl_rewind_shortcut = QShortcut(QKeySequence("Ctrl+Shift+Left"), self)
+        shift_ctrl_rewind_shortcut.activated.connect(lambda: self.rewind(60))
 
 
 
@@ -263,10 +281,10 @@ class SuraPlayerWindow(QMainWindow):
     def stop(self):
         self.player.stop()
 
-    def forward(self, step = 10):
+    def forward(self, step = 5):
         self.player.forward(step)
 
-    def rewind(self, step= 10):
+    def rewind(self, step= 5):
         self.player.rewind(step)
 
     def set_position(self, position: int, by_percent: bool = False) -> None:
@@ -409,6 +427,15 @@ class SuraPlayerWindow(QMainWindow):
             ord("V"): lambda: UniversalSpeech.say(self.surah_combo.currentText()),
             ord("I"): lambda: UniversalSpeech.say(F"{self.surah_combo.currentText()}, {self.reciter_combo.currentText()}"),
             Qt.Key.Key_1: lambda: self.set_position(10, by_percent=True),
+            Qt.Key.Key_2: lambda: self.set_position(20, by_percent=True),
+            Qt.Key.Key_3: lambda: self.set_position(30, by_percent=True),
+            Qt.Key.Key_4: lambda: self.set_position(40, by_percent=True),
+            Qt.Key.Key_5: lambda: self.set_position(50, by_percent=True),
+            Qt.Key.Key_6: lambda: self.set_position(60, by_percent=True),
+            Qt.Key.Key_7: lambda: self.set_position(70, by_percent=True),
+            Qt.Key.Key_8: lambda: self.set_position(80, by_percent=True),
+            Qt.Key.Key_9: lambda: self.set_position(90, by_percent=True),
+            Qt.Key.Key_0: lambda: self.set_position(0, by_percent=True),
         }
         
         key_native = event.nativeVirtualKey()
