@@ -19,6 +19,7 @@ from utils.universal_speech import UniversalSpeech
 from utils.user_data import PreferencesManager
 from utils.settings import SettingsManager
 from.menubar import MenuBar
+from .key_handler import KeyHandler
 
 
 class SuraPlayerWindow(QMainWindow):
@@ -34,8 +35,7 @@ class SuraPlayerWindow(QMainWindow):
         self.player = SurahPlayer()
         self.audio_player_thread = AudioPlayerThread(self.player, self)
         self.filter_manager = FilterManager()
-        self.filter_mode = False
-        self.search_text = ""
+        self.key_handler = KeyHandler(self)
 
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
@@ -415,61 +415,7 @@ class SuraPlayerWindow(QMainWindow):
         if self.filter_manager.handle_key_press(event):
             return
 
-        if event.key() == Qt.Key_Left:
-            if event.modifiers() & (Qt.ControlModifier | Qt.ShiftModifier):
-                self.rewind(60)
-            elif event.modifiers() & Qt.ShiftModifier:
-                self.rewind(10)
-            elif event.modifiers() & Qt.ControlModifier:
-                self.rewind(20)
-
-        elif event.key() == Qt.Key_Right:
-            if event.modifiers() & (Qt.ControlModifier | Qt.ShiftModifier):
-                self.forward(60)
-            elif event.modifiers() & Qt.ShiftModifier:
-                self.forward(10)
-            elif event.modifiers() & Qt.ControlModifier:
-                self.forward(20)
-
-        else:
-            super().keyPressEvent(event)
-
-
-
-
-
-        if event.modifiers() & (Qt.ControlModifier | Qt.ShiftModifier | Qt.AltModifier):
-            return
-
-        shortcuts = {
-            ord("E"): lambda: UniversalSpeech.say(self.elapsed_time_label.text()),
-            ord("R"): lambda: UniversalSpeech.say(self.remaining_time_label.text()),
-            ord("T"): lambda: UniversalSpeech.say(self.total_time.text()),
-            ord("C"): lambda: UniversalSpeech.say(self.reciter_combo.currentText()),
-            ord("V"): lambda: UniversalSpeech.say(self.surah_combo.currentText()),
-            ord("I"): lambda: UniversalSpeech.say(F"{self.surah_combo.currentText()}, {self.reciter_combo.currentText()}"),
-            Qt.Key.Key_1: lambda: self.set_position(10, by_percent=True),
-            Qt.Key.Key_2: lambda: self.set_position(20, by_percent=True),
-            Qt.Key.Key_3: lambda: self.set_position(30, by_percent=True),
-            Qt.Key.Key_4: lambda: self.set_position(40, by_percent=True),
-            Qt.Key.Key_5: lambda: self.set_position(50, by_percent=True),
-            Qt.Key.Key_6: lambda: self.set_position(60, by_percent=True),
-            Qt.Key.Key_7: lambda: self.set_position(70, by_percent=True),
-            Qt.Key.Key_8: lambda: self.set_position(80, by_percent=True),
-            Qt.Key.Key_9: lambda: self.set_position(90, by_percent=True),
-            Qt.Key.Key_0: lambda: self.set_position(0, by_percent=True),
-            Qt.Key_MediaTogglePlayPause: lambda: self.toggle_play_pause(),
-            Qt.Key_MediaStop: lambda: self.stop(),
-            Qt.Key_MediaPrevious: lambda: self.previous_surah(),
-            Qt.Key_MediaNext: lambda: self.next_surah(),
-        }
-        
-        key_native = event.nativeVirtualKey()
-        if key_native in shortcuts:
-            shortcuts[key_native]()
-            return
-        elif event.key() in  shortcuts:
-            shortcuts[event.key()]()
+        if self.key_handler.handle_key_press(event):
             return
 
         return super().keyPressEvent(event)    
