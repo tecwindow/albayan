@@ -62,6 +62,8 @@ class QuranInterface(QMainWindow):
         self.set_shortcut()
 
     def set_shortcut(self):
+        QShortcut(QKeySequence("C"), self). \
+        activated.connect(self.say_current_ayah)
         for i in range(0, 5):  
             shortcut = QShortcut(QKeySequence(f"Ctrl+{i+1}"), self)
             shortcut.activated.connect(lambda mode=i: self.OnChangeNavigationMode(mode))
@@ -328,6 +330,10 @@ class QuranInterface(QMainWindow):
         text = AyaInfo(aya_info[1]).text
         InfoDialog(self, title, label, text, is_html_content=True).exec()
 
+    def say_current_ayah(self):
+        text = f"آية {self.toolbar.navigation.current_ayah} من سورة {self.toolbar.navigation.current_surah}"
+        UniversalSpeech.say(text)
+
     @exception_handler(ui_element=QMessageBox)
     def OnSaveBookmark(self, event):
 
@@ -380,7 +386,6 @@ class QuranInterface(QMainWindow):
          self.quran.type,
          self.quran.current_pos
          )
-
 
     def OnSave_alert(self):
         UniversalSpeech.say("تم حفظ الموضع الحالي.")
