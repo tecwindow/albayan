@@ -16,7 +16,7 @@ class KeyHandler:
 
         :param parent: The main application window (QMainWindow).
         """
-        self.parent = parent  # Reference to the main window
+        self.parent = parent
 
         # Mapping arrow keys to their respective functions
         self.arrow_actions = {
@@ -58,7 +58,6 @@ class KeyHandler:
         if self.process_arrows(event):
             return True
 
-        # Ignore unknown shortcuts if Ctrl, Shift, or Alt is held
         if event.modifiers() & (Qt.ControlModifier | Qt.ShiftModifier | Qt.AltModifier):
             return True
 

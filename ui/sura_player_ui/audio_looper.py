@@ -81,7 +81,18 @@ class AudioLooper:
             self.player.set_position(self.loop_start)
             self.player.play()
             self.monitor_timer.start()
-    
+
+    def resume(self):
+        """
+        Resume the looping playback if it was paused.
+        
+        This method will start the player's playback and restart the monitor timer if it is not active,
+        """
+        if self.loop_active:
+            self.player.play()
+            if not self.monitor_timer.isActive():
+                self.monitor_timer.start()    
+
     def set_loop_delay(self, delay: int):
         """
         Set the delay time (in milliseconds) before restarting the loop.

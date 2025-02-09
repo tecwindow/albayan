@@ -20,6 +20,7 @@ from utils.user_data import PreferencesManager
 from utils.settings import SettingsManager
 from.menubar import MenuBar
 from .key_handler import KeyHandler
+from .audio_looper import AudioLooper
 
 
 class SuraPlayerWindow(QMainWindow):
@@ -36,6 +37,7 @@ class SuraPlayerWindow(QMainWindow):
         self.audio_player_thread = AudioPlayerThread(self.player, self)
         self.filter_manager = FilterManager()
         self.key_handler = KeyHandler(self)
+        self.audio_looper = AudioLooper(self.player)
 
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
@@ -264,7 +266,9 @@ class SuraPlayerWindow(QMainWindow):
         self.statusBar().showMessage(f"السورة الحالية: {self.surah_combo.currentText()}")
 
     def toggle_play_pause(self):
-        if self.player.is_playing():
+        if self.audio_looper.loop_active and self.player.is_paused():
+            self.audio_looper   .resume()
+        elif self.player.is_playing():
             self.player.pause()
         else:
             self.play_current_surah()
