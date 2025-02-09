@@ -13,6 +13,17 @@ class MenuBar(QMenuBar):
         # Create Player Menu
         main_menu = self.addMenu("القائمة الرئيسية(&M)")
         player_menu = self.addMenu("مشغل القرآن(&P)")
+        loop_menu = self.addMenu("التكرار(&L)")
+        
+                # Create Actions for Main Menu
+        self.close_window_action = QAction("إغلاق النافذة", self) 
+        self.close_window_action .triggered.connect(self.parent.OnClose)
+        self.close_program_action = QAction("إغلاق البرنامج", self)
+        self.close_program_action.triggered.connect(QApplication.exit)
+
+        # Add Actions to Menu    
+        main_menu.addAction(self.close_window_action)
+        main_menu.addAction(self.close_program_action)        
         
         # Create Actions for Player Menu
         self.play_pause_action = QAction("تشغيل", self)  # "Play"
@@ -40,15 +51,14 @@ class MenuBar(QMenuBar):
         player_menu.addAction(self.next_reciter_action)
         player_menu.addAction(self.previous_reciter_action)
         
-        # Create Actions for Main Menu
-        self.close_window_action = QAction("إغلاق النافذة", self) 
-        self.close_window_action .triggered.connect(self.parent.OnClose)
-        self.close_program_action = QAction("إغلاق البرنامج", self)
-        self.close_program_action.triggered.connect(QApplication.exit)
+        self.set_start_action = QAction("تحديد نقطة البداية (A)", self)
+        self.set_end_action = QAction("تحديد نقطة النهاية (B)", self)
+        self.toggle_loop_action = QAction("تشغيل/إيقاف التكرار", self)
 
-        # Add Actions to Menu    
-        main_menu.addAction(self.close_window_action)
-        main_menu.addAction(self.close_program_action)
+        loop_menu.addActions([
+            self.set_start_action, self.set_end_action,
+            self.toggle_loop_action
+        ])        
         self.installEventFilter(self)
 
     def get_player_actions(self) -> List[QAction]:
