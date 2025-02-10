@@ -269,6 +269,7 @@ class SuraPlayerWindow(QMainWindow):
         self.audio_player_thread.start()
         self.preferences_manager.set_preference("reciter_id", self.reciter_combo.currentData())
         self.preferences_manager.set_preference("sura_number",  self.surah_combo.currentData())
+        self.audio_looper.clear_loop()
         
     def stop(self):
         self.player.stop()

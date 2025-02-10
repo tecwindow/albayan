@@ -22,7 +22,7 @@ class AudioLooper:
         self.loop_start = None  # Start point (A)
         self.loop_end = None    # End point (B)
         self.loop_active = False  # Loop state
-        self.loop_delay = 500   # Delay (in milliseconds) before restarting the loop
+        self.loop_delay = 100   # Delay (in milliseconds) before restarting the loop
         
         # Timer to monitor the player's current position.
         self.monitor_timer = QTimer()
@@ -92,6 +92,15 @@ class AudioLooper:
             self.player.play()
             if not self.monitor_timer.isActive():
                 self.monitor_timer.start()    
+
+    def clear_loop(self):
+        """Clear the loop points and stop the loop."""
+        self.loop_start = None
+        self.loop_end = None
+        self.loop_active = False
+        if  self.monitor_timer.isActive():
+            self.monitor_timer.stop()
+
 
     def set_loop_delay(self, delay: int):
         """
