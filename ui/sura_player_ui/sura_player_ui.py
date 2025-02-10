@@ -13,7 +13,7 @@ from core_functions.Reciters import SurahReciter
 from core_functions.quran_class import QuranConst
 from .FilterManager import Item, FilterManager
 from ui.widgets.toolbar import AudioPlayerThread
-from utils.const import data_folder, user_db_path
+from utils.const import Globals, data_folder, user_db_path
 from utils.audio_player import SurahPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import PreferencesManager
@@ -380,6 +380,7 @@ class SuraPlayerWindow(QMainWindow):
             self.statusBar().showMessage("إيقاف مؤقت")
 
     def OnFilterModeChange(self, active: bool) -> None:
+        Globals.effects_manager.play("filter clos") if not active else Globals.effects_manager.play("filter open")
         widgets = self.buttons + self.menubar.get_player_actions()
         for widget in widgets:
             widget.setEnabled(not active)
@@ -393,6 +394,9 @@ class SuraPlayerWindow(QMainWindow):
         
     def OnItemSelectionChanged(self, widget: QComboBox, index: int) -> None:
         widget.setCurrentIndex(index)
+        if widget.currentIndex() == 0 or widget.currentIndex() == widget.count() - 1:
+            Globals.effects_manager.play("alert")
+
         UniversalSpeech.say(f"{widget.currentText()} {widget.currentIndex() + 1} من {widget.count()}")
 
     def OnFilteredItemsUpdated(self, widget: QComboBox, items: List[Item], selected_item_text: str) -> None:
