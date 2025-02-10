@@ -219,30 +219,15 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.stop_action: ["S", "Ctrl+Space"],
         self.menubar.close_window_action: ["Ctrl+W", "Ctrl+F4"],
         self.menubar.close_program_action: ["Ctrl+X"],
+        self.menubar.set_start_action: ["["],
+        self.menubar.set_end_action: ["]"],
+        self.menubar.toggle_loop_action: ["Ctrl+R"],
         }
 
 
         for widget, key_sequence in shortcuts.items():
             key_sequence = [key_sequence] if isinstance(key_sequence, str) else key_sequence
             widget.setShortcuts([QKeySequence(key) for key in key_sequence])
-
-
-        # # Forward Shortcuts
-        # shift_forward_shortcut = QShortcut(QKeySequence("Shift+Right"), self)
-        # shift_forward_shortcut.activated.connect(lambda: self.forward(10))
-        # ctrl_forward_shortcut = QShortcut(QKeySequence("Ctrl+Right"), self)
-        # ctrl_forward_shortcut.activated.connect(lambda: self.forward(20))
-        # shift_ctrl_forward_shortcut = QShortcut(QKeySequence("Ctrl+Shift+Right"), self)
-        # shift_ctrl_forward_shortcut.activated.connect(lambda: self.forward(60))
-
-        # # Rewind Shortcuts
-        # shift_rewind_shortcut = QShortcut(QKeySequence("Shift+Left"), self)
-        # shift_rewind_shortcut.activated.connect(lambda: self.rewind(10))
-        # ctrl_rewind_shortcut = QShortcut(QKeySequence("Ctrl+Left"), self)
-        # ctrl_rewind_shortcut.activated.connect(lambda: self.rewind(20))
-        # shift_ctrl_rewind_shortcut = QShortcut(QKeySequence("Ctrl+Shift+Left"), self)
-        # shift_ctrl_rewind_shortcut.activated.connect(lambda: self.rewind(60))
-
 
 
     def update_current_reciter(self):

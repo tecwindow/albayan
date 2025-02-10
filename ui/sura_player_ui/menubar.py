@@ -51,8 +51,8 @@ class MenuBar(QMenuBar):
         player_menu.addAction(self.next_reciter_action)
         player_menu.addAction(self.previous_reciter_action)
         
-        self.set_start_action = QAction("تحديد نقطة البداية (A)", self)
-        self.set_end_action = QAction("تحديد نقطة النهاية (B)", self)
+        self.set_start_action = QAction("تحديد نقطة البداية", self)
+        self.set_end_action = QAction("تحديد نقطة النهاية", self)
         self.toggle_loop_action = QAction("تشغيل/إيقاف التكرار", self)
 
         loop_menu.addActions([
