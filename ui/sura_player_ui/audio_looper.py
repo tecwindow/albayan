@@ -19,8 +19,8 @@ class AudioLooper:
         :param loop_check_interval: Interval (in milliseconds) to check the player's position.
         """
         self.player = player
-        self.loop_start = None  # Start point (A)
-        self.loop_end = None    # End point (B)
+        self.loop_start = 0 # Start point (A)
+        self.loop_end = 0 # End point (B)
         self.loop_active = False  # Loop state
         self.loop_delay = 100   # Delay (in milliseconds) before restarting the loop
         
@@ -32,11 +32,15 @@ class AudioLooper:
     def set_loop_start(self):
         """Set the start point (A) for the repeat loop."""
         self.loop_start = self.player.get_position()
+        if self.loop_start > self.loop_end:
+            self.loop_end = self.player.get_length()
         UniversalSpeech.say(f"Start point set at {self.loop_start} seconds.")
     
     def set_loop_end(self):
         """Set the end point (B) for the repeat loop."""
         self.loop_end = self.player.get_position()
+        if self.loop_end < self.loop_start:
+            self.loop_start = 0
         UniversalSpeech.say(f"End point set at {self.loop_end} seconds.")
     
     def toggle_loop(self):
@@ -95,8 +99,8 @@ class AudioLooper:
 
     def clear_loop(self):
         """Clear the loop points and stop the loop."""
-        self.loop_start = None
-        self.loop_end = None
+        self.loop_start = 0
+        self.loop_end = 0
         self.loop_active = False
         if  self.monitor_timer.isActive():
             self.monitor_timer.stop()
