@@ -48,7 +48,7 @@ class AudioLooper:
         Toggle loop playback between start (A) and end (B).
         If loop points are not set, informs the user.
         """
-        if self.loop_start is None or self.loop_end is None:
+        if not self.loop_start  and  not self.loop_end:
             UniversalSpeech.say("Loop points not set.")
             return
 
