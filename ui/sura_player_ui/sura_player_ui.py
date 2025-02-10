@@ -189,6 +189,7 @@ class SuraPlayerWindow(QMainWindow):
         self.filter_manager.filterModeChanged.connect(self.OnFilterModeChange)
         self.filter_manager.activeCategoryChanged.connect(self.OnActiveCategoryChanged)
         self.filter_manager.itemSelectionChanged.connect(self.OnItemSelectionChanged)
+        self.filter_manager.selectOutOfRange.connect(self.OnOutOfRange)
         self.filter_manager.filteredItemsUpdated.connect(self.OnFilteredItemsUpdated)
         self.filter_manager.itemeSelected.connect(self.play_current_surah)
         self.filter_manager.searchQueryUpdated.connect(self.OnSearchQueryUpdated)
@@ -393,11 +394,11 @@ class SuraPlayerWindow(QMainWindow):
         UniversalSpeech.say(search_query)
         
     def OnItemSelectionChanged(self, widget: QComboBox, index: int) -> None:
-        widget.setCurrentIndex(index)
-        if widget.currentIndex() == 0 or widget.currentIndex() == widget.count() - 1:
-            Globals.effects_manager.play("alert")
-
+        widget.setCurrentIndex(index)            
         UniversalSpeech.say(f"{widget.currentText()} {widget.currentIndex() + 1} من {widget.count()}")
+
+    def OnOutOfRange(self):
+        Globals.effects_manager.play("alert")
 
     def OnFilteredItemsUpdated(self, widget: QComboBox, items: List[Item], selected_item_text: str) -> None:
         widget.clear()

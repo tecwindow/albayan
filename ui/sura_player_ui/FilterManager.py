@@ -27,6 +27,7 @@ class FilterManager(QObject):
     activeCategoryChanged = pyqtSignal(str)
     itemSelectionChanged = pyqtSignal(QComboBox, int)
     itemeSelected = pyqtSignal()
+    selectOutOfRange = pyqtSignal(int)
     filteredItemsUpdated = pyqtSignal(QComboBox, list, str)
     searchQueryUpdated = pyqtSignal(str)
 
@@ -66,6 +67,8 @@ class FilterManager(QObject):
         current_index = combo_box.currentIndex()
         new_index = max(0, min(combo_box.count() - 1, current_index + direction))
         self.itemSelectionChanged.emit(combo_box, new_index)
+        if current_index + direction in (-1, combo_box.count()):
+            self.selectOutOfRange.emit(current_index + direction)
 
     def filter_items(self, char: str):
         """Filter items in the active category based on the search query."""
