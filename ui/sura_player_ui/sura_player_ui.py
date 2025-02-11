@@ -37,7 +37,7 @@ class SuraPlayerWindow(QMainWindow):
         self.audio_player_thread = AudioPlayerThread(self.player, self)
         self.filter_manager = FilterManager()
         self.key_handler = KeyHandler(self)
-        self.audio_looper = AudioLooper(self.player)
+        self.audio_looper = AudioLooper(self, self.player)
 
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)

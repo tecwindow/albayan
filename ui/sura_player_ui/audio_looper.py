@@ -11,7 +11,7 @@ class AudioLooper:
     after a specified delay.
     """
     
-    def __init__(self, player: SurahPlayer, loop_check_interval: int = 100):
+    def __init__(self, parent, player: SurahPlayer, loop_check_interval: int = 100):
         """
         Initializes the AudioLooper.
         
@@ -19,6 +19,7 @@ class AudioLooper:
         :param loop_check_interval: Interval (in milliseconds) to check the player's position.
         """
 
+        self.parent = parent
         self.player = player
         self.loop_start = 0 # Start point (A)
         self.loop_end = 0 # End point (B)
@@ -35,7 +36,7 @@ class AudioLooper:
         self.loop_start = self.player.get_position()
         if self.loop_start > self.loop_end:
             self.loop_end = self.player.get_length()
-        UniversalSpeech.say(f"Start point set at {self.loop_start} seconds.")
+        UniversalSpeech.say(f"Start point set at {self.parent.format_time(self.loop_start)} seconds.")
     
     def set_loop_end(self):
         """Set the end point (B) for the repeat loop."""
@@ -107,7 +108,6 @@ class AudioLooper:
         self.player.set_position(self.loop_start)
         UniversalSpeech.say(f"Returned to start point: {self.loop_start} seconds.")
 
-
     def clear_loop(self):
         """Clear the loop points and stop the loop."""
         self.loop_start = 0
@@ -115,7 +115,6 @@ class AudioLooper:
         self.loop_active = False
         if  self.monitor_timer.isActive():
             self.monitor_timer.stop()
-
 
     def set_loop_delay(self, delay: int):
         """
