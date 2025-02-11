@@ -54,9 +54,12 @@ class MenuBar(QMenuBar):
         self.set_start_action = QAction("تحديد نقطة البداية", self)
         self.set_end_action = QAction("تحديد نقطة النهاية", self)
         self.toggle_loop_action = QAction("تشغيل/إيقاف التكرار", self)
+        self.return_to_start_action = QAction("تشغيل بداية التحديد", self)
+        self.clear_loop_action = QAction("تجاهل التحديد", self)
+
 
         loop_menu.addActions([
-            self.set_start_action, self.set_end_action,
+            self.set_start_action, self.set_end_action, self.return_to_start_action, self.clear_loop_action,
             self.toggle_loop_action
         ])        
         self.installEventFilter(self)

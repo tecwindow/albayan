@@ -178,6 +178,8 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.set_start_action.triggered.connect(self.audio_looper.set_loop_start)
         self.menubar.set_end_action.triggered.connect(self.audio_looper.set_loop_end)
         self.menubar.toggle_loop_action.triggered.connect(self.audio_looper.toggle_loop)
+        self.menubar.return_to_start_action.triggered.connect(self.audio_looper.return_to_start)
+        self.menubar.clear_loop_action.triggered.connect(self.audio_looper.clear_loop)
         self.close_button.clicked.connect(self.OnClose)
         self.volume_slider.valueChanged.connect(self.update_volume)
         self.time_slider.valueChanged.connect(self.update_time)
@@ -210,7 +212,7 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.play_pause_action: ["Space", "K"],
         self.menubar.forward_action: ["Right", "L"],
         self.menubar.rewind_action: ["Left", "J"],
-        self.menubar.replay_action: ["Home"],  # Wrapped in a list for consistency
+        self.menubar.replay_action: ["Home"],
         self.menubar.up_volume_action: ["Up"],
         self.menubar.down_volume_action: ["Down"],
         self.menubar.previous_surah_action: ["Alt+Left"],
@@ -220,9 +222,11 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.stop_action: ["S", "Ctrl+Space"],
         self.menubar.close_window_action: ["Ctrl+W", "Ctrl+F4"],
         self.menubar.close_program_action: ["Ctrl+X"],
-        self.menubar.set_start_action: ["["],
-        self.menubar.set_end_action: ["]"],
+        self.menubar.set_start_action: ["[", "ج"],
+        self.menubar.set_end_action: ["]", "د"],
         self.menubar.toggle_loop_action: ["Ctrl+R"],
+        self.menubar.return_to_start_action: ["Shift+R"],
+        self.menubar.clear_loop_action: ["Ctrl+shift+R"],
         }
 
 

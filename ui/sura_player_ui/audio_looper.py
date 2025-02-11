@@ -18,6 +18,7 @@ class AudioLooper:
         :param player: Reference to the main player for controlling playback.
         :param loop_check_interval: Interval (in milliseconds) to check the player's position.
         """
+
         self.player = player
         self.loop_start = 0 # Start point (A)
         self.loop_end = 0 # End point (B)
@@ -96,6 +97,16 @@ class AudioLooper:
             self.player.play()
             if not self.monitor_timer.isActive():
                 self.monitor_timer.start()    
+
+    def return_to_start(self):
+        """Return playback to the loop start point."""
+        if self.loop_start == 0:
+            UniversalSpeech.say("Loop start point not set.")
+            return
+
+        self.player.set_position(self.loop_start)
+        UniversalSpeech.say(f"Returned to start point: {self.loop_start} seconds.")
+
 
     def clear_loop(self):
         """Clear the loop points and stop the loop."""
