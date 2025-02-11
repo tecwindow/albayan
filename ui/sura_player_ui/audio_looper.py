@@ -73,7 +73,7 @@ class AudioLooper:
         If the position exceeds loop_end, restarts the loop after the specified delay.
         """
         current_position = self.player.get_position()
-        if current_position >= self.loop_end:
+        if current_position >= self.loop_end or current_position < self.loop_start:
             # Stop the monitor timer to avoid multiple triggers.
             self.monitor_timer.stop()
             QTimer.singleShot(self.loop_delay, self.restart_loop)
