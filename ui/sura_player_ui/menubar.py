@@ -65,7 +65,7 @@ class MenuBar(QMenuBar):
         self.installEventFilter(self)
 
     def get_player_actions(self) -> List[QAction]:
-        return [self.play_pause_action, self.stop_action, self.forward_action, self.rewind_action, self.replay_action, self.up_volume_action, self.down_volume_action, self.next_surah_action, self.previous_surah_action, self.next_reciter_action, self.previous_reciter_action]
+        return [self.play_pause_action, self.stop_action, self.forward_action, self.rewind_action, self.replay_action, self.up_volume_action, self.down_volume_action, self.next_surah_action, self.previous_surah_action, self.next_reciter_action, self.previous_reciter_action, self.set_start_action, self.set_end_action, self.return_to_start_action, self.clear_loop_action, self.toggle_loop_action]
 
     def eventFilter(self, obj, event: QEvent):
         if obj == self:
