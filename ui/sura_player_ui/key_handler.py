@@ -36,7 +36,7 @@ class KeyHandler:
             ord("E"): lambda: UniversalSpeech.say(parent.elapsed_time_label.text()),
             ord("R"): lambda: UniversalSpeech.say(parent.remaining_time_label.text()),
             ord("T"): lambda: UniversalSpeech.say(parent.total_time.text()),
-            ord("C"): lambda: UniversalSpeech.say(parent.reciter_combo.currentText()),
+            ord("C"): lambda: UniversalSpeech.say(parent.reciter_combo.currentText().split(' - ')[0]),
             ord("V"): lambda: UniversalSpeech.say(parent.surah_combo.currentText()),
             ord("I"): lambda: UniversalSpeech.say(
                 f"{parent.surah_combo.currentText()}, {parent.reciter_combo.currentText()}"
