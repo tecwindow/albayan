@@ -7,6 +7,7 @@ from ui.dialogs.bookmark_dialog import BookmarkDialog
 from ui.dialogs.go_to import GoToDialog
 from ui.dialogs.athkar_dialog import AthkarDialog
 from ui.sura_player_ui import SuraPlayerWindow
+from ui.dialogs.tasbih_dialog import TasbihDialog
 from core_functions.quran_class import QuranConst
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
@@ -160,15 +161,19 @@ class MenuBar(QMenuBar):
         bookmark_manager_action = QAction("مدير العلامات", self)
         bookmark_manager_action.setShortcut(QKeySequence("Shift+D"))
         bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
-        sura_player__action = QAction("مشغل القرآن", self)
-        sura_player__action.setShortcut(QKeySequence("Shift+P"))
-        sura_player__action.triggered.connect(self.OnSuraPlayer)
+        sura_player_action = QAction("مشغل القرآن", self)
+        sura_player_action.setShortcut(QKeySequence("Shift+P"))
+        sura_player_action.triggered.connect(self.OnSuraPlayer)
+        tasbih_action = QAction("المسبحة", self)
+        tasbih_action.setShortcut(QKeySequence("Shift+S"))
+        tasbih_action.triggered.connect(self.OnTasbihAction)
         open_log_action = QAction("فتح ملف السجل", self)
         open_log_action.setShortcut(QKeySequence("Shift+L"))
         open_log_action.triggered.connect(self.Onopen_log_file)
         tools_menu.addAction(athkar_action)
         tools_menu.addAction(bookmark_manager_action)
-        tools_menu.addAction(sura_player__action)
+        tools_menu.addAction(sura_player_action)
+        tools_menu.addAction(tasbih_action)
         tools_menu.addAction(open_log_action)
 
         preferences_menu = self.addMenu("التفضيلات(&R)")
@@ -238,8 +243,9 @@ class MenuBar(QMenuBar):
         self.sura_player_window.show()
         self.sura_player_window.activateWindow()
 
-
-
+    def OnTasbihAction(self):
+        tasbih_dialog = TasbihDialog(self.parent)
+        tasbih_dialog.exec()
 
     def OnTheme    (self):
 
