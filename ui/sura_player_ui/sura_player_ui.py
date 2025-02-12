@@ -39,6 +39,7 @@ class SuraPlayerWindow(QMainWindow):
         self.key_handler = KeyHandler(self)
         self.audio_looper = AudioLooper(self, self.player)
 
+
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
         self.setCentralWidget(central_widget)
@@ -195,6 +196,9 @@ class SuraPlayerWindow(QMainWindow):
         self.filter_manager.filteredItemsUpdated.connect(self.OnFilteredItemsUpdated)
         self.filter_manager.itemeSelected.connect(self.play_current_surah)
         self.filter_manager.searchQueryUpdated.connect(self.OnSearchQueryUpdated)
+
+
+
 
     def disable_focus(self):
 
@@ -421,6 +425,10 @@ class SuraPlayerWindow(QMainWindow):
             return
 
         return super().keyPressEvent(event)    
+
+    def show(self):
+        super().show()
+        UniversalSpeech.say(f"مرحبا بك في مشغل القرآن. أنت تستمع إلى سورة {self.surah_combo.currentText()}، للقارئ {self.reciter_combo.currentText().split(' - ')[0]}، اضغط Space للتشغيل.", interrupt=False)
 
     def OnClose(self):
         self.player.stop()
