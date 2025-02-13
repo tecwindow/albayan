@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QListWidget, QPushButton,
+    QDialog, QVBoxLayout, QListWidget, QPushButton, QInputDialog,
     QLineEdit, QLabel, QMessageBox, QListWidgetItem
 )
 from PyQt6.QtCore import Qt
@@ -19,10 +19,7 @@ class TasbihDialog(QDialog):
         
         # Create UI elements.
         self.listWidget = QListWidget()
-        self.entryLineEdit = QLineEdit()
-        self.entryLineEdit.setPlaceholderText("أدخل تسبيح جديد")
         self.addButton = QPushButton("إضافة تسبيح")
-        self.addButton.setEnabled(False)
         self.delete_button = QPushButton("حذف تسبيح")
         self.delete_button.setEnabled(False)
         self.incrementButton = QPushButton("زيادة العداد")
@@ -34,8 +31,6 @@ class TasbihDialog(QDialog):
         layout = QVBoxLayout()
         layout.addWidget(QLabel("التسابيح"))
         layout.addWidget(self.listWidget)
-        layout.addWidget(QLabel("تسبيح جديد"))
-        layout.addWidget(self.entryLineEdit)
         layout.addWidget(self.addButton)
         layout.addWidget(self.delete_button)
         layout.addWidget(self.incrementButton)
@@ -47,13 +42,11 @@ class TasbihDialog(QDialog):
         self.delete_button.clicked.connect(self.handle_delete_entry)
         self.incrementButton.clicked.connect(self.handle_increment)
         self.resetButton.clicked.connect(self.handle_reset)
-        self.entryLineEdit.textChanged.connect(self.OnLineEdit)
         self.listWidget.itemSelectionChanged.connect(self.OnItemSelectionChanged)
         
         # Connect controller signals to dialog slots.
         self.controller.entrieAdded.connect(self.handle_entry_added)
         self.controller.entrieUpdated.connect(self.handle_entry_updated)
-        
         # Populate the list with existing entries.
         self.populate_list()
         self.set_shortcuts()
@@ -92,12 +85,16 @@ class TasbihDialog(QDialog):
         self.listWidget.addItem(item)
         
     def handle_add_entry(self):
-        """Called when the Add button is clicked."""
-        new_name = self.entryLineEdit.text().strip()
-        self.controller.add_entry(new_name)
-        self.entryLineEdit.clear()
-        self.listWidget.setFocus()
+        """Called when the Add button is clicked.
         
+        Opens a QInputDialog to obtain the name for the new tasbih entry.
+        If a valid name is entered, it is added to the list and the list is focused.
+        """
+        new_name, ok = QInputDialog.getText(self, "إضافة تسبيح", "أدخل اسم التسبيح:")
+        if ok and new_name.strip():
+            self.controller.add_entry(new_name.strip())
+            self.listWidget.setFocus()
+
     def handle_entry_added(self, entry: TasbihEntry):
         """
         Slot called when a new entry is added.
@@ -105,6 +102,7 @@ class TasbihDialog(QDialog):
         """
         self.add_list_item(entry)
         self.listWidget.setCurrentRow(self.listWidget.count() - 1)
+
             
     def handle_entry_updated(self, entry: TasbihEntry):
         """
