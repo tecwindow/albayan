@@ -24,6 +24,8 @@ class TasbihController(QObject):
         default_entries = [
             "سبحان الله",
             "الحمد لله",
+            "أستغفر الله",
+            "لا حول ولا قوة إلا بالله",
             "الله أكبر",
             "لا إله إلا الله"
         ]
@@ -67,6 +69,15 @@ class TasbihController(QObject):
             item.counter += 1
             self.update_entry(item)
 
+    def decrement_entry_counter(self, entry_id):
+        """Increment the counter for a specific tasbih entry."""
+        item = self.get_entry(entry_id)
+        if item:
+            item.counter -= 1
+            self.update_entry(item)
+
+
+
     def reset_entry_counter(self, entry_id):
         """Reset the counter for a specific tasbih entry."""
         item = self.get_entry(entry_id)
@@ -81,3 +92,16 @@ class TasbihController(QObject):
             if entry:
                 session.delete(entry)
                 session.commit()
+
+    def reset_all_entries(self):
+        """Reset the counter for all tasbih entries."""
+        with self.Session() as session:
+            session.query(TasbihEntry).update({TasbihEntry.counter: 0})
+            session.commit()
+
+    def delete_all_entries(self):
+        """Delete all tasbih entries."""
+        with self.Session() as session:
+            session.query(TasbihEntry).delete()
+            session.commit()
+
