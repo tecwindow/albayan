@@ -197,9 +197,6 @@ class SuraPlayerWindow(QMainWindow):
         self.filter_manager.itemeSelected.connect(self.play_current_surah)
         self.filter_manager.searchQueryUpdated.connect(self.OnSearchQueryUpdated)
 
-
-
-
     def disable_focus(self):
 
         widgets = [
@@ -233,11 +230,9 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.clear_loop_action: ["Ctrl+shift+R"],
         }
 
-
         for widget, key_sequence in shortcuts.items():
             key_sequence = [key_sequence] if isinstance(key_sequence, str) else key_sequence
             widget.setShortcuts([QKeySequence(key) for key in key_sequence])
-
 
     def update_current_reciter(self):
         reciter_id = self.reciter_combo.currentData()
@@ -285,9 +280,11 @@ class SuraPlayerWindow(QMainWindow):
 
     def forward(self, step = 5):
         self.player.forward(step)
+        self.on_update_time(self.player.get_position(), self.player.get_length())
 
     def rewind(self, step= 5):
         self.player.rewind(step)
+        self.on_update_time(self.player.get_position(), self.player.get_length())
 
     def set_position(self, position: int, by_percent: bool = False) -> None:
         if by_percent:
