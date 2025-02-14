@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QListWidget, QPushButton, QInputDialog, 
+    QDialog, QVBoxLayout, QGridLayout, QListWidget, QPushButton, QInputDialog, 
     QLineEdit, QLabel, QMessageBox, QListWidgetItem
 )
 from PyQt6.QtCore import Qt
@@ -15,10 +15,11 @@ class TasbihDialog(QDialog):
         super().__init__(parent)
         self.controller = TasbihController(athkar_db_path)
         self.setWindowTitle("المسبحة")
-        self.resize(400, 300)
+        self.resize(400, 400)
         
         # Create UI elements.
         self.listWidget = QListWidget()
+        self.listWidget.setMinimumHeight(150)  # ضبط ارتفاع القائمة
         self.openButton = QPushButton("اختيار التسبيح")
         self.addButton = QPushButton("إضافة تسبيح")
         self.delete_button = QPushButton("حذف تسبيح")
@@ -34,19 +35,24 @@ class TasbihDialog(QDialog):
         self.deleteAllButton = QPushButton("حذف الكل")
         self.deleteAllButton.setEnabled(False)
 
-        # Layout.
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel("التسابيح"))
-        layout.addWidget(self.listWidget)
-        layout.addWidget(self.openButton)
-        layout.addWidget(self.addButton)
-        layout.addWidget(self.delete_button)
-        layout.addWidget(self.incrementButton)
-        layout.addWidget(self.decrementButton)
-        layout.addWidget(self.resetButton)
-        layout.addWidget(self.resetAllButton)
-        layout.addWidget(self.deleteAllButton)
-        self.setLayout(layout)
+        # Main layout
+        mainLayout = QVBoxLayout()
+        mainLayout.addWidget(QLabel("التسابيح"))
+        mainLayout.addWidget(self.listWidget)
+        # Buttons layout (2 rows)
+        gridLayout = QGridLayout()
+        gridLayout.addWidget(self.openButton, 0, 0)
+        gridLayout.addWidget(self.addButton, 0, 1)
+        gridLayout.addWidget(self.delete_button, 0, 2)
+        gridLayout.addWidget(self.incrementButton, 1, 0)
+        gridLayout.addWidget(self.decrementButton, 1, 1)
+        gridLayout.addWidget(self.resetButton, 1, 2)
+        gridLayout.addWidget(self.resetAllButton, 2, 0)
+        gridLayout.addWidget(self.deleteAllButton, 2, 1)
+
+        mainLayout.addLayout(gridLayout)
+        self.setLayout(mainLayout)
+
         
         # Connect UI button clicks to slots.
         self.openButton.clicked.connect(self.open_tasbih_entry_dialog)
