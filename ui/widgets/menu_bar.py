@@ -318,6 +318,7 @@ class MenuBar(QMenuBar):
         if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:
             self.parent.OnSaveCurrentPosition()
         self.parent.tray_manager.hide_icon()
+        self.sura_player_window.close()
         QApplication.quit()
         bass.BASS_Free()
 
