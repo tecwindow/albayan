@@ -19,7 +19,7 @@ class TasbihDialog(QDialog):
         
         # Create UI elements.
         self.listWidget = QListWidget()
-        self.listWidget.setMinimumHeight(150)  # ضبط ارتفاع القائمة
+        self.listWidget.setMinimumHeight(150)  # set list Height
         self.openButton = QPushButton("اختيار التسبيح")
         self.addButton = QPushButton("إضافة تسبيح")
         self.delete_button = QPushButton("حذف تسبيح")
