@@ -62,30 +62,28 @@ class TasbihController(QObject):
             session.commit()
             self.entrieUpdated.emit(tasbih_entry)
 
-    def increment_entry_counter(self, entry_id):
+    def increment_entry_counter(self, entry_id: int):
         """Increment the counter for a specific tasbih entry."""
         item = self.get_entry(entry_id)
         if item:
             item.counter += 1
             self.update_entry(item)
 
-    def decrement_entry_counter(self, entry_id):
-        """Increment the counter for a specific tasbih entry."""
+    def decrement_entry_counter(self, entry_id: int):
+        """Decrement the counter for a specific tasbih entry."""
         item = self.get_entry(entry_id)
         if item:
-            item.counter -= 1
+            item.counter = max(0, item.counter - 1)
             self.update_entry(item)
 
-
-
-    def reset_entry_counter(self, entry_id):
+    def reset_entry_counter(self, entry_id: int):
         """Reset the counter for a specific tasbih entry."""
         item = self.get_entry(entry_id)
         if item:
             item.counter = 0
             self.update_entry(item)
             
-    def delete_entry(self, entry_id):
+    def delete_entry(self, entry_id: int):
         """Delete a specific tasbih entry by its ID."""
         with self.Session() as session:
             entry = session.get(TasbihEntry, entry_id)
@@ -98,10 +96,11 @@ class TasbihController(QObject):
         with self.Session() as session:
             session.query(TasbihEntry).update({TasbihEntry.counter: 0})
             session.commit()
+            self.entriesUpdated(self.get_all_entries())
 
     def delete_all_entries(self):
         """Delete all tasbih entries."""
         with self.Session() as session:
             session.query(TasbihEntry).delete()
             session.commit()
-
+            self._initialize_default_entries()

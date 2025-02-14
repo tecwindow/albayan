@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QListWidget, QPushButton, QInputDialog,
+    QDialog, QVBoxLayout, QListWidget, QPushButton, QInputDialog, 
     QLineEdit, QLabel, QMessageBox, QListWidgetItem
 )
 from PyQt6.QtCore import Qt
@@ -9,7 +9,7 @@ from core_functions.tasbih.model import TasbihEntry
 from utils.const import athkar_db_path
 from utils.universal_speech import UniversalSpeech
 
-
+ 
 class TasbihDialog(QDialog):
     def __init__(self, parent) -> None:
         super().__init__(parent)
@@ -19,11 +19,14 @@ class TasbihDialog(QDialog):
         
         # Create UI elements.
         self.listWidget = QListWidget()
+        self.openButton = QPushButton("اختيار التسبيح")
         self.addButton = QPushButton("إضافة تسبيح")
         self.delete_button = QPushButton("حذف تسبيح")
         self.delete_button.setEnabled(False)
         self.incrementButton = QPushButton("زيادة العداد")
         self.incrementButton.setEnabled(False)
+        self.decrementButton = QPushButton("إنقاص العداد")
+        self.decrementButton.setEnabled(False)
         self.resetButton = QPushButton("مسح العداد")
         self.resetButton.setEnabled(False)
         self.resetAllButton = QPushButton("إعادة تعيين الكل")
@@ -35,20 +38,25 @@ class TasbihDialog(QDialog):
         layout = QVBoxLayout()
         layout.addWidget(QLabel("التسابيح"))
         layout.addWidget(self.listWidget)
+        layout.addWidget(self.openButton)
         layout.addWidget(self.addButton)
         layout.addWidget(self.delete_button)
         layout.addWidget(self.incrementButton)
+        layout.addWidget(self.decrementButton)
         layout.addWidget(self.resetButton)
         layout.addWidget(self.resetAllButton)
         layout.addWidget(self.deleteAllButton)
         self.setLayout(layout)
         
         # Connect UI button clicks to slots.
+        self.openButton.clicked.connect(self.open_tasbih_entry_dialog)
         self.addButton.clicked.connect(self.handle_add_entry)
         self.delete_button.clicked.connect(self.handle_delete_entry)
         self.incrementButton.clicked.connect(self.handle_increment)
+        self.decrementButton.clicked.connect(self.handle_decrement)
         self.resetButton.clicked.connect(self.handle_reset)
         self.listWidget.itemSelectionChanged.connect(self.OnItemSelectionChanged)
+        self.listWidget.itemClicked.connect(self.open_tasbih_entry_dialog)
         self.resetAllButton.clicked.connect(self.handle_reset_all)
         self.deleteAllButton.clicked.connect(self.handle_delete_all)
 
@@ -62,6 +70,7 @@ class TasbihDialog(QDialog):
     def set_shortcuts(self):
         shortcuts = {
             self.incrementButton: "C",
+            self.decrementButton: "D",
             self.delete_button: "Delete",
             self.resetButton: "R"
         }
@@ -69,16 +78,26 @@ class TasbihDialog(QDialog):
         for widget, shortcut in shortcuts.items():
             widget.setShortcut(QKeySequence(shortcut))
             
+    def open_tasbih_entry_dialog(self):
+        selected_item = self.listWidget.currentItem()
+        entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
+        tasbih_entry = self.controller.get_entry(entry_id)
+        dialog = TasbihEntryDialog(self, self.controller, tasbih_entry)
+        dialog.exec()
+            
     def OnLineEdit(self):
         self.addButton.setEnabled(bool(self.entryLineEdit.text()))
         
     def OnItemSelectionChanged(self):    
         status = bool(self.listWidget.selectedItems())
+        self.openButton.setEnabled(status)
         self.incrementButton.setEnabled(status)
+        self.decrementButton.setEnabled(status)
         self.resetButton.setEnabled(status)
         self.delete_button.setEnabled(status)
         self.resetAllButton.setEnabled(status)
         self.deleteAllButton.setEnabled(status)
+
         
     def populate_list(self):
         """Populate the list widget with all current tasbih entries."""
@@ -119,7 +138,6 @@ class TasbihDialog(QDialog):
         """
         self.add_list_item(entry)
         self.listWidget.setCurrentRow(self.listWidget.count() - 1)
-
             
     def handle_entry_updated(self, entry: TasbihEntry):
         """
@@ -140,6 +158,12 @@ class TasbihDialog(QDialog):
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         self.controller.increment_entry_counter(entry_id)
         
+    def handle_decrement(self):
+        """Decrement the counter for the selected entry."""
+        selected_item = self.listWidget.currentItem()
+        entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
+        self.controller.decrement_entry_counter(entry_id)
+        
     def handle_reset(self):
         """Reset the counter for the selected entry."""
         selected_item = self.listWidget.currentItem()
@@ -155,8 +179,6 @@ class TasbihDialog(QDialog):
         self.listWidget.takeItem(row)
         self.listWidget.setFocus()
     
-
-
     def handle_reset_all(self):
         """
         Reset the counter for all entries.
@@ -185,7 +207,6 @@ class TasbihDialog(QDialog):
                 self.listWidget.setCurrentRow(last_focused_index)
             self.listWidget.setFocus()
 
-
     def handle_delete_all(self):
         """
         Delete all entries.
@@ -206,5 +227,91 @@ class TasbihDialog(QDialog):
             self.controller.delete_all_entries()
             # Clear the list widget to update the UI.
             self.listWidget.clear()
+            self.populate_list()
             self.listWidget.setFocus()
 
+
+class TasbihEntryDialog(QDialog):
+    def __init__(self, parent, controller: TasbihController, tasbih_entry: TasbihEntry):
+        """
+        Sub dialog to show and manage details of a specific tasbih entry.        
+        """
+        super().__init__(parent)
+        self.controller = controller
+        self.tasbih_entry = tasbih_entry
+        self.setWindowTitle(tasbih_entry.name)
+        self.resize(300, 200)
+        
+        # Layout setup.
+        self.layout = QVBoxLayout(self)
+        
+        # Labels for displaying the tasbih details.
+        self.name_label = QLabel("Name: ")
+        self.counter_label = QLabel("Counter: 0")
+        self.layout.addWidget(self.name_label)
+        self.layout.addWidget(self.counter_label)
+        
+        # Buttons for actions.
+        self.increment_button = QPushButton("Increment")
+        self.decrement_button = QPushButton("Decrement")
+        self.reset_button = QPushButton("Reset")
+        self.close_button = QPushButton("Close")
+        
+        self.layout.addWidget(self.increment_button)
+        self.layout.addWidget(self.decrement_button)
+        self.layout.addWidget(self.reset_button)
+        self.layout.addWidget(self.close_button)
+        
+        # Disable focus for all widgets.
+        for widget in [self.increment_button, self.decrement_button, self.reset_button, self.close_button]:
+            widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        
+        # Connect button signals to handlers.
+        self.increment_button.clicked.connect(self.handle_increment)
+        self.decrement_button.clicked.connect(self.handle_decrement)
+        self.reset_button.clicked.connect(self.handle_reset)
+        self.close_button.clicked.connect(self.close)
+        self.controller.entrieUpdated.connect(self.handle_entry_updated)
+        
+        # Set keyboard shortcuts.
+        self.set_shortcuts()
+        
+        # Load details for the specified tasbih.
+        self.load_details()
+
+    def load_details(self, tasbih_entry: TasbihEntry = None):
+        """Load and display details for the specific tasbih entry."""
+        if tasbih_entry is None:
+            tasbih_entry = self.tasbih_entry
+        
+        self.name_label.setText(tasbih_entry.name)
+        self.counter_label.setText(str(tasbih_entry.counter))
+        
+    def handle_entry_updated(self, tasbih_entry: TasbihEntry):
+        self.load_details(tasbih_entry)
+        UniversalSpeech.say(str(tasbih_entry.counter))
+                
+    def handle_increment(self):
+        """Handle the increment action."""
+        self.controller.increment_entry_counter(self.tasbih_entry.id)
+        
+    def handle_decrement(self):
+        """Handle the decrement action."""
+        self.controller.decrement_entry_counter(self.tasbih_entry.id)
+        
+    def handle_reset(self):
+        """Handle the reset action."""
+        self.controller.reset_entry_counter(self.tasbih_entry.id)
+        
+    def set_shortcuts(self):
+        """Register keyboard shortcuts for actions."""
+        shortcuts = {
+            self.increment_button: "Space",
+            self.decrement_button: "D",
+            self.reset_button: "R",
+            self.close_button: "Ctrl+W"
+        }
+        
+        for widget, shortcut in shortcuts.items():
+            widget.setShortcut(QKeySequence(shortcut))
+            
