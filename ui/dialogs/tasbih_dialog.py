@@ -34,6 +34,9 @@ class TasbihDialog(QDialog):
         self.resetAllButton.setEnabled(False)
         self.deleteAllButton = QPushButton("حذف الكل")
         self.deleteAllButton.setEnabled(False)
+        self.close_button = QPushButton("إغلاق")
+
+
 
         # Main layout
         mainLayout = QVBoxLayout()
@@ -49,6 +52,7 @@ class TasbihDialog(QDialog):
         gridLayout.addWidget(self.resetButton, 1, 2)
         gridLayout.addWidget(self.resetAllButton, 2, 0)
         gridLayout.addWidget(self.deleteAllButton, 2, 1)
+        gridLayout.addWidget(self.close_button, 2, 2)
 
         mainLayout.addLayout(gridLayout)
         self.setLayout(mainLayout)
@@ -65,6 +69,8 @@ class TasbihDialog(QDialog):
         self.listWidget.itemClicked.connect(self.open_tasbih_entry_dialog)
         self.resetAllButton.clicked.connect(self.handle_reset_all)
         self.deleteAllButton.clicked.connect(self.handle_delete_all)
+        self.close_button.clicked.connect(self.reject)
+
 
         # Connect controller signals to dialog slots.
         self.controller.entrieAdded.connect(self.handle_entry_added)
@@ -102,6 +108,9 @@ class TasbihDialog(QDialog):
     def OnLineEdit(self):
         self.addButton.setEnabled(bool(self.entryLineEdit.text()))
         
+    def reject(self):
+        self.deleteLater()
+
     def OnItemSelectionChanged(self):    
         status = bool(self.listWidget.selectedItems())
         self.openButton.setEnabled(status)
@@ -266,10 +275,10 @@ class TasbihEntryDialog(QDialog):
         self.layout.addWidget(self.counter_label)
         
         # Buttons for actions.
-        self.increment_button = QPushButton("Increment")
-        self.decrement_button = QPushButton("Decrement")
-        self.reset_button = QPushButton("Reset")
-        self.close_button = QPushButton("Close")
+        self.increment_button = QPushButton("زيادة عداد التسبيح")
+        self.decrement_button = QPushButton("إنقاص عداد التسبيح")
+        self.reset_button = QPushButton("إعادة تعيين عداد التسبيح")
+        self.close_button = QPushButton("إغلاق")
         
         self.layout.addWidget(self.increment_button)
         self.layout.addWidget(self.decrement_button)
@@ -284,7 +293,7 @@ class TasbihEntryDialog(QDialog):
         self.increment_button.clicked.connect(self.handle_increment)
         self.decrement_button.clicked.connect(self.handle_decrement)
         self.reset_button.clicked.connect(self.handle_reset)
-        self.close_button.clicked.connect(self.close)
+        self.close_button.clicked.connect(self.reject)
         self.controller.entrieUpdated.connect(self.handle_entry_updated)
         
         # Set keyboard shortcuts.
@@ -321,7 +330,7 @@ class TasbihEntryDialog(QDialog):
         """Register keyboard shortcuts for actions."""
 
         shortcuts = {
-            self.increment_button: ["Space", "Return", "C", "+", "="],
+            self.increment_button: ["Space", "Return", "Enter", "C", "+", "="],
             self.decrement_button: ["D", "Ctrl+Space", "-", "Backspace"],
             self.reset_button: "Ctrl+R",
             self.close_button: ["Ctrl+W", "Ctrl+F4"]
@@ -346,4 +355,5 @@ class TasbihEntryDialog(QDialog):
             
                 self.addAction(action)  # Attach action to the main window/dialog
 
-
+    def reject(self):
+        self.deleteLater()
