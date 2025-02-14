@@ -328,3 +328,15 @@ class MenuBar(QMenuBar):
 
         # Open the log file with the default program for the file type
         os.startfile(log_file_path)
+
+    def open_documentation(doc_type: str):
+        file_map = {
+            "user_guide": "user_guide.html",
+            "help": "help.html"
+        }
+        file_name = file_map.get(doc_type)
+        if not file_name:
+            return
+        doc_path = os.path.join("documentation", file_name)
+        if os.path.exists(doc_path):
+            os.startfile(doc_path)
