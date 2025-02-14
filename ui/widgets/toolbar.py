@@ -17,6 +17,7 @@ class AudioPlayerThread(QThread):
     playback_finished = pyqtSignal()
     error_signal = pyqtSignal(ErrorMessage) 
     playback_time_changed = pyqtSignal(float, float)
+    file_changed = pyqtSignal(str)
 
     def __init__(self, player: AyahPlayer, parent: Optional[object] = None):
         super().__init__(parent)
@@ -32,6 +33,7 @@ class AudioPlayerThread(QThread):
                 self.waiting_to_load.emit(False)
                 try:
                     if self.player.source != self.url or self.player.is_stopped():
+                        self.file_changed.emit(self.url)
                         self.player.load_audio(self.url)
                     self.player.play()
                     self.manually_stopped = False

@@ -188,6 +188,7 @@ class SuraPlayerWindow(QMainWindow):
         self.audio_player_thread.playback_time_changed.connect(self.on_update_time)
         self.audio_player_thread.waiting_to_load.connect(self.update_buttons_status)
         self.audio_player_thread.statusChanged.connect(self.update_ui_status)
+        self.audio_player_thread.file_changed.connect(self.audio_looper.clear_loop)
 
         self.filter_manager.filterModeChanged.connect(self.OnFilterModeChange)
         self.filter_manager.activeCategoryChanged.connect(self.OnActiveCategoryChanged)
@@ -273,7 +274,6 @@ class SuraPlayerWindow(QMainWindow):
         self.audio_player_thread.start()
         self.preferences_manager.set_preference("reciter_id", self.reciter_combo.currentData())
         self.preferences_manager.set_preference("sura_number",  self.surah_combo.currentData())
-        self.audio_looper.clear_loop()
         
     def stop(self):
         self.player.stop()
