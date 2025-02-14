@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QLineEdit, QLabel, QMessageBox, QListWidgetItem
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut, QAction
 from core_functions.tasbih import TasbihController
 from core_functions.tasbih.model import TasbihEntry
 from utils.const import athkar_db_path
@@ -75,10 +75,14 @@ class TasbihDialog(QDialog):
 
     def set_shortcuts(self):
         shortcuts = {
-            self.incrementButton: "C",
-            self.decrementButton: "D",
+            self.incrementButton: "Ctrl+C",
+            self.decrementButton: "Ctrl+D",
+            self.deleteAllButton: "Ctrl+Delete",
+            self.resetAllButton: "Ctrl+Shift+R",
             self.delete_button: "Delete",
-            self.resetButton: "R"
+            self.addButton: "Ctrl+A",
+            self.openButton: "Ctrl+O",
+            self.resetButton: "Ctrl+R"
         }
         
         for widget, shortcut in shortcuts.items():
@@ -89,8 +93,12 @@ class TasbihDialog(QDialog):
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         tasbih_entry = self.controller.get_entry(entry_id)
         dialog = TasbihEntryDialog(self, self.controller, tasbih_entry)
+        UniversalSpeech.say(F"مرحبا بك في المِسْبَحَة، الذِكر: {tasbih_entry.name}، العدد: {tasbih_entry.counter}. استخدم المفاتيح التالية لزيادة العداد: Space, Enter, +,أو C. لإنقاص العداد: D, Ctrl+Space, -, أو Backspace. لإعادة تعيين العداد: Ctrl+R. للمعلومات: V للعدد، T للذِكر، I للكل.")
         dialog.exec()
-            
+
+                
+
+
     def OnLineEdit(self):
         self.addButton.setEnabled(bool(self.entryLineEdit.text()))
         
@@ -311,13 +319,31 @@ class TasbihEntryDialog(QDialog):
         
     def set_shortcuts(self):
         """Register keyboard shortcuts for actions."""
+
         shortcuts = {
-            self.increment_button: "Space",
-            self.decrement_button: "D",
-            self.reset_button: "R",
-            self.close_button: "Ctrl+W"
+            self.increment_button: ["Space", "Return", "C", "+", "="],
+            self.decrement_button: ["D", "Ctrl+Space", "-", "Backspace"],
+            self.reset_button: "Ctrl+R",
+            self.close_button: ["Ctrl+W", "Ctrl+F4"]
         }
-        
-        for widget, shortcut in shortcuts.items():
-            widget.setShortcut(QKeySequence(shortcut))
+
+        #Info shortcuts
+        counter_info_shortcut = QShortcut(QKeySequence("V"), self)
+        counter_info_shortcut.activated.connect(lambda: UniversalSpeech.say(str(self.counter_label.text())))
+        name_info_shortcut = QShortcut(QKeySequence("T"), self)
+        name_info_shortcut.activated.connect(lambda: UniversalSpeech.say(str(self.name_label.text())))
+        all_info_shortcut = QShortcut(QKeySequence("I"), self)
+        all_info_shortcut.activated.connect(lambda: UniversalSpeech.say(f"{self.name_label.text()}، {self.counter_label.text()}"))
+
+
+        for widget, key_sequence in shortcuts.items():
+            key_sequence = [key_sequence] if isinstance(key_sequence, str) else key_sequence
+
+            for key in key_sequence:
+                action = QAction(self)  # Create a new action
+                action.setShortcut(QKeySequence(key))  # Set the shortcut
+                action.triggered.connect(widget.click)  # Simulate button press
             
+                self.addAction(action)  # Attach action to the main window/dialog
+
+
