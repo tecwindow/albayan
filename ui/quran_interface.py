@@ -46,6 +46,7 @@ class QuranInterface(QMainWindow):
         self.setWindowTitle(title)
         self.resize(800, 600)
         self.center_window()
+        self.setWindowIcon(QIcon("Albayan.ico"))
         self.quran = quran_mgr()
         self.quran.load_quran(SettingsManager.current_settings["reading"]["font_type"])
         self.user_data_manager = UserDataManager(user_db_path)
