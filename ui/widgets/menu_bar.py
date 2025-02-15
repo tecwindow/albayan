@@ -336,8 +336,16 @@ class MenuBar(QMenuBar):
         appdata_path = os.path.expandvars('%appdata%')
         log_file_path = os.path.join(appdata_path, 'tecwindow', 'albayan', 'albayan.log')
 
-        # Open the log file with the default program for the file type
-        os.startfile(log_file_path)
+        try:
+            os.startfile(log_file_path)
+        except FileNotFoundError:
+            try:
+                os.makedirs(os.path.dirname(log_file_path), exist_ok=True)  
+                with open(log_file_path, 'w', encoding='utf-8') as f:
+                    f.write("")
+                os.startfile(log_file_path)
+            except Exception:
+                pass
 
     def open_documentation(doc_type: str):
         file_map = {
