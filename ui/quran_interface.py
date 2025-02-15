@@ -44,7 +44,8 @@ class QuranInterface(QMainWindow):
     def __init__(self, title):
         super().__init__()
         self.setWindowTitle(title)
-        self.setGeometry(100, 100, 800, 600)
+        self.resize(800, 600)
+        self.center_window()
         self.quran = quran_mgr()
         self.quran.load_quran(SettingsManager.current_settings["reading"]["font_type"])
         self.user_data_manager = UserDataManager(user_db_path)
@@ -60,6 +61,12 @@ class QuranInterface(QMainWindow):
         self.create_layout()
         self.set_text()
         self.set_shortcut()
+
+    def center_window(self):
+        screen_geometry = QApplication.primaryScreen().availableGeometry()
+        window_geometry = self.frameGeometry()
+        window_geometry.moveCenter(screen_geometry.center())
+        self.move(window_geometry.topLeft())
 
     def set_shortcut(self):
         QShortcut(QKeySequence("C"), self). \
