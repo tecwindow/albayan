@@ -4,7 +4,7 @@ from utils.const import albayan_folder
 
 
 class SettingsManager:
-    path = os.path.join(albayan_folder, "Settingss.ini")
+    path = os.path.join(albayan_folder, "config.ini")
     config = configparser.ConfigParser()
 
     default_settings = {
