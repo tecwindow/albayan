@@ -22,6 +22,7 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 ArchitecturesAllowed=x64
+SetupIconFile=Albayan.ico
 
 DefaultDirName={sd}\program files\tecwindow\{#MyAppName}
 DisableProgramGroupPage=yes
@@ -60,8 +61,8 @@ Source: "albayan_build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 Source: "albayan_build\Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\Albayan"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Albayan.ico"
+Name: "{autodesktop}\Albayan"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Albayan.ico"; Tasks: desktopicon
 
 [INI]
 Filename: "{userappdata}\tecwindow\{#MyAppName}\config.ini"; Section: "general"; Key: "run_in_background_enabled"; String: "true"; Tasks: autorun
