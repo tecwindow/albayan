@@ -242,6 +242,7 @@ class MenuBar(QMenuBar):
             self.sura_player_window = SuraPlayerWindow(self.parent)
         self.sura_player_window.show()
         self.sura_player_window.activateWindow()
+        self.parent.hide()
 
     def OnTasbihAction(self):
         tasbih_dialog = TasbihDialog(self.parent)

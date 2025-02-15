@@ -26,6 +26,7 @@ from .audio_looper import AudioLooper
 class SuraPlayerWindow(QMainWindow):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
+        self.parent = parent
         self.setWindowTitle("مشغل القرآن")
         self.resize(600, 400)
         self.preferences_manager = PreferencesManager(user_db_path)
@@ -431,6 +432,7 @@ class SuraPlayerWindow(QMainWindow):
         self.player.stop()
         self.audio_player_thread.quit()
         self.close()
+        self.parent.show()
 
     def closeEvent(self, a0):
         self.OnClose()
