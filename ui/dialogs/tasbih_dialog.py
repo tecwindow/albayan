@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut, QAction
+import qtawesome as qta
 from core_functions.tasbih import TasbihController
 from core_functions.tasbih.model import TasbihEntry
 from utils.const import athkar_db_path
@@ -20,21 +21,57 @@ class TasbihDialog(QDialog):
         # Create UI elements.
         self.listWidget = QListWidget()
         self.listWidget.setMinimumHeight(150)  # set list Height
-        self.openButton = QPushButton("اختيار التسبيح")
-        self.addButton = QPushButton("إضافة تسبيح")
-        self.delete_button = QPushButton("حذف تسبيح")
+        
+        self.openButton = QPushButton()
+        self.openButton.setIcon(qta.icon("fa.folder-open"))
+        self.openButton.setToolTip("اختيار التسبيح")
+        self.openButton.setAccessibleName("اختيار التسبيح")
+        
+        self.addButton = QPushButton()
+        self.addButton.setIcon(qta.icon("fa.plus"))
+        self.addButton.setToolTip("إضافة تسبيح")
+        self.addButton.setAccessibleName("إضافة تسبيح")
+        
+        self.delete_button = QPushButton()
+        self.delete_button.setIcon(qta.icon("fa.trash"))
+        self.delete_button.setToolTip("حذف تسبيح")
+        self.delete_button.setAccessibleName("حذف تسبيح")
         self.delete_button.setEnabled(False)
-        self.incrementButton = QPushButton("زيادة العداد")
+        
+        self.incrementButton = QPushButton()
+        self.incrementButton.setIcon(qta.icon("fa.arrow-up"))
+        self.incrementButton.setToolTip("زيادة العداد")
+        self.incrementButton.setAccessibleName("زيادة العداد")
         self.incrementButton.setEnabled(False)
-        self.decrementButton = QPushButton("إنقاص العداد")
+        
+        self.decrementButton = QPushButton()
+        self.decrementButton.setIcon(qta.icon("fa.arrow-down"))
+        self.decrementButton.setToolTip("إنقاص العداد")
+        self.decrementButton.setAccessibleName("إنقاص العداد")
         self.decrementButton.setEnabled(False)
-        self.resetButton = QPushButton("مسح العداد")
+        
+        self.resetButton = QPushButton()
+        self.resetButton.setIcon(qta.icon("fa.refresh"))
+        self.resetButton.setToolTip("مسح العداد")
+        self.resetButton.setAccessibleName("مسح العداد")
         self.resetButton.setEnabled(False)
-        self.resetAllButton = QPushButton("إعادة تعيين الكل")
+        
+        self.resetAllButton = QPushButton()
+        self.resetAllButton.setIcon(qta.icon("fa.undo"))
+        self.resetAllButton.setToolTip("إعادة تعيين الكل")
+        self.resetAllButton.setAccessibleName("إعادة تعيين الكل")
         self.resetAllButton.setEnabled(False)
-        self.deleteAllButton = QPushButton("حذف الكل")
+        
+        self.deleteAllButton = QPushButton()
+        self.deleteAllButton.setIcon(qta.icon("fa.trash-o"))
+        self.deleteAllButton.setToolTip("حذف الكل")
+        self.deleteAllButton.setAccessibleName("حذف الكل")
         self.deleteAllButton.setEnabled(False)
-        self.close_button = QPushButton("إغلاق")
+        
+        self.close_button = QPushButton()
+        self.close_button.setIcon(qta.icon("fa.times"))
+        self.close_button.setToolTip("إغلاق")
+        self.close_button.setAccessibleName("إغلاق")
 
         # Main layout
         mainLayout = QVBoxLayout()
