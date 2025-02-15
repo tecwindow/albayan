@@ -6,6 +6,10 @@ from cx_Freeze import setup, Executable
 import PyQt6
 pyqt_path = os.path.dirname(PyQt6.__file__)
 
+# rename the main file to programe name 
+if os.path.exists("main.py"):
+    os.rename("main.py", "Albayan.py")
+
 # Include additional files and DLLs
 include_files = [("database", "database"), ("documentation", "documentation"), ("Audio", "Audio"), ("bass.dll", "bass.dll"), ("icon.webp", "icon.webp")]
 dll_files = ["Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Network.dll"]
@@ -32,7 +36,7 @@ setup(
     version="2.0.0",
     description=description,
     options={"build_exe": build_exe_options},
-    executables=[Executable("main.py", base=base)]
+    executables=[Executable("Albayan.py", base=base)]
 )
 
 #clean
@@ -42,3 +46,7 @@ for folder in folder_paths:
         shutil.rmtree(os.path.abspath(folder))
     except:
         pass
+
+# reset main file name
+if os.path.exists("Albayan. py"):
+    os.rename("Albayan.py", "main.py")
