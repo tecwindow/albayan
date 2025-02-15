@@ -251,6 +251,7 @@ class MenuBar(QMenuBar):
         self.parent.hide()
 
 
+
     def OnTasbihAction(self):
         tasbih_dialog = TasbihDialog(self.parent)
         tasbih_dialog.exec()
@@ -326,7 +327,8 @@ class MenuBar(QMenuBar):
         if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:
             self.parent.OnSaveCurrentPosition()
         self.parent.tray_manager.hide_icon()
-        self.sura_player_window.close()
+        if self.sura_player_window is not None:
+            self.sura_player_window.close()
         QApplication.quit()
         bass.BASS_Free()
 
