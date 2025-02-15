@@ -1,4 +1,5 @@
 @echo off
+title AlbayanBuild
 set VENV_DIR=albayan_env
 
 if not exist %VENV_DIR% (
