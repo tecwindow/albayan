@@ -25,7 +25,7 @@ os.makedirs(albayan_documents_dir, exist_ok=True)
 program_name = "البيان"
 program_english_name = "Albayan"
 program_version = "2.0.0"
-program_icon = "icon.webp"
+program_icon = "Albayan.ico"
 website = "https://tecwindow.net/"
 
 
