@@ -204,8 +204,12 @@ class MenuBar(QMenuBar):
 
 
         help_menu = self.addMenu("المساعدة(&H)")
-#        user_guide_action = QAction("دليل البرنامج", self)
-#        user_guide_action.setShortcut(QKeySequence("F1"))
+        user_guide_action = QAction("دليل البرنامج", self)
+        user_guide_action.setShortcut(QKeySequence("F1"))
+        user_guide_action.triggered.connect(lambda: MenuBar.open_documentation("user_guide"))
+        whats_new_action = QAction("دليل البرنامج", self)
+        whats_new_action.setShortcut(QKeySequence("F2"))
+        whats_new_action.triggered.connect(lambda: MenuBar.open_documentation("Whats_new"))
         contact_us_menu = QMenu("اتصل بنا", self)
         for name in self.our_emails:
             name_action = QAction(name, self)
@@ -223,6 +227,8 @@ class MenuBar(QMenuBar):
 #        help_menu.addAction(user_guide_action)
         help_menu.addMenu(contact_us_menu)
         help_menu.addAction(update_program_action)
+        help_menu.addAction(user_guide_action)
+        help_menu.addAction(whats_new_action)
         help_menu.addAction(about_program_action)
 
     def OnSettings(self):
@@ -242,6 +248,8 @@ class MenuBar(QMenuBar):
             self.sura_player_window = SuraPlayerWindow(self.parent)
         self.sura_player_window.show()
         self.sura_player_window.activateWindow()
+        self.parent.hide()
+
 
     def OnTasbihAction(self):
         tasbih_dialog = TasbihDialog(self.parent)
@@ -331,8 +339,8 @@ class MenuBar(QMenuBar):
 
     def open_documentation(doc_type: str):
         file_map = {
-            "user_guide": "user_guide.html",
-            "help": "help.html"
+            "user_guide": "UserGuide.html",
+            "Whats_new": "WhatsNew.html"
         }
         file_name = file_map.get(doc_type)
         if not file_name:

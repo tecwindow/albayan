@@ -7,7 +7,7 @@ import PyQt6
 pyqt_path = os.path.dirname(PyQt6.__file__)
 
 # Include additional files and DLLs
-include_files = [("database", "database"), ("Audio", "Audio"), ("bass.dll", "bass.dll"), ("icon.webp", "icon.webp")]
+include_files = [("database", "database"), ("documentation", "documentation"), ("Audio", "Audio"), ("bass.dll", "bass.dll"), ("icon.webp", "icon.webp")]
 dll_files = ["Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Network.dll"]
 for file in dll_files:
     include_files.append((os.path.join(pyqt_path, "Qt6", "bin", file), os.path.join("lib", file)))

@@ -26,6 +26,7 @@ from .audio_looper import AudioLooper
 class SuraPlayerWindow(QMainWindow):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
+        self.parent = parent
         self.setWindowTitle("مشغل القرآن")
         self.resize(600, 400)
         self.preferences_manager = PreferencesManager(user_db_path)
@@ -291,9 +292,12 @@ class SuraPlayerWindow(QMainWindow):
             total_length = self.player.get_length()
             position = total_length * (position / 100)
         self.player.set_position(position)
-        
+        self.on_update_time(self.player.get_position(), self.player.get_length())
+
+
     def replay(self):
         self.player.set_position(0)
+        self.on_update_time(self.player.get_position(), self.player.get_length())
 
     def next_surah(self):
         current_index = self.surah_combo.currentIndex()
@@ -431,6 +435,7 @@ class SuraPlayerWindow(QMainWindow):
         self.player.stop()
         self.audio_player_thread.quit()
         self.close()
+        self.parent.show()
 
     def closeEvent(self, a0):
         self.OnClose()

@@ -110,12 +110,14 @@ class AudioLooper:
 
     def clear_loop(self):
         """Clear the loop points and stop the loop."""
+        if int(self.loop_end) == 0:
+                        return
         self.loop_start = 0
         self.loop_end = 0
         self.loop_active = False
         if  self.monitor_timer.isActive():
             self.monitor_timer.stop()
-        #UniversalSpeech.say(F"تم مسح البداية والنهاية وإيقاف التكرار.")
+        UniversalSpeech.say(F"تم مسح البداية والنهاية وإيقاف التكرار.")
 
 
     def set_loop_delay(self, delay: int):
