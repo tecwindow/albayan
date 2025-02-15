@@ -2,19 +2,24 @@ import shutil
 import sys
 import os
 from cx_Freeze import setup, Executable
-
 import PyQt6
+
 pyqt_path = os.path.dirname(PyQt6.__file__)
 
-# rename the main file to programe name 
 if os.path.exists("main.py"):
     os.rename("main.py", "Albayan.py")
 
-# Include additional files and DLLs
-include_files = [("database", "database"), ("documentation", "documentation"), ("Audio", "Audio"), ("bass.dll", "bass.dll"), ("icon.webp", "icon.webp")]
+include_files = [
+    ("database", "database"),
+    ("documentation", "documentation"),
+    ("Audio", "Audio"),
+    ("bass.dll", "bass.dll"),
+    ("Albayan.ico", "Albayan.ico")
+]
 dll_files = ["Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Network.dll"]
 for file in dll_files:
     include_files.append((os.path.join(pyqt_path, "Qt6", "bin", file), os.path.join("lib", file)))
+
 
 build_exe_options = {
     "build_exe": "albayan_build",
@@ -26,27 +31,28 @@ build_exe_options = {
     "include_msvcr": True
 }
 
-description = "albayan"
-base = None
-if sys.platform == "win32":
-    base = "Win32GUI"
-
 setup(
-    name="albayan",
-    version="2.0.0",
-    description=description,
+    name="Albayan",
+    version="2.1.0",
+    description="كل ما يخص الإسلام",
     options={"build_exe": build_exe_options},
-    executables=[Executable("Albayan.py", base=base)]
+    executables=[
+        Executable(
+            "Albayan.py",
+            base="Win32GUI" if sys.platform == "win32" else None,
+            target_name="Albayan.exe",
+            icon="Albayan.ico",
+            copyright="All rights reserved tecwindow"
+        )
+    ]
 )
 
-#clean
 folder_paths = ["albayan_build/lib/PyQt6/Qt6/bin", "albayan_build/lib/PyQt6/Qt6/translations"]
 for folder in folder_paths:
     try:
         shutil.rmtree(os.path.abspath(folder))
-    except:
-        pass
+    except Exception as e:
+        print(f"Error removing {folder}: {e}")
 
-# reset main file name
-if os.path.exists("Albayan. py"):
+if os.path.exists("Albayan.py"):
     os.rename("Albayan.py", "main.py")
