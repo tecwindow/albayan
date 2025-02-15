@@ -27,7 +27,7 @@ build_exe_options = {
     "include_files": include_files,
     "packages": ["core_functions", "theme", "ui", "utils"],
     "includes": ["PyQt6.QtCore", "PyQt6.QtWidgets", "PyQt6.QtGui", "PyQt6.QtMultimedia", "packaging", "requests", "UniversalSpeech", "sqlalchemy", "sqlalchemy.dialects.sqlite", "apscheduler"],
-    "excludes": ["tkinter", "test", "setuptools", "pip", "numpy"],
+    "excludes": ["tkinter", "test", "setuptools", "pip", "numpy", "unittest"],
     "include_msvcr": True
 }
 
