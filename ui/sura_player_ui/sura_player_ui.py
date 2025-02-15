@@ -13,7 +13,7 @@ from core_functions.Reciters import SurahReciter
 from core_functions.quran_class import QuranConst
 from .FilterManager import Item, FilterManager
 from ui.widgets.toolbar import AudioPlayerThread
-from utils.const import Globals, data_folder, user_db_path
+from utils.const import Globals, data_folder, user_db_path, program_name
 from utils.audio_player import SurahPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import PreferencesManager
@@ -27,7 +27,7 @@ class SuraPlayerWindow(QMainWindow):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.parent = parent
-        self.setWindowTitle("مشغل القرآن")
+        self.setWindowTitle(f"{program_name} - مشغل القرآن")
         self.resize(600, 400)
         self.preferences_manager = PreferencesManager(user_db_path)
         self.menubar = MenuBar(self)
