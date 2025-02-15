@@ -96,7 +96,6 @@ class TasbihController(QObject):
         with self.Session() as session:
             session.query(TasbihEntry).update({TasbihEntry.counter: 0})
             session.commit()
-            self.entriesUpdated(self.get_all_entries())
 
     def delete_all_entries(self):
         """Delete all tasbih entries."""
