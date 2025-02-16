@@ -145,8 +145,8 @@ class QuranInterface(QMainWindow):
         self.quran_player.setIcon(qta.icon("fa.play-circle"))
         self.quran_player.setToolTip("مشغل القرآن")
         self.quran_player.setAccessibleName("مشغل القرآن")
-        self.quran_player.clicked.connect(self.OnSuraPlayer)
-        self.quran_player.setShortcut(QKeySequence("Ctrl+P"))
+        self.quran_player.clicked.connect(self.menu_bar.OnSuraPlayer)
+
 
 
 
@@ -460,9 +460,3 @@ class QuranInterface(QMainWindow):
         info_dialog.choose_QuotesMessage()
         info_dialog.exec()
 
-    def OnSuraPlayer(self):
-        if self.sura_player_window is None or not self.sura_player_window.isVisible():
-            self.sura_player_window = SuraPlayerWindow(self)
-            self.sura_player_window.show()
-        else:
-            self.sura_player_window.activateWindow()
