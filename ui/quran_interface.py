@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
     QApplication,
     QTextEdit
 )
+import qtawesome as qta
 from PyQt6.QtGui import QIcon, QAction, QShowEvent, QTextCursor, QKeySequence, QShortcut
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
@@ -90,27 +91,49 @@ class QuranInterface(QMainWindow):
         self.quran_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.quran_view.customContextMenuRequested.connect(self.onContextMenu)
         
-        self.next_to = EnterButton("التالي")
+        self.next_to = EnterButton()
+        self.next_to.setIcon(qta.icon("fa.forward"))
+        self.next_to.setToolTip("التالي")
+        self.next_to.setAccessibleName("التالي")
         self.next_to.clicked.connect(self.OnNext)
         
-        self.back_to = EnterButton("السابق")
+        self.back_to = EnterButton()
+        self.back_to.setIcon(qta.icon("fa.backward"))
+        self.back_to.setToolTip("السابق")
+        self.back_to.setAccessibleName("السابق")
         self.back_to.clicked.connect(self.OnBack)
-
-        self.interpretation_verse = EnterButton("تفسير الآية")
+        
+        self.interpretation_verse = EnterButton()
+        self.interpretation_verse.setIcon(qta.icon("fa.book"))
+        self.interpretation_verse.setToolTip("تفسير الآية")
+        self.interpretation_verse.setAccessibleName("تفسير الآية")
         self.interpretation_verse.setEnabled(False)
         self.interpretation_verse.clicked.connect(self.OnInterpretation)
-
-        self.quick_access = EnterButton("الوصول السريع")
+        
+        self.quick_access = EnterButton()
+        self.quick_access.setIcon(qta.icon("fa.bolt"))
+        self.quick_access.setToolTip("الوصول السريع")
+        self.quick_access.setAccessibleName("الوصول السريع")
         self.quick_access.clicked.connect(self.OnQuickAccess)
-
-        self.search_in_quran = EnterButton("البحث في القرآن")
+        
+        self.search_in_quran = EnterButton()
+        self.search_in_quran.setIcon(qta.icon("fa.search"))
+        self.search_in_quran.setToolTip("البحث في القرآن")
+        self.search_in_quran.setAccessibleName("البحث في القرآن")
         self.search_in_quran.clicked.connect(self.OnSearch)
-        self.save_current_position = EnterButton("حفظ الموضع الحالي")
+        
+        self.save_current_position = EnterButton()
+        self.save_current_position.setIcon(qta.icon("fa.save"))
+        self.save_current_position.setToolTip("حفظ الموضع الحالي")
+        self.save_current_position.setAccessibleName("حفظ الموضع الحالي")
         self.save_current_position.setEnabled(False)
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
         self.save_current_position.clicked.connect(self.OnSave_alert)
-
-        self.random_messages = EnterButton("رسالة لك")
+        
+        self.random_messages = EnterButton()
+        self.random_messages.setIcon(qta.icon("fa.comment"))
+        self.random_messages.setToolTip("رسالة لك")
+        self.random_messages.setAccessibleName("رسالة لك")
         self.random_messages.clicked.connect(self.OnRandomMessages)
         self.random_messages.setShortcut(QKeySequence("Ctrl+M"))
 
