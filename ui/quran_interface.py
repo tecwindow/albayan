@@ -16,7 +16,8 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QInputDialog,
     QApplication,
-    QTextEdit
+    QTextEdit,
+    QSystemTrayIcon
 )
 import qtawesome as qta
 from PyQt6.QtGui import QIcon, QAction, QShowEvent, QTextCursor, QKeySequence, QShortcut
@@ -448,7 +449,8 @@ class QuranInterface(QMainWindow):
         if SettingsManager.current_settings["general"]["run_in_background_enabled"]:
             event.ignore()
             self.hide()
-            self.tray_manager.tray_icon.showMessage("البيان", "تم تصغير نافذة البيان على صينية النظام, البرنامج يعمل في الخلفية.", msecs=5000)
+            icon_path = "Albayan.ico"
+            self.tray_manager.tray_icon.showMessage("البيان", "تم تصغير نافذة البيان على صينية النظام, البرنامج يعمل في الخلفية.", QIcon(icon_path), msecs=5000)
         else:
             self.tray_manager.hide_icon()
             
