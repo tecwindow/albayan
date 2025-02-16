@@ -25,6 +25,7 @@ from utils.const import data_folder, program_english_name
 from utils.settings import SettingsManager
 from utils.audio_player import AthkarPlayer, AyahPlayer, SurahPlayer, SoundEffectPlayer
 from utils.Startup import StartupManager
+import qtawesome as qta
 
 
 class SettingsDialog(QDialog):
@@ -48,12 +49,22 @@ class SettingsDialog(QDialog):
         tree_widget.setMinimumWidth(200)
         tree_widget.setStyleSheet("QTreeWidget { font-size: 14px; }")
         
-        # Adding items to the tree
+        # Adding items to the tree with icons
         general_item = QTreeWidgetItem(["الإعدادات العامة"])
+        general_item.setIcon(0, qta.icon("fa.cogs"))
+
         audio_item = QTreeWidgetItem(["الصوت"])
+        audio_item.setIcon(0, qta.icon("fa.volume-up"))
+
         listening_item = QTreeWidgetItem(["الاستماع"])
+        listening_item.setIcon(0, qta.icon("fa.headphones"))
+
         reading_item = QTreeWidgetItem(["القراءة"])
+        reading_item.setIcon(0, qta.icon("fa.book"))
+
         search_item = QTreeWidgetItem(["البحث"])
+        search_item.setIcon(0, qta.icon("fa.search"))
+
         
         # Adding top-level items
         tree_widget.addTopLevelItem(general_item)
