@@ -1,3 +1,4 @@
+import qtawesome as qta
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QDialog, 
@@ -36,11 +37,18 @@ class BookmarkDialog(QDialog):
         self.bookmark_list.setAccessibleDescription(self.bookmarks_label.text())
 
         self.update_button = QPushButton("تعديل الاسم")
+        self.update_button.setIcon(qta.icon("fa.pencil"))
+        
         self.delete_button = QPushButton("حذف العلامة")
+        self.delete_button.setIcon(qta.icon("fa.trash"))
         self.delete_button.setShortcut(QKeySequence(Qt.Key.Key_Delete))
+        
         self.go_button = QPushButton("الذهاب إلى العلامة")
+        self.go_button.setIcon(qta.icon("fa.location-arrow"))
         self.go_button.setDefault(True)
+        
         self.cancel_button = QPushButton("إلغاء")
+        self.cancel_button.setIcon(qta.icon("fa.times"))
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
 
 
