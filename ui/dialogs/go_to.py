@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QSpinBox, QDialog, QLabel
 from utils.const import Globals
-
+import qtawesome as qta
 
 
 class GoToDialog(QDialog):
@@ -26,12 +26,14 @@ class GoToDialog(QDialog):
         button_layout = QHBoxLayout()
         
         self.go_to_button = QPushButton('اذهب', self)
+        self.go_to_button.setIcon(qta.icon("fa.location-arrow"))
         self.go_to_button.setDefault(True)
         self.go_to_button.clicked.connect(self.accept)
         self.go_to_button.clicked.connect(lambda: Globals.effects_manager.play("move"))
         button_layout.addWidget(self.go_to_button)
         
         self.cancel_button = QPushButton('إغلاق', self)
+        self.cancel_button.setIcon(qta.icon("fa.times"))
         self.cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(self.cancel_button)
         
