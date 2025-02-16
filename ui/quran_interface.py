@@ -31,6 +31,7 @@ from ui.widgets.menu_bar import MenuBar
 from ui.widgets.qText_edit import QuranViewer
 from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
+from ui.sura_player_ui.sura_player_ui import SuraPlayerWindow
 from ui.widgets.system_tray import SystemTrayManager
 from ui.widgets.toolbar import AudioToolBar
 from utils.settings import SettingsManager
@@ -51,7 +52,9 @@ class QuranInterface(QMainWindow):
         self.quran = quran_mgr()
         self.quran.load_quran(SettingsManager.current_settings["reading"]["font_type"])
         self.user_data_manager = UserDataManager(user_db_path)
+        self.sura_player_window = None
         Globals.effects_manager = SoundEffectPlayer("Audio/sounds")
+
 
         self.toolbar = AudioToolBar(self)
         self.menu_bar = MenuBar(self)
@@ -137,6 +140,14 @@ class QuranInterface(QMainWindow):
         self.random_messages.clicked.connect(self.OnRandomMessages)
         self.random_messages.setShortcut(QKeySequence("Ctrl+M"))
 
+        self.quran_player = EnterButton()
+        self.quran_player.setIcon(qta.icon("fa.play-circle"))
+        self.quran_player.setToolTip("مشغل القرآن")
+        self.quran_player.setAccessibleName("مشغل القرآن")
+        self.quran_player.clicked.connect(self.OnSuraPlayer)
+        self.quran_player.setShortcut(QKeySequence("Ctrl+P"))
+
+
 
     def create_layout(self):
         layout = QVBoxLayout()
@@ -151,6 +162,7 @@ class QuranInterface(QMainWindow):
         buttons_layout.addWidget(self.search_in_quran)
         buttons_layout.addWidget(self.save_current_position)
         buttons_layout.addWidget(self.random_messages)
+        buttons_layout.addWidget(self.quran_player)
 
 
         layout.addLayout(buttons_layout)
@@ -445,3 +457,10 @@ class QuranInterface(QMainWindow):
         info_dialog = InfoDialog(self, 'رسالة لك', '', "", is_html_content=False, show_message_button=True)
         info_dialog.choose_QuotesMessage()
         info_dialog.exec()
+
+    def OnSuraPlayer(self):
+        if self.sura_player_window is None or not self.sura_player_window.isVisible():
+            self.sura_player_window = SuraPlayerWindow(self)
+            self.sura_player_window.show()
+        else:
+            self.sura_player_window.activateWindow()
