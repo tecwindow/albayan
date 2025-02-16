@@ -198,6 +198,8 @@ class SuraPlayerWindow(QMainWindow):
         self.filter_manager.filteredItemsUpdated.connect(self.OnFilteredItemsUpdated)
         self.filter_manager.itemeSelected.connect(self.play_current_surah)
         self.filter_manager.searchQueryUpdated.connect(self.OnSearchQueryUpdated)
+        self.setAccessibleDescription(F"أنت تستمع إلى سورة {self.surah_combo.currentText()}، للقارئ {self.reciter_combo.currentText().split(' - ')[0]}، اضغط Space للتشغيل. أو اضغط Ctrl+F لتغيير السورة أو القارئ.")
+
 
     def disable_focus(self):
 
@@ -383,11 +385,13 @@ class SuraPlayerWindow(QMainWindow):
             self.play_pause_button.setAccessibleName("إيقاف مؤقت")
             self.menubar.play_pause_action.setText("إيقاف مؤقت")
             self.statusBar().showMessage("تشغيل")
+            self.setAccessibleDescription(F"أنت تستمع إلى سورة {self.surah_combo.currentText()}، للقارئ {self.reciter_combo.currentText().split(' - ')[0]}، اضغط Ctrl+F لتغيير السورة أو القارئ.")
         else:
             self.play_pause_button.setIcon(qta.icon("fa.play"))
             self.play_pause_button.setAccessibleName("تشغيل")
             self.menubar.play_pause_action.setText("تشغيل")
             self.statusBar().showMessage("إيقاف مؤقت")
+            self.setAccessibleDescription(F"أنت تستمع إلى سورة {self.surah_combo.currentText()}، للقارئ {self.reciter_combo.currentText().split(' - ')[0]}، اضغط Space للتشغيل. أو اضغط Ctrl+F لتغيير السورة أو القارئ.")
 
     def OnFilterModeChange(self, active: bool) -> None:
         Globals.effects_manager.play("filter clos") if not active else Globals.effects_manager.play("filter open")
@@ -427,9 +431,7 @@ class SuraPlayerWindow(QMainWindow):
 
         return super().keyPressEvent(event)    
 
-    def show(self):
-        super().show()
-        UniversalSpeech.say(f"مرحبا بك في مشغل القرآن. أنت تستمع إلى سورة {self.surah_combo.currentText()}، للقارئ {self.reciter_combo.currentText().split(' - ')[0]}، اضغط Space للتشغيل.", interrupt=False)
+
 
     def OnClose(self):
         self.player.stop()
