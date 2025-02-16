@@ -1,6 +1,7 @@
 import sys
 import json
 import random
+import qtawesome as qta
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication, QMessageBox
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QKeySequence, QClipboard
@@ -39,6 +40,7 @@ class InfoDialog(QDialog):
 
         # Copy button
         copy_button = QPushButton('نسخ', self)
+        copy_button.setIcon(qta.icon("fa.copy"))
         copy_button.clicked.connect(self.copy_text)
         copy_button.setShortcut(QKeySequence("Shift+C"))
         copy_button.setStyleSheet('background-color: red; color: white;')
@@ -46,6 +48,7 @@ class InfoDialog(QDialog):
 
         # Message to you button (conditionally added)
         message_to_you_button = QPushButton('رسالة لك', self)
+        message_to_you_button.setIcon(qta.icon("fa.envelope"))
         message_to_you_button.clicked.connect(self.OnNewMessage)
         message_to_you_button.setShortcut(QKeySequence("Ctrl+M"))
         message_to_you_button.setStyleSheet('background-color: red; color: white;')
@@ -59,6 +62,7 @@ class InfoDialog(QDialog):
 
         # Close button
         close_button = QPushButton('إغلاق', self)
+        close_button.setIcon(qta.icon("fa.times"))
         close_button.setShortcut(QKeySequence("Ctrl+W"))
         close_button.clicked.connect(self.reject)
         close_button.setStyleSheet('background-color: red; color: white;')
