@@ -97,14 +97,14 @@ class QuranInterface(QMainWindow):
         
         self.next_to = EnterButton()
         self.next_to.setIcon(qta.icon("fa.forward"))
-        self.next_to.setToolTip("التالي")
-        self.next_to.setAccessibleName("التالي")
+        self.next_to.setToolTip(self.next_to.text())
+        self.next_to.setAccessibleName(self.next_to.text())
         self.next_to.clicked.connect(self.OnNext)
         
         self.back_to = EnterButton()
         self.back_to.setIcon(qta.icon("fa.backward"))
-        self.back_to.setToolTip("السابق")
-        self.back_to.setAccessibleName("السابق")
+        self.back_to.setToolTip(self.back_to.text())
+        self.back_to.setAccessibleName(self.back_to.text())
         self.back_to.clicked.connect(self.OnBack)
         
         self.interpretation_verse = EnterButton()
