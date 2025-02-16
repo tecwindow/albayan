@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence
+import qtawesome as qta
 
 
 class QuickAccess(QDialog):
@@ -51,7 +52,9 @@ class QuickAccess(QDialog):
         
         button_layout = QHBoxLayout()  # استخدام QHBoxLayout لأزرار الإجراءات
         self.go_button = QPushButton("اذهب")
+        self.go_button.setIcon(qta.icon("fa.location-arrow"))
         self.cancel_button = QPushButton("إغلاق")
+        self.cancel_button.setIcon(qta.icon("fa.times"))
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
         button_layout.addWidget(self.go_button)
         button_layout.addWidget(self.cancel_button)
