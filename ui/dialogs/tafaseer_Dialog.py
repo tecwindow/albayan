@@ -16,6 +16,7 @@ from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
 from utils.universal_speech import UniversalSpeech
 from utils.const import albayan_documents_dir, Globals
+import qtawesome as qta
 
 
 class TafaseerDialog(QDialog):
@@ -43,21 +44,25 @@ class TafaseerDialog(QDialog):
         self.button_layout = QHBoxLayout()  # استخدام QHBoxLayout بدلاً من QVBoxLayout
 
         self.category_button = QPushButton(self.default_category, self)
+        self.category_button.setIcon(qta.icon("fa.list"))
         self.category_button.setShortcut(QKeySequence("Alt+C"))
         self.category_button.clicked.connect(self.show_menu)
         self.button_layout.addWidget(self.category_button)
 
         self.copy_button = QPushButton("نسخ التفسير")
+        self.copy_button.setIcon(qta.icon("fa.copy"))
         self.copy_button.setShortcut(QKeySequence("Shift+C"))
         self.copy_button.clicked.connect(self.copy_content)
         self.button_layout.addWidget(self.copy_button)
 
         self.save_button = QPushButton("حفظ التفسير")
+        self.save_button.setIcon(qta.icon("fa.save"))
         self.save_button.setShortcut(QKeySequence("Ctrl+S"))
         self.save_button.clicked.connect(self.save_content)
         self.button_layout.addWidget(self.save_button)
 
         self.close_button = QPushButton("إغلاق")
+        self.close_button.setIcon(qta.icon("fa.times"))
         self.close_button.setShortcut(QKeySequence("Ctrl+W"))
         self.close_button.clicked.connect(self.reject)
         self.button_layout.addWidget(self.close_button)
