@@ -78,9 +78,9 @@ class ProphetsStoriesDialog(QDialog):
     def display_story(self):
         selected_story = self.combo_box.currentData()
         if selected_story:
-            story_text = f"{selected_story['name']}\n"
+            story_text = f"{selected_story['name']}.\n"
             for event in selected_story["data"]:
-                story_text += f"{event['title']}\n{event['data']}\n"
+                story_text += f"{event['title']}:\n{event['data']}\n"
             self.text_edit.setText(story_text.strip())
     
     def copy_content(self):
