@@ -8,6 +8,7 @@ from ui.dialogs.go_to import GoToDialog
 from ui.dialogs.athkar_dialog import AthkarDialog
 from ui.sura_player_ui import SuraPlayerWindow
 from ui.dialogs.tasbih_dialog import TasbihDialog
+from ui.dialogs.prophets_stories_dialog import ProphetsStoriesDialog
 from core_functions.quran_class import QuranConst
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
@@ -167,6 +168,9 @@ class MenuBar(QMenuBar):
         tasbih_action = QAction("المسبحة", self)
         tasbih_action.setShortcut(QKeySequence("Shift+S"))
         tasbih_action.triggered.connect(self.OnTasbihAction)
+        stories_action = QAction("قصص الأنبياء", self)
+        stories_action.setShortcut(QKeySequence("Shift+z"))
+        stories_action.triggered.connect(self.OnStoriesAction)
         open_log_action = QAction("فتح ملف السجل", self)
         open_log_action.setShortcut(QKeySequence("Shift+L"))
         open_log_action.triggered.connect(self.Onopen_log_file)
@@ -174,6 +178,7 @@ class MenuBar(QMenuBar):
         tools_menu.addAction(bookmark_manager_action)
         tools_menu.addAction(sura_player_action)
         tools_menu.addAction(tasbih_action)
+        tools_menu.addAction(stories_action)
         tools_menu.addAction(open_log_action)
 
         preferences_menu = self.addMenu("التفضيلات(&R)")
@@ -251,10 +256,13 @@ class MenuBar(QMenuBar):
         self.parent.hide()
 
 
-
     def OnTasbihAction(self):
         tasbih_dialog = TasbihDialog(self.parent)
         tasbih_dialog.exec()
+
+    def OnStoriesAction(self):
+        stories_dialog = ProphetsStoriesDialog(self.parent)
+        stories_dialog.exec()
 
     def OnTheme    (self):
 
