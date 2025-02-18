@@ -12,7 +12,8 @@ class ReadOnlyTextEdit(QTextEdit):
         self.parent = parent
         self.setReadOnly(True)
         self.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard| Qt.TextInteractionFlag.TextSelectableByMouse)
-        self.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
+#        self.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
+        self.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
         font = self.font()
         font.setPointSize(16)
         self.setFont(font)

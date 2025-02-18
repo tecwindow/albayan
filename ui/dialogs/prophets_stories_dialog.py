@@ -54,6 +54,11 @@ class ProphetsStoriesDialog(QDialog):
         self.load_stories()
         self.combo_box.currentIndexChanged.connect(self.display_story)
         
+        # Call display_story() after loading stories
+        if self.combo_box.count() > 0:
+            self.combo_box.setCurrentIndex(0)  # Select the first item
+            self.display_story()  # Display the first story
+        
         self.setFocus()
         QTimer.singleShot(300, self.combo_box.setFocus)
     
@@ -73,9 +78,9 @@ class ProphetsStoriesDialog(QDialog):
     def display_story(self):
         selected_story = self.combo_box.currentData()
         if selected_story:
-            story_text = f"{selected_story['name']}\n\n"
+            story_text = f"{selected_story['name']}\n"
             for event in selected_story["data"]:
-                story_text += f"{event['title']}\n{event['data']}\n\n"
+                story_text += f"{event['title']}\n{event['data']}\n"
             self.text_edit.setText(story_text.strip())
     
     def copy_content(self):
