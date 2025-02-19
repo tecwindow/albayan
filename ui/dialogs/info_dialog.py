@@ -50,7 +50,7 @@ class InfoDialog(QDialog):
         message_to_you_button = QPushButton('رسالة لك', self)
         message_to_you_button.setIcon(qta.icon("fa.envelope"))
         message_to_you_button.clicked.connect(self.OnNewMessage)
-        message_to_you_button.setShortcut(QKeySequence("Ctrl+M"))
+        message_to_you_button.setShortcut(QKeySequence("Shift+M"))
         message_to_you_button.setStyleSheet('background-color: red; color: white;')
         message_to_you_button.setVisible(self.show_message_button)
         message_to_you_button.setDefault(True)

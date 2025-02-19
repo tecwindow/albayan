@@ -226,7 +226,7 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.previous_reciter_action: ["Alt+Up"],
         self.menubar.stop_action: ["S", "Ctrl+Space"],
         self.menubar.close_window_action: ["Ctrl+W", "Ctrl+F4"],
-        self.menubar.close_program_action: ["Ctrl+X"],
+        self.menubar.close_program_action: ["Ctrl+Shift+W", "Ctrl+Shift+F4"],
         self.menubar.set_start_action: ["[", "ج"],
         self.menubar.set_end_action: ["]", "د"],
         self.menubar.toggle_loop_action: ["Ctrl+R"],
@@ -398,7 +398,7 @@ class SuraPlayerWindow(QMainWindow):
         widgets = self.buttons + self.menubar.get_player_actions()
         for widget in widgets:
             widget.setEnabled(not active)
-        UniversalSpeech.say("وضع الفلترة مفعَّل. استخدم الأسهم اليمين و اليسار للتنقل بين القرائ و السور, واستخدم الأسهم للأعلى والأسفل لتصفح المحدد, اكتب لتصفية القُرَّاء." if active else "وضع الفلترة معطَّل.")
+        UniversalSpeech.say("وضع الفلترة مفعَّل. استخدم الأسهم اليمين و اليسار للتنقل بين القُرَّاء و السور، واستخدم الأسهم للأعلى والأسفل لتصفح المحدد، اكتب لتصفية القُرَّاء و السور." if active else "وضع الفلترة معطَّل.")
 
     def OnActiveCategoryChanged(self, label: str) -> None:
         UniversalSpeech.say(label)

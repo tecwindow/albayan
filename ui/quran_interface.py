@@ -139,7 +139,6 @@ class QuranInterface(QMainWindow):
         self.random_messages.setToolTip("رسالة لك")
         self.random_messages.setAccessibleName("رسالة لك")
         self.random_messages.clicked.connect(self.OnRandomMessages)
-        self.random_messages.setShortcut(QKeySequence("Ctrl+M"))
 
         self.quran_player = EnterButton()
         self.quran_player.setIcon(qta.icon("fa.play-circle"))
