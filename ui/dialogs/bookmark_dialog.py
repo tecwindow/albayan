@@ -38,7 +38,8 @@ class BookmarkDialog(QDialog):
 
         self.update_button = QPushButton("تعديل الاسم")
         self.update_button.setIcon(qta.icon("fa.pencil"))
-        
+        self.update_button.setShortcut(QKeySequence("F2"))
+
         self.delete_button = QPushButton("حذف العلامة")
         self.delete_button.setIcon(qta.icon("fa.trash"))
         self.delete_button.setShortcut(QKeySequence(Qt.Key.Key_Delete))
