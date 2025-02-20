@@ -57,6 +57,7 @@ class ProphetsStoriesDialog(QDialog):
         
         self.load_stories()
         self.combo_box.currentIndexChanged.connect(self.display_story)
+        self.combo_box.currentIndexChanged.connect(lambda: Globals.effects_manager.play("move"))
         
         # Call display_story() after loading stories
         if self.combo_box.count() > 0:
@@ -86,7 +87,9 @@ class ProphetsStoriesDialog(QDialog):
             for event in selected_story["data"]:
                 story_text += f"{event['title']}:\n{event['data']}\n"
             self.text_edit.setText(story_text.strip())
-    
+
+
+
     def copy_content(self):
         copied_content = self.text_edit.toPlainText()
         clipboard = QApplication.clipboard()
