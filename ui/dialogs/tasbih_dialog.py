@@ -263,7 +263,7 @@ class TasbihDialog(QDialog):
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setWindowTitle("تأكيد الحذف")
-        msg_box.setText("هل أنت متأكد من حذف جميع التسابيح؟")
+        msg_box.setText("هل أنت متأكد من رغبتك في حذف جميع التسابيح؟\nسيتم حذف التسابيح المضافة يدويًا، وإعادة تعيين العدادات للتسابيح الافتراضية.")
 
         yes_button = msg_box.addButton("نعم", QMessageBox.ButtonRole.AcceptRole)
         no_button = msg_box.addButton("لا", QMessageBox.ButtonRole.RejectRole)

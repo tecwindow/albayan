@@ -255,4 +255,11 @@ class AudioToolBar(QToolBar):
                 self.audio_thread.timer.start(100)
 
     def show_error_message(self, message: ErrorMessage):
-        QMessageBox.critical(self.parent, message.title, message.body)
+        msg_box =QMessageBox(self.parent,)
+        msg_box.setIcon(QMessageBox.Icon.Critical)
+        msg_box.setWindowTitle(message.title)
+        msg_box.setText(message.body)
+        ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+        msg_box.exec()
+
+        

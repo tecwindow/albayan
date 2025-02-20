@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QFileDialog,
     QLabel,
     QMenu,
+    QMessageBox,
     QApplication
 )
 from PyQt6.QtGui import QIcon, QAction, QKeySequence
@@ -16,6 +17,7 @@ from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
 from utils.universal_speech import UniversalSpeech
 from utils.const import albayan_documents_dir, Globals
+from exceptions.error_decorators import exception_handler
 import qtawesome as qta
 
 
@@ -70,8 +72,9 @@ class TafaseerDialog(QDialog):
         self.layout.addLayout(self.button_layout)
         self.setFocus()
         QTimer.singleShot(300, self.text_edit.setFocus)
-        
-    def show_menu(self):
+
+    @exception_handler(ui_element=QMessageBox)
+    def show_menu(self, event):
         menu = QMenu(self)
         arabic_categories = Category.get_categories_in_arabic()
         actions = {}
@@ -92,7 +95,8 @@ class TafaseerDialog(QDialog):
         menu.setFocus()
         menu.exec(self.category_button.mapToGlobal(self.category_button.rect().bottomLeft()))
 
-    def handle_category_selection(self):
+    @exception_handler(ui_element=QMessageBox)
+    def handle_category_selection(self, event):
         selected_category = self.sender().text()
         self.category_button.setText(selected_category)
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(selected_category))

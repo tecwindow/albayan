@@ -145,7 +145,14 @@ class SearchDialog(QDialog):
         self.set_search_phrase(search_text)
         search_result = self.search_manager.search(search_text)
         if not search_result:
-            QMessageBox.warning(self, "لا توجد نتائج", "لا توجد نتائج متاحة لبحثك.")
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setWindowTitle("لا توجد نتائج")
+            msg_box.setText("لا توجد نتائج متاحة لبحثك.")
+
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
+
             return
         
         result_dialog = SearchResultsDialog(self, search_result)

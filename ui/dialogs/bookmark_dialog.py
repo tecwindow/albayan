@@ -100,7 +100,7 @@ class BookmarkDialog(QDialog):
         selected_items = self.bookmark_list.selectedItems()
         if not selected_items:
             msg_box = QMessageBox(self)
-            msg_box.setIcon(QMessageBox.Icon.Warning)
+            msg_box.setIcon(QMessageBox.Icon.Critical)
             msg_box.setWindowTitle("خطأ في التحديد")
             msg_box.setText("لم يتم تحديد أي علامة.")
         
@@ -139,7 +139,7 @@ class BookmarkDialog(QDialog):
         selected_items = self.bookmark_list.selectedItems()
         if not selected_items:
             msg_box = QMessageBox(self)
-            msg_box.setIcon(QMessageBox.Icon.Warning)
+            msg_box.setIcon(QMessageBox.Icon.Critical)
             msg_box.setWindowTitle("خطأ في التحديد")
             msg_box.setText("لم يتم تحديد أي علامة.")
       
