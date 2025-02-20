@@ -279,7 +279,10 @@ class SuraPlayerWindow(QMainWindow):
         self.preferences_manager.set_preference("sura_number",  self.surah_combo.currentData())
         
     def stop(self):
+        self.set_position(0)
         self.player.stop()
+
+
 
     def forward(self, step = 5):
         self.player.forward(step)
@@ -290,16 +293,17 @@ class SuraPlayerWindow(QMainWindow):
         self.on_update_time(self.player.get_position(), self.player.get_length())
 
     def set_position(self, position: int, by_percent: bool = False) -> None:
-        if by_percent:
-            total_length = self.player.get_length()
-            position = total_length * (position / 100)
-        self.player.set_position(position)
-        self.on_update_time(self.player.get_position(), self.player.get_length())
+        if not self.player.current_channel is None:
+            if by_percent:
+                total_length = self.player.get_length()
+                position = total_length * (position / 100)
+            self.player.set_position(position)
+            self.on_update_time(self.player.get_position(), self.player.get_length())
 
 
     def replay(self):
-        self.player.set_position(0)
-        self.on_update_time(self.player.get_position(), self.player.get_length())
+        self.set_position(0)
+        #self.on_update_time(self.player.get_position(), self.player.get_length())
 
     def next_surah(self):
         current_index = self.surah_combo.currentIndex()
