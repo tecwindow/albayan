@@ -106,6 +106,10 @@ class TasbihDialog(QDialog):
         self.deleteAllButton.clicked.connect(self.handle_delete_all)
         self.close_button.clicked.connect(self.reject)
 
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
+
         # Connect controller signals to dialog slots.
         self.controller.entrieAdded.connect(self.handle_entry_added)
         self.controller.entrieUpdated.connect(self.handle_entry_updated)
@@ -122,6 +126,7 @@ class TasbihDialog(QDialog):
             self.delete_button: "Delete",
             self.addButton: "Ctrl+A",
             self.openButton: "Ctrl+O",
+            self.close_button: "Ctrl+W",
             self.resetButton: "Ctrl+R"
         }
         
@@ -133,7 +138,7 @@ class TasbihDialog(QDialog):
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         tasbih_entry = self.controller.get_entry(entry_id)
         dialog = TasbihEntryDialog(self, self.controller, tasbih_entry)
-        UniversalSpeech.say(F"مرحبا بك في المِسْبَحَة، الذِكر: {tasbih_entry.name}، العدد: {tasbih_entry.counter}. استخدم المفاتيح التالية لزيادة العداد: Space, Enter, +,أو C. لإنقاص العداد: D, Ctrl+Space, -, أو Backspace. لإعادة تعيين العداد: Ctrl+R. للمعلومات: V للعدد، T للذِكر، I للكل.")
+        UniversalSpeech.say(F"مرحبا بك في المِسْبَحَة، التسبيح: {tasbih_entry.name}، العدد: {tasbih_entry.counter}. استخدم المفاتيح التالية لزيادة العداد: Space, Enter, +,أو C. لإنقاص العداد استخدم: D, Ctrl+Space, -, أو Backspace. لإعادة تعيين العداد استخدم: Ctrl+R. للمعلومات استخدم: V للعدد، T للذِكر، I للكل.")
         dialog.exec()
 
     def OnItemSelectionChanged(self):    

@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (
     QApplication, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
     QCheckBox, QComboBox, QPushButton, QGroupBox
 )
+from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
 from core_functions.athkar.athkar_db_manager import AthkarDBManager
 from core_functions.athkar.models import AthkarCategory
@@ -76,6 +77,10 @@ class AthkarDialog(QDialog):
         self.save_button = QPushButton("حفظ")
         self.save_button.setDefault(True)
         self.cancel_button = QPushButton("إغلاق")
+        self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
         button_layout.addWidget(self.reset_button)
         button_layout.addWidget(self.save_button)
         button_layout.addWidget(self.cancel_button)

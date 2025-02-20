@@ -4,7 +4,7 @@ import random
 import qtawesome as qta
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication, QMessageBox
 from PyQt6.QtCore import QTimer
-from PyQt6.QtGui import QKeySequence, QClipboard
+from PyQt6.QtGui import QKeySequence, QClipboard, QShortcut
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
 from utils.const import Globals, data_folder
@@ -66,6 +66,10 @@ class InfoDialog(QDialog):
         close_button.setShortcut(QKeySequence("Ctrl+W"))
         close_button.clicked.connect(self.reject)
         close_button.setStyleSheet('background-color: red; color: white;')
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
+
 
         # Layout
         layout = QVBoxLayout()

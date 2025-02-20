@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QMessageBox, 
     QInputDialog
 )
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
 from core_functions.bookmark import BookmarkManager
 from utils.const import Globals
 
@@ -47,9 +47,12 @@ class BookmarkDialog(QDialog):
         self.go_button.setIcon(qta.icon("fa.location-arrow"))
         self.go_button.setDefault(True)
         
-        self.cancel_button = QPushButton("إلغاء")
+        self.cancel_button = QPushButton("إغلاق")
         self.cancel_button.setIcon(qta.icon("fa.times"))
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
 
 
         form_layout = QHBoxLayout()

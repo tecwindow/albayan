@@ -3,7 +3,7 @@ import json
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, QComboBox, QApplication
 )
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import QTimer
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
@@ -47,6 +47,10 @@ class ProphetsStoriesDialog(QDialog):
         self.close_button.setIcon(qta.icon("fa.times"))
         self.close_button.setShortcut(QKeySequence("Ctrl+W"))
         self.close_button.clicked.connect(self.reject)
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
+
         self.button_layout.addWidget(self.close_button)
         
         self.layout.addLayout(self.button_layout)

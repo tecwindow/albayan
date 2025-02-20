@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QApplication
 )
-from PyQt6.QtGui import QIcon, QAction, QKeySequence
+from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut
 from PyQt6.QtCore import QTimer
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
@@ -67,6 +67,9 @@ class TafaseerDialog(QDialog):
         self.close_button.setIcon(qta.icon("fa.times"))
         self.close_button.setShortcut(QKeySequence("Ctrl+W"))
         self.close_button.clicked.connect(self.reject)
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
         self.button_layout.addWidget(self.close_button)
 
         self.layout.addLayout(self.button_layout)
