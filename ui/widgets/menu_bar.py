@@ -174,16 +174,14 @@ class MenuBar(QMenuBar):
         stories_action = QAction("قصص الأنبياء", self)
         stories_action.setShortcut(QKeySequence("Shift+O"))
         stories_action.triggered.connect(self.OnStoriesAction)
-        open_log_action = QAction("فتح ملف السجل", self)
-        open_log_action.setShortcut(QKeySequence("Shift+L"))
-        open_log_action.triggered.connect(self.Onopen_log_file)
+
         tools_menu.addAction(athkar_action)
         tools_menu.addAction(bookmark_manager_action)
         tools_menu.addAction(sura_player_action)
         tools_menu.addAction(tasbih_action)
         tools_menu.addAction(message_for_you_action)
         tools_menu.addAction(stories_action)
-        tools_menu.addAction(open_log_action)
+
 
         preferences_menu = self.addMenu("التفضيلات(&R)")
         settings_action = QAction("الإعدادات", self)
@@ -216,7 +214,7 @@ class MenuBar(QMenuBar):
         user_guide_action = QAction("دليل البرنامج", self)
         user_guide_action.setShortcut(QKeySequence("F1"))
         user_guide_action.triggered.connect(lambda: MenuBar.open_documentation("user_guide"))
-        whats_new_action = QAction("دليل البرنامج", self)
+        whats_new_action = QAction("المستجدات", self)
         whats_new_action.setShortcut(QKeySequence("F2"))
         whats_new_action.triggered.connect(lambda: MenuBar.open_documentation("Whats_new"))
         contact_us_menu = QMenu("اتصل بنا", self)
@@ -228,16 +226,20 @@ class MenuBar(QMenuBar):
         update_program_action = QAction("تحديث البرنامج", self)
         update_program_action.setShortcut(QKeySequence("Ctrl+F2"))
         update_program_action.triggered.connect(self.OnUpdate)
-
+        open_log_action = QAction("فتح ملف السجل", self)
+        open_log_action.setShortcut(QKeySequence("Shift+L"))
+        open_log_action.triggered.connect(self.Onopen_log_file)
         about_program_action = QAction("حول البرنامج", self)
         about_program_action.setShortcut(QKeySequence("Ctrl+F1"))
         about_program_action.triggered.connect(self.OnAbout)
 
-#        help_menu.addAction(user_guide_action)
-        help_menu.addMenu(contact_us_menu)
-        help_menu.addAction(update_program_action)
+
+
         help_menu.addAction(user_guide_action)
         help_menu.addAction(whats_new_action)
+        help_menu.addAction(update_program_action)
+        help_menu.addAction(open_log_action)
+        help_menu.addMenu(contact_us_menu)
         help_menu.addAction(about_program_action)
 
     def OnSettings(self):
