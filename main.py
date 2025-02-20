@@ -132,7 +132,14 @@ def main():
     except Exception as e:
         print(e)
         Logger.error(str(e))
-        QMessageBox.critical(None, "Error", "حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")
+        msg_box = QMessageBox(None)
+        msg_box.setIcon(QMessageBox.Icon.Critical)
+        msg_box.setWindowTitle("خطأ")
+        msg_box.setText("حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")
+
+        ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+        msg_box.exec()
+
         
 if __name__ == "__main__":    
     freeze_support()

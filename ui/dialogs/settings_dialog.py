@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QStackedWidget
 )
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
 from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name
@@ -240,6 +240,9 @@ class SettingsDialog(QDialog):
         close_button = QPushButton("إغلاق")
         close_button.setShortcut(QKeySequence("Ctrl+W"))
         close_button.clicked.connect(self.close)
+
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
 
         buttons_layout.addWidget(save_button)
         buttons_layout.addWidget(close_button)

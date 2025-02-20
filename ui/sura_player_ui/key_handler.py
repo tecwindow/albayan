@@ -33,9 +33,9 @@ class KeyHandler:
 
         # Mapping shortcut keys to their corresponding actions
         self.shortcuts = {
-            ord("E"): lambda: UniversalSpeech.say(parent.elapsed_time_label.text()),
-            ord("R"): lambda: UniversalSpeech.say(parent.remaining_time_label.text()),
-            ord("T"): lambda: UniversalSpeech.say(parent.total_time.text()),
+            ord("E"): lambda: UniversalSpeech.say(f"{parent.elapsed_time_label.text()}، الوقت المنقَضي."),
+            ord("R"): lambda: UniversalSpeech.say(f"{parent.remaining_time_label.text()}، الوقت المتبقي."),
+            ord("T"): lambda: UniversalSpeech.say(f"{parent.total_time.text()}، الوقت الإجمالي."),
             ord("C"): lambda: UniversalSpeech.say(parent.reciter_combo.currentText().split(' - ')[0]),
             ord("V"): lambda: UniversalSpeech.say(parent.surah_combo.currentText()),
             ord("I"): lambda: UniversalSpeech.say(

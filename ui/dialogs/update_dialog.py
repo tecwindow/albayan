@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QGroupBox
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.const import program_name, temp_folder
 import qtawesome as qta
@@ -66,6 +66,8 @@ class UpdateDialog(QDialog):
 
         self.update_button.clicked.connect(self.on_update)
         self.cancel_button.clicked.connect(self.reject)
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
 
         buttons_layout.addWidget(self.update_button)
         buttons_layout.addWidget(self.cancel_button)

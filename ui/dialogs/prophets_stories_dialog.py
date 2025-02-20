@@ -3,7 +3,7 @@ import json
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, QComboBox, QApplication
 )
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import QTimer
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
@@ -47,12 +47,17 @@ class ProphetsStoriesDialog(QDialog):
         self.close_button.setIcon(qta.icon("fa.times"))
         self.close_button.setShortcut(QKeySequence("Ctrl+W"))
         self.close_button.clicked.connect(self.reject)
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
+
         self.button_layout.addWidget(self.close_button)
         
         self.layout.addLayout(self.button_layout)
         
         self.load_stories()
         self.combo_box.currentIndexChanged.connect(self.display_story)
+        self.combo_box.currentIndexChanged.connect(lambda: Globals.effects_manager.play("move"))
         
         # Call display_story() after loading stories
         if self.combo_box.count() > 0:
@@ -82,7 +87,9 @@ class ProphetsStoriesDialog(QDialog):
             for event in selected_story["data"]:
                 story_text += f"{event['title']}:\n{event['data']}\n"
             self.text_edit.setText(story_text.strip())
-    
+
+
+
     def copy_content(self):
         copied_content = self.text_edit.toPlainText()
         clipboard = QApplication.clipboard()

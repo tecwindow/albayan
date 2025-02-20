@@ -139,7 +139,6 @@ class QuranInterface(QMainWindow):
         self.random_messages.setToolTip("رسالة لك")
         self.random_messages.setAccessibleName("رسالة لك")
         self.random_messages.clicked.connect(self.OnRandomMessages)
-        self.random_messages.setShortcut(QKeySequence("Ctrl+M"))
 
         self.quran_player = EnterButton()
         self.quran_player.setIcon(qta.icon("fa.play-circle"))
@@ -364,7 +363,14 @@ class QuranInterface(QMainWindow):
         if text:
             InfoDialog(self, title, label, text).exec()
         else:
-            QMessageBox.information(self, "لا يتوفر معلومات للآية", "للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setWindowTitle("لا يتوفر معلومات للآية")
+            msg_box.setText("للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
+
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnAyahInfo(self, event):

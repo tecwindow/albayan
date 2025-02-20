@@ -60,7 +60,7 @@ class MenuBar(QMenuBar):
         self.close_action.triggered.connect(self.parent.close)
         self.close_action.setVisible(SettingsManager.current_settings["general"]["run_in_background_enabled"])
         self.exit_action = QAction("إغلاق البرنامج", self)
-        self.exit_action.setShortcuts([QKeySequence("Ctrl+X")])
+        self.exit_action.setShortcuts([QKeySequence("Ctrl+Shift+W"), QKeySequence("Ctrl+Shift+F4")])
         self.exit_action.triggered.connect(self.quit_application)
 
         navigation_menu.addAction(self.next_action)
@@ -87,7 +87,7 @@ class MenuBar(QMenuBar):
         self.forward_action.setShortcuts([QKeySequence("L"), QKeySequence("Ctrl+Alt+Right")])
         self.forward_action.triggered.connect(lambda: self.parent.toolbar.player.forward(SettingsManager.current_settings["listening"]["forward_time"]))
         self.replay_action = QAction("إعادة", self)
-        self.replay_action.setShortcut(QKeySequence("Ctrl+J"))
+        self.replay_action.setShortcut(QKeySequence("Shift+J"))
         self.replay_action.triggered.connect(lambda: self.parent.toolbar.player.set_position(0))
 
         self.play_next_action = QAction("تشغيل الآية التالية", self)
@@ -134,10 +134,10 @@ class MenuBar(QMenuBar):
 
         self.ayah_info_action = QAction("معلومات الآية", self)
         self.ayah_info_action.triggered.connect(self.parent.OnAyahInfo)
-        self.ayah_info_action.setShortcut(QKeySequence("Ctrl+I"))
+        self.ayah_info_action.setShortcut(QKeySequence("Shift+I"))
         self.verse_info_action = QAction("أسباب نزول الآية", self)
         self.verse_info_action.triggered.connect(self.parent.OnVerseReasons)
-        self.verse_info_action.setShortcut(QKeySequence("Shift+A"))
+        self.verse_info_action.setShortcut(QKeySequence("Shift+R"))
         self.verse_grammar_action = QAction("إعراب الآية", self)
         self.verse_grammar_action.triggered.connect(self.parent.OnSyntax)
         self.verse_grammar_action.setShortcut(QKeySequence("Shift+E"))
@@ -157,7 +157,7 @@ class MenuBar(QMenuBar):
 
         tools_menu = self.addMenu("الأدوات(&T)")
         athkar_action = QAction("الأذكار", self)
-        athkar_action.setShortcut(QKeySequence("Ctrl+Shift+D"))
+        athkar_action.setShortcut(QKeySequence("Shift+A"))
         athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).exec())
         bookmark_manager_action = QAction("مدير العلامات", self)
         bookmark_manager_action.setShortcut(QKeySequence("Shift+D"))
@@ -168,18 +168,20 @@ class MenuBar(QMenuBar):
         tasbih_action = QAction("المسبحة", self)
         tasbih_action.setShortcut(QKeySequence("Shift+S"))
         tasbih_action.triggered.connect(self.OnTasbihAction)
+        message_for_you_action = QAction("رسالة لك", self)
+        message_for_you_action.setShortcut(QKeySequence("Shift+M"))
+        message_for_you_action.triggered.connect(self.parent.OnRandomMessages)
         stories_action = QAction("قصص الأنبياء", self)
-        stories_action.setShortcut(QKeySequence("Shift+z"))
+        stories_action.setShortcut(QKeySequence("Shift+O"))
         stories_action.triggered.connect(self.OnStoriesAction)
-        open_log_action = QAction("فتح ملف السجل", self)
-        open_log_action.setShortcut(QKeySequence("Shift+L"))
-        open_log_action.triggered.connect(self.Onopen_log_file)
+
         tools_menu.addAction(athkar_action)
         tools_menu.addAction(bookmark_manager_action)
         tools_menu.addAction(sura_player_action)
         tools_menu.addAction(tasbih_action)
+        tools_menu.addAction(message_for_you_action)
         tools_menu.addAction(stories_action)
-        tools_menu.addAction(open_log_action)
+
 
         preferences_menu = self.addMenu("التفضيلات(&R)")
         settings_action = QAction("الإعدادات", self)
@@ -212,7 +214,7 @@ class MenuBar(QMenuBar):
         user_guide_action = QAction("دليل البرنامج", self)
         user_guide_action.setShortcut(QKeySequence("F1"))
         user_guide_action.triggered.connect(lambda: MenuBar.open_documentation("user_guide"))
-        whats_new_action = QAction("دليل البرنامج", self)
+        whats_new_action = QAction("المستجدات", self)
         whats_new_action.setShortcut(QKeySequence("F2"))
         whats_new_action.triggered.connect(lambda: MenuBar.open_documentation("Whats_new"))
         contact_us_menu = QMenu("اتصل بنا", self)
@@ -224,16 +226,20 @@ class MenuBar(QMenuBar):
         update_program_action = QAction("تحديث البرنامج", self)
         update_program_action.setShortcut(QKeySequence("Ctrl+F2"))
         update_program_action.triggered.connect(self.OnUpdate)
-
+        open_log_action = QAction("فتح ملف السجل", self)
+        open_log_action.setShortcut(QKeySequence("Shift+L"))
+        open_log_action.triggered.connect(self.Onopen_log_file)
         about_program_action = QAction("حول البرنامج", self)
         about_program_action.setShortcut(QKeySequence("Ctrl+F1"))
         about_program_action.triggered.connect(self.OnAbout)
 
-#        help_menu.addAction(user_guide_action)
-        help_menu.addMenu(contact_us_menu)
-        help_menu.addAction(update_program_action)
+
+
         help_menu.addAction(user_guide_action)
         help_menu.addAction(whats_new_action)
+        help_menu.addAction(update_program_action)
+        help_menu.addAction(open_log_action)
+        help_menu.addMenu(contact_us_menu)
         help_menu.addAction(about_program_action)
 
     def OnSettings(self):

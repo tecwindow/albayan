@@ -4,7 +4,7 @@ import random
 import qtawesome as qta
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication, QMessageBox
 from PyQt6.QtCore import QTimer
-from PyQt6.QtGui import QKeySequence, QClipboard
+from PyQt6.QtGui import QKeySequence, QClipboard, QShortcut
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
 from utils.const import Globals, data_folder
@@ -50,7 +50,7 @@ class InfoDialog(QDialog):
         message_to_you_button = QPushButton('رسالة لك', self)
         message_to_you_button.setIcon(qta.icon("fa.envelope"))
         message_to_you_button.clicked.connect(self.OnNewMessage)
-        message_to_you_button.setShortcut(QKeySequence("Ctrl+M"))
+        message_to_you_button.setShortcut(QKeySequence("Shift+M"))
         message_to_you_button.setStyleSheet('background-color: red; color: white;')
         message_to_you_button.setVisible(self.show_message_button)
         message_to_you_button.setDefault(True)
@@ -66,6 +66,10 @@ class InfoDialog(QDialog):
         close_button.setShortcut(QKeySequence("Ctrl+W"))
         close_button.clicked.connect(self.reject)
         close_button.setStyleSheet('background-color: red; color: white;')
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
+
 
         # Layout
         layout = QVBoxLayout()

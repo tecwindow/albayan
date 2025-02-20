@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QGroupBox,
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
 import qtawesome as qta
 
 
@@ -76,6 +76,9 @@ class QuickAccess(QDialog):
         self.quarters_radio.toggled.connect(self.on_radio_toggled)
         self.hizb_radio.toggled.connect(self.on_radio_toggled)
         self.jus_radio.toggled.connect(self.on_radio_toggled)
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
 
     def on_submit(self):
         selected_item = self.choices.currentIndex() + 1

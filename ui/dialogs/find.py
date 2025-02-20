@@ -16,7 +16,7 @@ QListWidgetItem,
 QMessageBox,
 )
 from PyQt6.QtCore import Qt, QRegularExpression
-from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator
+from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator, QShortcut
 from core_functions.search import SearchCriteria, QuranSearchManager
 from utils.settings import SettingsManager
 from utils.universal_speech import UniversalSpeech
@@ -57,6 +57,8 @@ class SearchDialog(QDialog):
         self.search_button.setEnabled(False)
         self.cancel_button = QPushButton('إلغاء')
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
+
+
 
         self.advanced_search_groupbox = QGroupBox('البحث المتقدم')
         self.advanced_search_groupbox.setEnabled(False)
@@ -129,6 +131,9 @@ class SearchDialog(QDialog):
         self.search_type_radio_juz.toggled.connect(self.on_radio_toggled)
         self.search_type_radio_hizb.toggled.connect(self.on_radio_toggled)
         self.search_type_radio_quarter.toggled.connect(self.on_radio_toggled)
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
 
         self.on_radio_toggled()
         self.OnEdit()
@@ -145,7 +150,14 @@ class SearchDialog(QDialog):
         self.set_search_phrase(search_text)
         search_result = self.search_manager.search(search_text)
         if not search_result:
-            QMessageBox.warning(self, "لا توجد نتائج", "لا توجد نتائج متاحة لبحثك.")
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setWindowTitle("لا توجد نتائج")
+            msg_box.setText("لا توجد نتائج متاحة لبحثك.")
+
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
+
             return
         
         result_dialog = SearchResultsDialog(self, search_result)
@@ -225,7 +237,10 @@ class SearchResultsDialog(QDialog):
         self.cancel_button = QPushButton("إلغاء")
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
         self.cancel_button.clicked.connect(self.reject)
-        
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
+
         layout = QVBoxLayout()
         layout.addWidget(self.total_label)
         layout.addWidget(self.label)
