@@ -234,7 +234,7 @@ class AudioToolBar(QToolBar):
         self.volume_slider.setValue(SettingsManager.current_settings["audio"]["ayah_volume_level"])
 
     def update_play_pause_button_text(self):
-        label = "إيقاف مؤقت" if self.player.is_playing() or self.player.is_stalled() else "استماع الآية الحالية"
+        label = "إيقاف مؤقت" if self.player.is_playing() or self.player.is_stalled() else "تشغيل الآية الحالية"
         self.play_pause_button.setText(label)
         if hasattr(self.parent, "menu_bar"):
             self.parent.menu_bar.play_pause_action.setText(label)
@@ -251,6 +251,9 @@ class AudioToolBar(QToolBar):
             self.parent.menu_bar.play_previous_action.setEnabled(previous_status)
             self.parent.menu_bar.play_pause_action.setEnabled(status)
             self.parent.menu_bar.stop_action.setEnabled(not self.player.is_stopped())
+            self.parent.menu_bar.rewind_action.setEnabled(not self.player.is_stopped())
+            self.parent.menu_bar.forward_action.setEnabled(not self.player.is_stopped())
+            self.parent.menu_bar.replay_action.setEnabled(not self.player.is_stopped())
             if  status == True:
                 self.audio_thread.timer.start(100)
 
