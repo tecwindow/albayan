@@ -75,6 +75,7 @@ class QuranInterface(QMainWindow):
         self.move(window_geometry.topLeft())
 
     def set_shortcut(self):
+        QShortcut(QKeySequence("Ctrl+M"), self).activated.connect(lambda: self.quran_view.setFocus())
         QShortcut(QKeySequence("C"), self). \
         activated.connect(self.say_current_ayah)
         for i in range(0, 5):  
@@ -381,7 +382,11 @@ class QuranInterface(QMainWindow):
         InfoDialog(self, title, label, text, is_html_content=True).exec()
 
     def say_current_ayah(self):
-        text = f"آية {self.toolbar.navigation.current_ayah} من سورة {self.toolbar.navigation.current_surah}"
+        if not self.toolbar.navigation.current_ayah:
+            return
+
+        ayah_info = self.get_current_ayah_info()
+        text = f"آية {self.toolbar.navigation.current_ayah} من {ayah_info[2]}."
         UniversalSpeech.say(text)
 
     @exception_handler(ui_element=QMessageBox)
