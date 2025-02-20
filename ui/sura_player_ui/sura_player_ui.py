@@ -281,7 +281,7 @@ class SuraPlayerWindow(QMainWindow):
     def stop(self):
         self.set_position(0)
         self.player.stop()
-
+        self.audio_looper.clear_loop()
 
 
     def forward(self, step = 5):
@@ -438,7 +438,7 @@ class SuraPlayerWindow(QMainWindow):
 
 
     def OnClose(self):
-        self.player.stop()
+        self.stop()
         self.audio_player_thread.quit()
         self.close()
         self.parent.show()
