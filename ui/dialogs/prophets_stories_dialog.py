@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, QComboBox, QApplication
 )
 from PyQt6.QtGui import QKeySequence, QShortcut
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import Qt, QTimer, QEvent
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
 from utils.const import albayan_documents_dir, Globals
@@ -66,7 +66,9 @@ class ProphetsStoriesDialog(QDialog):
         
         self.setFocus()
         QTimer.singleShot(300, self.combo_box.setFocus)
-    
+        self.combo_box.installEventFilter(self)
+
+
     def load_stories(self):
         try:
             file_path = data_folder/"prophets_stories/stories.json"
@@ -108,7 +110,14 @@ class ProphetsStoriesDialog(QDialog):
         if file_path:
             with open(file_path, "w", encoding="utf-8") as file:
                 file.write(self.text_edit.toPlainText())
-    
+
+    def eventFilter(self, obj, event):
+        if obj == self.combo_box and event.type() == event.KeyPress:
+            if event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
+                self.text_edit.setFocus()
+                return True
+        return super().eventFilter(obj, event)
+
     def reject(self):
         Globals.effects_manager.play("clos")
         self.deleteLater()
