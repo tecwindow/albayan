@@ -134,20 +134,17 @@ class QuranInterface(QMainWindow):
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
         self.save_current_position.clicked.connect(self.OnSave_alert)
         
-        self.random_messages = EnterButton()
-        self.random_messages.setIcon(qta.icon("fa.comment"))
-        self.random_messages.setToolTip("رسالة لك")
-        self.random_messages.setAccessibleName("رسالة لك")
-        self.random_messages.clicked.connect(self.OnRandomMessages)
+        self.tasbih = EnterButton()
+        self.tasbih.setIcon(qta.icon("fa.circle"))
+        self.tasbih.setToolTip("المسبحة")
+        self.tasbih.setAccessibleName("المسبحة")
+        self.tasbih.clicked.connect(self.menu_bar.OnTasbihAction)
 
         self.quran_player = EnterButton()
         self.quran_player.setIcon(qta.icon("fa.play-circle"))
         self.quran_player.setToolTip("مشغل القرآن")
         self.quran_player.setAccessibleName("مشغل القرآن")
         self.quran_player.clicked.connect(self.menu_bar.OnSuraPlayer)
-
-
-
 
     def create_layout(self):
         layout = QVBoxLayout()
@@ -161,7 +158,7 @@ class QuranInterface(QMainWindow):
         buttons_layout.addWidget(self.quick_access)
         buttons_layout.addWidget(self.search_in_quran)
         buttons_layout.addWidget(self.save_current_position)
-        buttons_layout.addWidget(self.random_messages)
+        buttons_layout.addWidget(self.tasbih)
         buttons_layout.addWidget(self.quran_player)
 
 
