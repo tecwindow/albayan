@@ -36,10 +36,10 @@ class KeyHandler:
             ord("E"): lambda: UniversalSpeech.say(f"{parent.elapsed_time_label.text()}، الوقت المنقَضي."),
             ord("R"): lambda: UniversalSpeech.say(f"{parent.remaining_time_label.text()}، الوقت المتبقي."),
             ord("T"): lambda: UniversalSpeech.say(f"{parent.total_time.text()}، الوقت الإجمالي."),
-            ord("C"): lambda: UniversalSpeech.say(parent.reciter_combo.currentText().split(' - ')[0]),
-            ord("V"): lambda: UniversalSpeech.say(parent.surah_combo.currentText()),
+            ord("C"): lambda: UniversalSpeech.say(f"{parent.reciter_combo.currentText().split(' - ')[0]}، القارئ الحالي."),
+            ord("V"): lambda: UniversalSpeech.say(f"{parent.surah_combo.currentText()}، السورة الحالية."),
             ord("I"): lambda: UniversalSpeech.say(
-                f"{parent.surah_combo.currentText()}, {parent.reciter_combo.currentText()}"
+                f"{parent.surah_combo.currentText()}، للقارئ، {parent.reciter_combo.currentText()}"
             ),
             **{Qt.Key.Key_0 + i: lambda i=i: parent.set_position(i * 10, by_percent=True) for i in range(10)},
             Qt.Key_MediaTogglePlayPause: parent.toggle_play_pause,
