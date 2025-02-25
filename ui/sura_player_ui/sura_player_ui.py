@@ -67,7 +67,7 @@ class SuraPlayerWindow(QMainWindow):
         self.reciter_combo = QComboBox()
         self.reciter_combo.setAccessibleName(self.reciter_label.text())
         reciters_list = []
-        saved_reciter_id = self.preferences_manager.get_int("reciter_id")
+        saved_reciter_id = self.preferences_manager.get_int("reciter_id", 123)
         for row in self.reciters.get_reciters():
             display_text = f"{row['name']} - {row['rewaya']} - ({row['type']}) - ({row['bitrate']} kbps)"
             self.reciter_combo.addItem(display_text, row["id"])
