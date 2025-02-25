@@ -1,14 +1,16 @@
+import os
 import sys
 import json
 import random
 import qtawesome as qta
+from datetime import datetime
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication, QMessageBox, QFileDialog
 from PyQt6.QtCore import Qt
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QKeySequence, QClipboard, QShortcut, QPixmap, QFontMetrics, QPainter, QFont
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
-from utils.const import Globals, data_folder
+from utils.const import albayan_documents_dir, Globals, data_folder
 from exceptions.json import JSONFileNotFoundError, InvalidJSONFormatError
 from exceptions.error_decorators import exception_handler
 
@@ -120,8 +122,12 @@ class InfoDialog(QDialog):
         Globals.effects_manager.play("message")
 
     def save_text_as_image(self):
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         options = QFileDialog.Options()
-        file_path, _ = QFileDialog.getSaveFileName(self, "حفظ الصورة", str(data_folder / "saved_message.png"), "Images (*.png *.jpg *.bmp)", options=options)
+        file_name = os.path.join(albayan_documents_dir, f"البيان_{self.windowTitle()}_{timestamp}.png")
+        file_path, _ = QFileDialog.getSaveFileName(
+        self, "حفظ الصورة", file_name, "Images (*.png *.jpg *.bmp)", options=options
+        )
         if file_path:
             text = self.text_edit.toPlainText()
             font = self.text_edit.font()  
@@ -143,5 +149,12 @@ class InfoDialog(QDialog):
             painter.end()
 
             pixmap.save(file_path)
-            UniversalSpeech.say("تم حفظ الرسالة كصورة")
-            QMessageBox.information(self, "تم الحفظ", f"تم حفظ الصورة في: {file_path}")
+
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setWindowTitle("تم الحفظ")
+            msg_box.setText(f"تم حفظ الصورة في: {file_path}")
+
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
+
