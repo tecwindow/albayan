@@ -66,7 +66,7 @@ class InfoDialog(QDialog):
         save_img_button.clicked.connect(self.save_text_as_image)
         save_img_button.setStyleSheet('background-color: red; color: white;')
         save_img_button.setVisible(self.save_message_as_img_button)
-
+        save_img_button.setShortcut(QKeySequence("Shift+S"))
 
         # Close button
         close_button = QPushButton('إغلاق', self)
