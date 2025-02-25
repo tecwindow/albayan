@@ -175,9 +175,9 @@ class MenuBar(QMenuBar):
         stories_action.setShortcut(QKeySequence("Shift+O"))
         stories_action.triggered.connect(self.OnStoriesAction)
 
+        tools_menu.addAction(sura_player_action)
         tools_menu.addAction(athkar_action)
         tools_menu.addAction(bookmark_manager_action)
-        tools_menu.addAction(sura_player_action)
         tools_menu.addAction(tasbih_action)
         tools_menu.addAction(message_for_you_action)
         tools_menu.addAction(stories_action)
