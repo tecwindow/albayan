@@ -464,7 +464,7 @@ class QuranInterface(QMainWindow):
             
     @exception_handler(ui_element=QMessageBox)
     def OnRandomMessages(self, event):
-        info_dialog = InfoDialog(self, 'رسالة لك', '', "", is_html_content=False, show_message_button=True)
+        info_dialog = InfoDialog(self, 'رسالة لك', '', "", is_html_content=False, show_message_button=True, save_message_as_img_button=True)
         info_dialog.choose_QuotesMessage()
         info_dialog.exec()
 

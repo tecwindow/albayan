@@ -2,9 +2,10 @@ import sys
 import json
 import random
 import qtawesome as qta
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication, QMessageBox
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication, QMessageBox, QFileDialog
+from PyQt6.QtCore import Qt
 from PyQt6.QtCore import QTimer
-from PyQt6.QtGui import QKeySequence, QClipboard, QShortcut
+from PyQt6.QtGui import QKeySequence, QClipboard, QShortcut, QPixmap, QFontMetrics, QPainter, QFont
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
 from utils.const import Globals, data_folder
@@ -12,7 +13,7 @@ from exceptions.json import JSONFileNotFoundError, InvalidJSONFormatError
 from exceptions.error_decorators import exception_handler
 
 class InfoDialog(QDialog):
-    def __init__(self, parent, title: str, label: str, text: str, is_html_content: bool = False, show_message_button: bool = False):
+    def __init__(self, parent, title: str, label: str, text: str, is_html_content: bool = False, show_message_button: bool = False, save_message_as_img_button: bool = False):
         super().__init__(parent)
         self.title = title
         self.label = label
@@ -20,9 +21,9 @@ class InfoDialog(QDialog):
         self.parent = parent
         self.is_html_content = is_html_content
         self.show_message_button = show_message_button
+        self.save_message_as_img_button = save_message_as_img_button
         self.init_ui()
         Globals.effects_manager.play("open")
-
 
     def init_ui(self):
         self.setWindowTitle(self.title)
@@ -45,7 +46,6 @@ class InfoDialog(QDialog):
         copy_button.setShortcut(QKeySequence("Shift+C"))
         copy_button.setStyleSheet('background-color: red; color: white;')
 
-
         # Message to you button (conditionally added)
         message_to_you_button = QPushButton('رسالة لك', self)
         message_to_you_button.setIcon(qta.icon("fa.envelope"))
@@ -55,9 +55,15 @@ class InfoDialog(QDialog):
         message_to_you_button.setVisible(self.show_message_button)
         message_to_you_button.setDefault(True)
 
-
         if not self.show_message_button:
-                    copy_button.setDefault(True)
+            copy_button.setDefault(True)
+
+        # Save as Image button (conditionally added)
+        save_img_button = QPushButton('حفظ كصورة', self)
+        save_img_button.setIcon(qta.icon("fa.image"))
+        save_img_button.clicked.connect(self.save_text_as_image)
+        save_img_button.setStyleSheet('background-color: red; color: white;')
+        save_img_button.setVisible(self.save_message_as_img_button)
 
 
         # Close button
@@ -70,13 +76,14 @@ class InfoDialog(QDialog):
         close_shortcut.activated.connect(self.reject)
 
 
-
         # Layout
+        layout = QVBoxLayout()
         layout = QVBoxLayout()
         layout.addWidget(label)
         layout.addWidget(self.text_edit)
         layout.addWidget(copy_button)
         layout.addWidget(message_to_you_button)
+        layout.addWidget(save_img_button)
         layout.addWidget(close_button)
         self.setLayout(layout)
         
@@ -111,4 +118,30 @@ class InfoDialog(QDialog):
     def OnNewMessage(self):
         self.choose_QuotesMessage()
         Globals.effects_manager.play("message")
-        
+
+    def save_text_as_image(self):
+        options = QFileDialog.Options()
+        file_path, _ = QFileDialog.getSaveFileName(self, "حفظ الصورة", str(data_folder / "saved_message.png"), "Images (*.png *.jpg *.bmp)", options=options)
+        if file_path:
+            text = self.text_edit.toPlainText()
+            font = self.text_edit.font()  
+            font.setPointSize(22)
+            font.setBold(True)
+            font.setFamily("Arial")
+
+            metrics = QFontMetrics(font)
+            text_width = max([metrics.horizontalAdvance(line) for line in text.split("\n")]) + 40
+            text_height = metrics.lineSpacing() * (len(text.split("\n")) + 2)
+
+            pixmap = QPixmap(text_width, text_height)
+            pixmap.fill(Qt.GlobalColor.black)
+
+            painter = QPainter(pixmap)
+            painter.setFont(font)
+            painter.setPen(Qt.GlobalColor.white)
+            painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, text)
+            painter.end()
+
+            pixmap.save(file_path)
+            UniversalSpeech.say("تم حفظ الرسالة كصورة")
+            QMessageBox.information(self, "تم الحفظ", f"تم حفظ الصورة في: {file_path}")
