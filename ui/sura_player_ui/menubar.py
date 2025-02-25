@@ -13,7 +13,7 @@ class MenuBar(QMenuBar):
         # Create Player Menu
         main_menu = self.addMenu("القائمة الرئيسية(&M)")
         player_menu = self.addMenu("مشغل القرآن(&P)")
-        loop_menu = self.addMenu("التكرار(&L)")
+        loop_menu = self.addMenu("التكرار(&R)")
         
                 # Create Actions for Main Menu
         self.close_window_action = QAction("إغلاق النافذة", self) 
