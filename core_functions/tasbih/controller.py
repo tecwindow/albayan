@@ -47,9 +47,11 @@ class TasbihController(QObject):
                 session.commit()
                 self.entrieAdded.emit(self.get_entry(new_entry.id))
         except IntegrityError as e:
-            Logger.error(e)
+            #Logger.error(e)
+            pass
         except Exception as e:
-            Logger.error(e)
+            #Logger.error(e)
+            pass
 
     def get_entry(self, entry_id) -> TasbihEntry:
         """Return a specific tasbih entry by its ID."""
