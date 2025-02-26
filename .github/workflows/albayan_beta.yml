@@ -33,10 +33,7 @@ jobs:
       run: |
         python setup.py build
 
-    - name: Rename main.exe to albayan.exe
-      run: |
-        Rename-Item -Path "albayan_build\main.exe" -NewName "albayan.exe"
-
+    
     - name: Download and install Inno Setup
       run: |
         Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile is.exe
