@@ -33,8 +33,9 @@ build_exe_options = {
 
 setup(
     name="Albayan",
-    version="2.1.0",
-    description="كل ما يخص الإسلام",
+    version="3.0.0",
+    author="TecWindow",
+    description="Albayan",
     options={"build_exe": build_exe_options},
     executables=[
         Executable(
@@ -42,7 +43,7 @@ setup(
             base="Win32GUI" if sys.platform == "win32" else None,
             target_name="Albayan.exe",
             icon="Albayan.ico",
-            copyright="All rights reserved tecwindow"
+            copyright="2025 tecwindow"
         )
     ]
 )
