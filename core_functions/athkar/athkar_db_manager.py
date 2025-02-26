@@ -36,7 +36,7 @@ class AthkarDBManager:
                         audio_path: Optional[str] = None,
                         from_time: str = "00:00",
                         to_time: str = "23:00",
-                        play_interval: int =5,
+                        play_interval: int =30,
                         audio_athkar_enabled: int = 0,
                         text_athkar_enabled: int = 0
                         ) -> int:
