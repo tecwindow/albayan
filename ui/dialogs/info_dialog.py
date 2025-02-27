@@ -29,7 +29,7 @@ class InfoDialog(QDialog):
 
     def init_ui(self):
         self.setWindowTitle(self.title)
-        self.resize(400, 300)
+        self.resize(500, 400)
         self.setFocus()
 
         label = QLabel(self.label, self)
