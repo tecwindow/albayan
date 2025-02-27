@@ -4,7 +4,7 @@ import json
 import random
 import qtawesome as qta
 from datetime import datetime
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QApplication, QMessageBox, QFileDialog
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QGridLayout, QLabel, QTextEdit, QPushButton, QApplication, QMessageBox, QFileDialog
 from PyQt6.QtCore import Qt
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QKeySequence, QClipboard, QShortcut, QPixmap, QFontMetrics, QPainter, QFont
@@ -80,15 +80,17 @@ class InfoDialog(QDialog):
 
         # Layout
         layout = QVBoxLayout()
-        layout = QVBoxLayout()
         layout.addWidget(label)
         layout.addWidget(self.text_edit)
-        layout.addWidget(copy_button)
-        layout.addWidget(message_to_you_button)
-        layout.addWidget(save_img_button)
-        layout.addWidget(close_button)
+        button_layout = QGridLayout()
+        button_layout.addWidget(message_to_you_button, 0, 0)
+        button_layout.addWidget(save_img_button, 0, 1)
+        button_layout.addWidget(copy_button, 1, 0)
+        button_layout.addWidget(close_button, 1, 1)
+        layout.addLayout(button_layout)
         self.setLayout(layout)
         
+
         # Focus the text edit after dialog opens
         QTimer.singleShot(300, self.text_edit.setFocus)
 
