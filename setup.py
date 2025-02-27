@@ -40,7 +40,7 @@ setup(
     author_email="support@tecwindow.net",
     url="https://tecwindow.net/en",
     download_url="https://github.com/tecwindow/albayan",
-    keywords=["islamic", "islam", "quran", "desktop", "alquran", "tecwindow", "القرآن", "إسلام"]
+    keywords=["islamic", "islam", "quran", "desktop", "alquran", "tecwindow", "القرآن", "إسلام"],
     options={"build_exe": build_exe_options},
     executables=[
         Executable(
