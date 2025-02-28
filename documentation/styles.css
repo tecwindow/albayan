@@ -1,0 +1,94 @@
+            body {
+                font-family: Arial, sans-serif;
+                direction: rtl;
+                text-align: right;
+                background-color: #121212;
+                color: #e0e0e0;
+                margin: 0;
+                padding: 20px;
+                font-size: 18px;
+            }
+
+            #toc {
+                background: #1e1e1e;
+                padding: 15px;
+                border: 1px solid #444;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+
+            #toc h2 {
+                color: #ffffff;
+            }
+
+            #toc a {
+                padding: 5px 0;
+                text-decoration: none;
+                color: #4db8ff;
+                transition: color 0.3s;
+            }
+
+            #toc a:hover {
+                text-decoration: underline;
+                color: #1e90ff;
+            }
+
+            article {
+                background: #1a1a1a;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                color: #ffcc00;
+            }
+
+            h1 {
+                font-size: 28px;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            code {
+                background: #333;
+                padding: 2px 5px;
+                border-radius: 4px;
+                color: #ffcc00;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+                background: #1e1e1e;
+                color: #ffffff;
+                border: 1px solid #444;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            th,
+            td {
+                border: 1px solid #444;
+                padding: 12px;
+                text-align: center;
+            }
+
+            th {
+                background: #333;
+                color: #ffcc00;
+            }
+
+            tr:nth-child(even) {
+                background: #252525;
+            }
+
+            tr:nth-child(odd) {
+                background: #1a1a1a;
+            }

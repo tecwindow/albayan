@@ -1,6 +1,6 @@
 import re
 from PyQt6.QtCore import QEvent, Qt, QLocale
-from PyQt6.QtGui import QKeyEvent
+from PyQt6.QtGui import QKeyEvent, QTextCursor
 from PyQt6.QtWidgets import QTextEdit
 from utils.settings import SettingsManager
 from utils.const import Globals
@@ -12,6 +12,7 @@ class ReadOnlyTextEdit(QTextEdit):
         self.parent = parent
         self.setReadOnly(True)
         self.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByKeyboard| Qt.TextInteractionFlag.TextSelectableByMouse)
+#        self.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
         self.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
         font = self.font()
         font.setPointSize(16)
@@ -61,9 +62,13 @@ class QuranViewer(ReadOnlyTextEdit):
         if e.modifiers() & Qt.KeyboardModifier.ControlModifier:
             if e.key() == Qt.Key.Key_Shift:
                 if e.nativeScanCode() == 42:  # Scan code for Left Shift
+                    self.document().setDefaultCursorMoveStyle(Qt.CursorMoveStyle.LogicalMoveStyle)
                     self.parent.menu_bar.set_text_direction_ltr()
+                    self.document().setDefaultCursorMoveStyle(Qt.CursorMoveStyle.VisualMoveStyle)
                 elif e.nativeScanCode() == 54: # Scan code for Right Shift
+                    self.document().setDefaultCursorMoveStyle(Qt.CursorMoveStyle.LogicalMoveStyle)
                     self.parent.menu_bar.set_text_direction_rtl()
+                    self.document().setDefaultCursorMoveStyle(Qt.CursorMoveStyle.VisualMoveStyle)
 
         if not SettingsManager.current_settings["reading"]["auto_page_turn"]:
             return

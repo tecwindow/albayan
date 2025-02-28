@@ -1,3 +1,5 @@
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QSystemTrayIcon
 import os
 import json
 from datetime import datetime, time
@@ -10,7 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from .athkar_db_manager import AthkarDBManager
 from .athkar_refresher import AthkarRefresher
 from utils.audio_player import AthkarPlayer
-from utils.const import Globals
+from utils.const import Globals, program_icon
 from utils.logger import Logger
 from exceptions.base import ErrorMessage
 
@@ -55,7 +57,10 @@ class AthkarScheduler:
             title = "البيان"
             description = text
 
-        Globals.TRAY_ICON.showMessage(title, description, msecs=5000)
+
+        icon_path = "Albayan.ico"
+
+        Globals.TRAY_ICON.showMessage(title, description, QIcon(icon_path), 5000)
 
     @staticmethod
     def _parse_time(time_str: str) -> time:

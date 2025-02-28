@@ -108,11 +108,11 @@ QAbstractItemView {
 }
 
 * [themeID="upArrowIconSmall"] {
-    qproperty-icon: url(./Flat Dark/up_arrow.png);
+    qproperty-icon: url(./theme/Flat Dark/up_arrow.png);
 }
 
 * [themeID="downArrowIconSmall"] {
-    qproperty-icon: url(./Flat Dark/down_arrow.png);
+    qproperty-icon: url(./theme/Flat Dark/down_arrow.png);
 }
 
 /* Textedits etc */
@@ -138,20 +138,20 @@ QGroupBox::indicator {
 }
 
 QCheckBox::indicator:unchecked {
-	image: url(./Flat Dark/checkbox_unchecked.png);
+	image: url(./theme/Flat Dark/checkbox_unchecked.png);
 }
 
 QCheckBox::indicator:checked {
-	image: url(./Flat Dark/checkbox_checked.png);
+	image: url(./theme/Flat Dark/checkbox_checked.png);
 }
 
 QCheckBox::indicator:checked:disabled {
 	outline: none;
-	image: url(./Flat Dark/checkbox_checked_disabled.png);
+	image: url(./theme/Flat Dark/checkbox_checked_disabled.png);
 }
 
 QCheckBox::indicator:unchecked:disabled {
-	image: url(./Flat Dark/checkbox_unchecked_disabled.png);
+	image: url(./theme/Flat Dark/checkbox_unchecked_disabled.png);
 }
 
 /* Radio Buttons */
@@ -162,22 +162,22 @@ QRadioButton::indicator {
 }
 
 QRadioButton::indicator:unchecked {
-	image: url(./Flat Dark/radio_unchecked.png);
+	image: url(./theme/Flat Dark/radio_unchecked.png);
 }
 
 QRadioButton::indicator:checked {
 	border: none;
 	outline: none;
-	image: url(./Flat Dark/radio_checked.png);
+	image: url(./theme/Flat Dark/radio_checked.png);
 }
 
 QRadioButton::indicator:checked:disabled {
 	outline: none;
-	image: url(./Flat Dark/radio_checked_disabled.png);
+	image: url(./theme/Flat Dark/radio_checked_disabled.png);
 }
 
 QRadioButton::indicator:unchecked:disabled {
-	image: url(./Flat Dark/radio_unchecked_disabled.png);
+	image: url(./theme/Flat Dark/radio_unchecked_disabled.png);
 }
 
 /* Listbox */
@@ -416,13 +416,13 @@ QComboBox::drop-down {
 
 QComboBox::down-arrow {
 	qproperty-alignment: AlignTop;
-	image: url(./Flat Dark/down_arrow.png);
+	image: url(./theme/Flat Dark/down_arrow.png);
 	width: 100%;
 	margin-right: 10px;
 }
 
 QComboBox::down-arrow:on {
-	image: url(./Flat Dark/up_arrow.png);
+	image: url(./theme/Flat Dark/up_arrow.png);
 }
 
 QComboBox:on {
@@ -441,7 +441,7 @@ QComboBox::drop-down:editable {
 
 QComboBox::down-arrow:editable {
 	qproperty-alignment: AlignTop;
-	image: url(./Flat Dark/down_arrow.png);
+	image: url(./theme/Flat Dark/down_arrow.png);
 	width: 8%;
 }
 
@@ -507,12 +507,12 @@ QDoubleSpinBox::down-button:off {
 }
 
 QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
-	image: url(./Flat Dark/up_arrow.png);
+	image: url(./theme/Flat Dark/up_arrow.png);
 	width: 100%;
 }
 
 QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
-	image: url(./Flat Dark/down_arrow.png);
+	image: url(./theme/Flat Dark/down_arrow.png);
 	width: 100%;
 }
 
@@ -554,7 +554,7 @@ QPushButton:checked:hover#streamButton {
 }
 
 QPushButton::menu-indicator {
-    image: url(./Flat Dark/down_arrow.png);
+    image: url(./theme/Flat Dark/down_arrow.png);
     subcontrol-position: right;
     subcontrol-origin: padding;
     width: 25px;
@@ -659,11 +659,11 @@ SourceTreeSubItemCheckBox::indicator {
 }
 
 SourceTreeSubItemCheckBox::indicator:checked {
-    image: url(./Flat Dark/right_arrow.png);
+    image: url(./theme/Flat Dark/right_arrow.png);
 }
 
 SourceTreeSubItemCheckBox::indicator:unchecked {
-    image: url(./Flat Dark/down_arrow.png);
+    image: url(./theme/Flat Dark/down_arrow.png);
 }
 
 /* Scenes */
@@ -733,34 +733,34 @@ MuteCheckBox {
 }
 
 MuteCheckBox::indicator:checked {
-	image: url(./Flat Dark/mute.png);
+	image: url(./theme/Flat Dark/mute.png);
 }
 
 MuteCheckBox::indicator:unchecked {
-	image: url(./Flat Dark/unmute.png);
+	image: url(./theme/Flat Dark/unmute.png);
 }
 
 MuteCheckBox::indicator:unchecked:hover {
-	image: url(./Flat Dark/unmute.png);
+	image: url(./theme/Flat Dark/unmute.png);
 }
 
 MuteCheckBox::indicator:unchecked:focus {
-	image: url(./Flat Dark/unmute.png);
+	image: url(./theme/Flat Dark/unmute.png);
 }
 MuteCheckBox::indicator:checked:hover {
-	image: url(./Flat Dark/mute.png);
+	image: url(./theme/Flat Dark/mute.png);
 }
 
 MuteCheckBox::indicator:checked:focus {
-	image: url(./Flat Dark/mute.png);
+	image: url(./theme/Flat Dark/mute.png);
 }
 
 MuteCheckBox::indicator:checked:disabled {
-	image: url(./Flat Dark/mute.png);
+	image: url(./theme/Flat Dark/mute.png);
 }
 
 MuteCheckBox::indicator:unchecked:disabled {
-	image: url(./Flat Dark/unmute.png);
+	image: url(./theme/Flat Dark/unmute.png);
 }
 
 OBSHotkeyLabel[hotkeyPairHover=true] {
@@ -798,27 +798,27 @@ QToolButton:pressed {
 }
 
 * [themeID="addIconSmall"] {
-	qproperty-icon: url(./Flat Dark/plus.png);
+	qproperty-icon: url(./theme/Flat Dark/plus.png);
 }
 
 * [themeID="removeIconSmall"] {
-	qproperty-icon: url(./Flat Dark/minus.png);
+	qproperty-icon: url(./theme/Flat Dark/minus.png);
 }
 
 * [themeID="propertiesIconSmall"] {
-	qproperty-icon: url(./Flat Dark/cogwheel.png);
+	qproperty-icon: url(./theme/Flat Dark/cogwheel.png);
 }
 
 * [themeID="configIconSmall"] {
-	qproperty-icon: url(./Flat Dark/cogwheel.png);
+	qproperty-icon: url(./theme/Flat Dark/cogwheel.png);
 }
 
 * [themeID="upArrowIconSmall"] {
-	qproperty-icon: url(./Flat Dark/up_arrow.png);
+	qproperty-icon: url(./theme/Flat Dark/up_arrow.png);
 }
 
 * [themeID="downArrowIconSmall"] {
-	qproperty-icon: url(./Flat Dark/down_arrow.png);
+	qproperty-icon: url(./theme/Flat Dark/down_arrow.png);
 }
 
 * [themeID="pauseIconSmall"] {

@@ -1,6 +1,6 @@
 ﻿#define MyAppName "Albayan"
-#define MyAppVersion "2.0.0"
-#define AppVersion "2.0.0"
+#define MyAppVersion "3.0.0"
+#define AppVersion "3.0.0"
 #define MyAppPublisher "Tecwindow"
 #define MyAppURL "https://tecwindow.net/"
 #define MyAppExeName "Albayan.exe"
@@ -22,6 +22,7 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 ArchitecturesAllowed=x64
+SetupIconFile=Albayan.ico
 
 DefaultDirName={sd}\program files\tecwindow\{#MyAppName}
 DisableProgramGroupPage=yes
@@ -47,9 +48,12 @@ Name: "arabic"; MessagesFile: "compiler:Languages\Arabic.isl"
 arabic.AppLNGfile=Arabic
 english.DeleteSettingsPrompt=Do you want to delete the settings folder?
 arabic.DeleteSettingsPrompt=هل تريد حذف مجلد الإعدادات؟
+english.autorun=auto start albayan with windows?
+arabic.autorun=فتح برنامج البيان تلقائيا مع بدء تشغيل النظام
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+Name: "autorun"; Description: "{cm:autorun}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
 Source: "albayan_build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
@@ -57,43 +61,44 @@ Source: "albayan_build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 Source: "albayan_build\Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\Albayan"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Albayan.ico"
+Name: "{autodesktop}\Albayan"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Albayan.ico"; Tasks: desktopicon
 
 [INI]
-Filename: "{userappdata}\tecwindow\{#MyAppName}\Settingss.ini"; Section: "general"; Key: "language"; String: "{cm:AppLNGfile}"
+Filename: "{userappdata}\tecwindow\{#MyAppName}\config.ini"; Section: "general"; Key: "run_in_background_enabled"; String: "true"; Tasks: autorun
+Filename: "{userappdata}\tecwindow\{#MyAppName}\config.ini"; Section: "general"; Key: "auto_start_enabled"; String: "true"; Tasks: autorun
+
+[Registry]
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "albayan"; ValueData: "{app}\albayan.exe --minimized"; Flags: uninsdeletevalue; Tasks: autorun
+
+[UninstallRun]
+Filename: "taskkill"; Parameters: "/F /IM Albayan.exe"; Flags: runhidden
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
+
+[InstallDelete]
+Type: filesandordirs; Name: "{app}\*"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
 
 [Code]
-procedure DeleteOldInstallation();
-begin
-  if DirExists(ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}\Audio\sounds')) then
-  begin
-    DelTree(ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}\Audio\sounds'), True, True, True);
-  end;
-end;
-
 function InitializeSetup(): Boolean;
 begin
-  DeleteOldInstallation();
   Result := True;
 end;
 
-procedure DeleteAthkarFolder();
-begin
-  DelTree(ExpandConstant('{app}\Audio\athkar'), True, True, True);
-end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if CurStep = ssPostInstall then
+  if CurStep = ssInstall then
   begin
-    DeleteAthkarFolder();
+    if FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini')) then
+begin
+RenameFile(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini'), ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\config.ini'));
+end;
+
   end;
 end;
 
@@ -117,3 +122,4 @@ begin
     end;
   end;
 end;
+

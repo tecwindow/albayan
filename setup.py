@@ -2,15 +2,24 @@ import shutil
 import sys
 import os
 from cx_Freeze import setup, Executable
-
 import PyQt6
+
 pyqt_path = os.path.dirname(PyQt6.__file__)
 
-# Include additional files and DLLs
-include_files = [("database", "database"), ("Audio", "Audio"), ("bass.dll", "bass.dll"), ("icon.webp", "icon.webp")]
+if os.path.exists("main.py"):
+    os.rename("main.py", "Albayan.py")
+
+include_files = [
+    ("database", "database"),
+    ("documentation", "documentation"),
+    ("Audio", "Audio"),
+    ("bass.dll", "bass.dll"),
+    ("Albayan.ico", "Albayan.ico")
+]
 dll_files = ["Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Network.dll"]
 for file in dll_files:
     include_files.append((os.path.join(pyqt_path, "Qt6", "bin", file), os.path.join("lib", file)))
+
 
 build_exe_options = {
     "build_exe": "albayan_build",
@@ -18,27 +27,38 @@ build_exe_options = {
     "include_files": include_files,
     "packages": ["core_functions", "theme", "ui", "utils"],
     "includes": ["PyQt6.QtCore", "PyQt6.QtWidgets", "PyQt6.QtGui", "PyQt6.QtMultimedia", "packaging", "requests", "UniversalSpeech", "sqlalchemy", "sqlalchemy.dialects.sqlite", "apscheduler"],
-    "excludes": ["tkinter", "test", "setuptools", "pip", "numpy"],
+    "excludes": ["tkinter", "test", "setuptools", "pip", "numpy", "unittest"],
     "include_msvcr": True
 }
 
-description = "albayan"
-base = None
-if sys.platform == "win32":
-    base = "Win32GUI"
-
 setup(
-    name="albayan",
-    version="2.0.0",
-    description=description,
+    name="Albayan",
+    version="3.0.0",
+    description="Albayan",
+    long_description="البيان - Albayan, كل ما يخص الإسلام",
+    author="TecWindow",
+    author_email="support@tecwindow.net",
+    url="https://tecwindow.net/en",
+    download_url="https://github.com/tecwindow/albayan",
+    keywords=["islamic", "islam", "quran", "desktop", "alquran", "tecwindow", "القرآن", "إسلام"],
     options={"build_exe": build_exe_options},
-    executables=[Executable("main.py", base=base)]
+    executables=[
+        Executable(
+            "Albayan.py",
+            base="Win32GUI" if sys.platform == "win32" else None,
+            target_name="Albayan.exe",
+            icon="Albayan.ico",
+            copyright="2025 tecwindow"
+        )
+    ]
 )
 
-#clean
 folder_paths = ["albayan_build/lib/PyQt6/Qt6/bin", "albayan_build/lib/PyQt6/Qt6/translations"]
 for folder in folder_paths:
     try:
         shutil.rmtree(os.path.abspath(folder))
-    except:
-        pass
+    except Exception as e:
+        print(f"Error removing {folder}: {e}")
+
+if os.path.exists("Albayan.py"):
+    os.rename("Albayan.py", "main.py")

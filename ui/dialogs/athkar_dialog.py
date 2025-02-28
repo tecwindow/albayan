@@ -1,8 +1,9 @@
 from typing import Optional
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
-    QCheckBox, QComboBox, QPushButton, QGroupBox
+    QCheckBox, QComboBox, QPushButton, QGroupBox, QMessageBox
 )
+from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
 from core_functions.athkar.athkar_db_manager import AthkarDBManager
 from core_functions.athkar.models import AthkarCategory
@@ -76,6 +77,10 @@ class AthkarDialog(QDialog):
         self.save_button = QPushButton("حفظ")
         self.save_button.setDefault(True)
         self.cancel_button = QPushButton("إغلاق")
+        self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
         button_layout.addWidget(self.reset_button)
         button_layout.addWidget(self.save_button)
         button_layout.addWidget(self.cancel_button)
@@ -118,16 +123,27 @@ class AthkarDialog(QDialog):
             self.from_combobox.setCurrentText(selected_category.from_time)
             self.to_combobox.setCurrentText(selected_category.to_time)
             interval_text = self.interval_options_dict.get(
-                selected_category.play_interval, "5 دقيقة"
+                selected_category.play_interval, "30 دقيقة"
             )
             self.interval_combobox.setCurrentText(interval_text)
 
     def reset_settings(self):
-        self.audio_athkar_enable_checkbox.setChecked(False)
-        self.text_athkar_enable_checkbox.setChecked(False)
-        self.from_combobox.setCurrentIndex(0)
-        self.to_combobox.setCurrentIndex(self.to_combobox.count() - 1)
-        self.interval_combobox.setCurrentIndex(0)
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Icon.Warning)
+        msg_box.setWindowTitle("إعادة ضبط الخيارات")
+        msg_box.setText("هل تريد إعادة ضبط جميع الخيارات على الوضع الافتراضي؟\nسيتم تعطيل جميع الأذكار.")
+    
+        yes_button = msg_box.addButton("نعم", QMessageBox.ButtonRole.AcceptRole)
+        no_button = msg_box.addButton("لا", QMessageBox.ButtonRole.RejectRole)
+
+        msg_box.exec()
+
+        if msg_box.clickedButton() == yes_button:
+            self.audio_athkar_enable_checkbox.setChecked(False)
+            self.text_athkar_enable_checkbox.setChecked(False)
+            self.from_combobox.setCurrentIndex(0)
+            self.to_combobox.setCurrentIndex(self.to_combobox.count() - 1)
+            self.interval_combobox.setCurrentIndex(3)
 
     def on_save(self) -> None:
         selected_category = self.get_selected_category()

@@ -3,7 +3,7 @@ from typing import Optional
 from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider, QMessageBox
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from core_functions.quran_class import quran_mgr
-from core_functions.Reciters import RecitersManager
+from core_functions.Reciters import AyahReciter
 from utils.audio_player import AyahPlayer
 from utils.settings import SettingsManager
 from utils.const import data_folder
@@ -16,6 +16,8 @@ class AudioPlayerThread(QThread):
     waiting_to_load = pyqtSignal(bool)
     playback_finished = pyqtSignal()
     error_signal = pyqtSignal(ErrorMessage) 
+    playback_time_changed = pyqtSignal(float, float)
+    file_changed = pyqtSignal(str)
 
     def __init__(self, player: AyahPlayer, parent: Optional[object] = None):
         super().__init__(parent)
@@ -31,6 +33,7 @@ class AudioPlayerThread(QThread):
                 self.waiting_to_load.emit(False)
                 try:
                     if self.player.source != self.url or self.player.is_stopped():
+                        self.file_changed.emit(self.url)
                         self.player.load_audio(self.url)
                     self.player.play()
                     self.manually_stopped = False
@@ -45,6 +48,7 @@ class AudioPlayerThread(QThread):
                     self.waiting_to_load.emit(True)
 
     def check_playback_status(self):
+        self.playback_time_changed.emit(self.player.get_position(), self.player.get_length())
         if not self.player.is_playing() and not self.player.is_stalled():
             self.timer.stop()
             self.statusChanged.emit()
@@ -131,11 +135,13 @@ class NavigationManager:
 
 
 class AudioToolBar(QToolBar):
+#    ayahChanged = pyqtSignal(int)
+    
     def __init__(self, parent: Optional[object] = None):
         super().__init__(parent)
         self.parent = parent
         self.player = AyahPlayer()
-        self.reciters = RecitersManager(data_folder / "quran" / "reciters.db")
+        self.reciters = AyahReciter(data_folder / "quran" / "reciters.db")
         self.navigation = NavigationManager(self.parent, self.parent.quran)
         self.audio_thread = AudioPlayerThread(self.player, self.parent)
 
@@ -189,7 +195,7 @@ class AudioToolBar(QToolBar):
             self.navigation.current_ayah = 0
         elif self.navigation.current_ayah > 1:
             self.navigation.has_basmala = False
-                    
+
         reciter_id = SettingsManager.current_settings["listening"]["reciter"]
         url = self.reciters.get_url(reciter_id, self.navigation.current_surah, self.navigation.current_ayah)
         self.audio_thread.set_audio_url(url, send_error_signal=False if self.navigation.current_ayah == 0 else True)
@@ -200,17 +206,23 @@ class AudioToolBar(QToolBar):
         self.stop_audio()
         if self.navigation.navigate("next"):
             self.play_current_ayah()
+            self.change_ayah_focus()
 
     def OnPlayPrevious(self) -> None:
         self.stop_audio()
         if self.navigation.navigate("previous"):
             self.play_current_ayah()
+            self.change_ayah_focus()
+
+    def change_ayah_focus(self) -> None:
+            aya_number = self.parent.quran.ayah_data.get_ayah_number(self.navigation.current_ayah, self.navigation.current_surah)
+            self.parent.set_focus_to_ayah(aya_number)
 
     def OnActionAfterListening(self):
         self.set_buttons_status()
         action_after_listening = SettingsManager.current_settings["listening"]["action_after_listening"]
         if action_after_listening == 2 or self.navigation.current_ayah == 0:
-            self.navigation.has_basmala = True
+            self.navigation.has_basmala = True if self.navigation.current_ayah < 2 else False
             self.OnPlayNext()
         elif action_after_listening == 1:
             self.play_current_ayah()
@@ -222,7 +234,7 @@ class AudioToolBar(QToolBar):
         self.volume_slider.setValue(SettingsManager.current_settings["audio"]["ayah_volume_level"])
 
     def update_play_pause_button_text(self):
-        label = "إيقاف مؤقت" if self.player.is_playing() or self.player.is_stalled() else "استماع الآية الحالية"
+        label = "إيقاف مؤقت" if self.player.is_playing() or self.player.is_stalled() else "تشغيل الآية الحالية"
         self.play_pause_button.setText(label)
         if hasattr(self.parent, "menu_bar"):
             self.parent.menu_bar.play_pause_action.setText(label)
@@ -239,8 +251,18 @@ class AudioToolBar(QToolBar):
             self.parent.menu_bar.play_previous_action.setEnabled(previous_status)
             self.parent.menu_bar.play_pause_action.setEnabled(status)
             self.parent.menu_bar.stop_action.setEnabled(not self.player.is_stopped())
+            self.parent.menu_bar.rewind_action.setEnabled(not self.player.is_stopped())
+            self.parent.menu_bar.forward_action.setEnabled(not self.player.is_stopped())
+            self.parent.menu_bar.replay_action.setEnabled(not self.player.is_stopped())
             if  status == True:
                 self.audio_thread.timer.start(100)
 
     def show_error_message(self, message: ErrorMessage):
-        QMessageBox.critical(self.parent, message.title, message.body)
+        msg_box =QMessageBox(self.parent,)
+        msg_box.setIcon(QMessageBox.Icon.Critical)
+        msg_box.setWindowTitle(message.title)
+        msg_box.setText(message.body)
+        ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+        msg_box.exec()
+
+        

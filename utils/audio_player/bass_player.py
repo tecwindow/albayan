@@ -1,40 +1,27 @@
 import os
 import time
 import ctypes
-func_type = ctypes.WINFUNCTYPE
-QWORD = ctypes.c_int64
-
 from typing import List, Optional
 from urllib.parse import urlparse
 from .status import PlaybackStatus
+from .bass_init import BassInitializer, BassFlag
 from exceptions.audio_pplayer import (
     AudioFileNotFoundError, LoadFileError, UnsupportedFormatError, PlaybackControlError,
     InvalidSourceError, PlaybackInitializationError, PlaybackControlError
 )
 
-# Load bass.dll
-bass_path = os.path.abspath("bass.dll")
-bass = ctypes.CDLL(bass_path)
-
-# Constants
-BASS_STREAM_AUTOFREE = 0x40000  # Automatically free the stream when it stops/ends
-
-# Initialize BASS
-if not bass.BASS_Init(-1, 44100, 0, 0, 0):
-    raise PlaybackInitializationError()
+bass_initializer = BassInitializer()
+bass = bass_initializer.initialize()
 
 class AudioPlayer:
     instances = []
 
-    def __init__(self, volume: float, auto_free: bool =True) -> None:
+    def __init__(self, volume: float, flag: int = BassFlag.AUTO_FREE) -> None:
         self.source: Optional[str] = None
         self.current_channel: Optional[int] = None
         self.volume = volume
         self.supported_extensions = ('.wav', '.mp3', '.ogg')
-        self.auto_free = auto_free
-        self.BASS_ChannelBytes2Seconds = func_type(ctypes.c_double, ctypes.c_ulong, QWORD)(('BASS_ChannelBytes2Seconds', bass))
-        self.BASS_ChannelSeconds2Bytes = func_type(QWORD, ctypes.c_ulong, ctypes.c_double)(('BASS_ChannelSeconds2Bytes', bass))
-        self.BASS_ChannelSetPosition = func_type(ctypes.c_bool, ctypes.c_ulong, QWORD, ctypes.c_ulong)(('BASS_ChannelSetPosition', bass))
+        self.flag = flag
         AudioPlayer.instances.append(self)
     
     def load_audio(self, source: str, attempts: Optional[int] = 3) -> None:
@@ -54,12 +41,12 @@ class AudioPlayer:
         parsed_url = urlparse(source)
         if parsed_url.scheme in ("http", "https") and parsed_url.netloc:
             # Stream from URL
-            self.current_channel = bass.BASS_StreamCreateURL(source.encode(), 0, BASS_STREAM_AUTOFREE if self.auto_free else 0, None, None)
+            self.current_channel = bass.BASS_StreamCreateURL(source.encode(), 0, self.flag, None, None)
         else:
             # Load from local file
             if not os.path.isfile(source):
                 raise AudioFileNotFoundError(source)
-            self.current_channel = bass.BASS_StreamCreateFile(False, source.encode('utf-8'), 0, 0, BASS_STREAM_AUTOFREE if self.auto_free else 0)
+            self.current_channel = bass.BASS_StreamCreateFile(False, source.encode('utf-8'), 0, 0, self.flag)
 
         if not self.current_channel:
             if attempts:
@@ -98,12 +85,12 @@ class AudioPlayer:
         if self.current_channel:
             bass.BASS_ChannelSetAttribute(self.current_channel, 2, ctypes.c_float(self.volume))
     
-    def increase_volume(self, step: float = 0.01) -> None:
+    def increase_volume(self, step: float = 0.1) -> None:
         """Increases the volume by a specified step, default is 0.1 (10%)."""
         new_volume = min(self.volume + step, 1.0)
         self.set_volume(new_volume)
     
-    def decrease_volume(self, step: float = 0.01) -> None:
+    def decrease_volume(self, step: float = 0.1) -> None:
         """Decreases the volume by a specified step, default is 0.1 (10%)."""
         new_volume = max(self.volume - step, 0.0)
         self.set_volume(new_volume)
@@ -113,34 +100,50 @@ class AudioPlayer:
         if self.current_channel:
             new_seconds = max(0.0, new_seconds)
 
-        duration = self.BASS_ChannelBytes2Seconds(self.current_channel, bass.BASS_ChannelGetLength( self.current_channel, 0))
-        new_seconds = min(new_seconds, duration)    
-        new_position = self.BASS_ChannelSeconds2Bytes(self.current_channel, new_seconds)
-        self.BASS_ChannelSetPosition(self.current_channel, new_position, 0)
+        duration = self.get_length()
+        new_seconds = min(new_seconds, duration-1)    
+        new_position = bass.BASS_ChannelSeconds2Bytes(self.current_channel, new_seconds)
+        return bass.BASS_ChannelSetPosition(self.current_channel, new_position, 0)
 
     def forward(self, seconds: int = 5) -> None:
         """Forwards the audio playback by the specified number of seconds."""
         if self.current_channel:
-            current_position = bass.BASS_ChannelGetPosition(self.current_channel, 0)
+            current_position = self.get_position()
             if current_position == -1:
                 print("Error getting current position.")
                 return
         
-            current_seconds = self.BASS_ChannelBytes2Seconds(self.current_channel, current_position)
-            new_seconds = round(current_seconds + seconds)
+            new_seconds = current_position + seconds
             self.set_position(new_seconds)
 
     def rewind(self, seconds: int = 5) -> None:
         """Rewinds the audio playback by the specified number of seconds."""
         if self.current_channel:
-            current_position = bass.BASS_ChannelGetPosition(self.current_channel, 0)
+            current_position = self.get_position()
             if current_position == -1:
                 print("Error getting current position.")
                 return
         
-            current_seconds = self.BASS_ChannelBytes2Seconds(self.current_channel, current_position)
-            new_seconds = current_seconds - seconds
+            new_seconds = current_position - seconds
             self.set_position(new_seconds)
+
+    def get_length(self) -> float:
+        if not self.current_channel:
+            return 0
+
+        length = bass.BASS_ChannelGetLength( self.current_channel, 0)
+        duration = bass.BASS_ChannelBytes2Seconds(self.current_channel, length)
+
+        return duration
+    
+    def get_position(self) -> float:
+        if not self.current_channel:
+            return 0
+        
+        current_position = bass.BASS_ChannelGetPosition(self.current_channel, 0)
+        current_seconds = bass.BASS_ChannelBytes2Seconds(self.current_channel, current_position)
+
+        return current_seconds
 
     def get_playback_status(self) -> PlaybackStatus:
         """Returns the current playback status."""
@@ -177,8 +180,4 @@ class AudioPlayer:
     
     def get_error(self) -> int:
         return bass.BASS_ErrorGetCode()
-    
-    def get_length(self) -> int:
-        length = int(bass.BASS_ChannelGetLength( self.current_channel, 0))
-        return self.BASS_ChannelBytes2Seconds(self.current_channel, length)
     

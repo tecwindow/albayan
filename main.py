@@ -18,10 +18,11 @@ from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        app_id = "Albayan" if sys.argv[0].endswith(".exe") else "Albayan_Source"
         self.setApplicationName(program_name)
-        self.server_name = "Albayan"
+        self.server_name = app_id
         self.local_server = QLocalServer(self)
-        self.shared_memory = QSharedMemory("Albayan")
+        self.shared_memory = QSharedMemory(app_id)
         self.is_running = self.shared_memory.attach()
         self.volume_controller = VolumeController()
         self.installEventFilter(self) 
@@ -131,7 +132,14 @@ def main():
     except Exception as e:
         print(e)
         Logger.error(str(e))
-        QMessageBox.critical(None, "Error", "حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")
+        msg_box = QMessageBox(None)
+        msg_box.setIcon(QMessageBox.Icon.Critical)
+        msg_box.setWindowTitle("خطأ")
+        msg_box.setText("حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")
+
+        ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+        msg_box.exec()
+
         
 if __name__ == "__main__":    
     freeze_support()

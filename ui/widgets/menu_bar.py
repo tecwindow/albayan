@@ -1,3 +1,4 @@
+import os
 from PyQt6.QtWidgets import QApplication, QMenuBar, QMenu, QMessageBox
 from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut, QDesktopServices
 from PyQt6.QtCore import Qt, QUrl
@@ -5,14 +6,18 @@ from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
 from ui.dialogs.go_to import GoToDialog
 from ui.dialogs.athkar_dialog import AthkarDialog
+from ui.sura_player_ui import SuraPlayerWindow
+from ui.dialogs.tasbih_dialog import TasbihDialog
+from ui.dialogs.prophets_stories_dialog import ProphetsStoriesDialog
 from core_functions.quran_class import QuranConst
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
 from utils.settings import SettingsManager
 from utils.logger import Logger
 from utils.const import program_name, program_version, website, Globals
-
+from utils.audio_player import bass
 from theme import ThemeManager
+
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
@@ -20,6 +25,7 @@ class MenuBar(QMenuBar):
         self.parent = parent
         self.theme_manager = ThemeManager(self.parent)
         self.update_manager = UpdateManager(self.parent)
+        self.sura_player_window = None
         self.our_emails = {
             "محمود عاطف": "mahmoud.atef.987123@gmail.com",
             "قيس الرفاعي": "ww258148@gmail.com",
@@ -54,7 +60,7 @@ class MenuBar(QMenuBar):
         self.close_action.triggered.connect(self.parent.close)
         self.close_action.setVisible(SettingsManager.current_settings["general"]["run_in_background_enabled"])
         self.exit_action = QAction("إغلاق البرنامج", self)
-        self.exit_action.setShortcuts([QKeySequence("Ctrl+X")])
+        self.exit_action.setShortcuts([QKeySequence("Ctrl+Shift+W"), QKeySequence("Ctrl+Shift+F4")])
         self.exit_action.triggered.connect(self.quit_application)
 
         navigation_menu.addAction(self.next_action)
@@ -68,12 +74,22 @@ class MenuBar(QMenuBar):
 
         player_menu = self.addMenu("المشغل(&P)")
         self.play_pause_action = QAction("تشغيل الآية الحالية", self)
-        self.play_pause_action.setShortcut(QKeySequence("Ctrl+P"))
+        self.play_pause_action.setShortcuts([QKeySequence("K"), QKeySequence("Ctrl+P")])
         self.play_pause_action.triggered.connect(self.parent.toolbar.toggle_play_pause)
         self.stop_action = QAction("إيقاف", self)
         self.stop_action.setShortcut(QKeySequence("Ctrl+E"))
         self.stop_action.setEnabled(False)
         self.stop_action.triggered.connect(self.parent.toolbar.stop_audio)
+        self.rewind_action = QAction("ترجيع", self)
+        self.rewind_action.setShortcuts([QKeySequence("J"), QKeySequence("Ctrl+Alt+Left")])
+        self.rewind_action.triggered.connect(lambda: self.parent.toolbar.player.rewind(SettingsManager.current_settings["listening"]["forward_time"]))
+        self.forward_action = QAction("تقديم", self)
+        self.forward_action.setShortcuts([QKeySequence("L"), QKeySequence("Ctrl+Alt+Right")])
+        self.forward_action.triggered.connect(lambda: self.parent.toolbar.player.forward(SettingsManager.current_settings["listening"]["forward_time"]))
+        self.replay_action = QAction("إعادة", self)
+        self.replay_action.setShortcut(QKeySequence("Shift+J"))
+        self.replay_action.triggered.connect(lambda: self.parent.toolbar.player.set_position(0))
+
         self.play_next_action = QAction("تشغيل الآية التالية", self)
         self.play_next_action.setShortcut(QKeySequence("Ctrl+Shift+N"))
         self.play_next_action.setEnabled(False)
@@ -85,8 +101,12 @@ class MenuBar(QMenuBar):
 
         player_menu.addAction(self.play_pause_action)
         player_menu.addAction(self.stop_action)
+        player_menu.addAction(self.rewind_action)
+        player_menu.addAction(self.forward_action)
+        player_menu.addAction(self.replay_action)
         player_menu.addAction(self.play_next_action)
         player_menu.addAction(self.play_previous_action)
+
 
         actions_menu = self.addMenu("الإجرائات(&A)")
         self.save_position_action = QAction("حفظ الموضع الحالي", self)
@@ -114,10 +134,10 @@ class MenuBar(QMenuBar):
 
         self.ayah_info_action = QAction("معلومات الآية", self)
         self.ayah_info_action.triggered.connect(self.parent.OnAyahInfo)
-        self.ayah_info_action.setShortcut(QKeySequence("Ctrl+I"))
+        self.ayah_info_action.setShortcut(QKeySequence("Shift+I"))
         self.verse_info_action = QAction("أسباب نزول الآية", self)
         self.verse_info_action.triggered.connect(self.parent.OnVerseReasons)
-        self.verse_info_action.setShortcut(QKeySequence("Shift+A"))
+        self.verse_info_action.setShortcut(QKeySequence("Shift+R"))
         self.verse_grammar_action = QAction("إعراب الآية", self)
         self.verse_grammar_action.triggered.connect(self.parent.OnSyntax)
         self.verse_grammar_action.setShortcut(QKeySequence("Shift+E"))
@@ -137,13 +157,31 @@ class MenuBar(QMenuBar):
 
         tools_menu = self.addMenu("الأدوات(&T)")
         athkar_action = QAction("الأذكار", self)
-        athkar_action.setShortcut(QKeySequence("Ctrl+Shift+D"))
+        athkar_action.setShortcut(QKeySequence("Shift+A"))
         athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).exec())
         bookmark_manager_action = QAction("مدير العلامات", self)
         bookmark_manager_action.setShortcut(QKeySequence("Shift+D"))
         bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
+        sura_player_action = QAction("مشغل القرآن", self)
+        sura_player_action.setShortcut(QKeySequence("Shift+P"))
+        sura_player_action.triggered.connect(self.OnSuraPlayer)
+        tasbih_action = QAction("المسبحة", self)
+        tasbih_action.setShortcut(QKeySequence("Shift+S"))
+        tasbih_action.triggered.connect(self.OnTasbihAction)
+        message_for_you_action = QAction("رسالة لك", self)
+        message_for_you_action.setShortcut(QKeySequence("Shift+M"))
+        message_for_you_action.triggered.connect(self.parent.OnRandomMessages)
+        stories_action = QAction("قصص الأنبياء", self)
+        stories_action.setShortcut(QKeySequence("Shift+O"))
+        stories_action.triggered.connect(self.OnStoriesAction)
+
+        tools_menu.addAction(sura_player_action)
         tools_menu.addAction(athkar_action)
-        tools_menu.addAction(bookmark_manager_action )
+        tools_menu.addAction(bookmark_manager_action)
+        tools_menu.addAction(tasbih_action)
+        tools_menu.addAction(message_for_you_action)
+        tools_menu.addAction(stories_action)
+
 
         preferences_menu = self.addMenu("التفضيلات(&R)")
         settings_action = QAction("الإعدادات", self)
@@ -173,8 +211,12 @@ class MenuBar(QMenuBar):
 
 
         help_menu = self.addMenu("المساعدة(&H)")
-#        user_guide_action = QAction("دليل البرنامج", self)
-#        user_guide_action.setShortcut(QKeySequence("F1"))
+        user_guide_action = QAction("دليل البرنامج", self)
+        user_guide_action.setShortcut(QKeySequence("F1"))
+        user_guide_action.triggered.connect(lambda: MenuBar.open_documentation("user_guide"))
+        whats_new_action = QAction("المستجدات", self)
+        whats_new_action.setShortcut(QKeySequence("F2"))
+        whats_new_action.triggered.connect(lambda: MenuBar.open_documentation("Whats_new"))
         contact_us_menu = QMenu("اتصل بنا", self)
         for name in self.our_emails:
             name_action = QAction(name, self)
@@ -182,16 +224,22 @@ class MenuBar(QMenuBar):
             contact_us_menu.addAction(name_action)
 
         update_program_action = QAction("تحديث البرنامج", self)
-        #update_program_action.setShortcuts([QKeySequence("F5"), QKeySequence("Ctrl+U")])
+        update_program_action.setShortcut(QKeySequence("Ctrl+F2"))
         update_program_action.triggered.connect(self.OnUpdate)
-
+        open_log_action = QAction("فتح ملف السجل", self)
+        open_log_action.setShortcut(QKeySequence("Shift+L"))
+        open_log_action.triggered.connect(self.Onopen_log_file)
         about_program_action = QAction("حول البرنامج", self)
-        #about_program_action.setShortcuts([QKeySequence("F6")])
+        about_program_action.setShortcut(QKeySequence("Ctrl+F1"))
         about_program_action.triggered.connect(self.OnAbout)
 
-#        help_menu.addAction(user_guide_action)
-        help_menu.addMenu(contact_us_menu)
+
+
+        help_menu.addAction(user_guide_action)
+        help_menu.addAction(whats_new_action)
         help_menu.addAction(update_program_action)
+        help_menu.addAction(open_log_action)
+        help_menu.addMenu(contact_us_menu)
         help_menu.addAction(about_program_action)
 
     def OnSettings(self):
@@ -205,6 +253,22 @@ class MenuBar(QMenuBar):
         dialog = BookmarkDialog(self.parent)
         if dialog.exec():
             self.parent.set_text_ctrl_label()
+
+    def OnSuraPlayer(self):
+        if not self.sura_player_window:
+            self.sura_player_window = SuraPlayerWindow(self.parent)
+        self.sura_player_window.show()
+        self.sura_player_window.activateWindow()
+        self.parent.hide()
+
+
+    def OnTasbihAction(self):
+        tasbih_dialog = TasbihDialog(self.parent)
+        tasbih_dialog.exec()
+
+    def OnStoriesAction(self):
+        stories_dialog = ProphetsStoriesDialog(self.parent)
+        stories_dialog.exec()
 
     def OnTheme    (self):
 
@@ -249,7 +313,12 @@ class MenuBar(QMenuBar):
             f"إصدار البرنامج: {program_version}\n"
             f"الموقع الرسمي للبرنامج: {website}\n"
         )
-        QMessageBox.about(self, "حول البرنامج", about_text)
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setWindowTitle("حول البرنامج")
+        msg_box.setText(about_text)
+        ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+        msg_box.exec()
 
     def OnGoTo(self):
         category_number = self.parent.quran.type
@@ -272,6 +341,34 @@ class MenuBar(QMenuBar):
         if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:
             self.parent.OnSaveCurrentPosition()
         self.parent.tray_manager.hide_icon()
+        if self.sura_player_window is not None:
+            self.sura_player_window.close()
         QApplication.quit()
-        
+        bass.BASS_Free()
 
+    def Onopen_log_file(self):
+        appdata_path = os.path.expandvars('%appdata%')
+        log_file_path = os.path.join(appdata_path, 'tecwindow', 'albayan', 'albayan.log')
+
+        try:
+            os.startfile(log_file_path)
+        except FileNotFoundError:
+            try:
+                os.makedirs(os.path.dirname(log_file_path), exist_ok=True)  
+                with open(log_file_path, 'w', encoding='utf-8') as f:
+                    f.write("")
+                os.startfile(log_file_path)
+            except Exception:
+                pass
+
+    def open_documentation(doc_type: str):
+        file_map = {
+            "user_guide": "UserGuide.html",
+            "Whats_new": "WhatsNew.html"
+        }
+        file_name = file_map.get(doc_type)
+        if not file_name:
+            return
+        doc_path = os.path.join("documentation", file_name)
+        if os.path.exists(doc_path):
+            os.startfile(doc_path)

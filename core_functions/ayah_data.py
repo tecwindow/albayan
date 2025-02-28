@@ -60,6 +60,16 @@ class AyahData:
         else:
             return 0
 
+    def get_ayah_number(self, ayah_number_in_surah: int, surah_number) -> int:
+        """Get ayah number by surah number and ayah number in surah."""
+        self.cursor.execute("SELECT ayah_number FROM ayah_data WHERE ayah_number_in_surah = ? AND surah_number = ?;", (ayah_number_in_surah, surah_number))
+        result = self.cursor.fetchone()
+
+        if result:
+            return result["ayah_number"]
+        else:
+            return None
+
     def get_ayah_range(self) -> Dict[int, List[sqlite3.Row]]:
         """Fetches the maximum and minimum ayah numbers from the ayah_data table."""
         self.cursor.execute("""

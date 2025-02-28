@@ -6,7 +6,7 @@ class UniversalSpeech:
     universal_speech.enable_native_speech(False)
 
     @classmethod
-    def say(cls, msg: str) -> None:
+    def say(cls, msg: str, interrupt: bool = True) -> None:
         if SettingsManager.current_settings["audio"]["speak_actions_enabled"]:
-            cls.universal_speech.say(msg, True)
+            cls.universal_speech.say(msg, interrupt)
 

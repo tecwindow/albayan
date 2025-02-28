@@ -23,6 +23,11 @@ class SystemTrayManager:
         self.tray_icon.show()
 
     def show_main_window(self):
+        if self.main_window.menu_bar.sura_player_window is not None and  self.main_window.menu_bar.sura_player_window.isVisible():
+            self.main_window.menu_bar.sura_player_window.activateWindow()
+            self.main_window.menu_bar.sura_player_window.raise_()
+            return
+
         self.main_window.show()
         self.main_window.raise_()
         self.main_window.activateWindow()

@@ -15,15 +15,17 @@ from PyQt6.QtWidgets import (
     QSpacerItem,
     QSizePolicy,
     QHBoxLayout,
+    QSpinBox,
     QStackedWidget
 )
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
-from core_functions.Reciters import RecitersManager
+from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name
 from utils.settings import SettingsManager
-from utils.audio_player import AthkarPlayer, AyahPlayer, SoundEffectPlayer
+from utils.audio_player import AthkarPlayer, AyahPlayer, SurahPlayer, SoundEffectPlayer
 from utils.Startup import StartupManager
+import qtawesome as qta
 
 
 class SettingsDialog(QDialog):
@@ -32,7 +34,7 @@ class SettingsDialog(QDialog):
         self.parent = parent
         self.setWindowTitle("الإعدادات")
         self.resize(600, 450)
-        self.reciters_manager = RecitersManager(data_folder / "quran" / "reciters.db")
+        self.reciters_manager = AyahReciter(data_folder / "quran" / "reciters.db")
         self.init_ui()
         self.set_current_settings()
 
@@ -47,12 +49,22 @@ class SettingsDialog(QDialog):
         tree_widget.setMinimumWidth(200)
         tree_widget.setStyleSheet("QTreeWidget { font-size: 14px; }")
         
-        # Adding items to the tree
+        # Adding items to the tree with icons
         general_item = QTreeWidgetItem(["الإعدادات العامة"])
+        general_item.setIcon(0, qta.icon("fa.cogs"))
+
         audio_item = QTreeWidgetItem(["الصوت"])
+        audio_item.setIcon(0, qta.icon("fa.volume-up"))
+
         listening_item = QTreeWidgetItem(["الاستماع"])
+        listening_item.setIcon(0, qta.icon("fa.headphones"))
+
         reading_item = QTreeWidgetItem(["القراءة"])
+        reading_item.setIcon(0, qta.icon("fa.book"))
+
         search_item = QTreeWidgetItem(["البحث"])
+        search_item.setIcon(0, qta.icon("fa.search"))
+
         
         # Adding top-level items
         tree_widget.addTopLevelItem(general_item)
@@ -102,6 +114,12 @@ class SettingsDialog(QDialog):
         self.ayah_volume.valueChanged.connect(self.OnAyahVolume)
         self.ayah_volume.setAccessibleName(self.ayah_volume_label.text())
         self.ayah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.surah_volume_label = QLabel("مستوى صوت السور")
+        self.surah_volume = QSlider(Qt.Orientation.Horizontal)
+        self.surah_volume.setRange(0, 100)
+        self.surah_volume.valueChanged.connect(self.OnSurahVolume)
+        self.surah_volume.setAccessibleName(self.surah_volume_label.text())
+        self.surah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.athkar_volume_label = QLabel("مستوى صوت الأذكار")
         self.athkar_volume = QSlider(Qt.Orientation.Horizontal)
         self.athkar_volume.setRange(0, 100)
@@ -116,6 +134,8 @@ class SettingsDialog(QDialog):
         self.group_audio_layout.addWidget(self.volume)
         self.group_audio_layout.addWidget(self.ayah_volume_label)
         self.group_audio_layout.addWidget(self.ayah_volume)
+        self.group_audio_layout.addWidget(self.surah_volume_label)
+        self.group_audio_layout.addWidget(self.surah_volume)
         self.group_audio_layout.addWidget(self.athkar_volume_label)
         self.group_audio_layout.addWidget(self.athkar_volume)
         self.group_audio_layout.addWidget(self.sound_checkbox)
@@ -129,8 +149,8 @@ class SettingsDialog(QDialog):
 
         self.reciters_label = QLabel("القارئ:")
         self.reciters_combo = QComboBox()
-        reciters = self.reciters_manager.get_reciters()
         self.reciters_combo.setAccessibleName(self.reciters_label.text())
+        reciters = self.reciters_manager.get_reciters()
         for  row in reciters:
             display_text = f"{row['name']} - {row['rewaya']} - {row['type']} - ({row['bitrate']} kbps)"
             self.reciters_combo.addItem(display_text, row["id"])
@@ -141,11 +161,20 @@ class SettingsDialog(QDialog):
         [self.action_combo.addItem(text, id) for text, id in items_with_ids]
         self.action_combo.setAccessibleName(self.action_label.text())
 
+        self.duration_label = QLabel("مدة التقديم والترجيع (بالثواني):")
+        self.duration_spinbox = QSpinBox()
+        self.duration_spinbox.setAccessibleName(self.duration_label.text())        
+        self.duration_spinbox.setRange(2, 15)
+        self.duration_spinbox.setSingleStep(1)
+
+
         self.group_listening_layout.addWidget(self.reciters_label)
         self.group_listening_layout.addWidget(self.reciters_combo)
         self.group_listening_layout.addSpacerItem(QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))  # مسافة نتوسطة
         self.group_listening_layout.addWidget(self.action_label)
         self.group_listening_layout.addWidget(self.action_combo)
+        self.group_listening_layout.addWidget(self.duration_label)
+        self.group_listening_layout.addWidget(self.duration_spinbox)
         self.group_listening.setLayout(self.group_listening_layout)
         self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
@@ -212,11 +241,19 @@ class SettingsDialog(QDialog):
         close_button.setShortcut(QKeySequence("Ctrl+W"))
         close_button.clicked.connect(self.close)
 
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
         buttons_layout.addWidget(save_button)
         buttons_layout.addWidget(close_button)
 
         main_layout.addLayout(buttons_layout)
         self.setLayout(main_layout)
+
+
+    def OnSurahVolume(self) -> None:
+        for instance in SurahPlayer.instances:
+            instance.set_volume(self.surah_volume.value())
 
     def OnAyahVolume(self) -> None:
         for instance in AyahPlayer.instances:
@@ -267,12 +304,14 @@ class SettingsDialog(QDialog):
             "speak_actions_enabled": self.speech_checkbox.isChecked(),
             "volume_level": self.volume.value(),
             "ayah_volume_level": self.ayah_volume.value(),
+            "surah_volume_level": self.surah_volume.value(),
             "athkar_volume_level": self.athkar_volume.value()
         }
 
         listening_settings = {
             "reciter": self.reciters_combo.currentData(),
-            "action_after_listening": self.action_combo.currentData()
+            "action_after_listening": self.action_combo.currentData(),
+            "forward_time": self.duration_spinbox.value()
         }
 
         reading_settings = {
@@ -317,11 +356,13 @@ class SettingsDialog(QDialog):
         self.volume.setValue(current_settings["audio"]["volume_level"])
         self.athkar_volume.setValue(current_settings["audio"]["athkar_volume_level"])
         self.ayah_volume.setValue(current_settings["audio"]["ayah_volume_level"])
+        self.surah_volume.setValue(current_settings["audio"]["surah_volume_level"])
         self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])
         self.turn_pages_checkbox.setChecked(current_settings["reading"]["auto_page_turn"])
         self.start_on_system_start_checkbox.setChecked(current_settings["general"]["auto_start_enabled"])
         self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
         self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
+        self.duration_spinbox.setValue(current_settings["listening"]["forward_time"])
         self.log_checkbox.setChecked(current_settings["general"]["logging_enabled"])
         self.ignore_tashkeel_checkbox.setChecked(current_settings["search"]["ignore_tashkeel"])
         self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])

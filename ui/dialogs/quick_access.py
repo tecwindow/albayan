@@ -12,7 +12,8 @@ from PyQt6.QtWidgets import (
     QGroupBox,
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
+import qtawesome as qta
 
 
 class QuickAccess(QDialog):
@@ -51,7 +52,9 @@ class QuickAccess(QDialog):
         
         button_layout = QHBoxLayout()  # استخدام QHBoxLayout لأزرار الإجراءات
         self.go_button = QPushButton("اذهب")
+        self.go_button.setIcon(qta.icon("fa.location-arrow"))
         self.cancel_button = QPushButton("إغلاق")
+        self.cancel_button.setIcon(qta.icon("fa.times"))
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
         button_layout.addWidget(self.go_button)
         button_layout.addWidget(self.cancel_button)
@@ -73,6 +76,9 @@ class QuickAccess(QDialog):
         self.quarters_radio.toggled.connect(self.on_radio_toggled)
         self.hizb_radio.toggled.connect(self.on_radio_toggled)
         self.jus_radio.toggled.connect(self.on_radio_toggled)
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
 
     def on_submit(self):
         selected_item = self.choices.currentIndex() + 1

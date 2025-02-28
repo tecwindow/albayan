@@ -16,8 +16,10 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QInputDialog,
     QApplication,
-    QTextEdit
+    QTextEdit,
+    QSystemTrayIcon
 )
+import qtawesome as qta
 from PyQt6.QtGui import QIcon, QAction, QShowEvent, QTextCursor, QKeySequence, QShortcut
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
@@ -30,13 +32,14 @@ from ui.widgets.menu_bar import MenuBar
 from ui.widgets.qText_edit import QuranViewer
 from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
+from ui.sura_player_ui.sura_player_ui import SuraPlayerWindow
 from ui.widgets.system_tray import SystemTrayManager
 from ui.widgets.toolbar import AudioToolBar
 from utils.settings import SettingsManager
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
 from utils.const import program_name, program_icon, user_db_path, data_folder, Globals
-from utils.audio_player import bass, SoundEffectPlayer
+from utils.audio_player import SoundEffectPlayer
 from exceptions.error_decorators import exception_handler
 
 
@@ -44,11 +47,15 @@ class QuranInterface(QMainWindow):
     def __init__(self, title):
         super().__init__()
         self.setWindowTitle(title)
-        self.setGeometry(100, 100, 800, 600)
+        self.resize(800, 600)
+        self.center_window()
+        self.setWindowIcon(QIcon("Albayan.ico"))
         self.quran = quran_mgr()
         self.quran.load_quran(SettingsManager.current_settings["reading"]["font_type"])
         self.user_data_manager = UserDataManager(user_db_path)
+        self.sura_player_window = None
         Globals.effects_manager = SoundEffectPlayer("Audio/sounds")
+
 
         self.toolbar = AudioToolBar(self)
         self.menu_bar = MenuBar(self)
@@ -61,7 +68,16 @@ class QuranInterface(QMainWindow):
         self.set_text()
         self.set_shortcut()
 
+    def center_window(self):
+        screen_geometry = QApplication.primaryScreen().availableGeometry()
+        window_geometry = self.frameGeometry()
+        window_geometry.moveCenter(screen_geometry.center())
+        self.move(window_geometry.topLeft())
+
     def set_shortcut(self):
+        QShortcut(QKeySequence("Ctrl+M"), self).activated.connect(lambda: self.quran_view.setFocus())
+        QShortcut(QKeySequence("C"), self). \
+        activated.connect(self.say_current_ayah)
         for i in range(0, 5):  
             shortcut = QShortcut(QKeySequence(f"Ctrl+{i+1}"), self)
             shortcut.activated.connect(lambda mode=i: self.OnChangeNavigationMode(mode))
@@ -80,30 +96,56 @@ class QuranInterface(QMainWindow):
         self.quran_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.quran_view.customContextMenuRequested.connect(self.onContextMenu)
         
-        self.next_to = EnterButton("التالي")
+        self.next_to = EnterButton()
+        self.next_to.setIcon(qta.icon("fa.forward"))
+        self.next_to.setToolTip(self.next_to.text())
+        self.next_to.setAccessibleName(self.next_to.text())
         self.next_to.clicked.connect(self.OnNext)
         
-        self.back_to = EnterButton("السابق")
+        self.back_to = EnterButton()
+        self.back_to.setIcon(qta.icon("fa.backward"))
+        self.back_to.setToolTip(self.back_to.text())
+        self.back_to.setAccessibleName(self.back_to.text())
         self.back_to.clicked.connect(self.OnBack)
-
-        self.interpretation_verse = EnterButton("تفسير الآية")
+        
+        self.interpretation_verse = EnterButton()
+        self.interpretation_verse.setIcon(qta.icon("fa.book"))
+        self.interpretation_verse.setToolTip("تفسير الآية")
+        self.interpretation_verse.setAccessibleName("تفسير الآية")
         self.interpretation_verse.setEnabled(False)
         self.interpretation_verse.clicked.connect(self.OnInterpretation)
-
-        self.quick_access = EnterButton("الوصول السريع")
+        
+        self.quick_access = EnterButton()
+        self.quick_access.setIcon(qta.icon("fa.bolt"))
+        self.quick_access.setToolTip("الوصول السريع")
+        self.quick_access.setAccessibleName("الوصول السريع")
         self.quick_access.clicked.connect(self.OnQuickAccess)
-
-        self.search_in_quran = EnterButton("البحث في القرآن")
+        
+        self.search_in_quran = EnterButton()
+        self.search_in_quran.setIcon(qta.icon("fa.search"))
+        self.search_in_quran.setToolTip("البحث في القرآن")
+        self.search_in_quran.setAccessibleName("البحث في القرآن")
         self.search_in_quran.clicked.connect(self.OnSearch)
-        self.save_current_position = EnterButton("حفظ الموضع الحالي")
+        
+        self.save_current_position = EnterButton()
+        self.save_current_position.setIcon(qta.icon("fa.save"))
+        self.save_current_position.setToolTip("حفظ الموضع الحالي")
+        self.save_current_position.setAccessibleName("حفظ الموضع الحالي")
         self.save_current_position.setEnabled(False)
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
         self.save_current_position.clicked.connect(self.OnSave_alert)
+        
+        self.tasbih = EnterButton()
+        self.tasbih.setIcon(qta.icon("fa.circle"))
+        self.tasbih.setToolTip("المسبحة")
+        self.tasbih.setAccessibleName("المسبحة")
+        self.tasbih.clicked.connect(self.menu_bar.OnTasbihAction)
 
-        self.random_messages = EnterButton("رسالة لك")
-        self.random_messages.clicked.connect(self.OnRandomMessages)
-        self.random_messages.setShortcut(QKeySequence("Ctrl+M"))
-
+        self.quran_player = EnterButton()
+        self.quran_player.setIcon(qta.icon("fa.play-circle"))
+        self.quran_player.setToolTip("مشغل القرآن")
+        self.quran_player.setAccessibleName("مشغل القرآن")
+        self.quran_player.clicked.connect(self.menu_bar.OnSuraPlayer)
 
     def create_layout(self):
         layout = QVBoxLayout()
@@ -117,7 +159,8 @@ class QuranInterface(QMainWindow):
         buttons_layout.addWidget(self.quick_access)
         buttons_layout.addWidget(self.search_in_quran)
         buttons_layout.addWidget(self.save_current_position)
-        buttons_layout.addWidget(self.random_messages)
+        buttons_layout.addWidget(self.tasbih)
+        buttons_layout.addWidget(self.quran_player)
 
 
         layout.addLayout(buttons_layout)
@@ -318,7 +361,14 @@ class QuranInterface(QMainWindow):
         if text:
             InfoDialog(self, title, label, text).exec()
         else:
-            QMessageBox.information(self, "لا يتوفر معلومات للآية", "للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setWindowTitle("لا يتوفر معلومات للآية")
+            msg_box.setText("للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
+
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnAyahInfo(self, event):
@@ -328,6 +378,14 @@ class QuranInterface(QMainWindow):
         text = AyaInfo(aya_info[1]).text
         InfoDialog(self, title, label, text, is_html_content=True).exec()
 
+    def say_current_ayah(self):
+        if not self.toolbar.navigation.current_ayah:
+            return
+
+        ayah_info = self.get_current_ayah_info()
+        text = f"آية {self.toolbar.navigation.current_ayah} من {ayah_info[2]}."
+        UniversalSpeech.say(text)
+
     @exception_handler(ui_element=QMessageBox)
     def OnSaveBookmark(self, event):
 
@@ -336,13 +394,43 @@ class QuranInterface(QMainWindow):
         criteria_number = self.quran.type
 
         if bookmark_manager.is_exist(aya_info[1]):
-            QMessageBox.critical(self, "خطأ", f"تم حفظ العلامة المرجعية مسبقًا.")
+            msgBox = QMessageBox(self)
+            msgBox.setIcon(QMessageBox.Critical)
+            msgBox.setWindowTitle("خطأ")
+            msgBox.setText("تم حفظ العلامة المرجعية مسبقًا.")
+            msgBox.addButton("موافق", QMessageBox.AcceptRole)
+            msgBox.exec()
+
             return
 
-        name, ok = QInputDialog.getText(self, "اسم العلامة", "أدخل اسم العلامة:")
-        if ok and name:
-            bookmark_manager.insert_bookmark(name, aya_info[1], aya_info[3], aya_info[0], aya_info[2], criteria_number)
-            self.quran_view.setFocus()
+
+        dialog = QInputDialog(self)
+        dialog.setWindowTitle("اسم العلامة")
+        dialog.setLabelText("أدخل اسم العلامة:")
+        dialog.setTextValue("")
+    
+
+        dialog.setOkButtonText("إضافة")
+        dialog.setCancelButtonText("إلغاء")
+    
+
+        if dialog.exec() == dialog.Accepted:
+            name = dialog.textValue()
+            if name:
+                bookmark_manager.insert_bookmark(
+                    name, 
+                    aya_info[1], 
+                    aya_info[3], 
+                    aya_info[0], 
+                    aya_info[2], 
+                    criteria_number
+                )
+                self.quran_view.setFocus()
+            else:
+                # Optionally, handle the case where the user accepts without entering a name
+                return
+        else:
+            return
 
     def OnSaveCurrentPosition(self):
         self.user_data_manager.save_position(
@@ -350,7 +438,6 @@ class QuranInterface(QMainWindow):
          self.quran.type,
          self.quran.current_pos
          )
-
 
     def OnSave_alert(self):
         UniversalSpeech.say("تم حفظ الموضع الحالي.")
@@ -370,13 +457,14 @@ class QuranInterface(QMainWindow):
         if SettingsManager.current_settings["general"]["run_in_background_enabled"]:
             event.ignore()
             self.hide()
-            self.tray_manager.tray_icon.showMessage("البيان", "تم تصغير نافذة البيان على صينية النظام, البرنامج يعمل في الخلفية.", msecs=5000)
+            icon_path = "Albayan.ico"
+            self.tray_manager.tray_icon.showMessage("البيان", "تم تصغير نافذة البيان على صينية النظام, البرنامج يعمل في الخلفية.", QIcon(icon_path), msecs=5000)
         else:
             self.tray_manager.hide_icon()
-            bass.BASS_Free()
-
+            
     @exception_handler(ui_element=QMessageBox)
     def OnRandomMessages(self, event):
-        info_dialog = InfoDialog(self, 'رسالة لك', '', "", is_html_content=False, show_message_button=True)
+        info_dialog = InfoDialog(self, 'رسالة لك', '', "", is_html_content=False, show_message_button=True, save_message_as_img_button=True)
         info_dialog.choose_QuotesMessage()
         info_dialog.exec()
+

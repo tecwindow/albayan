@@ -1,3 +1,4 @@
+import qtawesome as qta
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QDialog, 
@@ -11,7 +12,7 @@ from PyQt6.QtWidgets import (
     QMessageBox, 
     QInputDialog
 )
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
 from core_functions.bookmark import BookmarkManager
 from utils.const import Globals
 
@@ -36,12 +37,23 @@ class BookmarkDialog(QDialog):
         self.bookmark_list.setAccessibleDescription(self.bookmarks_label.text())
 
         self.update_button = QPushButton("تعديل الاسم")
+        self.update_button.setIcon(qta.icon("fa.pencil"))
+        self.update_button.setShortcut(QKeySequence("F2"))
+
         self.delete_button = QPushButton("حذف العلامة")
+        self.delete_button.setIcon(qta.icon("fa.trash"))
         self.delete_button.setShortcut(QKeySequence(Qt.Key.Key_Delete))
+        
         self.go_button = QPushButton("الذهاب إلى العلامة")
+        self.go_button.setIcon(qta.icon("fa.location-arrow"))
         self.go_button.setDefault(True)
-        self.cancel_button = QPushButton("إلغاء")
+        
+        self.cancel_button = QPushButton("إغلاق")
+        self.cancel_button.setIcon(qta.icon("fa.times"))
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
 
 
         form_layout = QHBoxLayout()
@@ -89,41 +101,74 @@ class BookmarkDialog(QDialog):
         self.load_bookmarks(bookmarks)
 
     def update_bookmark(self):
-
         selected_items = self.bookmark_list.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, "Selection Error", "لم يتم تحديد أي علامة")
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setWindowTitle("خطأ في التحديد")
+            msg_box.setText("لم يتم تحديد أي علامة.")
+        
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
             return
 
         item = selected_items[0]
         bookmark = item.data(Qt.ItemDataRole.UserRole)
         bookmark_id = bookmark["id"]
-        new_name, ok = QInputDialog.getText(self, "Update Bookmark", "Enter new bookmark name:", text=bookmark["name"])
-        if ok and new_name:
-            self.manager.update_bookmark(bookmark_id, new_name)
-            current_row = self.bookmark_list.currentRow()
-            self.load_bookmarks()
-            self.bookmark_list.setCurrentRow(current_row)
-            self.bookmark_list.setFocus()
+        new_name = ""
+    # Create an instance of QInputDialog
+        dialog = QInputDialog(self)
+        dialog.setWindowTitle("تحديث العلامة")
+        dialog.setLabelText("أدخل اسم جديد للعلامة:")
+        dialog.setTextValue(bookmark["name"])
+    
+        # Change the button texts to Arabic.
+        dialog.setOkButtonText("حفظ")
+        dialog.setCancelButtonText("إلغاء")
+    
+        # Execute the dialog and check the result.
+        if dialog.exec() == QDialog.Accepted:
+            new_name = dialog.textValue()
+        if new_name:
+                self.manager.update_bookmark(bookmark_id, new_name)
+                current_row = self.bookmark_list.currentRow()
+                self.load_bookmarks()
+                self.bookmark_list.setCurrentRow(current_row)
+                self.bookmark_list.setFocus()
+
+
 
     def delete_bookmark(self):
 
         selected_items = self.bookmark_list.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, "Selection Error", "لم يتم تحديد أي علامة.")
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setWindowTitle("خطأ في التحديد")
+            msg_box.setText("لم يتم تحديد أي علامة.")
+      
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+
+            msg_box.exec()
+
             return
+
         
         item = selected_items[0]
         bookmark = item.data(Qt.ItemDataRole.UserRole)
         bookmark_id = bookmark["id"]
+        
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Icon.Warning)
+        msg_box.setWindowTitle("تحذير")
+        msg_box.setText(f"هل أنت متأكد إنك تريد حذف هذه العلامة؟\n\nالاسم: {bookmark['name']}")
+    
+        yes_button = msg_box.addButton("نعم", QMessageBox.ButtonRole.AcceptRole)
+        no_button = msg_box.addButton("لا", QMessageBox.ButtonRole.RejectRole)
 
-        reply = QMessageBox.warning(
-                self, "تحذير",
-                f"هل أنت متأكد إنك تريد حذف هذه العلامة؟\n\nالاسم: {bookmark['name']}",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                )
+        msg_box.exec()
 
-        if reply == QMessageBox.StandardButton.Yes:
+        if msg_box.clickedButton() == yes_button:
             self.manager.delete_bookmark(bookmark_id)
             self.load_bookmarks()
             self.bookmark_list.setFocus()

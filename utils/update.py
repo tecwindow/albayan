@@ -64,12 +64,24 @@ class UpdateManager:
 
     def on_update_error(self, error_message):
         if not self.auto_update:
-            QMessageBox.critical(self.parent, "Error", error_message)
+            msg_box = QMessageBox(self.parent)
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setWindowTitle("خطأ")
+            msg_box.setText(error_message)
+
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
 
     def show_update_dialog(self, release_notes, download_url, latest_version):
         UpdateDialog(self.parent, release_notes, download_url, latest_version).exec()
 
     def show_no_update_dialog(self):
         if not self.auto_update:
-            QMessageBox.information(self.parent, "لا يوجد تحديث.", f"أنت تستخدم {program_name} الإصدار {program_version}, وهو الإصدار الأحدث.")
+            msg_box = QMessageBox(self.parent)
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setWindowTitle("لا يوجد تحديث.")
+            msg_box.setText(f"أنت تستخدم {program_name} الإصدار {program_version}, وهو الإصدار الأحدث.")
+
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
 

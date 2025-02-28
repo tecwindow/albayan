@@ -20,7 +20,7 @@ For more information, visit: https://github.com/baaziznasser/qurani
 
 import os
 import sqlite3
-from typing import Union
+from typing import List, Dict, Union
 from core_functions.ayah_data import AyahData
 from utils.settings import SettingsManager
 from utils.const import data_folder
@@ -34,6 +34,7 @@ class QuranConst:
     max_hizb = 60
     max_hizb_quarter = 240
     _max = (max_page, max_surah_number, max_hizb_quarter, max_hizb, max_juz)
+    SURAS = []
     _category_labels = ("صفحة", "سورة", "ربع", "حزب", "جزء")
     quran_folder = data_folder / "quran"
     databases = [quran_folder/ "quran.DB", quran_folder / "uthmani.DB"]
@@ -62,7 +63,7 @@ class quran_mgr:
         self.cursor = None
         self.text = ""
         self.ayah_data = None
-
+        
     def load_quran(self, db_file: Union[str, int]):
         db_file = QuranConst.databases[db_file] if isinstance(db_file, int) else db_file
         if not os.path.isfile(db_file):
@@ -70,10 +71,15 @@ class quran_mgr:
         
         self.conn = sqlite3.connect(db_file)
         self.cursor = self.conn.cursor()
+        QuranConst.SURAS = self.get_suras()
 
     def reload_quran(self, db_file: Union[str, int]):
         self.load_quran(db_file)
         return self.goto(self.current_pos)
+
+    def get_suras(self) -> List[Union[str, int]]:
+        self.cursor.execute("SELECT DISTINCT REPLACE(sura_name, 'سورة ', '') AS sura_name, sura_number from quran ORDER BY sura_number;")
+        return self.cursor.fetchall()
 
     def get_surah(self, surah_number):
         self.current_pos = surah_number

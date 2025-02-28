@@ -8,14 +8,17 @@ from PyQt6.QtWidgets import (
     QFileDialog,
     QLabel,
     QMenu,
+    QMessageBox,
     QApplication
 )
-from PyQt6.QtGui import QIcon, QAction, QKeySequence
+from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut
 from PyQt6.QtCore import QTimer
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
 from utils.universal_speech import UniversalSpeech
 from utils.const import albayan_documents_dir, Globals
+from exceptions.error_decorators import exception_handler
+import qtawesome as qta
 
 
 class TafaseerDialog(QDialog):
@@ -43,29 +46,38 @@ class TafaseerDialog(QDialog):
         self.button_layout = QHBoxLayout()  # استخدام QHBoxLayout بدلاً من QVBoxLayout
 
         self.category_button = QPushButton(self.default_category, self)
+        self.category_button.setIcon(qta.icon("fa.list"))
+        self.category_button.setShortcut(QKeySequence("Alt+C"))
         self.category_button.clicked.connect(self.show_menu)
         self.button_layout.addWidget(self.category_button)
 
         self.copy_button = QPushButton("نسخ التفسير")
+        self.copy_button.setIcon(qta.icon("fa.copy"))
         self.copy_button.setShortcut(QKeySequence("Shift+C"))
         self.copy_button.clicked.connect(self.copy_content)
         self.button_layout.addWidget(self.copy_button)
 
         self.save_button = QPushButton("حفظ التفسير")
+        self.save_button.setIcon(qta.icon("fa.save"))
         self.save_button.setShortcut(QKeySequence("Ctrl+S"))
         self.save_button.clicked.connect(self.save_content)
         self.button_layout.addWidget(self.save_button)
 
         self.close_button = QPushButton("إغلاق")
+        self.close_button.setIcon(qta.icon("fa.times"))
         self.close_button.setShortcut(QKeySequence("Ctrl+W"))
         self.close_button.clicked.connect(self.reject)
+        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+        close_shortcut.activated.connect(self.reject)
+
         self.button_layout.addWidget(self.close_button)
 
         self.layout.addLayout(self.button_layout)
         self.setFocus()
         QTimer.singleShot(300, self.text_edit.setFocus)
-        
-    def show_menu(self):
+
+    @exception_handler(ui_element=QMessageBox)
+    def show_menu(self, event):
         menu = QMenu(self)
         arabic_categories = Category.get_categories_in_arabic()
         actions = {}
@@ -86,7 +98,8 @@ class TafaseerDialog(QDialog):
         menu.setFocus()
         menu.exec(self.category_button.mapToGlobal(self.category_button.rect().bottomLeft()))
 
-    def handle_category_selection(self):
+    @exception_handler(ui_element=QMessageBox)
+    def handle_category_selection(self, event):
         selected_category = self.sender().text()
         self.category_button.setText(selected_category)
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(selected_category))
