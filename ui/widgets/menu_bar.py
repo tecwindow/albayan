@@ -171,16 +171,16 @@ class MenuBar(QMenuBar):
         message_for_you_action = QAction("رسالة لك", self)
         message_for_you_action.setShortcut(QKeySequence("Shift+M"))
         message_for_you_action.triggered.connect(self.parent.OnRandomMessages)
-        stories_action = QAction("قصص الأنبياء", self)
-        stories_action.setShortcut(QKeySequence("Shift+O"))
-        stories_action.triggered.connect(self.OnStoriesAction)
+        #stories_action = QAction("قصص الأنبياء", self)
+        #stories_action.setShortcut(QKeySequence("Shift+O"))
+        #stories_action.triggered.connect(self.OnStoriesAction)
 
         tools_menu.addAction(sura_player_action)
         tools_menu.addAction(athkar_action)
         tools_menu.addAction(bookmark_manager_action)
         tools_menu.addAction(tasbih_action)
         tools_menu.addAction(message_for_you_action)
-        tools_menu.addAction(stories_action)
+        #tools_menu.addAction(stories_action)
 
 
         preferences_menu = self.addMenu("التفضيلات(&R)")
