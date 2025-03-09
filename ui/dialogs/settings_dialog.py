@@ -23,7 +23,7 @@ from PyQt6.QtCore import Qt
 from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name
 from utils.settings import SettingsManager
-from utils.audio_player import AthkarPlayer, AyahPlayer, SurahPlayer, SoundEffectPlayer
+from utils.audio_player import bass_initializer, AthkarPlayer, AyahPlayer, SurahPlayer, SoundEffectPlayer
 from utils.Startup import StartupManager
 import qtawesome as qta
 
@@ -108,6 +108,11 @@ class SettingsDialog(QDialog):
         self.volume.valueChanged.connect(self.OnVolume)
         self.volume.setAccessibleName(self.volume_label.text())
         self.volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        ayah_device_label = QLabel("كرت الصوت لتشغيل الآيات")
+        self.ayah_device_combo = QComboBox(self)
+        self.ayah_device_combo.setAccessibleName(ayah_device_label.text())
+        for device in bass_initializer.get_sound_cards():
+            self.ayah_device_combo.addItem(device.name, device.index)
         self.ayah_volume_label = QLabel("مستوى صوت الآيات")
         self.ayah_volume = QSlider(Qt.Orientation.Horizontal)
         self.ayah_volume.setRange(0, 100)
@@ -132,6 +137,8 @@ class SettingsDialog(QDialog):
 
         self.group_audio_layout.addWidget(self.volume_label)
         self.group_audio_layout.addWidget(self.volume)
+        self.group_audio_layout.addWidget(ayah_device_label)
+        self.group_audio_layout.addWidget(self.ayah_device_combo)
         self.group_audio_layout.addWidget(self.ayah_volume_label)
         self.group_audio_layout.addWidget(self.ayah_volume)
         self.group_audio_layout.addWidget(self.surah_volume_label)
