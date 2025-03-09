@@ -287,6 +287,7 @@ class SettingsDialog(QDialog):
             self.start_on_system_start_checkbox.setChecked(False)
 
     def save_settings(self):
+        AyahPlayer.apply_new_sound_card(self.ayah_device_combo.currentData())
 
         if SettingsManager.current_settings["general"]["auto_start_enabled"] != self.start_on_system_start_checkbox.isChecked():
             if self.start_on_system_start_checkbox.isChecked():
@@ -310,6 +311,7 @@ class SettingsDialog(QDialog):
             "start_with_basmala_enabled": self.basmala_checkbox.isChecked(),
             "speak_actions_enabled": self.speech_checkbox.isChecked(),
             "volume_level": self.volume.value(),
+            "ayah_device": self.ayah_device_combo.currentData(),
             "ayah_volume_level": self.ayah_volume.value(),
             "surah_volume_level": self.surah_volume.value(),
             "athkar_volume_level": self.athkar_volume.value()
@@ -362,6 +364,7 @@ class SettingsDialog(QDialog):
         self.speech_checkbox.setChecked(current_settings["audio"]["speak_actions_enabled"])
         self.volume.setValue(current_settings["audio"]["volume_level"])
         self.athkar_volume.setValue(current_settings["audio"]["athkar_volume_level"])
+        self.ayah_device_combo.setCurrentIndex(current_settings["audio"]["ayah_device"])
         self.ayah_volume.setValue(current_settings["audio"]["ayah_volume_level"])
         self.surah_volume.setValue(current_settings["audio"]["surah_volume_level"])
         self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])

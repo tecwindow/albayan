@@ -21,10 +21,11 @@ class AudioPlayer:
         for instance in cls.instances:
             instance.set_channel_device(device)
 
-    def __init__(self, volume: float, flag: int = BassFlag.AUTO_FREE) -> None:
+    def __init__(self, volume: float, device: int, flag: int = BassFlag.AUTO_FREE) -> None:
         self.source: Optional[str] = None
         self.current_channel: Optional[int] = None
         self.volume = volume
+        self.device = device
         self.supported_extensions = ('.wav', '.mp3', '.ogg')
         self.flag = flag
         AudioPlayer.instances.append(self)
@@ -61,6 +62,7 @@ class AudioPlayer:
             raise LoadFileError(source)
         
         self.source = source
+        self.set_channel_device(1)
         self.set_volume(self.volume) 
         
     def play(self) -> None:
@@ -186,7 +188,7 @@ class AudioPlayer:
     def set_channel_device(self, device: int) -> None:
         """Sets the device for the current channel."""
         if self.current_channel:
-            if bass.BASS_ChannelSetDevice(self.current_channel, 0):
+            if not bass.BASS_ChannelSetDevice(self.current_channel, device):
                 raise SetDeviceError(device)
     
     def get_error(self) -> int:

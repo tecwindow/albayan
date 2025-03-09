@@ -8,7 +8,7 @@ from exceptions.error_decorators import exception_handler
 class StartupSoundEffectPlayer(AudioPlayer):
     instances = []
     def __init__(self, sounds_folder: str) -> None:
-        super().__init__(SettingsManager.current_settings["audio"]["volume_level"])
+        super().__init__(SettingsManager.current_settings["audio"]["volume_level"], device=1)
         self.sounds_folder = sounds_folder
         StartupSoundEffectPlayer.instances.append(self)
         

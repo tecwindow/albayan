@@ -10,7 +10,7 @@ from exceptions.error_decorators import exception_handler
 class AthkarPlayer(AudioPlayer):
     instances = []
     def __init__(self, athkar_folder: str, athkar_list: List[AudioAthkar]) -> None:
-        super().__init__(SettingsManager.current_settings["audio"]["athkar_volume_level"])
+        super().__init__(SettingsManager.current_settings["audio"]["athkar_volume_level"], device=1)
         self.athkar_folder = athkar_folder
         self.athkar_list = athkar_list
         AthkarPlayer.instances.append(self)
