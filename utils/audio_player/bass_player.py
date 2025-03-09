@@ -16,6 +16,11 @@ bass = bass_initializer.initialize()
 class AudioPlayer:
     instances = []
 
+    @classmethod
+    def apply_new_sound_card(cls, device: int) -> None:
+        for instance in cls.instances:
+            instance.set_channel_device(device)
+
     def __init__(self, volume: float, flag: int = BassFlag.AUTO_FREE) -> None:
         self.source: Optional[str] = None
         self.current_channel: Optional[int] = None
