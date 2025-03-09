@@ -7,7 +7,7 @@ from .status import PlaybackStatus
 from .bass_init import BassInitializer, BassFlag
 from exceptions.audio_pplayer import (
     AudioFileNotFoundError, LoadFileError, UnsupportedFormatError, PlaybackControlError,
-    InvalidSourceError, PlaybackInitializationError, PlaybackControlError
+    InvalidSourceError, PlaybackInitializationError, PlaybackControlError, SetDeviceError
 )
 
 bass_initializer = BassInitializer()
@@ -57,7 +57,7 @@ class AudioPlayer:
         
         self.source = source
         self.set_volume(self.volume) 
-    
+        
     def play(self) -> None:
         """Plays the currently loaded audio."""
         if not self.current_channel:
@@ -177,6 +177,12 @@ class AudioPlayer:
     def is_stopped(self) -> bool:
         """Checks if the audio is currently stopped."""
         return self.get_playback_status() == PlaybackStatus.STOPPED   
+
+    def set_channel_device(self, device: int) -> None:
+        """Sets the device for the current channel."""
+        if self.current_channel:
+            if bass.BASS_ChannelSetDevice(self.current_channel, 0):
+                raise SetDeviceError(device)
     
     def get_error(self) -> int:
         return bass.BASS_ErrorGetCode()

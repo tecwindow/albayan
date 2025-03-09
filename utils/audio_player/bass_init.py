@@ -1,10 +1,10 @@
 import os
 import ctypes
-from ctypes import c_int, c_longlong, c_void_p, c_uint, c_double, c_char_p
+from ctypes import c_int, c_longlong, c_void_p, c_uint, c_double, c_char_p, c_bool
 from enum import IntFlag
 from dataclasses import dataclass
 from typing import List
-from exceptions.audio_pplayer import PlaybackInitializationError
+from exceptions.audio_pplayer import PlaybackInitializationError, SetDeviceError
 
 
 
@@ -65,6 +65,8 @@ class BassInitializer:
         self.bass.BASS_ChannelGetLength.restype = c_longlong
         self.bass.BASS_ChannelGetPosition.argtypes = [c_int, c_uint]
         self.bass.BASS_ChannelGetPosition.restype = c_longlong
+        self.bass.BASS_ChannelSetDevice.argtypes = [c_uint, c_uint]
+        self.bass.BASS_ChannelSetDevice.restype = c_bool
         self.bass.BASS_ErrorGetCode.restype = c_int
 
     def initialize(self):
@@ -72,8 +74,9 @@ class BassInitializer:
         if not self.bass:
             raise RuntimeError("BASS library is not set up. Call `setup()` first.")
 
-        if not self.bass.BASS_Init(-1, 44100, 0, 0, 0):
-            raise PlaybackInitializationError()
+        for card in self.get_sound_cards():
+            if not self.bass.BASS_Init(card.index, 44100, 0, 0, 0):
+                raise PlaybackInitializationError()
 
         return self.bass
 
@@ -99,8 +102,7 @@ class BassInitializer:
     def set_sound_card(self, device_index: int):
         """Set the active sound card by index."""
         if not self.bass.BASS_SetDevice(device_index):
-            error_code = self.bass.BASS_ErrorGetCode()
-            raise RuntimeError(f"Failed to set sound card. Error code: {error_code}")
+            raise SetDeviceError(device_index)
 
     def close(self):
         """Shuts down and frees resources used by BASS."""

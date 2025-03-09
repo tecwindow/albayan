@@ -26,3 +26,8 @@ class PlaybackControlError(BaseException):
     def __init__(self, action: str, message: str = None, cause: Exception = None):
         message = message or f"Failed to perform playback action: {action}."
         super().__init__(message, cause, 1005)
+
+class SetDeviceError(BaseException):
+    def __init__(self, device: int, message: str = None, cause: Exception = None):
+        message = message or f"Failed to set audio device: {device}."
+        super().__init__(message, cause, 1006)
