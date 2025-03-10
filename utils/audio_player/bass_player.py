@@ -190,10 +190,9 @@ class AudioPlayer:
         try:
             if self.current_channel:
                 if not bass.BASS_ChannelSetDevice(self.current_channel, device):
-                    device = -1
                     raise SetDeviceError(device)
         except Exception as e:
-            print(e)
+            print(e, self.get_error())
         finally:
             self.device = device
     
