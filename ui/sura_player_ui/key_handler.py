@@ -41,7 +41,6 @@ class KeyHandler:
             ord("I"): lambda: UniversalSpeech.say(
                 f"{parent.surah_combo.currentText()}، للقارئ، {parent.reciter_combo.currentText()}."
             ),
-            **{Qt.Key.Key_0 + i: lambda i=i: parent.set_position(i * 10, by_percent=True) for i in range(10)},
             Qt.Key_MediaTogglePlayPause: parent.toggle_play_pause,
             Qt.Key_MediaStop: parent.stop,
             Qt.Key_MediaPrevious: parent.previous_surah,
@@ -58,7 +57,7 @@ class KeyHandler:
         if self.process_arrows(event):
             return True
 
-        if event.modifiers() & (Qt.ControlModifier | Qt.ShiftModifier | Qt.AltModifier):
+        if event.modifiers() & (Qt.ControlModifier | Qt.AltModifier):
             return True
 
         if  self.process_shortcuts(event):
@@ -89,8 +88,19 @@ class KeyHandler:
         :return: True if the event was handled, False otherwise.
         """
         key_code = event.nativeVirtualKey() or event.key()
+        modifiers = event.modifiers()
+
+        # Ensure Shift is pressed along with a number key (0-9)
+        if modifiers & Qt.ShiftModifier:
+            if Qt.Key_0 <= key_code <= Qt.Key_9:  # Shift + 0 to Shift + 9
+                number = key_code - Qt.Key_0  # Convert key_code to 0-9
+                self.parent.set_position(number * 10, by_percent=True)
+                return True
+
+        # Handle other shortcuts
         action = self.shortcuts.get(key_code)
         if action:
             action()
             return True
+
         return False
