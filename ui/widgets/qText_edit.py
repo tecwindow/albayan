@@ -48,6 +48,11 @@ class QuranViewer(ReadOnlyTextEdit):
         super().keyPressEvent(e)
         self.set_ctrl()
 
+        if e.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+            self.parent.OnInterpretation(event=e)
+            return
+
+
         if e.key() == Qt.Key.Key_Space:
             if e.modifiers() & Qt.KeyboardModifier.ControlModifier:  # Ctrl + Space
                 self.parent.toolbar.stop_audio()

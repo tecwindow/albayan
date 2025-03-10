@@ -24,8 +24,10 @@ class ProphetsStoriesDialog(QDialog):
         self.layout.addWidget(self.label)
         
         self.combo_box = QComboBox(self)
+        self.combo_box.setAccessibleName(self.label.text())
         self.layout.addWidget(self.combo_box)
         
+
         self.text_edit = ReadOnlyTextEdit(self)
         self.layout.addWidget(self.text_edit)
         

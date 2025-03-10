@@ -21,9 +21,13 @@ class SettingsManager:
             "start_with_basmala_enabled": True,
             "speak_actions_enabled": True,
             "volume_level": 75,
+            "volume_device": 1,
             "ayah_volume_level": 100,
+            "ayah_device": 1,
             "surah_volume_level": 100,
+            "surah_device": 1,
             "athkar_volume_level": 50,
+            "athkar_device": 1,
             "current_volume_category": 0
         },
         "listening": {

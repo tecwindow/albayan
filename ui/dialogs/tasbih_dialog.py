@@ -21,7 +21,9 @@ class TasbihDialog(QDialog):
         # Create UI elements.
         self.listWidget = QListWidget()
         self.listWidget.setMinimumHeight(150)  # set list Height
-        
+        self.listWidget.setAccessibleName("قائمة التسابيح")
+
+
         self.openButton = QPushButton()
         self.openButton.setIcon(qta.icon("fa.folder-open"))
         self.openButton.setToolTip("اختيار التسبيح")

@@ -33,12 +33,12 @@ build_exe_options = {
 
 setup(
     name="Albayan",
-    version="3.0.0",
+    version="3.0.1",
     description="Albayan",
     long_description="البيان - Albayan, كل ما يخص الإسلام",
     author="TecWindow",
     author_email="support@tecwindow.net",
-    url="https://tecwindow.net/en",
+    url="https://tecwindow.net",
     download_url="https://github.com/tecwindow/albayan",
     keywords=["islamic", "islam", "quran", "desktop", "alquran", "tecwindow", "القرآن", "إسلام"],
     options={"build_exe": build_exe_options},

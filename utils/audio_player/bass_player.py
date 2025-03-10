@@ -7,7 +7,7 @@ from .status import PlaybackStatus
 from .bass_init import BassInitializer, BassFlag
 from exceptions.audio_pplayer import (
     AudioFileNotFoundError, LoadFileError, UnsupportedFormatError, PlaybackControlError,
-    InvalidSourceError, PlaybackInitializationError, PlaybackControlError
+    InvalidSourceError, PlaybackInitializationError, PlaybackControlError, SetDeviceError
 )
 
 bass_initializer = BassInitializer()
@@ -16,10 +16,16 @@ bass = bass_initializer.initialize()
 class AudioPlayer:
     instances = []
 
-    def __init__(self, volume: float, flag: int = BassFlag.AUTO_FREE) -> None:
+    @classmethod
+    def apply_new_sound_card(cls, device: int) -> None:
+        for instance in cls.instances:
+            instance.set_channel_device(device)
+
+    def __init__(self, volume: float, device: int, flag: int = BassFlag.AUTO_FREE) -> None:
         self.source: Optional[str] = None
         self.current_channel: Optional[int] = None
         self.volume = volume
+        self.device = device
         self.supported_extensions = ('.wav', '.mp3', '.ogg')
         self.flag = flag
         AudioPlayer.instances.append(self)
@@ -56,8 +62,9 @@ class AudioPlayer:
             raise LoadFileError(source)
         
         self.source = source
+        self.set_channel_device(self.device)
         self.set_volume(self.volume) 
-    
+        
     def play(self) -> None:
         """Plays the currently loaded audio."""
         if not self.current_channel:
@@ -177,6 +184,17 @@ class AudioPlayer:
     def is_stopped(self) -> bool:
         """Checks if the audio is currently stopped."""
         return self.get_playback_status() == PlaybackStatus.STOPPED   
+
+    def set_channel_device(self, device: int) -> None:
+        """Sets the device for the current channel."""
+        try:
+            if self.current_channel:
+                if not bass.BASS_ChannelSetDevice(self.current_channel, device):
+                    raise SetDeviceError(device)
+        except Exception as e:
+            print(e, self.get_error())
+        finally:
+            self.device = device
     
     def get_error(self) -> int:
         return bass.BASS_ErrorGetCode()
