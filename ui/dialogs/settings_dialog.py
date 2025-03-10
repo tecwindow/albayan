@@ -108,43 +108,63 @@ class SettingsDialog(QDialog):
         self.volume.valueChanged.connect(self.OnVolume)
         self.volume.setAccessibleName(self.volume_label.text())
         self.volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        ayah_device_label = QLabel("كرت الصوت لتشغيل الآيات")
-        self.ayah_device_combo = QComboBox(self)
-        self.ayah_device_combo.setAccessibleName(ayah_device_label.text())
-        for device in bass_initializer.get_sound_cards():
-            self.ayah_device_combo.addItem(device.name, device.index)
+        self.volume_device_label = QLabel("كرت الصوت لتشغيل أصوات البرنامج")
+        self.volume_device_combo = QComboBox(self)
+        self.volume_device_combo .setAccessibleName(self.volume_device_label.text())
         self.ayah_volume_label = QLabel("مستوى صوت الآيات")
         self.ayah_volume = QSlider(Qt.Orientation.Horizontal)
         self.ayah_volume.setRange(0, 100)
         self.ayah_volume.valueChanged.connect(self.OnAyahVolume)
         self.ayah_volume.setAccessibleName(self.ayah_volume_label.text())
         self.ayah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.ayah_device_label = QLabel("كرت الصوت لتشغيل الآيات")
+        self.ayah_device_combo = QComboBox(self)
+        self.ayah_device_combo.setAccessibleName(self.ayah_device_label.text())
         self.surah_volume_label = QLabel("مستوى صوت السور")
         self.surah_volume = QSlider(Qt.Orientation.Horizontal)
         self.surah_volume.setRange(0, 100)
         self.surah_volume.valueChanged.connect(self.OnSurahVolume)
         self.surah_volume.setAccessibleName(self.surah_volume_label.text())
         self.surah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.surah_device_label = QLabel("كرت الصوت لتشغيل السور")
+        self.surah_device_combo = QComboBox(self)
+        self.surah_device_combo.setAccessibleName(self.surah_device_label.text())
         self.athkar_volume_label = QLabel("مستوى صوت الأذكار")
         self.athkar_volume = QSlider(Qt.Orientation.Horizontal)
         self.athkar_volume.setRange(0, 100)
         self.athkar_volume.valueChanged.connect(self.OnAthkarVolume)
         self.athkar_volume.setAccessibleName(self.athkar_volume_label.text())
         self.athkar_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.athkar_device_label = QLabel("كرت الصوت لتشغيل الأذكار")
+        self.athkar_device_combo = QComboBox(self)
+        self.athkar_device_combo.setAccessibleName(self.athkar_device_label.text())
+
+        for device in bass_initializer.get_sound_cards():
+            self.volume_device_combo .addItem(device.name, device.index)
+            self.ayah_device_combo.addItem(device.name, device.index)
+            self.surah_device_combo.addItem(device.name, device.index)
+            self.athkar_device_combo.addItem(device.name, device.index)
+
         self.sound_checkbox = QCheckBox("تفعيل المؤثرات الصوتية")
         self.basmala_checkbox = QCheckBox("تفعيل البسملة مع فتح البرنامج")
         self.speech_checkbox = QCheckBox("نطق الإجرائات")
 
         self.group_audio_layout.addWidget(self.volume_label)
         self.group_audio_layout.addWidget(self.volume)
-        self.group_audio_layout.addWidget(ayah_device_label)
-        self.group_audio_layout.addWidget(self.ayah_device_combo)
+        self.group_audio_layout.addWidget(self.volume_device_label)
+        self.group_audio_layout.addWidget(self.volume_device_combo)
         self.group_audio_layout.addWidget(self.ayah_volume_label)
         self.group_audio_layout.addWidget(self.ayah_volume)
+        self.group_audio_layout.addWidget(self.ayah_device_label)
+        self.group_audio_layout.addWidget(self.ayah_device_combo)
         self.group_audio_layout.addWidget(self.surah_volume_label)
         self.group_audio_layout.addWidget(self.surah_volume)
+        self.group_audio_layout.addWidget(self.surah_device_label)
+        self.group_audio_layout.addWidget(self.surah_device_combo)
         self.group_audio_layout.addWidget(self.athkar_volume_label)
         self.group_audio_layout.addWidget(self.athkar_volume)
+        self.group_audio_layout.addWidget(self.athkar_device_label)
+        self.group_audio_layout.addWidget(self.athkar_device_combo)
         self.group_audio_layout.addWidget(self.sound_checkbox)
         self.group_audio_layout.addWidget(self.basmala_checkbox)
         self.group_audio_layout.addWidget(self.speech_checkbox)
@@ -311,10 +331,13 @@ class SettingsDialog(QDialog):
             "start_with_basmala_enabled": self.basmala_checkbox.isChecked(),
             "speak_actions_enabled": self.speech_checkbox.isChecked(),
             "volume_level": self.volume.value(),
-            "ayah_device": self.ayah_device_combo.currentData(),
+            "volume_device": self.volume_device_combo.currentData(),
             "ayah_volume_level": self.ayah_volume.value(),
+            "ayah_device": self.ayah_device_combo.currentData(),
             "surah_volume_level": self.surah_volume.value(),
-            "athkar_volume_level": self.athkar_volume.value()
+            "surah_device": self.surah_device_combo.currentData(),
+            "athkar_volume_level": self.athkar_volume.value(),
+            "athkar_device": self.athkar_device_combo.currentData()
         }
 
         listening_settings = {
@@ -365,6 +388,9 @@ class SettingsDialog(QDialog):
         self.volume.setValue(current_settings["audio"]["volume_level"])
         self.athkar_volume.setValue(current_settings["audio"]["athkar_volume_level"])
         self.ayah_device_combo.setCurrentIndex(current_settings["audio"]["ayah_device"])
+        self.surah_device_combo.setCurrentIndex(current_settings["audio"]["surah_device"])
+        self.volume_device_combo.setCurrentIndex(current_settings["audio"]["volume_device"])
+        self.athkar_device_combo.setCurrentIndex(current_settings["audio"]["athkar_device"])
         self.ayah_volume.setValue(current_settings["audio"]["ayah_volume_level"])
         self.surah_volume.setValue(current_settings["audio"]["surah_volume_level"])
         self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])
