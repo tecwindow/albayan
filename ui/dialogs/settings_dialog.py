@@ -307,7 +307,12 @@ class SettingsDialog(QDialog):
             self.start_on_system_start_checkbox.setChecked(False)
 
     def save_settings(self):
+
+        # Apply new sound cards
+        SurahPlayer.apply_new_sound_card(self.surah_device_combo.currentData())
         AyahPlayer.apply_new_sound_card(self.ayah_device_combo.currentData())
+        AthkarPlayer.apply_new_sound_card(self.athkar_device_combo.currentData())
+        SoundEffectPlayer.apply_new_sound_card(self.volume_device_combo.currentData())
 
         if SettingsManager.current_settings["general"]["auto_start_enabled"] != self.start_on_system_start_checkbox.isChecked():
             if self.start_on_system_start_checkbox.isChecked():
