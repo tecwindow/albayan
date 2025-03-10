@@ -62,7 +62,7 @@ class AudioPlayer:
             raise LoadFileError(source)
         
         self.source = source
-        self.set_channel_device(1)
+        self.set_channel_device(self.device)
         self.set_volume(self.volume) 
         
     def play(self) -> None:
@@ -187,9 +187,15 @@ class AudioPlayer:
 
     def set_channel_device(self, device: int) -> None:
         """Sets the device for the current channel."""
-        if self.current_channel:
-            if not bass.BASS_ChannelSetDevice(self.current_channel, device):
-                raise SetDeviceError(device)
+        try:
+            if self.current_channel:
+                if not bass.BASS_ChannelSetDevice(self.current_channel, device):
+                    device = -1
+                    raise SetDeviceError(device)
+        except Exception as e:
+            print(e)
+        finally:
+            self.device = device
     
     def get_error(self) -> int:
         return bass.BASS_ErrorGetCode()
