@@ -299,11 +299,14 @@ class SuraPlayerWindow(QMainWindow):
                 position = total_length * (position / 100)
             self.player.set_position(position)
             self.on_update_time(self.player.get_position(), self.player.get_length())
-
+            if by_percent:
+                UniversalSpeech.say(f"{self.elapsed_time_label.text()}، الوقت الحالي.")
 
     def replay(self):
         self.set_position(0)
         #self.on_update_time(self.player.get_position(), self.player.get_length())
+        UniversalSpeech.say(f"{self.elapsed_time_label.text()}، الوقت الحالي.")
+
 
     def next_surah(self):
         current_index = self.surah_combo.currentIndex()
