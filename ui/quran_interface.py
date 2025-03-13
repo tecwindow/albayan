@@ -77,6 +77,7 @@ class QuranInterface(QMainWindow):
     def set_shortcut(self):
         QShortcut(QKeySequence("Ctrl+M"), self).activated.connect(lambda: self.quran_view.setFocus())
         QShortcut(QKeySequence("C"), self).        activated.connect(self.say_played_ayah)
+        QShortcut(QKeySequence("V"), self).        activated.connect(self.say_focused_ayah)
         for i in range(0, 5):  
             shortcut = QShortcut(QKeySequence(f"Ctrl+{i+        1}"), self)
             shortcut.activated.connect(lambda mode=i: self.OnChangeNavigationMode(mode))
@@ -396,6 +397,10 @@ class QuranInterface(QMainWindow):
         else:
             UniversalSpeech.say("لم يتم تشغيل أي آية.")
 
+    def say_focused_ayah(self):
+        ayah_info = self.get_current_ayah_info()
+        text = f"آية {ayah_info[3]} من {ayah_info[2]}، الآية الحالية."
+        UniversalSpeech.say(text)
 
     @exception_handler(ui_element=QMessageBox)
     def OnSaveBookmark(self, event):
