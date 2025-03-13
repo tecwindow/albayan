@@ -77,6 +77,7 @@ class QuranInterface(QMainWindow):
     def set_shortcut(self):
         QShortcut(QKeySequence("Ctrl+M"), self).activated.connect(lambda: self.quran_view.setFocus())
         QShortcut(QKeySequence("C"), self).        activated.connect(self.say_played_ayah)
+        QShortcut(QKeySequence("Alt+Shift+C"), self).activated.connect(lambda: self.toolbar.change_ayah_focus(manual=True))
         QShortcut(QKeySequence("V"), self).        activated.connect(self.say_focused_ayah)
         for i in range(0, 5):  
             shortcut = QShortcut(QKeySequence(f"Ctrl+{i+        1}"), self)
