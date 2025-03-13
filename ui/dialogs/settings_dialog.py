@@ -59,6 +59,8 @@ class SettingsDialog(QDialog):
         listening_item = QTreeWidgetItem(["الاستماع"])
         listening_item.setIcon(0, qta.icon("fa.headphones"))
 
+
+
         reading_item = QTreeWidgetItem(["القراءة"])
         reading_item.setIcon(0, qta.icon("fa.book"))
 
@@ -194,6 +196,7 @@ class SettingsDialog(QDialog):
         self.duration_spinbox.setRange(2, 15)
         self.duration_spinbox.setSingleStep(1)
 
+        self.auto_move_focus_checkbox = QCheckBox("نقل المؤشر تلقائيًا إلى الآية التي يتم تشغيلها")
 
         self.group_listening_layout.addWidget(self.reciters_label)
         self.group_listening_layout.addWidget(self.reciters_combo)
@@ -202,6 +205,7 @@ class SettingsDialog(QDialog):
         self.group_listening_layout.addWidget(self.action_combo)
         self.group_listening_layout.addWidget(self.duration_label)
         self.group_listening_layout.addWidget(self.duration_spinbox)
+        self.group_listening_layout.addWidget(self.auto_move_focus_checkbox)
         self.group_listening.setLayout(self.group_listening_layout)
         self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
@@ -348,7 +352,8 @@ class SettingsDialog(QDialog):
         listening_settings = {
             "reciter": self.reciters_combo.currentData(),
             "action_after_listening": self.action_combo.currentData(),
-            "forward_time": self.duration_spinbox.value()
+            "forward_time": self.duration_spinbox.value(),
+            "auto_move_focus": self.auto_move_focus_checkbox.isChecked()
         }
 
         reading_settings = {
@@ -404,6 +409,7 @@ class SettingsDialog(QDialog):
         self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
         self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
         self.duration_spinbox.setValue(current_settings["listening"]["forward_time"])
+        self.auto_move_focus_checkbox.setChecked(current_settings["listening"]["auto_move_focus"])
         self.log_checkbox.setChecked(current_settings["general"]["logging_enabled"])
         self.ignore_tashkeel_checkbox.setChecked(current_settings["search"]["ignore_tashkeel"])
         self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])

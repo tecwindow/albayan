@@ -33,7 +33,8 @@ class SettingsManager:
         "listening": {
             "reciter": 58,
             "action_after_listening": 0,
-            "forward_time": 5
+            "forward_time": 5,
+            "auto_move_focus": True,
         },
         "search": {
             "ignore_tashkeel": True,
