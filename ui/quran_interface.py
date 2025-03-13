@@ -76,10 +76,9 @@ class QuranInterface(QMainWindow):
 
     def set_shortcut(self):
         QShortcut(QKeySequence("Ctrl+M"), self).activated.connect(lambda: self.quran_view.setFocus())
-        QShortcut(QKeySequence("C"), self). \
-        activated.connect(self.say_current_ayah)
+        QShortcut(QKeySequence("C"), self).        activated.connect(self.say_played_ayah)
         for i in range(0, 5):  
-            shortcut = QShortcut(QKeySequence(f"Ctrl+{i+1}"), self)
+            shortcut = QShortcut(QKeySequence(f"Ctrl+{i+        1}"), self)
             shortcut.activated.connect(lambda mode=i: self.OnChangeNavigationMode(mode))
 
     def create_widgets(self):
@@ -382,13 +381,21 @@ class QuranInterface(QMainWindow):
         text = AyaInfo(aya_info[1]).text
         InfoDialog(self, title, label, text, is_html_content=True).exec()
 
-    def say_current_ayah(self):
-        if not self.toolbar.navigation.current_ayah:
-            return
-
+    def say_played_ayah(self):
         ayah_info = self.get_current_ayah_info()
-        text = f"آية {self.toolbar.navigation.current_ayah} من {ayah_info[2]}."
-        UniversalSpeech.say(text)
+        text = f"آية {self.toolbar.navigation.current_ayah} من {ayah_info[2]}"
+        if self.toolbar.navigation.current_ayah:
+            if self.toolbar.player.is_playing():
+                UniversalSpeech.say(f"{text}، الآية المشغلة.")
+            elif self.toolbar.player.is_paused():
+                UniversalSpeech.say(f"{text}، تم إيقافها مؤقتًا.")
+            elif self.toolbar.player.is_stopped():
+                UniversalSpeech.say(f"{text}، تم إيقافها.")
+            elif self.toolbar.player.is_stalled():
+                UniversalSpeech.say(f"{text}، يجري تحميلها.")
+        else:
+            UniversalSpeech.say("لم يتم تشغيل أي آية.")
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnSaveBookmark(self, event):
