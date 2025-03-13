@@ -137,6 +137,7 @@ class NavigationManager:
 class AudioToolBar(QToolBar):
 #    ayahChanged = pyqtSignal(int)
     
+
     def __init__(self, parent: Optional[object] = None):
         super().__init__(parent)
         self.parent = parent
@@ -145,7 +146,8 @@ class AudioToolBar(QToolBar):
         self.navigation = NavigationManager(self.parent, self.parent.quran)
         self.audio_thread = AudioPlayerThread(self.player, self.parent)
 
-        self.play_pause_button = self.create_button("استماع الآية الحالية", self.toggle_play_pause)
+
+        self.play_pause_button = self.create_button("تشغيلالآية الحالية", self.toggle_play_pause)
         self.stop_button = self.create_button("إيقاف", self.stop_audio)
         self.stop_button.setEnabled(False)
         self.previous_button = self.create_button("الآية السابقة", self.OnPlayPrevious)
@@ -189,10 +191,13 @@ class AudioToolBar(QToolBar):
         self.player.stop()
         self.set_buttons_status()
 
+
     def play_current_ayah(self):
 
         if self.navigation.current_ayah == 1 and not self.navigation.has_basmala:
             self.navigation.current_ayah = 0
+        elif self.navigation.current_ayah == 1:
+            self.navigation.has_basmala = False
         elif self.navigation.current_ayah > 1:
             self.navigation.has_basmala = False
 
@@ -201,6 +206,8 @@ class AudioToolBar(QToolBar):
         self.audio_thread.set_audio_url(url, send_error_signal=False if self.navigation.current_ayah == 0 else True)
         self.audio_thread.start()
         self.set_buttons_status()
+
+
 
     def OnPlayNext(self) -> None:
         self.stop_audio()
@@ -215,7 +222,9 @@ class AudioToolBar(QToolBar):
             self.change_ayah_focus()
 
     def change_ayah_focus(self) -> None:
-            aya_number = self.parent.quran.ayah_data.get_ayah_number(self.navigation.current_ayah, self.navigation.current_surah)
+        aya_number = self.parent.quran.ayah_data.get_ayah_number(self.navigation.current_ayah, self.navigation.current_surah)
+        auto_move_focus = SettingsManager.current_settings["listening"]["auto_move_focus"]
+        if auto_move_focus:
             self.parent.set_focus_to_ayah(aya_number)
 
     def OnActionAfterListening(self):
