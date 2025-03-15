@@ -54,7 +54,6 @@ class MenuBar(QMenuBar):
         self.exit_action = QAction("إغلاق البرنامج", self)
         self.exit_action.triggered.connect(self.quit_application)
 
-
         navigation_menu.addActions([self.next_action, self.previous_action, self.go_to_saved_position_action, self.search_action, self.go_to_action, self.quick_access_action, self.close_action, self.exit_action])
 
 
@@ -112,10 +111,6 @@ class MenuBar(QMenuBar):
         actions_menu.addActions([self.save_position_action, self.save_bookmark_action, self.verse_tafsir_action, self.ayah_info_action, self.verse_info_action, self.verse_grammar_action, self.copy_verse_action])
         #actions_menu.addAction(self.surah_info_action)
         actions_menu.insertMenu(self.ayah_info_action, self.tafaseer_menu)
-
-
-
-
 
 
     # Browse mode menu

@@ -168,9 +168,10 @@ class QuranInterface(QMainWindow):
         position_data = self.user_data_manager.get_last_position()
         ayah_number = position_data.get("ayah_number", 1)
         current_positiom = position_data.get("position", 1)
-        self.quran.type = position_data.get("criteria_number", 0)
+        mode = position_data.get("criteria_number", 0)
+        self.quran.type = mode
+        self.menu_bar.browse_mode_actions[mode].setChecked(True)
         
-
         text = self.quran.goto(current_positiom)
         self.quran_view.setText(text)
         self.set_text_ctrl_label()
@@ -461,6 +462,7 @@ class QuranInterface(QMainWindow):
         if  ayah_info:
             ayah_number = ayah_info[1]
             self.quran.type = mode
+            self.menu_bar.browse_mode_actions[mode].setChecked(True)
             self.quran_view.setText(self.quran.get_by_ayah_number(ayah_number)["full_text"])
             self.set_focus_to_ayah(ayah_number)
             self.set_text_ctrl_label()
