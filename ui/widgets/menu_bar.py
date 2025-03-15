@@ -54,14 +54,9 @@ class MenuBar(QMenuBar):
         self.exit_action = QAction("إغلاق البرنامج", self)
         self.exit_action.triggered.connect(self.quit_application)
 
-        navigation_menu.addAction(self.next_action)
-        navigation_menu.addAction(self.previous_action)
-        navigation_menu.addAction(self.go_to_saved_position_action)
-        navigation_menu.addAction(self.search_action)
-        navigation_menu.addAction(self.go_to_action)
-        navigation_menu.addAction(self.quick_access_action)
-        navigation_menu.addAction(self.close_action)
-        navigation_menu.addAction(self.exit_action)
+
+        navigation_menu.addActions([self.next_action, self.previous_action, self.go_to_saved_position_action, self.search_action, self.go_to_action, self.quick_access_action, self.close_action, self.exit_action])
+
 
         player_menu = self.addMenu("المشغل(&P)")
         self.play_pause_action = QAction("تشغيل الآية الحالية", self)
@@ -82,13 +77,7 @@ class MenuBar(QMenuBar):
         self.play_previous_action.setEnabled(False)
         self.play_previous_action.triggered.connect(self.parent.toolbar.OnPlayPrevious)
 
-        player_menu.addAction(self.play_pause_action)
-        player_menu.addAction(self.stop_action)
-        player_menu.addAction(self.rewind_action)
-        player_menu.addAction(self.forward_action)
-        player_menu.addAction(self.replay_action)
-        player_menu.addAction(self.play_next_action)
-        player_menu.addAction(self.play_previous_action)
+        player_menu.addActions([self.play_pause_action, self.stop_action, self.rewind_action, self.forward_action, self.replay_action, self.play_next_action, self.play_previous_action])
 
 
         actions_menu = self.addMenu("الإجرائات(&A)")
@@ -120,16 +109,12 @@ class MenuBar(QMenuBar):
         self.copy_verse_action = QAction("نسخ الآية", self)
         self.copy_verse_action.triggered.connect(self.parent.on_copy_verse)
 
-
-        actions_menu.addAction(self.save_position_action)
-        actions_menu.addAction(self.save_bookmark_action)
+        actions_menu.addActions([self.save_position_action, self.save_bookmark_action, self.verse_tafsir_action, self.ayah_info_action, self.verse_info_action, self.verse_grammar_action, self.copy_verse_action])
         #actions_menu.addAction(self.surah_info_action)
-        actions_menu.addAction(self.verse_tafsir_action)
-        actions_menu.addMenu(self.tafaseer_menu)
-        actions_menu.addAction(self.ayah_info_action)
-        actions_menu.addAction(self.verse_info_action)
-        actions_menu.addAction(self.verse_grammar_action)
-        actions_menu.addAction(self.copy_verse_action)
+        actions_menu.insertMenu(self.ayah_info_action, self.tafaseer_menu)
+
+
+
 
 
 
@@ -210,7 +195,7 @@ class MenuBar(QMenuBar):
         preferences_menu.addMenu(self.text_direction_action)
 
 
-        help_menu = self.addMenu("المساعدة(&H)")
+        self.help_menu = self.addMenu("المساعدة(&H)")
         self.user_guide_action = QAction("دليل البرنامج", self)
         self.user_guide_action.triggered.connect(lambda: self.open_documentation("user_guide"))
         self.whats_new_action = QAction("المستجدات", self)
@@ -227,14 +212,9 @@ class MenuBar(QMenuBar):
         self.about_program_action = QAction("حول البرنامج", self)
         self.about_program_action.triggered.connect(self.OnAbout)
 
+        self.help_menu.addActions([self.user_guide_action, self.whats_new_action, self.update_program_action, self.open_log_action, self.about_program_action])
+        self.help_menu.insertMenu(self.open_log_action, self.contact_us_menu)
 
-
-        help_menu.addAction(self.user_guide_action)
-        help_menu.addAction(self.whats_new_action)
-        help_menu.addAction(self.update_program_action)
-        help_menu.addAction(self.open_log_action)
-        help_menu.addMenu(self.contact_us_menu)
-        help_menu.addAction(self.about_program_action)
 
 
         self.setup_shortcuts()
@@ -263,7 +243,7 @@ class MenuBar(QMenuBar):
 
     def OnTasbihAction(self):
         tasbih_dialog = TasbihDialog(self.parent)
-        tasbih_dialog.exec()
+        tasbih_dialog.open()
 
     def OnStoriesAction(self):
         stories_dialog = ProphetsStoriesDialog(self.parent)
