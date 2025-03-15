@@ -37,30 +37,21 @@ class MenuBar(QMenuBar):
         navigation_menu = self.addMenu("التنقل(&M)")
         self.next_action = QAction("التالي", self)
         self.next_action.triggered.connect(self.parent.OnNext)
-        self.next_action.setShortcuts([QKeySequence("Ctrl+N"), QKeySequence("Ctrl+Down"), QKeySequence("Alt+Right"), QKeySequence(Qt.Key.Key_PageDown)])
         self.previous_action = QAction("السابق", self)
         self.previous_action.triggered.connect(self.parent.OnBack)
-        self.previous_action.setShortcuts([QKeySequence("Ctrl+B"), QKeySequence(Qt.Key.Key_PageUp),
-                                           QKeySequence("Ctrl+Up"), QKeySequence("Alt+Left")])
         self.go_to_saved_position_action = QAction("الذهاب إلى الموضع المحفوظ", self)
         self.go_to_saved_position_action.triggered.connect(self.parent.set_text)
         self.go_to_saved_position_action.triggered.connect(lambda: Globals.effects_manager.play("move"))
-        self.go_to_saved_position_action.setShortcut("Ctrl+Backspace")
         self.search_action = QAction("البحث", self)
         self.search_action.triggered.connect(self.parent.OnSearch)        
-        self.search_action.setShortcut(QKeySequence("Ctrl+F"))
         self.go_to_action = QAction("اذهب إلى", self)
         self.go_to_action.triggered.connect(self.OnGoTo)
-        self.go_to_action.setShortcut(QKeySequence("Ctrl+G"))
         self.quick_access_action = QAction("الوصول السريع", self)
         self.quick_access_action.triggered.connect(self.parent.OnQuickAccess)
-        self.quick_access_action.setShortcut(QKeySequence("Ctrl+Q"))
         self.close_action = QAction("إغلاق النافذة", self)
-        self.close_action.setShortcuts([QKeySequence("Ctrl+W"), QKeySequence("Ctrl+F4")])
         self.close_action.triggered.connect(self.parent.close)
         self.close_action.setVisible(SettingsManager.current_settings["general"]["run_in_background_enabled"])
         self.exit_action = QAction("إغلاق البرنامج", self)
-        self.exit_action.setShortcuts([QKeySequence("Ctrl+Shift+W"), QKeySequence("Ctrl+Shift+F4")])
         self.exit_action.triggered.connect(self.quit_application)
 
         navigation_menu.addAction(self.next_action)
@@ -74,28 +65,20 @@ class MenuBar(QMenuBar):
 
         player_menu = self.addMenu("المشغل(&P)")
         self.play_pause_action = QAction("تشغيل الآية الحالية", self)
-        self.play_pause_action.setShortcuts([QKeySequence("K"), QKeySequence("Ctrl+P")])
         self.play_pause_action.triggered.connect(self.parent.toolbar.toggle_play_pause)
         self.stop_action = QAction("إيقاف", self)
-        self.stop_action.setShortcut(QKeySequence("Ctrl+E"))
         self.stop_action.setEnabled(False)
         self.stop_action.triggered.connect(self.parent.toolbar.stop_audio)
         self.rewind_action = QAction("ترجيع", self)
-        self.rewind_action.setShortcuts([QKeySequence("J"), QKeySequence("Ctrl+Alt+Left")])
         self.rewind_action.triggered.connect(lambda: self.parent.toolbar.player.rewind(SettingsManager.current_settings["listening"]["forward_time"]))
         self.forward_action = QAction("تقديم", self)
-        self.forward_action.setShortcuts([QKeySequence("L"), QKeySequence("Ctrl+Alt+Right")])
         self.forward_action.triggered.connect(lambda: self.parent.toolbar.player.forward(SettingsManager.current_settings["listening"]["forward_time"]))
         self.replay_action = QAction("إعادة", self)
-        self.replay_action.setShortcut(QKeySequence("Shift+J"))
         self.replay_action.triggered.connect(lambda: self.parent.toolbar.player.set_position(0))
-
         self.play_next_action = QAction("تشغيل الآية التالية", self)
-        self.play_next_action.setShortcut(QKeySequence("Ctrl+Shift+N"))
         self.play_next_action.setEnabled(False)
         self.play_next_action.triggered.connect(self.parent.toolbar.OnPlayNext)
         self.play_previous_action = QAction("تشغيل الآية السابقة", self)
-        self.play_previous_action.setShortcut(QKeySequence("Ctrl+Shift+B"))
         self.play_previous_action.setEnabled(False)
         self.play_previous_action.triggered.connect(self.parent.toolbar.OnPlayPrevious)
 
@@ -110,17 +93,13 @@ class MenuBar(QMenuBar):
 
         actions_menu = self.addMenu("الإجرائات(&A)")
         self.save_position_action = QAction("حفظ الموضع الحالي", self)
-        self.save_position_action.setShortcut(QKeySequence("Ctrl+S"))
         self.save_position_action.triggered.connect(self.parent.OnSaveCurrentPosition)
         self.save_position_action.triggered.connect(self.parent.OnSave_alert)
         self.save_bookmark_action = QAction("حفظ علامة", self)
-        self.save_bookmark_action.setShortcut(QKeySequence("Ctrl+D"))
         self.save_bookmark_action.triggered.connect(self.parent.OnSaveBookmark)
         #self.surah_info_action = QAction("معلومات السورة", self)
-        #self.surah_info_action.setShortcut(QKeySequence("Shift+S"))
         self.verse_tafsir_action = QAction("تفسير الآية", self)
         self.verse_tafsir_action.triggered.connect(self.parent.OnInterpretation)
-        self.verse_tafsir_action.setShortcut(QKeySequence("Ctrl+T"))
 
         self.tafaseer_menu = QMenu("التفسير")
         self.tafaseer_menu.setAccessibleName("قائمة المفسرين")
@@ -134,16 +113,13 @@ class MenuBar(QMenuBar):
 
         self.ayah_info_action = QAction("معلومات الآية", self)
         self.ayah_info_action.triggered.connect(self.parent.OnAyahInfo)
-        self.ayah_info_action.setShortcut(QKeySequence("Shift+I"))
         self.verse_info_action = QAction("أسباب نزول الآية", self)
         self.verse_info_action.triggered.connect(self.parent.OnVerseReasons)
-        self.verse_info_action.setShortcut(QKeySequence("Shift+R"))
         self.verse_grammar_action = QAction("إعراب الآية", self)
         self.verse_grammar_action.triggered.connect(self.parent.OnSyntax)
-        self.verse_grammar_action.setShortcut(QKeySequence("Shift+E"))
         self.copy_verse_action = QAction("نسخ الآية", self)
         self.copy_verse_action.triggered.connect(self.parent.on_copy_verse)
-        self.copy_verse_action.setShortcut(QKeySequence("Shift+C"))
+
 
         actions_menu.addAction(self.save_position_action)
         actions_menu.addAction(self.save_bookmark_action)
@@ -184,47 +160,40 @@ class MenuBar(QMenuBar):
         # Add the menu to the parent
         self.addMenu(browse_mode_menu)
 
-        self.addMenu(browse_mode_menu)
+
 
         tools_menu = self.addMenu("الأدوات(&T)")
-        athkar_action = QAction("الأذكار", self)
-        athkar_action.setShortcut(QKeySequence("Shift+A"))
-        athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).exec())
-        bookmark_manager_action = QAction("مدير العلامات", self)
-        bookmark_manager_action.setShortcut(QKeySequence("Shift+D"))
-        bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
-        sura_player_action = QAction("مشغل القرآن", self)
-        sura_player_action.setShortcut(QKeySequence("Shift+P"))
-        sura_player_action.triggered.connect(self.OnSuraPlayer)
-        tasbih_action = QAction("المسبحة", self)
-        tasbih_action.setShortcut(QKeySequence("Shift+S"))
-        tasbih_action.triggered.connect(self.OnTasbihAction)
-        message_for_you_action = QAction("رسالة لك", self)
-        message_for_you_action.setShortcut(QKeySequence("Shift+M"))
-        message_for_you_action.triggered.connect(self.parent.OnRandomMessages)
-        #stories_action = QAction("قصص الأنبياء", self)
-        #stories_action.setShortcut(QKeySequence("Shift+O"))
-        #stories_action.triggered.connect(self.OnStoriesAction)
+        self.athkar_action = QAction("الأذكار", self)
+        self.athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).exec())
+        self.bookmark_manager_action = QAction("مدير العلامات", self)
+        self.bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
+        self.sura_player_action = QAction("مشغل القرآن", self)
+        self.sura_player_action.triggered.connect(self.OnSuraPlayer)
+        self.tasbih_action = QAction("المسبحة", self)
+        self.tasbih_action.triggered.connect(self.OnTasbihAction)
+        self.message_for_you_action = QAction("رسالة لك", self)
+        self.message_for_you_action.triggered.connect(self.parent.OnRandomMessages)
+        self.stories_action = QAction("قصص الأنبياء", self)
+        self.stories_action.triggered.connect(self.OnStoriesAction)
 
-        tools_menu.addAction(sura_player_action)
-        tools_menu.addAction(athkar_action)
-        tools_menu.addAction(bookmark_manager_action)
-        tools_menu.addAction(tasbih_action)
-        tools_menu.addAction(message_for_you_action)
-        #tools_menu.addAction(stories_action)
+        tools_menu.addAction(self.sura_player_action)
+        tools_menu.addAction(self.athkar_action)
+        tools_menu.addAction(self.bookmark_manager_action)
+        tools_menu.addAction(self.tasbih_action)
+        tools_menu.addAction(self.message_for_you_action)
+        #tools_menu.addAction(self.stories_action)
 
 
         preferences_menu = self.addMenu("التفضيلات(&R)")
-        settings_action = QAction("الإعدادات", self)
-        settings_action.setShortcut(QKeySequence("F3"))
-        settings_action.setShortcuts([QKeySequence("F3"), QKeySequence("Alt+S")])
-        settings_action.triggered.connect(self.OnSettings)
+        self.settings_action = QAction("الإعدادات", self)
+        self.settings_action.setShortcuts([QKeySequence("F3"), QKeySequence("Alt+S")])
+        self.settings_action.triggered.connect(self.OnSettings)
 
-        theme_menu = QMenu("تغيير الثيم", self)
+        self.theme_menu = QMenu("تغيير الثيم", self)
         for theme in self.theme_manager.get_themes():
-            theme_action = QAction(theme, self)
-            theme_action.triggered.connect(self.OnTheme)
-            theme_menu.addAction(theme_action)
+            self.theme_action = QAction(theme, self)
+            self.theme_action.triggered.connect(self.OnTheme)
+            self.theme_menu.addAction(self.theme_action)
         self.theme_manager.apply_theme(SettingsManager.current_settings["preferences"]["theme"])
         
         self.text_direction_action = QMenu("تغيير اتجاه النص", self)
@@ -236,49 +205,48 @@ class MenuBar(QMenuBar):
         self.ltr_action.triggered.connect(self.set_text_direction_ltr)
         self.text_direction_action.addAction(self.ltr_action)
 
-        preferences_menu.addAction(settings_action)
-        preferences_menu.addMenu(theme_menu)
+        preferences_menu.addAction(self.settings_action)
+        preferences_menu.addMenu(self.theme_menu)
         preferences_menu.addMenu(self.text_direction_action)
 
 
         help_menu = self.addMenu("المساعدة(&H)")
-        user_guide_action = QAction("دليل البرنامج", self)
-        user_guide_action.setShortcut(QKeySequence("F1"))
-        user_guide_action.triggered.connect(lambda: MenuBar.open_documentation("user_guide"))
-        whats_new_action = QAction("المستجدات", self)
-        whats_new_action.setShortcut(QKeySequence("F2"))
-        whats_new_action.triggered.connect(lambda: MenuBar.open_documentation("Whats_new"))
-        contact_us_menu = QMenu("اتصل بنا", self)
+        self.user_guide_action = QAction("دليل البرنامج", self)
+        self.user_guide_action.triggered.connect(lambda: self.open_documentation("user_guide"))
+        self.whats_new_action = QAction("المستجدات", self)
+        self.whats_new_action.triggered.connect(lambda: self.open_documentation("Whats_new"))
+        self.contact_us_menu = QMenu("اتصل بنا", self)
         for name in self.our_emails:
             name_action = QAction(name, self)
             name_action.triggered.connect(self.OnContact)
-            contact_us_menu.addAction(name_action)
-
-        update_program_action = QAction("تحديث البرنامج", self)
-        update_program_action.setShortcut(QKeySequence("Ctrl+F2"))
-        update_program_action.triggered.connect(self.OnUpdate)
-        open_log_action = QAction("فتح ملف السجل", self)
-        open_log_action.setShortcut(QKeySequence("Shift+L"))
-        open_log_action.triggered.connect(self.Onopen_log_file)
-        about_program_action = QAction("حول البرنامج", self)
-        about_program_action.setShortcut(QKeySequence("Ctrl+F1"))
-        about_program_action.triggered.connect(self.OnAbout)
+            self.contact_us_menu.addAction(name_action)
+        self.update_program_action = QAction("تحديث البرنامج", self)
+        self.update_program_action.triggered.connect(self.OnUpdate)
+        self.open_log_action = QAction("فتح ملف السجل", self)
+        self.open_log_action.triggered.connect(self.Onopen_log_file)
+        self.about_program_action = QAction("حول البرنامج", self)
+        self.about_program_action.triggered.connect(self.OnAbout)
 
 
 
-        help_menu.addAction(user_guide_action)
-        help_menu.addAction(whats_new_action)
-        help_menu.addAction(update_program_action)
-        help_menu.addAction(open_log_action)
-        help_menu.addMenu(contact_us_menu)
-        help_menu.addAction(about_program_action)
+        help_menu.addAction(self.user_guide_action)
+        help_menu.addAction(self.whats_new_action)
+        help_menu.addAction(self.update_program_action)
+        help_menu.addAction(self.open_log_action)
+        help_menu.addMenu(self.contact_us_menu)
+        help_menu.addAction(self.about_program_action)
+
+
+        self.setup_shortcuts()
 
     def OnSettings(self):
         SettingsDialog(self.parent).exec()
         self.close_action.setVisible(SettingsManager.current_settings["general"]["run_in_background_enabled"])
 
     def OnUpdate(self):
-         self.update_manager.check_updates()
+        self.update_manager.check_updates()
+
+
 
     def OnBookmarkManager(self):
         dialog = BookmarkDialog(self.parent)
@@ -392,7 +360,7 @@ class MenuBar(QMenuBar):
             except Exception:
                 pass
 
-    def open_documentation(doc_type: str):
+    def open_documentation(self, doc_type: str):
         file_map = {
             "user_guide": "UserGuide.html",
             "Whats_new": "WhatsNew.html"
@@ -403,3 +371,61 @@ class MenuBar(QMenuBar):
         doc_path = os.path.join("documentation", file_name)
         if os.path.exists(doc_path):
             os.startfile(doc_path)
+
+
+
+
+    def setup_shortcuts(self, disable=False,):
+
+        shortcuts = {
+        # Navigation actions
+            self.next_action: ["Ctrl+N", "Ctrl+Down", "Alt+Right", QKeySequence(Qt.Key.Key_PageDown)],
+            self.previous_action: ["Ctrl+B", QKeySequence(Qt.Key.Key_PageUp), "Ctrl+Up", "Alt+Left"],
+            self.go_to_saved_position_action: ["Ctrl+Backspace"],
+            self.search_action: ["Ctrl+F"],
+            self.go_to_action: ["Ctrl+G"],
+            self.quick_access_action: ["Ctrl+Q"],
+            self.close_action: ["Ctrl+W", "Ctrl+F4"],
+            self.exit_action: ["Ctrl+Shift+W", "Ctrl+Shift+F4"],
+
+            # Playback controls
+            self.play_pause_action: ["K", "Ctrl+P"],
+            self.stop_action: ["Ctrl+E"],
+            self.rewind_action: ["J", "Ctrl+Alt+Left"],
+            self.forward_action: ["L", "Ctrl+Alt+Right"],
+            self.replay_action: ["Shift+J"],
+            self.play_next_action: ["Ctrl+Shift+N"],
+            self.play_previous_action: ["Ctrl+Shift+B"],
+
+        # Actions
+            self.save_position_action: ["Ctrl+S"],
+            self.save_bookmark_action: ["Ctrl+D"],
+            self.verse_tafsir_action: ["Shift+T"],
+            self.ayah_info_action: ["Shift+I"],
+            self.verse_info_action: ["Shift+R"],
+            self.verse_grammar_action: ["Shift+E"],
+            self.copy_verse_action: ["Shift+C"],
+
+        #tools
+                    self.sura_player_action: ["Shift+P"],
+        self.athkar_action: ["Shift+A"],
+        self.bookmark_manager_action: ["Shift+D"],
+        self.tasbih_action: ["Shift+S"],
+        self.message_for_you_action: ["Shift+M"],
+            #self.stories_action: ["Shift+O"],
+
+        # Preferences# Preferences
+        self.settings_action: ["F3", "Alt+S"],    
+
+        #Help
+        self.user_guide_action: ["F1"],
+        self.whats_new_action: ["F2"],
+        self.update_program_action: ["Ctrl+F2"],
+        self.open_log_action: ["Shift+L"],
+        self.about_program_action: ["Ctrl+F1"],
+        }
+
+
+        for widget, key_sequence in shortcuts.items():
+            key_sequence = [key_sequence] if isinstance(key_sequence, str) else key_sequence
+            widget.setShortcuts([QKeySequence(key) for key in key_sequence])
