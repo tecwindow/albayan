@@ -56,7 +56,6 @@ class QuranInterface(QMainWindow):
         self.sura_player_window = None
         Globals.effects_manager = SoundEffectPlayer("Audio/sounds")
 
-
         self.toolbar = AudioToolBar(self)
         self.menu_bar = MenuBar(self)
         self.setMenuBar(self.menu_bar)
@@ -79,9 +78,6 @@ class QuranInterface(QMainWindow):
         QShortcut(QKeySequence("C"), self).        activated.connect(self.say_played_ayah)
         QShortcut(QKeySequence("Alt+Shift+C"), self).activated.connect(lambda: self.toolbar.change_ayah_focus(manual=True))
         QShortcut(QKeySequence("V"), self).        activated.connect(self.say_focused_ayah)
-        for i in range(0, 5):  
-            shortcut = QShortcut(QKeySequence(f"Ctrl+{i+        1}"), self)
-            shortcut.activated.connect(lambda mode=i: self.OnChangeNavigationMode(mode))
 
     def create_widgets(self):
         central_widget = QWidget()
