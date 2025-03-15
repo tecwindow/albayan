@@ -120,8 +120,8 @@ class MenuBar(QMenuBar):
 
         # List of browse modes (name, mode value, shortcut)
         modes = [
-            ("صفحات", 0, "Ctrl+1"),
-        ("سور", 1, "Ctrl+2"),
+            ("سور", 1, "Ctrl+1"),
+        ("صفحات", 0, "Ctrl+2"),
         ("أرباع", 2, "Ctrl+3"),
         ("أحزاب", 3, "Ctrl+4"),
         ("أجزاء", 4, "Ctrl+5"),
@@ -135,7 +135,7 @@ class MenuBar(QMenuBar):
             action.triggered.connect(lambda checked, m=mode: self.parent.OnChangeNavigationMode(m))
             self.browse_mode_group.addAction(action)
             browse_mode_menu.addAction(action)
-            self.browse_mode_actions.append(action)
+            self.browse_mode_actions.insert(mode, action)
 
         # Add the menu to the parent
         self.addMenu(browse_mode_menu)
