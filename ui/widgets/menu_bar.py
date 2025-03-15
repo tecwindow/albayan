@@ -122,9 +122,9 @@ class MenuBar(QMenuBar):
         modes = [
             ("صفحات", 0, "Ctrl+1"),
         ("سور", 1, "Ctrl+2"),
-        ("أرباع", 3, "Ctrl+3"),
-        ("أحزاب", 4, "Ctrl+4"),
-        ("أجزاء", 5, "Ctrl+5"),
+        ("أرباع", 2, "Ctrl+3"),
+        ("أحزاب", 3, "Ctrl+4"),
+        ("أجزاء", 4, "Ctrl+5"),
     ]
 
     # Create actions using a loop
