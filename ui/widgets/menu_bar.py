@@ -1,6 +1,6 @@
 import os
 from PyQt6.QtWidgets import QApplication, QMenuBar, QMenu, QMessageBox
-from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut, QDesktopServices
+from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut, QDesktopServices, QActionGroup
 from PyQt6.QtCore import Qt, QUrl
 from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
@@ -154,6 +154,37 @@ class MenuBar(QMenuBar):
         actions_menu.addAction(self.verse_info_action)
         actions_menu.addAction(self.verse_grammar_action)
         actions_menu.addAction(self.copy_verse_action)
+
+
+
+    # Browse mode menu
+        browse_mode_menu = self.addMenu("وضع التصفح")
+        self.browse_mode_group = QActionGroup(self)
+        self.browse_mode_actions = []  # List to store actions
+
+        # List of browse modes (name, mode value, shortcut)
+        modes = [
+            ("صفحات", 0, "Ctrl+1"),
+        ("سور", 1, "Ctrl+2"),
+        ("أجزاء", 4, "Ctrl+3"),
+        ("أرباع", 2, "Ctrl+4"),
+        ("أحزاب", 3, "Ctrl+5"),
+    ]
+
+    # Create actions using a loop
+        for name, mode, shortcut in modes:
+            action = QAction(name, self)
+            action.setCheckable(True)
+            action.setShortcut(QKeySequence(shortcut))  # Assign shortcut
+            action.triggered.connect(lambda checked, m=mode: self.parent.OnChangeNavigationMode(m))
+            self.browse_mode_group.addAction(action)
+            browse_mode_menu.addAction(action)
+            self.browse_mode_actions.append(action)
+
+        # Add the menu to the parent
+        self.addMenu(browse_mode_menu)
+
+        self.addMenu(browse_mode_menu)
 
         tools_menu = self.addMenu("الأدوات(&T)")
         athkar_action = QAction("الأذكار", self)
