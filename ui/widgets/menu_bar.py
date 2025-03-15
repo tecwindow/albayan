@@ -119,7 +119,7 @@ class MenuBar(QMenuBar):
 
 
     # Browse mode menu
-        browse_mode_menu = self.addMenu("وضع التصفح")
+        browse_mode_menu = self.addMenu("وضع التصفح(&B)")
         self.browse_mode_group = QActionGroup(self)
         self.browse_mode_actions = []  # List to store actions
 
@@ -149,7 +149,7 @@ class MenuBar(QMenuBar):
 
         tools_menu = self.addMenu("الأدوات(&T)")
         self.athkar_action = QAction("الأذكار", self)
-        self.athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).exec())
+        self.athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).open())
         self.bookmark_manager_action = QAction("مدير العلامات", self)
         self.bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
         self.sura_player_action = QAction("مشغل القرآن", self)
@@ -247,7 +247,7 @@ class MenuBar(QMenuBar):
 
     def OnStoriesAction(self):
         stories_dialog = ProphetsStoriesDialog(self.parent)
-        stories_dialog.exec()
+        stories_dialog.open()
 
     def OnTheme    (self):
 
