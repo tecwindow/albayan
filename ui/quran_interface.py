@@ -23,7 +23,7 @@ import qtawesome as qta
 from PyQt6.QtGui import QIcon, QAction, QShowEvent, QTextCursor, QKeySequence, QShortcut
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
-from core_functions.info import E3rab, TanzilAyah, AyaInfo
+from core_functions.info import E3rab, TanzilAyah, AyaInfo, SuraInfo
 from core_functions.bookmark import BookmarkManager
 from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog

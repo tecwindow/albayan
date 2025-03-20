@@ -1,12 +1,10 @@
 import sqlite3
+import json
 import os
 from abc import ABC, abstractmethod
 
 class Base(ABC):
-    @abstractmethod
-    def __init__(self, ayah_number: int) -> None:
-        pass
-
+    
     def _connect(self, file_path) -> sqlite3.Connection:
         
         if not os.path.isfile(file_path):
@@ -129,4 +127,51 @@ class AyaInfo(Base):
         """.format(result["numberInSurah"], result["sura_name"], result["sura_number"], result["page"], result["juz"], result["hizb"], result["hizbQuarter"], result["sajda"], result["sajdaObligation"])
 
         return text
+
     
+class SuraInfo(Base):
+    def __init__(self, surah_number: int) -> None:
+        assert 1 <= surah_number <= 114, "Out of surah number."
+        self._surah_number = surah_number
+        file_path = os.path.join("database", "other", "quran_info.DB")
+        self._conn = self._connect(file_path)
+        self.cursor = self._conn.cursor()
+
+    @property
+    def text(self) -> str:
+        self.cursor.execute("SELECT info FROM surah_info WHERE sura_number = ?", (self._surah_number,))
+        result = self.cursor.fetchone()
+
+        if result and result[0]:
+            info =  json.loads(result["info"])
+            text = self._format(info)
+        else:
+            text = ""
+        
+        return text
+
+    def _format(self, data: dict) -> str:
+
+        arabic_labels = {
+            "name": "اسم السورة",
+            "english_name": "الاسم بالإنجليزية",
+            "numberOfAyahs": "عدد الآيات",
+            "firstAyahNumber": "رقم أول آية",
+            "lastAyahNumber": "رقم آخر آية",
+            "revelationType": "نوع السورة",
+            "start_page": "تبدأ في الصفحة",
+            "end_page": "تنتهي في الصفحة",
+            "start_hizb": "تبدأ في الحزب",
+            "end_hizb": "تنتهي في الحزب",
+            "start_juz": "تبدأ في الجزء",
+            "end_juz": "تنتهي في الجزء",
+            "start_hizbQuarter": "تبدأ في الربع",
+            "end_hizbQuarter": "تنتهي في الربع"
+        }
+        
+        text = "<ul>\n"
+        for key, label in arabic_labels.items():
+            value = data.get(key, "غير متوفر")
+            text += f"<li><strong>{label}:</strong> {value}</li>\n"
+
+        return text + "</ul>"
