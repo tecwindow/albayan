@@ -165,13 +165,13 @@ class SuraInfo(Base):
             "end_hizb": "تنتهي في الحزب",
             "start_juz": "تبدأ في الجزء",
             "end_juz": "تنتهي في الجزء",
-            "start_hizbQuarter": "تبدأ في الربع",
-            "end_hizbQuarter": "تنتهي في الربع"
+            "start_hizb_quarter": "تبدأ في الربع",
+            "end_hizb_quarter": "تنتهي في الربع"
         }
         
         text = "<ul>\n"
         for key, label in arabic_labels.items():
             value = data.get(key, "غير متوفر")
-            text += f"<li><strong>{label}:</strong> {value}</li>\n"
+            text += f"<li><strong>{label}:</strong> {value}.</li>\n"
 
         return text + "</ul>"

@@ -299,7 +299,7 @@ class QuranInterface(QMainWindow):
         menu = QMenu(self)
         save_current_position = menu.addAction("حفظ الموضع الحالي")
         save_bookmark = menu.addAction("حفظ علامة")
-        #get_sura_info = menu.addAction("معلومات السورة")
+        get_sura_info = menu.addAction("معلومات السورة")
         get_interpretation_verse = menu.addAction("تفسير الآية")
         get_interpretation_verse.triggered.connect(self.OnInterpretation)
 
@@ -315,6 +315,7 @@ class QuranInterface(QMainWindow):
         save_bookmark.triggered.connect(self.OnSaveBookmark)
         ayah_info = menu.addAction("معلومات الآية")
         ayah_info.triggered.connect(self.OnAyahInfo)
+        get_sura_info.triggered.connect(self.OnSurahInfo)
         get_verse_syntax = menu.addAction("إعراب الآية")
         get_verse_syntax.triggered.connect(self.OnSyntax)
         get_verse_reasons = menu.addAction("أسباب نزول الآية")
@@ -327,7 +328,7 @@ class QuranInterface(QMainWindow):
             save_current_position.setEnabled(False)
             save_bookmark.setEnabled(False)
             copy_verse.setEnabled(False)
-            #get_sura_info.setEnabled(False)
+            get_sura_info.setEnabled(False)
             get_interpretation_verse.setEnabled(False)
             submenu.setEnabled(False)
             ayah_info.setEnabled(False)
@@ -378,7 +379,15 @@ class QuranInterface(QMainWindow):
         title = "معلومات آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "معلومات الآية:"
         text = AyaInfo(aya_info[1]).text
-        InfoDialog(self, title, label, text, is_html_content=True).exec()
+        InfoDialog(self, title, label, text, is_html_content=True).open()
+        
+    @exception_handler(ui_element=QMessageBox)
+    def OnSurahInfo(self, event):
+        aya_info = self.get_current_ayah_info()
+        title = "معلومات {}".format(aya_info[2])
+        label = "معلومات السورة:"
+        sura_info = SuraInfo(aya_info[0])
+        InfoDialog(self, title, label, sura_info.text, is_html_content=True).open()
 
     def say_played_ayah(self):
         ayah_info = self.get_current_ayah_info()

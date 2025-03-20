@@ -85,7 +85,8 @@ class MenuBar(QMenuBar):
         self.save_position_action.triggered.connect(self.parent.OnSave_alert)
         self.save_bookmark_action = QAction("حفظ علامة", self)
         self.save_bookmark_action.triggered.connect(self.parent.OnSaveBookmark)
-        #self.surah_info_action = QAction("معلومات السورة", self)
+        self.surah_info_action = QAction("معلومات السورة", self)
+        self.surah_info_action.triggered.connect(self.parent.OnSurahInfo)
         self.verse_tafsir_action = QAction("تفسير الآية", self)
         self.verse_tafsir_action.triggered.connect(self.parent.OnInterpretation)
 
@@ -108,8 +109,7 @@ class MenuBar(QMenuBar):
         self.copy_verse_action = QAction("نسخ الآية", self)
         self.copy_verse_action.triggered.connect(self.parent.on_copy_verse)
 
-        actions_menu.addActions([self.save_position_action, self.save_bookmark_action, self.verse_tafsir_action, self.ayah_info_action, self.verse_info_action, self.verse_grammar_action, self.copy_verse_action])
-        #actions_menu.addAction(self.surah_info_action)
+        actions_menu.addActions([self.save_position_action, self.save_bookmark_action, self.surah_info_action, self.verse_tafsir_action, self.ayah_info_action, self.verse_info_action, self.verse_grammar_action, self.copy_verse_action])
         actions_menu.insertMenu(self.ayah_info_action, self.tafaseer_menu)
 
 
