@@ -198,6 +198,8 @@ class JuzInfo(Base):
             MAX(hizb) AS end_hizb,
             MIN(hizbQuarter) AS start_hizbQuarter,
             MAX(hizbQuarter) AS end_hizbQuarter,
+            COUNT(DISTINCT sura_number) AS count_surahs,
+            COUNT(number) AS count_ayahs,
             (SELECT numberInSurah FROM quran q2 WHERE q2.juz = q1.juz ORDER BY number LIMIT 1) AS start_ayah_number,
             (SELECT numberInSurah FROM quran q3 WHERE q3.juz = q1.juz ORDER BY number DESC LIMIT 1) AS end_ayah_number,
             (SELECT sura_name FROM quran q4 WHERE q4.juz = q1.juz ORDER BY number LIMIT 1) AS start_sura_name,
@@ -222,6 +224,8 @@ class JuzInfo(Base):
 📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
 📚 يبدأ في الحزب {data["start_hizb"]} وينتهي عند الحزب {data["end_hizb"]}.
 🔹 يبدأ في الربع {data["start_hizbQuarter"]} وينتهي عند الربع {data["end_hizbQuarter"]}.
+🔹 عدد السور في الجزء: {data["count_surahs"]}.
+🔹 عدد الآيات في الجزء: {data["count_ayahs"]}.
     """
 
         return text
