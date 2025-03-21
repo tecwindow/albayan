@@ -328,7 +328,6 @@ class QuranInterface(QMainWindow):
             save_current_position.setEnabled(False)
             save_bookmark.setEnabled(False)
             copy_verse.setEnabled(False)
-            get_sura_info.setEnabled(False)
             get_interpretation_verse.setEnabled(False)
             submenu.setEnabled(False)
             ayah_info.setEnabled(False)
