@@ -175,3 +175,53 @@ class SuraInfo(Base):
             text += f"<li><strong>{label}:</strong> {value}.</li>\n"
 
         return text + "</ul>"
+
+
+class JuzInfo(Base):
+    def __init__(self, juz_number: int) -> None:
+        """Initialize with a specific Juz number"""
+        assert 1 <= juz_number <= 30, "❌ Juz number must be between 1 and 30."
+        self._juz_number = juz_number
+        file_path = os.path.join("database", "quran", "quran.DB")
+        self._conn = self._connect(file_path)
+        self.cursor = self._conn.cursor()
+
+    @property
+    def text(self) -> str:
+
+        query = """ 
+        SELECT 
+            juz AS juz_number,
+            MIN(page) AS start_page,
+            MAX(page) AS end_page,
+            MIN(hizb) AS start_hizb,
+            MAX(hizb) AS end_hizb,
+            MIN(hizbQuarter) AS start_hizbQuarter,
+            MAX(hizbQuarter) AS end_hizbQuarter,
+            (SELECT numberInSurah FROM quran q2 WHERE q2.juz = q1.juz ORDER BY number LIMIT 1) AS start_ayah_number,
+            (SELECT numberInSurah FROM quran q3 WHERE q3.juz = q1.juz ORDER BY number DESC LIMIT 1) AS end_ayah_number,
+            (SELECT sura_name FROM quran q4 WHERE q4.juz = q1.juz ORDER BY number LIMIT 1) AS start_sura_name,
+            (SELECT sura_name FROM quran q5 WHERE q5.juz = q1.juz ORDER BY number DESC LIMIT 1) AS end_sura_name
+        FROM quran q1
+        WHERE juz = ?
+        GROUP BY juz;
+        """
+
+        self.cursor.execute(query, (self._juz_number,))
+        result = self.cursor.fetchone()
+
+        if result:
+            return self._format(dict(result))
+        else:
+            return ""
+
+    def _format(self, data: dict) -> str:
+
+        text = f"""يبدأ الجزء {data["juz_number"]} من الآية {data["start_ayah_number"]} في سورة {data["start_sura_name"]}.
+ينتهي الجزء في الآية {data["end_ayah_number"]} من سورة {data["end_sura_name"]}.
+📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
+📚 يبدأ في الحزب {data["start_hizb"]} وينتهي عند الحزب {data["end_hizb"]}.
+🔹 يبدأ في الربع {data["start_hizbQuarter"]} وينتهي عند الربع {data["end_hizbQuarter"]}.
+    """
+
+        return text
