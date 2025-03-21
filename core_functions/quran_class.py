@@ -260,7 +260,7 @@ class quran_mgr:
     
     def get_ayah_info(self, position: int) -> list:
         ayah_number = self.ayah_data.get(position)
-        self.cursor.execute("SELECT sura_number, number, sura_name, numberInSurah FROM quran WHERE number = ?", (ayah_number,))
+        self.cursor.execute("SELECT sura_number, number, sura_name, numberInSurah, juz FROM quran WHERE number = ?", (ayah_number,))
         return self.cursor.fetchone()
 
     def get_text(self):

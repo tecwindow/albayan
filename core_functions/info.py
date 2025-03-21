@@ -217,8 +217,8 @@ class JuzInfo(Base):
 
     def _format(self, data: dict) -> str:
 
-        text = f"""يبدأ الجزء {data["juz_number"]} من الآية {data["start_ayah_number"]} في سورة {data["start_sura_name"]}.
-ينتهي الجزء في الآية {data["end_ayah_number"]} من سورة {data["end_sura_name"]}.
+        text = f"""يبدأ الجزء {data["juz_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
+ينتهي الجزء في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
 📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
 📚 يبدأ في الحزب {data["start_hizb"]} وينتهي عند الحزب {data["end_hizb"]}.
 🔹 يبدأ في الربع {data["start_hizbQuarter"]} وينتهي عند الربع {data["end_hizbQuarter"]}.
