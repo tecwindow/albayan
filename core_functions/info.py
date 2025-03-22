@@ -336,3 +336,54 @@ class QuarterInfo(Base):
 """
 
         return text.strip()
+
+class PageInfo(Base):
+    def __init__(self, page_number: int) -> None:
+        assert 1 <= page_number <= 604, "❌ Page number must be between 1 and 604."
+        self._page_number = page_number
+        file_path = os.path.join("database", "quran", "quran.DB")
+        self._conn = self._connect(file_path)
+        self.cursor = self._conn.cursor()
+
+    @property
+    def text(self) -> str:
+        
+        query = """ 
+        SELECT 
+            page AS page_number,
+            MIN(juz) AS juz_number,
+            MIN(hizb) AS hizb_number,
+            MIN(hizbQuarter) AS quarter_number,
+            COUNT(DISTINCT sura_number) AS count_surahs,
+            COUNT(number) AS count_ayahs,
+            (SELECT numberInSurah FROM quran WHERE page = q1.page ORDER BY number LIMIT 1) AS start_ayah_number,
+            (SELECT numberInSurah FROM quran WHERE page = q1.page ORDER BY number DESC LIMIT 1) AS end_ayah_number,
+            (SELECT sura_name FROM quran WHERE page = q1.page ORDER BY number LIMIT 1) AS start_sura_name,
+            (SELECT sura_name FROM quran WHERE page = q1.page ORDER BY number DESC LIMIT 1) AS end_sura_name,
+            (SELECT GROUP_CONCAT(sura_name, ' | ') FROM (SELECT DISTINCT sura_name FROM quran WHERE page = q1.page)) AS surah_names
+        FROM quran q1
+        WHERE page = ?
+        GROUP BY page;
+        """
+
+        self.cursor.execute(query, (self._page_number,))
+        result = self.cursor.fetchone()
+
+        if result:
+            return self._format(dict(result))
+        else:
+            return ""
+
+    def _format(self, data: dict) -> str:
+
+        text = f"""
+        📖 الصفحة {data["page_number"]} تنتمي إلى الجزء {data["juz_number"]}.
+📚 تقع في الحزب {data["hizb_number"]} والربع {data["quarter_number"]}.
+🔹 تبدأ الصفحة بالآية {data["start_ayah_number"]} من {data["start_sura_name"]}.
+🔹 تنتهي الصفحة بالآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
+📜 عدد السور في الصفحة: {data["count_surahs"]}.
+📖 السور الموجودة في الصفحة: {data["surah_names"]}.
+🔢 عدد الآيات في الصفحة: {data["count_ayahs"]}.
+"""
+
+        return text.strip()
