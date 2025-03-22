@@ -3,6 +3,7 @@ import json
 import os
 from abc import ABC, abstractmethod
 
+
 class Base(ABC):
     
     def _connect(self, file_path) -> sqlite3.Connection:
@@ -285,3 +286,50 @@ class HizbInfo(Base):
         return text
     
     
+class QuarterInfo(Base):
+    def __init__(self, quarter_number: int) -> None:
+        assert 1 <= quarter_number <= 240, "❌ Quarter number must be between 1 and 240."
+        self._quarter_number = quarter_number
+        file_path = os.path.join("database", "quran", "quran.DB")
+        self._conn = self._connect(file_path)
+        self.cursor = self._conn.cursor()
+
+    @property
+    def text(self) -> str:
+
+        query = """ 
+        SELECT 
+            hizbQuarter AS quarter_number,
+            MIN(page) AS start_page,
+            MAX(page) AS end_page,
+            COUNT(DISTINCT sura_number) AS count_surahs,
+            COUNT(number) AS count_ayahs,
+            (SELECT numberInSurah FROM quran WHERE hizbQuarter = q1.hizbQuarter ORDER BY number LIMIT 1) AS start_ayah_number,
+            (SELECT numberInSurah FROM quran WHERE hizbQuarter = q1.hizbQuarter ORDER BY number DESC LIMIT 1) AS end_ayah_number,
+            (SELECT sura_name FROM quran WHERE hizbQuarter = q1.hizbQuarter ORDER BY number LIMIT 1) AS start_sura_name,
+            (SELECT sura_name FROM quran WHERE hizbQuarter = q1.hizbQuarter ORDER BY number DESC LIMIT 1) AS end_sura_name,
+            (SELECT GROUP_CONCAT(sura_name, ' | ') FROM (SELECT DISTINCT sura_name FROM quran WHERE hizbQuarter = q1.hizbQuarter)) AS surah_names
+        FROM quran q1
+        WHERE hizbQuarter = ?
+        GROUP BY hizbQuarter;
+        """
+
+        self.cursor.execute(query, (self._quarter_number,))
+        result = self.cursor.fetchone()
+
+        if result:
+            return self._format(dict(result))
+        else:
+            return ""
+
+    def _format(self, data: dict) -> str:
+
+        text = f"""📖 يبدأ الربع {data["quarter_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
+ينتهي الربع في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
+📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
+📚 عدد السور في الربع: {data["count_surahs"]}.
+📜 السور الموجودة في الربع: {data["surah_names"]}.
+🔢 عدد الآيات في الربع: {data["count_ayahs"]}.
+"""
+
+        return text
