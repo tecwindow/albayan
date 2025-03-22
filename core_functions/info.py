@@ -225,9 +225,63 @@ class JuzInfo(Base):
 📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
 📚 يبدأ في الحزب {data["start_hizb"]} وينتهي عند الحزب {data["end_hizb"]}.
 🔹 يبدأ في الربع {data["start_hizbQuarter"]} وينتهي عند الربع {data["end_hizbQuarter"]}.
-🔹 السور الموجودة في الجزء: {data["surah_names"]}.
 🔹 عدد السور في الجزء: {data["count_surahs"]}.
+🔹 السور الموجودة في الجزء: {data["surah_names"]}.
 🔹 عدد الآيات في الجزء: {data["count_ayahs"]}.
 """
 
         return text
+
+
+class HizbInfo(Base):
+    def __init__(self, hizb_number: int) -> None:
+        assert 1 <= hizb_number <= 60, "❌ Hizb number must be between 1 and 60."
+        self._hizb_number = hizb_number
+        file_path = os.path.join("database", "quran", "quran.DB")
+        self._conn = self._connect(file_path)
+        self.cursor = self._conn.cursor()
+
+    @property
+    def text(self) -> str:
+
+        query = """ 
+        SELECT 
+            hizb AS hizb_number,
+            MIN(page) AS start_page,
+            MAX(page) end_page,
+            MIN(hizbQuarter) AS start_hizbQuarter,
+            MAX(hizbQuarter) AS end_hizbQuarter,
+            COUNT(DISTINCT sura_number) AS count_surahs,
+            COUNT(number) AS count_ayahs,
+            (SELECT numberInSurah FROM quran WHERE hizb = q1.hizb ORDER BY number LIMIT 1) AS start_ayah_number,
+            (SELECT numberInSurah FROM quran WHERE hizb = q1.hizb ORDER BY number DESC LIMIT 1) AS end_ayah_number,
+            (SELECT sura_name FROM quran WHERE hizb = q1.hizb ORDER BY number LIMIT 1) AS start_sura_name,
+            (SELECT sura_name FROM quran WHERE hizb = q1.hizb ORDER BY number DESC LIMIT 1) AS end_sura_name,
+            (SELECT GROUP_CONCAT(sura_name, ' | ') FROM (SELECT DISTINCT sura_name FROM quran WHERE hizb = q1.hizb)) AS surah_names
+        FROM quran q1
+        WHERE hizb = ?
+        GROUP BY hizb;
+        """
+
+        self.cursor.execute(query, (self._hizb_number,))
+        result = self.cursor.fetchone()
+
+        if result:
+            return self._format(dict(result))
+        else:
+            return ""
+
+    def _format(self, data: dict) -> str:
+
+        text = f"""📖 يبدأ الحزب {data["hizb_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
+ينتهي الحزب في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
+📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
+🔹 يبدأ في الربع {data["start_hizbQuarter"]} وينتهي عند الربع {data["end_hizbQuarter"]}.
+📚 عدد السور في الحزب: {data["count_surahs"]}.
+📜 السور الموجودة في الحزب: {data["surah_names"]}.
+🔢 عدد الآيات في الحزب: {data["count_ayahs"]}.
+"""
+
+        return text
+    
+    
