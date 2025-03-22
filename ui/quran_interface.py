@@ -23,7 +23,7 @@ import qtawesome as qta
 from PyQt6.QtGui import QIcon, QAction, QShowEvent, QTextCursor, QKeySequence, QShortcut
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
-from core_functions.info import E3rab, TanzilAyah, AyaInfo, SuraInfo, JuzInfo
+from core_functions.info import E3rab, TanzilAyah, AyaInfo, SuraInfo, JuzInfo, HizbInfo, QuarterInfo
 from core_functions.bookmark import BookmarkManager
 from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog
@@ -395,6 +395,22 @@ class QuranInterface(QMainWindow):
         label = "معلومات الجزء:"
         juz_info = JuzInfo(aya_info[4])
         InfoDialog(self, title, label, juz_info.text).open()
+
+    @exception_handler(ui_element=QMessageBox)
+    def OnHizbInfo(self, event):
+        aya_info = self.get_current_ayah_info()
+        title = "معلومات الحزب {}".format(aya_info[5])
+        label = "معلومات الحزب:"
+        hizb_info = HizbInfo(aya_info[5])
+        InfoDialog(self, title, label, hizb_info.text).open()
+
+    @exception_handler(ui_element=QMessageBox)
+    def OnQuarterInfo(self, event):
+        aya_info = self.get_current_ayah_info()
+        title = "معلومات الربع {}".format(aya_info[6])
+        label = "معلومات الربع:"
+        quarter_info = QuarterInfo(aya_info[6])
+        InfoDialog(self, title, label, quarter_info.text).open()
 
     def say_played_ayah(self):
         ayah_info = self.get_current_ayah_info()

@@ -221,7 +221,8 @@ class JuzInfo(Base):
 
     def _format(self, data: dict) -> str:
 
-        text = f"""يبدأ الجزء {data["juz_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
+        text = f"""
+📖يبدأ الجزء {data["juz_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
 ينتهي الجزء في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
 📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
 📚 يبدأ في الحزب {data["start_hizb"]} وينتهي عند الحزب {data["end_hizb"]}.
@@ -231,7 +232,7 @@ class JuzInfo(Base):
 🔹 عدد الآيات في الجزء: {data["count_ayahs"]}.
 """
 
-        return text
+        return text.strip()
 
 
 class HizbInfo(Base):
@@ -274,7 +275,8 @@ class HizbInfo(Base):
 
     def _format(self, data: dict) -> str:
 
-        text = f"""📖 يبدأ الحزب {data["hizb_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
+        text = f"""
+📖 يبدأ الحزب {data["hizb_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
 ينتهي الحزب في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
 📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
 🔹 يبدأ في الربع {data["start_hizbQuarter"]} وينتهي عند الربع {data["end_hizbQuarter"]}.
@@ -283,7 +285,7 @@ class HizbInfo(Base):
 🔢 عدد الآيات في الحزب: {data["count_ayahs"]}.
 """
 
-        return text
+        return text.strip()
     
     
 class QuarterInfo(Base):
@@ -324,12 +326,13 @@ class QuarterInfo(Base):
 
     def _format(self, data: dict) -> str:
 
-        text = f"""📖 يبدأ الربع {data["quarter_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
+        text = f"""
+📖 يبدأ الربع {data["quarter_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
 ينتهي الربع في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
 📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
-📚 عدد السور في الربع: {data["count_surahs"]}.
+🔢 عدد السور في الربع: {data["count_surahs"]}.
 📜 السور الموجودة في الربع: {data["surah_names"]}.
 🔢 عدد الآيات في الربع: {data["count_ayahs"]}.
 """
 
-        return text
+        return text.strip()
