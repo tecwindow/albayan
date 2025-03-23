@@ -85,16 +85,6 @@ class MenuBar(QMenuBar):
         self.save_position_action.triggered.connect(self.parent.OnSave_alert)
         self.save_bookmark_action = QAction("حفظ علامة", self)
         self.save_bookmark_action.triggered.connect(self.parent.OnSaveBookmark)
-        self.surah_info_action = QAction("معلومات السورة", self)
-        self.surah_info_action.triggered.connect(self.parent.OnSurahInfo)
-        self.juz_info_action = QAction("معلومات الجزء", self)
-        self.juz_info_action.triggered.connect(self.parent.OnJuzInfo)
-        self.hizb_info_action = QAction("معلومات الحزب", self)
-        self.hizb_info_action.triggered.connect(self.parent.OnHizbInfo)
-        self.quarter_info_action = QAction("معلومات الربع", self)
-        self.quarter_info_action.triggered.connect(self.parent.OnQuarterInfo)
-        self.page_info_action = QAction("معلومات الصفحة", self)
-        self.page_info_action.triggered.connect(self.parent.OnPageInfo)
         self.verse_tafsir_action = QAction("تفسير الآية", self)
         self.verse_tafsir_action.triggered.connect(self.parent.OnInterpretation)
 
@@ -107,9 +97,6 @@ class MenuBar(QMenuBar):
             action = QAction(arabic_category, self)
             action.triggered.connect(self.parent.OnInterpretation)
             self.tafaseer_menu.addAction(action)
-
-        self.ayah_info_action = QAction("معلومات الآية", self)
-        self.ayah_info_action.triggered.connect(self.parent.OnAyahInfo)
         self.verse_info_action = QAction("أسباب نزول الآية", self)
         self.verse_info_action.triggered.connect(self.parent.OnVerseReasons)
         self.verse_grammar_action = QAction("إعراب الآية", self)
@@ -117,8 +104,8 @@ class MenuBar(QMenuBar):
         self.copy_verse_action = QAction("نسخ الآية", self)
         self.copy_verse_action.triggered.connect(self.parent.on_copy_verse)
 
-        actions_menu.addActions([self.save_position_action, self.save_bookmark_action, self.surah_info_action, self.juz_info_action, self.hizb_info_action, self.quarter_info_action, self.page_info_action, self.verse_tafsir_action, self.ayah_info_action, self.verse_info_action, self.verse_grammar_action, self.copy_verse_action])
-        actions_menu.insertMenu(self.ayah_info_action, self.tafaseer_menu)
+        actions_menu.addActions([self.save_position_action, self.save_bookmark_action, self.verse_tafsir_action, self.verse_info_action, self.verse_grammar_action, self.copy_verse_action])
+        actions_menu.insertMenu(self.verse_info_action, self.tafaseer_menu)
 
 
     # Browse mode menu
@@ -148,9 +135,25 @@ class MenuBar(QMenuBar):
         # Add the menu to the parent
         self.addMenu(browse_mode_menu)
 
+        info_menu = self.addMenu("المعلومات(&I)")
+        self.ayah_info_action = QAction("معلومات الآية", self)
+        self.ayah_info_action.triggered.connect(self.parent.OnAyahInfo)
+        self.surah_info_action = QAction("معلومات السورة", self)
+        self.surah_info_action.triggered.connect(self.parent.OnSurahInfo)
+        self.juz_info_action = QAction("معلومات الجزء", self)
+        self.juz_info_action.triggered.connect(self.parent.OnJuzInfo)
+        self.hizb_info_action = QAction("معلومات الحزب", self)
+        self.hizb_info_action.triggered.connect(self.parent.OnHizbInfo)
+        self.quarter_info_action = QAction("معلومات الربع", self)
+        self.quarter_info_action.triggered.connect(self.parent.OnQuarterInfo)
+        self.page_info_action = QAction("معلومات الصفحة", self)
+        self.page_info_action.triggered.connect(self.parent.OnPageInfo)
+
+        info_menu.addActions([self.ayah_info_action, self.surah_info_action, self.juz_info_action, self.hizb_info_action, self.quarter_info_action, self.page_info_action])
 
 
-        tools_menu = self.addMenu("الأدوات(&T)")
+
+        tools_menu =self.addMenu("الأدوات(&T)")
         self.athkar_action = QAction("الأذكار", self)
         self.athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).open())
         self.bookmark_manager_action = QAction("مدير العلامات", self)
@@ -384,10 +387,13 @@ class MenuBar(QMenuBar):
             self.save_position_action: ["Ctrl+S"],
             self.save_bookmark_action: ["Ctrl+D"],
             self.verse_tafsir_action: ["Shift+T"],
-            self.ayah_info_action: ["Shift+I"],
             self.verse_info_action: ["Shift+R"],
             self.verse_grammar_action: ["Shift+E"],
             self.copy_verse_action: ["Shift+C"],
+
+        #info
+            self.ayah_info_action: ["Shift+I"],
+            self.surah_info_action: ["Ctrl+I"],
 
         #tools
                     self.sura_player_action: ["Shift+P"],
@@ -397,7 +403,7 @@ class MenuBar(QMenuBar):
         self.message_for_you_action: ["Shift+M"],
             #self.stories_action: ["Shift+O"],
 
-        # Preferences# Preferences
+        #Preferences
         self.settings_action: ["F3", "Alt+S"],    
 
         #Help
