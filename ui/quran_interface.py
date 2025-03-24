@@ -425,7 +425,7 @@ class QuranInterface(QMainWindow):
         aya_info = self.get_current_ayah_info()
         title = "معلومات الصفحة {}".format(aya_info[7])
         label = "معلومات الصفحة:"
-        page_info = PageInfo(aya_info[6])
+        page_info = PageInfo(aya_info[7])
         InfoDialog(self, title, label, page_info.text).open()
 
     def say_played_ayah(self):
