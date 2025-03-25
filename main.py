@@ -10,7 +10,7 @@ from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from ui.quran_interface import QuranInterface
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
 from utils.update import UpdateManager
-from utils.settings import SettingsManager
+from utils.settings import Config
 from utils.const import program_name, program_icon, user_db_path
 from utils.logger import Logger
 from utils.audio_player import StartupSoundEffectPlayer, VolumeController
@@ -121,6 +121,7 @@ def call_after_starting(parent: QuranInterface) -> None:
 
 def main():
     try:
+        Config.load_settings()
         app = SingleInstanceApplication(sys.argv)
         app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         main_window = QuranInterface(program_name)

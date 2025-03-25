@@ -3,7 +3,7 @@ import traceback
 import os
 import ctypes
 import sys
-from utils.settings import SettingsManager
+from utils.settings import Config
 from utils.const import albayan_folder
 
 
@@ -27,7 +27,7 @@ level=logging.INFO,
     @classmethod
     def info(cls, message:str) -> None:
         cls.initialize_logger()
-        if SettingsManager.current_settings["general"].get("is_logging_enabled"):
+        if Config.general.logging_enabled:
             logging.info(message)
 
     @classmethod

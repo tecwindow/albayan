@@ -22,7 +22,7 @@ import os
 import sqlite3
 from typing import List, Dict, Union
 from core_functions.ayah_data import AyahData
-from utils.settings import SettingsManager
+from utils.settings import Config
 from utils.const import data_folder
 from exceptions.database import DBNotFoundError
 
@@ -298,7 +298,7 @@ class quran_mgr:
             last_position = current_position - 1
             ayah_data.insert(ayah[1], ayah[3], ayah[4], first_position, last_position)
 
-        text = text + "|" if SettingsManager.current_settings["reading"]["auto_page_turn"] else text.strip()
+        text = text + "|" if Config.reading.auto_page_turn else text.strip()
         self.text = text
         self.ayah_data = ayah_data
 
