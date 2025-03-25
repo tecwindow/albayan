@@ -102,16 +102,17 @@ class Config:
     @classmethod
     def sections(cls) -> Dict[str, Any]:
         """
-        Returns a dictionary mapping section names to their corresponding dataclass instances.
+        Returns a dictionary mapping section names to their corresponding dataclass instances
+        by iterating over the class annotations.
         """
-        return {
-            cls.general.__class__.SECTION_NAME: cls.general,
-            cls.audio.__class__.SECTION_NAME: cls.audio,
-            cls.listening.__class__.SECTION_NAME: cls.listening,
-            cls.search.__class__.SECTION_NAME: cls.search,
-            cls.reading.__class__.SECTION_NAME: cls.reading,
-            cls.preferences.__class__.SECTION_NAME: cls.preferences,
-        }
+        sections_dict = {}
+        for attr_name in cls.__annotations__:
+            attr = getattr(cls, attr_name, None)
+            if isinstance(attr, BaseSection):
+                section_name = getattr(attr.__class__, "SECTION_NAME", None)
+                if section_name:
+                    sections_dict[section_name] = attr
+        return sections_dict
 
     @classmethod
     def _get_value(cls, section: str, key: str, default_value: Any) -> Any:
@@ -180,26 +181,12 @@ class Config:
     @classmethod
     def reset_settings(cls) -> None:
         """
-        Resets all settings to their default values and saves the changes.
+        Dynamically resets all settings to their default values by iterating over class
+        annotations and reinitializing any attribute that is an instance of BaseSection.
         """
-        cls.general = GeneralSettings()
-        cls.audio = AudioSettings()
-        cls.listening = ListeningSettings()
-        cls.search = SearchSettings()
-        cls.reading = ReadingSettings()
-        cls.preferences = PreferencesSettings()
+        for attr_name in cls.__annotations__:
+            attr = getattr(cls, attr_name, None)
+            if isinstance(attr, BaseSection):
+                setattr(cls, attr_name, type(attr)())
         cls.save_settings()
-
-# Load settings when the module is imported
-Config.load_settings()
-
-# Example usage
-if __name__ == "__main__":
-    # Access a setting using the base section methods
-    print(Config.general.get_value("check_update_enabled"))
     
-    # Modify a setting using the base section set_value method
-    Config.general.set_value("check_update_enabled", False)
-    
-    # Confirm the change
-    print(Config.general.get_value("check_update_enabled"))
