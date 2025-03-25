@@ -264,12 +264,8 @@ class MenuBar(QMenuBar):
         self.theme_manager.apply_theme(theme)
 
         # Save selected theme in the settings
-        theme_setting = {
-            "preferences": {
-                "theme": theme
-            }
-        }
-        Config.save_settings(theme_setting)
+        Config.preferences.theme = theme
+        Config.save_settings()
 
     def set_text_direction_rtl(self):
         option = self.parent.quran_view.document().defaultTextOption()

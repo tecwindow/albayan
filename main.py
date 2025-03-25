@@ -108,7 +108,7 @@ class SingleInstanceApplication(QApplication):
 
 def call_after_starting(parent: QuranInterface) -> None:
         
-    Config.load_settings()
+
 
     basmala = StartupSoundEffectPlayer("Audio/basmala")
     basmala.play()
