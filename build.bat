@@ -4,7 +4,7 @@ set VENV_DIR=albayan_env
 
 if not exist %VENV_DIR% (
     echo Creating virtual environment...
-    py -3.12 -m venv %VENV_DIR%
+    py -3.13 -m venv %VENV_DIR%
 )
 
 call %VENV_DIR%\Scripts\activate
