@@ -22,7 +22,8 @@ from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
 from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name
-from utils.settings import SettingsManager
+from utils.settings import Config
+
 from utils.audio_player import bass_initializer, AthkarPlayer, AyahPlayer, SurahPlayer, SoundEffectPlayer
 from utils.Startup import StartupManager
 import qtawesome as qta
@@ -36,7 +37,7 @@ class SettingsDialog(QDialog):
         self.resize(600, 450)
         self.reciters_manager = AyahReciter(data_folder / "quran" / "reciters.db")
         self.init_ui()
-        self.set_current_settings()
+
 
 
     def init_ui(self):
@@ -318,62 +319,49 @@ class SettingsDialog(QDialog):
         AthkarPlayer.apply_new_sound_card(self.athkar_device_combo.currentData())
         SoundEffectPlayer.apply_new_sound_card(self.volume_device_combo.currentData())
 
-        if SettingsManager.current_settings["general"]["auto_start_enabled"] != self.start_on_system_start_checkbox.isChecked():
+        if Config.general.auto_start_enabled != self.start_on_system_start_checkbox.isChecked():
             if self.start_on_system_start_checkbox.isChecked():
                 StartupManager.add_to_startup(program_english_name)
             else:
                 StartupManager.remove_from_startup(program_english_name)
 
-        if SettingsManager.current_settings["reading"]["font_type"] != self.font_type_combo.currentData():
+        if Config.reading.font_type != self.font_type_combo.currentData():
             self.parent.quran_view.setText(self.parent.quran.reload_quran(self.font_type_combo.currentData()))
 
-        general_settings = {
-            "run_in_background_enabled": self.run_in_background_checkbox.isChecked(),
-            "auto_start_enabled": self.start_on_system_start_checkbox.isChecked(),
-            "auto_save_position_enabled": self.auto_save_position_checkbox.isChecked(),
-            "check_update_enabled": self.update_checkbox.isChecked(),
-            "logging_enabled": self.log_checkbox.isChecked()
-        }
+        # Update settings in Config
+        Config.general.run_in_background_enabled = self.run_in_background_checkbox.isChecked()
+        Config.general.auto_start_enabled = self.start_on_system_start_checkbox.isChecked()
+        Config.general.auto_save_position_enabled = self.auto_save_position_checkbox.isChecked()
+        Config.general.check_update_enabled = self.update_checkbox.isChecked()
+        Config.general.logging_enabled = self.log_checkbox.isChecked()
 
-        audio_settings = {
-            "sound_effect_enabled": self.sound_checkbox.isChecked(),
-            "start_with_basmala_enabled": self.basmala_checkbox.isChecked(),
-            "speak_actions_enabled": self.speech_checkbox.isChecked(),
-            "volume_level": self.volume.value(),
-            "volume_device": self.volume_device_combo.currentData(),
-            "ayah_volume_level": self.ayah_volume.value(),
-            "ayah_device": self.ayah_device_combo.currentData(),
-            "surah_volume_level": self.surah_volume.value(),
-            "surah_device": self.surah_device_combo.currentData(),
-            "athkar_volume_level": self.athkar_volume.value(),
-            "athkar_device": self.athkar_device_combo.currentData()
-        }
+        Config.audio.sound_effect_enabled = self.sound_checkbox.isChecked()
+        Config.audio.start_with_basmala_enabled = self.basmala_checkbox.isChecked()
+        Config.audio.speak_actions_enabled = self.speech_checkbox.isChecked()
+        Config.audio.volume_level = self.volume.value()
+        Config.audio.volume_device = self.volume_device_combo.currentData()
+        Config.audio.ayah_volume_level = self.ayah_volume.value()
+        Config.audio.ayah_device = self.ayah_device_combo.currentData()
+        Config.audio.surah_volume_level = self.surah_volume.value()
+        Config.audio.surah_device = self.surah_device_combo.currentData()
+        Config.audio.athkar_volume_level = self.athkar_volume.value()
+        Config.audio.athkar_device = self.athkar_device_combo.currentData()
 
-        listening_settings = {
-            "reciter": self.reciters_combo.currentData(),
-            "action_after_listening": self.action_combo.currentData(),
-            "forward_time": self.duration_spinbox.value(),
-            "auto_move_focus": self.auto_move_focus_checkbox.isChecked()
-        }
+        Config.listening.reciter = self.reciters_combo.currentData()
+        Config.listening.action_after_listening = self.action_combo.currentData()
+        Config.listening.forward_time = self.duration_spinbox.value()
+        Config.listening.auto_move_focus = self.auto_move_focus_checkbox.isChecked()
 
-        reading_settings = {
-            "font_type": self.font_type_combo.currentData(),
-            "auto_page_turn": self.turn_pages_checkbox.isChecked()
-        }
+        Config.reading.font_type = self.font_type_combo.currentData()
+        Config.reading.auto_page_turn = self.turn_pages_checkbox.isChecked()
 
-        search_settings = {
-            "ignore_tashkeel": self.ignore_tashkeel_checkbox.isChecked(),
-            "ignore_hamza": self.ignore_hamza_checkbox.isChecked(),
-            "match_whole_word": self.match_whole_word_checkbox.isChecked()
-        }
+        Config.search.ignore_tashkeel = self.ignore_tashkeel_checkbox.isChecked()
+        Config.search.ignore_hamza = self.ignore_hamza_checkbox.isChecked()
+        Config.search.match_whole_word = self.match_whole_word_checkbox.isChecked()
 
-        SettingsManager.write_settings({
-            "general": general_settings,
-            "audio": audio_settings,
-            "listening": listening_settings,
-            "reading": reading_settings,
-            "search": search_settings
-        })
+        # Save settings to file
+        Config.save_settings()
+
         self.accept()
         self.deleteLater()
 
@@ -387,46 +375,46 @@ class SettingsDialog(QDialog):
         msg_box.exec()
 
         if msg_box.clickedButton() == yes_button:
-            SettingsManager.reset_settings()
+            Config.reset_settings()
             self.set_current_settings()
 
     def set_current_settings(self):
-        current_settings = SettingsManager.current_settings    
-        self.sound_checkbox.setChecked(current_settings["audio"]["sound_effect_enabled"])
-        self.basmala_checkbox.setChecked(current_settings["audio"]["start_with_basmala_enabled"])
-        self.speech_checkbox.setChecked(current_settings["audio"]["speak_actions_enabled"])
-        self.volume.setValue(current_settings["audio"]["volume_level"])
-        self.athkar_volume.setValue(current_settings["audio"]["athkar_volume_level"])
-        self.ayah_device_combo.setCurrentIndex(current_settings["audio"]["ayah_device"])
-        self.surah_device_combo.setCurrentIndex(current_settings["audio"]["surah_device"])
-        self.volume_device_combo.setCurrentIndex(current_settings["audio"]["volume_device"])
-        self.athkar_device_combo.setCurrentIndex(current_settings["audio"]["athkar_device"])
-        self.ayah_volume.setValue(current_settings["audio"]["ayah_volume_level"])
-        self.surah_volume.setValue(current_settings["audio"]["surah_volume_level"])
-        self.run_in_background_checkbox.setChecked(current_settings["general"]["run_in_background_enabled"])
-        self.turn_pages_checkbox.setChecked(current_settings["reading"]["auto_page_turn"])
-        self.start_on_system_start_checkbox.setChecked(current_settings["general"]["auto_start_enabled"])
-        self.auto_save_position_checkbox.setChecked(current_settings["general"]["auto_save_position_enabled"])
-        self.update_checkbox.setChecked(current_settings["general"]["check_update_enabled"])
-        self.duration_spinbox.setValue(current_settings["listening"]["forward_time"])
-        self.auto_move_focus_checkbox.setChecked(current_settings["listening"]["auto_move_focus"])
-        self.log_checkbox.setChecked(current_settings["general"]["logging_enabled"])
-        self.ignore_tashkeel_checkbox.setChecked(current_settings["search"]["ignore_tashkeel"])
-        self.ignore_hamza_checkbox.setChecked(current_settings["search"]["ignore_hamza"])
-        self.match_whole_word_checkbox.setChecked(current_settings["search"]["match_whole_word"])
+        Config.load_settings()
+        self.sound_checkbox.setChecked(Config.audio.sound_effect_enabled)
+        self.basmala_checkbox.setChecked(Config.audio.start_with_basmala_enabled)
+        self.speech_checkbox.setChecked(Config.audio.speak_actions_enabled)
+        self.volume.setValue(Config.audio.volume_level)
+        self.athkar_volume.setValue(Config.audio.athkar_volume_level)
+        self.ayah_device_combo.setCurrentIndex(Config.audio.ayah_device)
+        self.surah_device_combo.setCurrentIndex(Config.audio.surah_device)
+        self.volume_device_combo.setCurrentIndex(Config.audio.volume_device)
+        self.athkar_device_combo.setCurrentIndex(Config.audio.athkar_device)
+        self.ayah_volume.setValue(Config.audio.ayah_volume_level)
+        self.surah_volume.setValue(Config.audio.surah_volume_level)
+        self.run_in_background_checkbox.setChecked(Config.general.run_in_background_enabled)
+        self.turn_pages_checkbox.setChecked(Config.reading.auto_page_turn)
+        self.start_on_system_start_checkbox.setChecked(Config.general.auto_start_enabled)
+        self.auto_save_position_checkbox.setChecked(Config.general.auto_save_position_enabled)
+        self.update_checkbox.setChecked(Config.general.check_update_enabled)
+        self.duration_spinbox.setValue(Config.listening.forward_time)
+        self.auto_move_focus_checkbox.setChecked(Config.listening.auto_move_focus)
+        self.log_checkbox.setChecked(Config.general.logging_enabled)
+        self.ignore_tashkeel_checkbox.setChecked(Config.search.ignore_tashkeel)
+        self.ignore_hamza_checkbox.setChecked(Config.search.ignore_hamza)
+        self.match_whole_word_checkbox.setChecked(Config.search.match_whole_word)
         # Update the reciter ComboBox
-        reciter_id = current_settings["listening"]["reciter"]
+        reciter_id = Config.listening.reciter
         for index in range(self.reciters_combo.count()):
             if self.reciters_combo.itemData(index) == reciter_id:
                 self.reciters_combo.setCurrentIndex(index)
                 break
 
-        stored_id = current_settings["listening"]["action_after_listening"]
+        stored_id = Config.listening.action_after_listening
         index = self.action_combo.findData(stored_id)
         if index != -1:
             self.action_combo.setCurrentIndex(index)
 
-        stored_id = current_settings["reading"]["font_type"]
+        stored_id = Config.reading.font_type
         index = self.font_type_combo.findData(stored_id)
         if index != -1:
             self.font_type_combo.setCurrentIndex(index)

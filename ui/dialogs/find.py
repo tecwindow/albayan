@@ -18,7 +18,7 @@ QMessageBox,
 from PyQt6.QtCore import Qt, QRegularExpression
 from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator, QShortcut
 from core_functions.search import SearchCriteria, QuranSearchManager
-from utils.settings import SettingsManager
+from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
 from utils.const import Globals
 
@@ -39,7 +39,7 @@ class SearchDialog(QDialog):
         self.resize(500, 400)
         self.search_manager = QuranSearchManager()
         self.criteria = None
-        self.current_settings = SettingsManager.current_settings
+
         self.initUI()
 
     def initUI(self):
@@ -77,11 +77,11 @@ class SearchDialog(QDialog):
         self.search_to_combobox = QComboBox()
         self.search_to_combobox.setAccessibleName(self.search_to_label.text())
         self.ignore_diacritics_checkbox = QCheckBox('تجاهل التشكيل')
-        self.ignore_diacritics_checkbox.setChecked(self.current_settings["search"]["ignore_tashkeel"])
+        self.ignore_diacritics_checkbox.setChecked(Config.search.ignore_tashkeel)
         self.ignore_hamza_checkbox = QCheckBox('تجاهل الهمزات')
-        self.ignore_hamza_checkbox.setChecked(self.current_settings["search"]["ignore_hamza"])
+        self.ignore_hamza_checkbox.setChecked(Config.search.ignore_hamza)
         self.match_whole_word_checkbox = QCheckBox('تطابق الكلمة بأكملها')
-        self.match_whole_word_checkbox.setChecked(self.current_settings["search"]["match_whole_word"])
+        self.match_whole_word_checkbox.setChecked(Config.search.match_whole_word)
 
         self.search_type_layout = QVBoxLayout()
         self.search_type_layout.addWidget(self.search_type_radio_page)

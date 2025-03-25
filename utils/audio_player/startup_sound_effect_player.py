@@ -14,7 +14,7 @@ class StartupSoundEffectPlayer(AudioPlayer):
         
     @exception_handler
     def play(self):
-        if not SettingsManager.current_settings["audio"]["start_with_basmala_enabled"]:
+        if not Config.audio.start_with_basmala_enabled:
             return
 
         audio_files =  [

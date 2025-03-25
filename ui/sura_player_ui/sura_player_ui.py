@@ -17,7 +17,8 @@ from utils.const import Globals, data_folder, user_db_path, program_name
 from utils.audio_player import SurahPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import PreferencesManager
-from utils.settings import SettingsManager
+from utils.settings import Config
+
 from.menubar import MenuBar
 from .key_handler import KeyHandler
 from .audio_looper import AudioLooper
@@ -339,13 +340,16 @@ class SuraPlayerWindow(QMainWindow):
     def increase_volume(self):
         self.player.increase_volume()
         volume = int(self.player.volume * 100)
-        SettingsManager.write_settings({"audio": {"surah_volume_level": volume}})
+        Config.audio.surah_volume_level = volume
+        Config.save_settings()
+ 
 
     def decrease_volume(self):
         self.player.decrease_volume()
         volume = int(self.player.volume * 100)
-        SettingsManager.write_settings({"audio": {"surah_volume_level": volume}})
-
+        Config.audio.surah_volume_level = volume
+        Config.save_settings()
+ 
     def update_volume(self):
         self.player.set_volume(self.volume_slider.value())
 

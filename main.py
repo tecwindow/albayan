@@ -108,10 +108,12 @@ class SingleInstanceApplication(QApplication):
 
 def call_after_starting(parent: QuranInterface) -> None:
         
+    Config.load_settings()
+
     basmala = StartupSoundEffectPlayer("Audio/basmala")
     basmala.play()
 
-    check_update_enabled = SettingsManager.current_settings["general"].get("check_update_enabled", False)
+    check_update_enabled = getattr(Config.general, "check_update_enabled", False)
     update_manager = UpdateManager(parent, check_update_enabled)
     update_manager.check_auto_update()
 

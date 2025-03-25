@@ -24,7 +24,7 @@ class SoundEffectPlayer(AudioPlayer):
     @exception_handler
     def play(self, file_name: Optional[str]= None) -> None:
         """Plays a specified or random sound effect if enabled."""
-        if not SettingsManager.current_settings["audio"]["sound_effect_enabled"]:
+        if not Config.audio.sound_effect_enabled:
             return
 
         if file_name not in self.sounds:
