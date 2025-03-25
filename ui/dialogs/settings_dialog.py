@@ -37,6 +37,7 @@ class SettingsDialog(QDialog):
         self.resize(600, 450)
         self.reciters_manager = AyahReciter(data_folder / "quran" / "reciters.db")
         self.init_ui()
+        self.set_current_settings()
 
 
 
@@ -59,7 +60,6 @@ class SettingsDialog(QDialog):
 
         listening_item = QTreeWidgetItem(["الاستماع"])
         listening_item.setIcon(0, qta.icon("fa.headphones"))
-
 
 
         reading_item = QTreeWidgetItem(["القراءة"])
@@ -379,7 +379,6 @@ class SettingsDialog(QDialog):
             self.set_current_settings()
 
     def set_current_settings(self):
-        Config.load_settings()
         self.sound_checkbox.setChecked(Config.audio.sound_effect_enabled)
         self.basmala_checkbox.setChecked(Config.audio.start_with_basmala_enabled)
         self.speech_checkbox.setChecked(Config.audio.speak_actions_enabled)

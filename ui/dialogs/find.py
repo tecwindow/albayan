@@ -134,7 +134,6 @@ class SearchDialog(QDialog):
         close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
         close_shortcut.activated.connect(self.reject)
 
-
         self.on_radio_toggled()
         self.OnEdit()
 
@@ -271,7 +270,6 @@ class SearchResultsDialog(QDialog):
             UniversalSpeech.say(text)
 
         return super().keyPressEvent(event)
-
 
     def reject(self):
         self.deleteLater()
