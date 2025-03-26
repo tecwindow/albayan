@@ -15,6 +15,9 @@ from utils.const import program_name, program_icon, user_db_path
 from utils.logger import Logger
 from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 
+Logger.initialize_logger()
+Config.load_settings()
+
 class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -70,9 +73,6 @@ class SingleInstanceApplication(QApplication):
 
         return super().eventFilter(obj, event)
 
-
-
-    
     def setup_local_server(self) -> None:
         if not self.local_server.listen(self.server_name):
             Logger.error(f"Failed to start local server: {self.local_server.errorString()}")
@@ -108,8 +108,6 @@ class SingleInstanceApplication(QApplication):
 
 def call_after_starting(parent: QuranInterface) -> None:
         
-
-
     basmala = StartupSoundEffectPlayer("Audio/basmala")
     basmala.play()
 
@@ -123,7 +121,6 @@ def call_after_starting(parent: QuranInterface) -> None:
 
 def main():
     try:
-        Config.load_settings()
         app = SingleInstanceApplication(sys.argv)
         app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         main_window = QuranInterface(program_name)
@@ -133,7 +130,6 @@ def main():
         call_after_starting(main_window)
         sys.exit(app.exec())
     except Exception as e:
-        print(e)
         Logger.error(str(e))
         msg_box = QMessageBox(None)
         msg_box.setIcon(QMessageBox.Icon.Critical)

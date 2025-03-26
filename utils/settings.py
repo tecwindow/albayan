@@ -98,6 +98,7 @@ class Config:
         """
         if section not in cls._config_parser:
             cls._config_parser[section] = {}
+            logger.info(f"Creating new section '{section}' in config file")
 
     @classmethod
     def sections(cls) -> Dict[str, Any]:
@@ -139,11 +140,18 @@ class Config:
         Loads a specific section from the config file into the corresponding dataclass.
         """
         cls.ensure_section(section)
+        updated = False
+
         for field_name, _ in section_obj.__dataclass_fields__.items():
             default_value = getattr(section_obj, field_name)
             value = cls._get_value(section, field_name, default_value)
             setattr(section_obj, field_name, value)
-
+            if not cls._config_parser[section].get(field_name):
+                updated = True
+                
+        if updated:
+            cls.save_settings()
+        
     @classmethod
     def _save_section(cls, section: str, section_obj: Any) -> None:
         """
@@ -151,6 +159,8 @@ class Config:
         """
         cls.ensure_section(section)
         for field_name, value in asdict(section_obj).items():
+            if not cls._config_parser[section].get(field_name):
+                logger.info(f"Creating new setting '{field_name}' in section '{section}'")
             cls._config_parser[section][field_name] = str(value)
 
     @classmethod
