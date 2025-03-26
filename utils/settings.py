@@ -157,11 +157,16 @@ class Config:
     def load_settings(cls) -> None:
         """
         Loads all settings from the configuration file by iterating over all sections.
+        If the config file cannot be read or is missing, it will save the default settings.
         """
         try:
-            cls._config_parser.read(CONFIG_PATH, encoding='utf-8')
+            if not cls._config_parser.read(CONFIG_PATH, encoding='utf-8'):
+                logger.warning(f"Config file '{CONFIG_PATH}' not found or empty. Saving default settings.")
+                cls.save_settings()
         except configparser.Error as e:
-            logger.error(f"Error reading config file: {e}")
+            logger.error(f"Failed to read config file: {e}. Reverting to default settings.")
+            cls.save_settings()            
+
         for section, instance in cls.sections().items():
             cls._load_section(section, instance)
 
