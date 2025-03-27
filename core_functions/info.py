@@ -154,6 +154,7 @@ class SuraInfo(Base):
     def _format(self, data: dict) -> str:
 
         arabic_labels = {
+            "sura_number": "رقم السورة",
             "name": "اسم السورة",
             "english_name": "الاسم بالإنجليزية",
             "numberOfAyahs": "عدد الآيات",
