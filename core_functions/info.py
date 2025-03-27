@@ -253,6 +253,11 @@ class HizbInfo(Base):
         query = """ 
         SELECT 
             hizb AS hizb_number,
+            CASE 
+                WHEN (hizb % 2) = 1 THEN 'الأول' 
+                ELSE 'الثاني' 
+            END AS hizb_number_in_juz,
+            MIN(juz) AS juz,
             MIN(page) AS start_page,
             MAX(page) end_page,
             MIN(hizbQuarter) AS start_hizbQuarter,
@@ -282,6 +287,7 @@ class HizbInfo(Base):
         text = f"""
 📖 يبدأ الحزب {data["hizb_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
 ينتهي الحزب في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
+📖الحزب {data["hizb_number_in_juz"]} من الجزء {data["juz"]}.
 📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
 🔹 يبدأ في الربع {data["start_hizbQuarter"]} وينتهي عند الربع {data["end_hizbQuarter"]}.
 📚 عدد السور في الحزب: {data["count_surahs"]}.
