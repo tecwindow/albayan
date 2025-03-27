@@ -256,7 +256,7 @@ class HizbInfo(Base):
             CASE 
                 WHEN (hizb % 2) = 1 THEN 'الأول' 
                 ELSE 'الثاني' 
-            END AS hizb_number_in_juz,
+            END AS hizb_order_in_juz,
             MIN(juz) AS juz,
             MIN(page) AS start_page,
             MAX(page) end_page,
@@ -287,7 +287,7 @@ class HizbInfo(Base):
         text = f"""
 📖 يبدأ الحزب {data["hizb_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
 ينتهي الحزب في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
-📖الحزب {data["hizb_number_in_juz"]} من الجزء {data["juz"]}.
+📖الحزب {data["hizb_order_in_juz"]} من الجزء {data["juz"]}.
 📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
 🔹 يبدأ في الربع {data["start_hizbQuarter"]} وينتهي عند الربع {data["end_hizbQuarter"]}.
 📚 عدد السور في الحزب: {data["count_surahs"]}.
@@ -312,6 +312,13 @@ class QuarterInfo(Base):
         query = """ 
         SELECT 
             hizbQuarter AS quarter_number,
+            CASE 
+                WHEN hizbQuarter % 4 = 1 THEN 'الأول'
+                WHEN hizbQuarter % 4 = 2 THEN 'الثاني'
+                WHEN hizbQuarter % 4 = 3 THEN 'الثالث'
+                ELSE 'الرابع'
+            END AS quarter_order_in_hizb,
+            MIN(hizb) AS hizb,
             MIN(page) AS start_page,
             MAX(page) AS end_page,
             COUNT(DISTINCT sura_number) AS count_surahs,
@@ -339,6 +346,7 @@ class QuarterInfo(Base):
         text = f"""
 📖 يبدأ الربع {data["quarter_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
 ينتهي الربع في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
+📖 الربع {data["quarter_order_in_hizb"]} من الحزب {data["hizb"]}.
 📖 يبدأ من الصفحة {data["start_page"]} وينتهي عند الصفحة {data["end_page"]}.
 🔢 عدد السور في الربع: {data["count_surahs"]}.
 📜 السور الموجودة في الربع: {data["surah_names"]}.
