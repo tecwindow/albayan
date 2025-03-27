@@ -84,6 +84,7 @@ class AyaInfo(Base):
 
         sql = """
         SELECT 
+        number,
         sura_name,
         sura_number,
           numberInSurah,
@@ -116,6 +117,7 @@ class AyaInfo(Base):
         text = """|
         <ul>
             <li><strong>رقم الآية:</strong> {}.</li>
+            <li><strong>رقم الآية في المصحف:</strong> {}.</li>
             <li><strong>السورة:</strong> {}.</li>
             <li><strong>رقم السورة:</strong> {}.</li>
             <li><strong>رقم الصفحة:</strong> {}.</li>
@@ -125,7 +127,7 @@ class AyaInfo(Base):
             <li><strong>سجدة:</strong> {}.</li>
             <li><strong>سجدة واجبة:</strong> {}.</li>
         </ul>
-        """.format(result["numberInSurah"], result["sura_name"], result["sura_number"], result["page"], result["juz"], result["hizb"], result["hizbQuarter"], result["sajda"], result["sajdaObligation"])
+        """.format(result["numberInSurah"], result["number"], result["sura_name"], result["sura_number"], result["page"], result["juz"], result["hizb"], result["hizbQuarter"], result["sajda"], result["sajdaObligation"])
 
         return text
 
@@ -140,11 +142,12 @@ class SuraInfo(Base):
 
     @property
     def text(self) -> str:
-        self.cursor.execute("SELECT info FROM surah_info WHERE sura_number = ?", (self._surah_number,))
+        self.cursor.execute("SELECT sura_number, info FROM surah_info WHERE sura_number = ?", (self._surah_number,))
         result = self.cursor.fetchone()
 
         if result and result[0]:
             info =  json.loads(result["info"])
+            info["sura_number"] = result["sura_number"]
             text = self._format(info)
         else:
             text = ""
