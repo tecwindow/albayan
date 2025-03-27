@@ -35,7 +35,7 @@ from ui.dialogs.info_dialog import InfoDialog
 from ui.sura_player_ui.sura_player_ui import SuraPlayerWindow
 from ui.widgets.system_tray import SystemTrayManager
 from ui.widgets.toolbar import AudioToolBar
-from utils.settings import SettingsManager
+from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
 from utils.const import program_name, program_icon, user_db_path, data_folder, Globals
@@ -51,7 +51,7 @@ class QuranInterface(QMainWindow):
         self.center_window()
         self.setWindowIcon(QIcon("Albayan.ico"))
         self.quran = quran_mgr()
-        self.quran.load_quran(SettingsManager.current_settings["reading"]["font_type"])
+        self.quran.load_quran(Config.reading.font_type)
         self.user_data_manager = UserDataManager(user_db_path)
         self.sura_player_window = None
         Globals.effects_manager = SoundEffectPlayer("Audio/sounds")
@@ -202,7 +202,7 @@ class QuranInterface(QMainWindow):
         Globals.effects_manager.play("previous")
         if self.quran.current_pos == 1:            
             self.quran_view.setFocus()
-        if SettingsManager.current_settings["reading"]["auto_page_turn"] and is_auto_call:
+        if Config.reading.auto_page_turn and is_auto_call:
             self.set_focus_to_ayah(-1)
     
     def set_text_ctrl_label(self):
@@ -517,7 +517,7 @@ class QuranInterface(QMainWindow):
         Globals.effects_manager.play("change")
             
     def closeEvent(self, event):
-        if SettingsManager.current_settings["general"]["run_in_background_enabled"]:
+        if Config.general.run_in_background_enabled:
             event.ignore()
             self.hide()
             icon_path = "Albayan.ico"

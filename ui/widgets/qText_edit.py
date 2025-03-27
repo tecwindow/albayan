@@ -2,7 +2,8 @@ import re
 from PyQt6.QtCore import QEvent, Qt, QLocale
 from PyQt6.QtGui import QKeyEvent, QTextCursor
 from PyQt6.QtWidgets import QTextEdit
-from utils.settings import SettingsManager
+from utils.settings import Config
+
 from utils.const import Globals
 
 
@@ -74,7 +75,7 @@ class QuranViewer(ReadOnlyTextEdit):
                     self.parent.menu_bar.set_text_direction_rtl()
                     self.document().setDefaultCursorMoveStyle(Qt.CursorMoveStyle.VisualMoveStyle)
 
-        if not SettingsManager.current_settings["reading"]["auto_page_turn"]:
+        if not Config.reading.auto_page_turn:
             return
 
         current_line = self.textCursor().block().blockNumber()

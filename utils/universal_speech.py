@@ -1,5 +1,5 @@
 import  UniversalSpeech as u_speech
-from utils.settings import SettingsManager
+from utils.settings import Config
 
 class UniversalSpeech:
     universal_speech = u_speech.UniversalSpeech()
@@ -7,6 +7,6 @@ class UniversalSpeech:
 
     @classmethod
     def say(cls, msg: str, interrupt: bool = True) -> None:
-        if SettingsManager.current_settings["audio"]["speak_actions_enabled"]:
+        if Config.audio.speak_actions_enabled:
             cls.universal_speech.say(msg, interrupt)
 

@@ -10,10 +10,13 @@ from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from ui.quran_interface import QuranInterface
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
 from utils.update import UpdateManager
-from utils.settings import SettingsManager
+from utils.settings import Config
 from utils.const import program_name, program_icon, user_db_path
 from utils.logger import Logger
 from utils.audio_player import StartupSoundEffectPlayer, VolumeController
+
+Logger.initialize_logger()
+Config.load_settings()
 
 class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs) -> None:
@@ -70,9 +73,6 @@ class SingleInstanceApplication(QApplication):
 
         return super().eventFilter(obj, event)
 
-
-
-    
     def setup_local_server(self) -> None:
         if not self.local_server.listen(self.server_name):
             Logger.error(f"Failed to start local server: {self.local_server.errorString()}")
@@ -111,7 +111,7 @@ def call_after_starting(parent: QuranInterface) -> None:
     basmala = StartupSoundEffectPlayer("Audio/basmala")
     basmala.play()
 
-    check_update_enabled = SettingsManager.current_settings["general"].get("check_update_enabled", False)
+    check_update_enabled = getattr(Config.general, "check_update_enabled", False)
     update_manager = UpdateManager(parent, check_update_enabled)
     update_manager.check_auto_update()
 
@@ -130,7 +130,6 @@ def main():
         call_after_starting(main_window)
         sys.exit(app.exec())
     except Exception as e:
-        print(e)
         Logger.error(str(e))
         msg_box = QMessageBox(None)
         msg_box.setIcon(QMessageBox.Icon.Critical)

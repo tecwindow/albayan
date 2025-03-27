@@ -5,7 +5,7 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from core_functions.quran_class import quran_mgr
 from core_functions.Reciters import AyahReciter
 from utils.audio_player import AyahPlayer
-from utils.settings import SettingsManager
+from utils.settings import Config
 from utils.const import data_folder
 from utils.logger import Logger
 from exceptions.base import ErrorMessage
@@ -201,7 +201,7 @@ class AudioToolBar(QToolBar):
         elif self.navigation.current_ayah > 1:
             self.navigation.has_basmala = False
 
-        reciter_id = SettingsManager.current_settings["listening"]["reciter"]
+        reciter_id = Config.listening.reciter
         url = self.reciters.get_url(reciter_id, self.navigation.current_surah, self.navigation.current_ayah)
         self.audio_thread.set_audio_url(url, send_error_signal=False if self.navigation.current_ayah == 0 else True)
         self.audio_thread.start()
@@ -223,7 +223,7 @@ class AudioToolBar(QToolBar):
 
     def change_ayah_focus(self, manual: bool = False) -> None:
         aya_number = self.parent.quran.ayah_data.get_ayah_number(self.navigation.current_ayah, self.navigation.current_surah)
-        if SettingsManager.current_settings["listening"]["auto_move_focus"]:
+        if Config.listening.auto_move_focus:
             self.parent.set_focus_to_ayah(aya_number)
         if manual:
             self.parent.set_focus_to_ayah(aya_number)       
@@ -231,7 +231,7 @@ class AudioToolBar(QToolBar):
 
     def OnActionAfterListening(self):
         self.set_buttons_status()
-        action_after_listening = SettingsManager.current_settings["listening"]["action_after_listening"]
+        action_after_listening = Config.listening.action_after_listening
         if action_after_listening == 2 or self.navigation.current_ayah == 0:
             self.navigation.has_basmala = True if self.navigation.current_ayah < 2 else False
             self.OnPlayNext()
@@ -242,7 +242,7 @@ class AudioToolBar(QToolBar):
         self.player.set_volume(value)
 
     def set_volume(self) -> None:
-        self.volume_slider.setValue(SettingsManager.current_settings["audio"]["ayah_volume_level"])
+        self.volume_slider.setValue(Config.audio.ayah_volume_level)
 
     def update_play_pause_button_text(self):
         label = "إيقاف مؤقت" if self.player.is_playing() or self.player.is_stalled() else "تشغيل الآية الحالية"

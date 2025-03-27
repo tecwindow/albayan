@@ -3,31 +3,37 @@ import traceback
 import os
 import ctypes
 import sys
-from utils.settings import SettingsManager
+from utils.settings import Config
 from utils.const import albayan_folder
 
 
 class Logger:
+    log_file = os.path.join(albayan_folder, "albayan.log")
     last_logging_status = None
 
     @classmethod
-    def initialize_logger(cls):
-        current_logging_status = "True"
-        if current_logging_status != cls.last_logging_status:
-            if current_logging_status == "True":
-                mode = "a"
-            else:
-                mode = "w"
-            logging.basicConfig(filename=os.path.join(albayan_folder, "albayan.log"),
-level=logging.INFO,
-                    filemode=mode,
-                    format="(%(asctime)s) | %(name)s | %(levelname)s => '%(message)s'")
-        cls.last_logging_status = current_logging_status
+    def initialize_logger(cls) -> None:
+        current_logging_status = True  # Change to a boolean instead of string comparison
+        if current_logging_status == cls.last_logging_status:
+            return
+
+        mode = "a" if current_logging_status else "w"
+        logging.basicConfig(
+            level=logging.INFO,
+            format="(%(asctime)s) | %(name)s | %(levelname)s => '%(message)s'",
+            handlers=[
+                logging.FileHandler(cls.log_file, mode=mode, encoding="utf-8"),
+                logging.StreamHandler()  # Also print logs to the console
+            ]
+        )
+
+        cls.last_logging_status = current_logging_status  
+        logging.info("Logger initialized successfully.")
 
     @classmethod
     def info(cls, message:str) -> None:
         cls.initialize_logger()
-        if SettingsManager.current_settings["general"].get("is_logging_enabled"):
+        if Config.general.logging_enabled:
             logging.info(message)
 
     @classmethod

@@ -1,4 +1,4 @@
-from utils.settings import SettingsManager
+from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
 from utils.audio_player import AyahPlayer, SoundEffectPlayer, AthkarPlayer, SurahPlayer
 
@@ -8,7 +8,7 @@ class VolumeController:
     
     def __init__(self) -> None:
         self.categories = self._load_categories()
-        self.current_category_index = SettingsManager.current_settings["audio"]["current_volume_category"]
+        self.current_category_index = Config.audio.current_volume_category
 
     def _load_categories(self) -> dict:
         """Load categories with their custom handling methods."""
@@ -21,7 +21,7 @@ class VolumeController:
 
     def _get_volume(self, category: str) -> int:
         """Retrieve the volume for the given category from the settings."""
-        return SettingsManager.current_settings["audio"].get(category, 50) 
+        return Config.audio.get_value(category)
 
     def switch_category(self, direction: str) -> None:
         """Switch between categories in the specified direction ('next' or 'previous')."""
@@ -35,7 +35,7 @@ class VolumeController:
         current_label = self.categories[current_category]["label"]  # Access label
         current_volume = self._get_volume(current_category)  # Get current volume
 
-        SettingsManager.write_settings({"audio": {"current_volume_category": self.current_category_index}})
+        Config.audio.set_value("current_volume_category", self.current_category_index)
         UniversalSpeech.say(f"{current_label}: {current_volume}%")
 
     def adjust_volume(self, change: int) -> None:
@@ -45,7 +45,7 @@ class VolumeController:
         new_volume = max(0, min(100, current_volume + change))
         current_label = self.categories[current_category]["label"]
         UniversalSpeech.say(f"{new_volume}%: {current_label}")
-        SettingsManager.write_settings({"audio": {current_category: new_volume}})
+        Config.audio.set_value(current_category, new_volume)
 
         # Apply the custom volume handler if it exists for the current category
         handling_method = self.categories[current_category].get("custom_volume_handler")

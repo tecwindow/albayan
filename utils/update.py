@@ -4,7 +4,7 @@ from packaging import version
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtCore import QTimer, QThread, pyqtSignal
 from utils.logger import Logger
-from utils.settings import SettingsManager
+from utils.settings import Config
 from utils.const import program_name, program_version
 from ui.dialogs.update_dialog import UpdateDialog
 from exceptions.base import ErrorMessage
@@ -55,7 +55,7 @@ class UpdateManager:
         """Checks for updates and notifies the user if an update is available."""
         latest_version = info.get("latest_version")
         if version.parse(latest_version) > version.parse(program_version):
-            language = SettingsManager.current_settings["general"].get("language", "Arabic")
+            language = getattr(Config.general, "language", "Arabic")
             release_notes = info.get("release_notes", {}).get(language, info["release_notes"].get("Arabic", ""))
             download_url = info.get("download_url")
             self.show_update_dialog(release_notes, download_url, latest_version)

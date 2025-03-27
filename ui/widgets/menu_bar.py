@@ -12,7 +12,8 @@ from ui.dialogs.prophets_stories_dialog import ProphetsStoriesDialog
 from core_functions.quran_class import QuranConst
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
-from utils.settings import SettingsManager
+from utils.settings import Config
+
 from utils.logger import Logger
 from utils.const import program_name, program_version, website, Globals
 from utils.audio_player import bass
@@ -50,7 +51,7 @@ class MenuBar(QMenuBar):
         self.quick_access_action.triggered.connect(self.parent.OnQuickAccess)
         self.close_action = QAction("إغلاق النافذة", self)
         self.close_action.triggered.connect(self.parent.close)
-        self.close_action.setVisible(SettingsManager.current_settings["general"]["run_in_background_enabled"])
+        self.close_action.setVisible(Config.general.run_in_background_enabled)
         self.exit_action = QAction("إغلاق البرنامج", self)
         self.exit_action.triggered.connect(self.quit_application)
 
@@ -64,9 +65,9 @@ class MenuBar(QMenuBar):
         self.stop_action.setEnabled(False)
         self.stop_action.triggered.connect(self.parent.toolbar.stop_audio)
         self.rewind_action = QAction("ترجيع", self)
-        self.rewind_action.triggered.connect(lambda: self.parent.toolbar.player.rewind(SettingsManager.current_settings["listening"]["forward_time"]))
+        self.rewind_action.triggered.connect(lambda: self.parent.toolbar.player.rewind(Config.listening.forward_time))
         self.forward_action = QAction("تقديم", self)
-        self.forward_action.triggered.connect(lambda: self.parent.toolbar.player.forward(SettingsManager.current_settings["listening"]["forward_time"]))
+        self.forward_action.triggered.connect(lambda: self.parent.toolbar.player.forward(Config.listening.forward_time))
         self.replay_action = QAction("إعادة", self)
         self.replay_action.triggered.connect(lambda: self.parent.toolbar.player.set_position(0))
         self.play_next_action = QAction("تشغيل الآية التالية", self)
@@ -185,7 +186,7 @@ class MenuBar(QMenuBar):
             self.theme_action = QAction(theme, self)
             self.theme_action.triggered.connect(self.OnTheme)
             self.theme_menu.addAction(self.theme_action)
-        self.theme_manager.apply_theme(SettingsManager.current_settings["preferences"]["theme"])
+        self.theme_manager.apply_theme(Config.preferences.theme)
         
         self.text_direction_action = QMenu("تغيير اتجاه النص", self)
 
@@ -227,7 +228,7 @@ class MenuBar(QMenuBar):
 
     def OnSettings(self):
         SettingsDialog(self.parent).exec()
-        self.close_action.setVisible(SettingsManager.current_settings["general"]["run_in_background_enabled"])
+        self.close_action.setVisible(Config.general.run_in_background_enabled)
 
     def OnUpdate(self):
         self.update_manager.check_updates()
@@ -263,12 +264,8 @@ class MenuBar(QMenuBar):
         self.theme_manager.apply_theme(theme)
 
         # Save selected theme in the settings
-        theme_setting = {
-            "preferences": {
-                "theme": theme
-            }
-        }
-        SettingsManager.write_settings(theme_setting)
+        Config.preferences.theme = theme
+        Config.save_settings()
 
     def set_text_direction_rtl(self):
         option = self.parent.quran_view.document().defaultTextOption()
@@ -323,7 +320,7 @@ class MenuBar(QMenuBar):
             self.tafaseer_menu.exec()
 
     def quit_application(self):
-        if SettingsManager.current_settings["general"]["auto_save_position_enabled"]:
+        if Config.general.auto_save_position_enabled:
             self.parent.OnSaveCurrentPosition()
         self.parent.tray_manager.hide_icon()
         if self.sura_player_window is not None:
