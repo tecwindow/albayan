@@ -23,7 +23,7 @@ import qtawesome as qta
 from PyQt6.QtGui import QIcon, QAction, QShowEvent, QTextCursor, QKeySequence, QShortcut
 from core_functions.quran_class import quran_mgr
 from core_functions.tafaseer import Category
-from core_functions.info import E3rab, TanzilAyah, AyaInfo, SuraInfo, JuzInfo, HizbInfo, QuarterInfo, PageInfo
+from core_functions.info import MoshafInfo, E3rab, TanzilAyah, AyaInfo, SuraInfo, JuzInfo, HizbInfo, QuarterInfo, PageInfo
 from core_functions.bookmark import BookmarkManager
 from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog
@@ -299,6 +299,7 @@ class QuranInterface(QMainWindow):
         menu = QMenu(self)
         save_current_position = menu.addAction("حفظ الموضع الحالي")
         save_bookmark = menu.addAction("حفظ علامة")
+        get_moshaf_info = menu.addAction("معلومات المصحف")
         get_sura_info = menu.addAction("معلومات السورة")
         get_juz_info = menu.addAction("معلومات الجزء")
         get_hizb_info = menu.addAction("معلومات الحزب")
@@ -319,6 +320,7 @@ class QuranInterface(QMainWindow):
         save_bookmark.triggered.connect(self.OnSaveBookmark)
         ayah_info = menu.addAction("معلومات الآية")
         ayah_info.triggered.connect(self.OnAyahInfo)
+        get_moshaf_info.triggered.connect(self.OnMoshafInfo)
         get_sura_info.triggered.connect(self.OnSurahInfo)
         get_juz_info.triggered.connect(self.OnJuzInfo)
         get_hizb_info.triggered.connect(self.OnHizbInfo)
@@ -379,6 +381,12 @@ class QuranInterface(QMainWindow):
             ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
             msg_box.exec()
 
+    @exception_handler(ui_element=QMessageBox)
+    def OnMoshafInfo(self, event):
+        title = "معلومات المصحف"
+        label = "معلومات المصحف:"
+        text = MoshafInfo().text
+        InfoDialog(self, title, label, text).open()
 
     @exception_handler(ui_element=QMessageBox)
     def OnAyahInfo(self, event):

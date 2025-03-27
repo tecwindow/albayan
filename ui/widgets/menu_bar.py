@@ -137,6 +137,8 @@ class MenuBar(QMenuBar):
         self.addMenu(browse_mode_menu)
 
         info_menu = self.addMenu("المعلومات(&I)")
+        self.moshaf_info_action = QAction("معلومات المصحف", self)
+        self.moshaf_info_action.triggered.connect(self.parent.OnMoshafInfo)
         self.ayah_info_action = QAction("معلومات الآية", self)
         self.ayah_info_action.triggered.connect(self.parent.OnAyahInfo)
         self.surah_info_action = QAction("معلومات السورة", self)
@@ -149,9 +151,7 @@ class MenuBar(QMenuBar):
         self.quarter_info_action.triggered.connect(self.parent.OnQuarterInfo)
         self.page_info_action = QAction("معلومات الصفحة", self)
         self.page_info_action.triggered.connect(self.parent.OnPageInfo)
-
-        info_menu.addActions([self.ayah_info_action, self.surah_info_action, self.juz_info_action, self.hizb_info_action, self.quarter_info_action, self.page_info_action])
-
+        info_menu.addActions([self.moshaf_info_action, self.ayah_info_action, self.surah_info_action, self.juz_info_action, self.hizb_info_action, self.quarter_info_action, self.page_info_action])
 
 
         tools_menu =self.addMenu("الأدوات(&T)")
