@@ -387,3 +387,51 @@ class PageInfo(Base):
 """
 
         return text.strip()
+
+
+class MoshafInfo(Base):
+    MECCAN_COUNT = 86
+    MEDINAN_COUNT = 28
+
+    def __init__(self) -> None:
+        file_path = os.path.join("database", "quran", "quran.DB")
+        self._conn = self._connect(file_path)
+        self.cursor = self._conn.cursor()
+
+    @property
+    def text(self) -> str:
+
+        query = """ 
+        SELECT 
+            COUNT(DISTINCT sura_number) AS total_surahs,
+            COUNT(number) AS total_ayahs,
+            COUNT(DISTINCT juz) AS total_juz,
+            COUNT(DISTINCT hizb) AS total_hizb,
+            COUNT(DISTINCT hizbQuarter) AS total_hizb_quarters,
+            COUNT(DISTINCT page) AS total_pages
+        FROM quran;
+        """
+        
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+
+        if result:
+            return self._format(dict(result))
+        else:
+            return "⚠️ لم يتم العثور على بيانات."
+
+    def _format(self, data: dict) -> str:
+
+        text = f"""📖 **معلومات عن المصحف الشريف**:
+📌 **عدد السور:** {data["total_surahs"]}
+   🔹 مكية: {self.MECCAN_COUNT} 🕋 | مدنية: {self.MEDINAN_COUNT} 🕌
+📌 **عدد الآيات:** {data["total_ayahs"]} ✨
+📌 **التقسيمات:**
+   🔹 عدد الأجزاء: {data["total_juz"]} 📚
+   🔹 عدد الأحزاب: {data["total_hizb"]} 📖
+   🔹 عدد الأرباع: {data["total_hizb_quarters"]} 🔹
+📌 **عدد الصفحات:** {data["total_pages"]} 📜
+"""
+
+        return text.strip()
+
