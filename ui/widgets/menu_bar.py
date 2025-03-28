@@ -149,9 +149,10 @@ class MenuBar(QMenuBar):
         self.quarter_info_action.triggered.connect(self.parent.OnQuarterInfo)
         self.page_info_action = QAction("معلومات الصفحة", self)
         self.page_info_action.triggered.connect(self.parent.OnPageInfo)
-        self.info_menu.addActions([self.moshaf_info_action, self.ayah_info_action, self.surah_info_action, self.juz_info_action, self.hizb_info_action, self.quarter_info_action, self.page_info_action])
         self.moshaf_info_action = QAction("معلومات المصحف", self)
         self.moshaf_info_action.triggered.connect(self.parent.OnMoshafInfo)
+        self.info_menu.addActions([self.moshaf_info_action, self.ayah_info_action, self.surah_info_action, self.juz_info_action, self.hizb_info_action, self.quarter_info_action, self.page_info_action])
+
 
         self.tools_menu =self.addMenu("الأدوات(&T)")
         self.athkar_action = QAction("الأذكار", self)
@@ -377,14 +378,16 @@ class MenuBar(QMenuBar):
         # Actions
             self.save_position_action: ["Ctrl+S"],
             self.save_bookmark_action: ["Ctrl+D"],
-            self.verse_tafsir_action: ["Shift+T"],
+            self.verse_tafsir_action: ["Ctrl+T"],
             self.verse_info_action: ["Shift+R"],
             self.verse_grammar_action: ["Shift+E"],
             self.copy_verse_action: ["Shift+C"],
 
         #info
+            self.surah_info_action: ["Ctrl+I", "AltShift+1"],
+            self.juz_info_action: ["Ctrl+J", "AltShift+2"],
             self.ayah_info_action: ["Shift+I"],
-            self.surah_info_action: ["Ctrl+I"],
+
 
         #tools
                     self.sura_player_action: ["Shift+P"],
@@ -403,8 +406,6 @@ class MenuBar(QMenuBar):
         self.update_program_action: ["Ctrl+F2"],
         self.open_log_action: ["Shift+L"],
         self.about_program_action: ["Ctrl+F1"],
-
-        #menus
 
 
         }
