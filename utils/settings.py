@@ -142,16 +142,16 @@ class Config:
         cls.ensure_section(section)
         updated = False
 
-        for field_name, _ in section_obj.__dataclass_fields__.items():
-            default_value = getattr(section_obj, field_name)
+        for field_name, default_value in asdict(section_obj).items():
             value = cls._get_value(section, field_name, default_value)
             setattr(section_obj, field_name, value)
-            if not cls._config_parser[section].get(field_name):
+            if cls._config_parser[section].get(field_name) is None:
                 updated = True
-                
+                        
         if updated:
-            cls.save_settings()
-        
+            cls._save_section(section, section_obj)
+            cls._write_config()
+                            
     @classmethod
     def _save_section(cls, section: str, section_obj: Any) -> None:
         """
@@ -187,6 +187,11 @@ class Config:
         """
         for section, instance in cls.sections().items():
             cls._save_section(section, instance)
+        cls._write_config()
+
+    @classmethod
+    def _write_config(cls) -> None:
+        """Writes the current configuration to the config file."""
         try:
             with open(CONFIG_PATH, "w", encoding='utf-8') as config_file:
                 cls._config_parser.write(config_file)
