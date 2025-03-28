@@ -35,7 +35,7 @@ class MenuBar(QMenuBar):
         self.create_menu()
 
     def create_menu(self):
-        navigation_menu = self.addMenu("التنقل(&M)")
+        self.navigation_menu = self.addMenu("التنقل(&M)")
         self.next_action = QAction("التالي", self)
         self.next_action.triggered.connect(self.parent.OnNext)
         self.previous_action = QAction("السابق", self)
@@ -55,10 +55,10 @@ class MenuBar(QMenuBar):
         self.exit_action = QAction("إغلاق البرنامج", self)
         self.exit_action.triggered.connect(self.quit_application)
 
-        navigation_menu.addActions([self.next_action, self.previous_action, self.go_to_saved_position_action, self.search_action, self.go_to_action, self.quick_access_action, self.close_action, self.exit_action])
+        self.navigation_menu.addActions([self.next_action, self.previous_action, self.go_to_saved_position_action, self.search_action, self.go_to_action, self.quick_access_action, self.close_action, self.exit_action])
 
 
-        player_menu = self.addMenu("المشغل(&P)")
+        self.player_menu = self.addMenu("المشغل(&P)")
         self.play_pause_action = QAction("تشغيل الآية الحالية", self)
         self.play_pause_action.triggered.connect(self.parent.toolbar.toggle_play_pause)
         self.stop_action = QAction("إيقاف", self)
@@ -77,10 +77,10 @@ class MenuBar(QMenuBar):
         self.play_previous_action.setEnabled(False)
         self.play_previous_action.triggered.connect(self.parent.toolbar.OnPlayPrevious)
 
-        player_menu.addActions([self.play_pause_action, self.stop_action, self.rewind_action, self.forward_action, self.replay_action, self.play_next_action, self.play_previous_action])
+        self.player_menu.addActions([self.play_pause_action, self.stop_action, self.rewind_action, self.forward_action, self.replay_action, self.play_next_action, self.play_previous_action])
 
 
-        actions_menu = self.addMenu("الإجرائات(&A)")
+        self.actions_menu = self.addMenu("الإجرائات(&A)")
         self.save_position_action = QAction("حفظ الموضع الحالي", self)
         self.save_position_action.triggered.connect(self.parent.OnSaveCurrentPosition)
         self.save_position_action.triggered.connect(self.parent.OnSave_alert)
@@ -105,12 +105,12 @@ class MenuBar(QMenuBar):
         self.copy_verse_action = QAction("نسخ الآية", self)
         self.copy_verse_action.triggered.connect(self.parent.on_copy_verse)
 
-        actions_menu.addActions([self.save_position_action, self.save_bookmark_action, self.verse_tafsir_action, self.verse_info_action, self.verse_grammar_action, self.copy_verse_action])
-        actions_menu.insertMenu(self.verse_info_action, self.tafaseer_menu)
+        self.actions_menu.addActions([self.save_position_action, self.save_bookmark_action, self.verse_tafsir_action, self.verse_info_action, self.verse_grammar_action, self.copy_verse_action])
+        self.actions_menu.insertMenu(self.verse_info_action, self.tafaseer_menu)
 
 
     # Browse mode menu
-        browse_mode_menu = self.addMenu("وضع التصفح(&B)")
+        self.browse_mode_menu = self.addMenu("وضع التصفح(&B)")
         self.browse_mode_group = QActionGroup(self)
         self.browse_mode_actions = []  # List to store actions
 
@@ -130,15 +130,13 @@ class MenuBar(QMenuBar):
             action.setShortcut(QKeySequence(shortcut))  # Assign shortcut
             action.triggered.connect(lambda checked, m=mode: self.parent.OnChangeNavigationMode(m))
             self.browse_mode_group.addAction(action)
-            browse_mode_menu.addAction(action)
+            self.browse_mode_menu.addAction(action)
             self.browse_mode_actions.insert(mode, action)
 
         # Add the menu to the parent
-        self.addMenu(browse_mode_menu)
+        self.addMenu(self.browse_mode_menu)
 
-        info_menu = self.addMenu("المعلومات(&I)")
-        self.moshaf_info_action = QAction("معلومات المصحف", self)
-        self.moshaf_info_action.triggered.connect(self.parent.OnMoshafInfo)
+        self.info_menu = self.addMenu("المعلومات(&I)")
         self.ayah_info_action = QAction("معلومات الآية", self)
         self.ayah_info_action.triggered.connect(self.parent.OnAyahInfo)
         self.surah_info_action = QAction("معلومات السورة", self)
@@ -151,10 +149,11 @@ class MenuBar(QMenuBar):
         self.quarter_info_action.triggered.connect(self.parent.OnQuarterInfo)
         self.page_info_action = QAction("معلومات الصفحة", self)
         self.page_info_action.triggered.connect(self.parent.OnPageInfo)
-        info_menu.addActions([self.moshaf_info_action, self.ayah_info_action, self.surah_info_action, self.juz_info_action, self.hizb_info_action, self.quarter_info_action, self.page_info_action])
+        self.info_menu.addActions([self.moshaf_info_action, self.ayah_info_action, self.surah_info_action, self.juz_info_action, self.hizb_info_action, self.quarter_info_action, self.page_info_action])
+        self.moshaf_info_action = QAction("معلومات المصحف", self)
+        self.moshaf_info_action.triggered.connect(self.parent.OnMoshafInfo)
 
-
-        tools_menu =self.addMenu("الأدوات(&T)")
+        self.tools_menu =self.addMenu("الأدوات(&T)")
         self.athkar_action = QAction("الأذكار", self)
         self.athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).open())
         self.bookmark_manager_action = QAction("مدير العلامات", self)
@@ -168,15 +167,10 @@ class MenuBar(QMenuBar):
         self.stories_action = QAction("قصص الأنبياء", self)
         self.stories_action.triggered.connect(self.OnStoriesAction)
 
-        tools_menu.addAction(self.sura_player_action)
-        tools_menu.addAction(self.athkar_action)
-        tools_menu.addAction(self.bookmark_manager_action)
-        tools_menu.addAction(self.tasbih_action)
-        tools_menu.addAction(self.message_for_you_action)
-        #tools_menu.addAction(self.stories_action)
+        self.tools_menu.addActions([self.sura_player_action, self.athkar_action, self.bookmark_manager_action, self.tasbih_action, self.message_for_you_action])
 
 
-        preferences_menu = self.addMenu("التفضيلات(&R)")
+        self.preferences_menu = self.addMenu("التفضيلات(&R)")
         self.settings_action = QAction("الإعدادات", self)
         self.settings_action.setShortcuts([QKeySequence("F3"), QKeySequence("Alt+S")])
         self.settings_action.triggered.connect(self.OnSettings)
@@ -197,9 +191,9 @@ class MenuBar(QMenuBar):
         self.ltr_action.triggered.connect(self.set_text_direction_ltr)
         self.text_direction_action.addAction(self.ltr_action)
 
-        preferences_menu.addAction(self.settings_action)
-        preferences_menu.addMenu(self.theme_menu)
-        preferences_menu.addMenu(self.text_direction_action)
+        self.preferences_menu.addAction(self.settings_action)
+        self.preferences_menu.addMenu(self.theme_menu)
+        self.preferences_menu.addMenu(self.text_direction_action)
 
 
         self.help_menu = self.addMenu("المساعدة(&H)")
@@ -409,7 +403,13 @@ class MenuBar(QMenuBar):
         self.update_program_action: ["Ctrl+F2"],
         self.open_log_action: ["Shift+L"],
         self.about_program_action: ["Ctrl+F1"],
+
+        #menus
+
+
         }
+
+
 
 
         for widget, key_sequence in shortcuts.items():
