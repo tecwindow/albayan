@@ -3,7 +3,6 @@ from PyQt6.QtCore import QEvent, Qt, QLocale
 from PyQt6.QtGui import QKeyEvent, QTextCursor
 from PyQt6.QtWidgets import QTextEdit
 from utils.settings import Config
-
 from utils.const import Globals
 
 
@@ -48,7 +47,7 @@ class QuranViewer(ReadOnlyTextEdit):
         super().keyPressEvent(e)
         self.set_ctrl()
 
-        if e.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+        if e.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter) and self.parent.menu_bar.verse_tafsir_action.isEnabled():
             self.parent.OnInterpretation(event=e)
             return
 
