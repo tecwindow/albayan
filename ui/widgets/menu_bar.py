@@ -151,7 +151,7 @@ class MenuBar(QMenuBar):
         self.page_info_action.triggered.connect(self.parent.OnPageInfo)
         self.moshaf_info_action = QAction("معلومات المصحف", self)
         self.moshaf_info_action.triggered.connect(self.parent.OnMoshafInfo)
-        self.info_menu.addActions([self.moshaf_info_action, self.ayah_info_action, self.surah_info_action, self.juz_info_action, self.hizb_info_action, self.quarter_info_action, self.page_info_action])
+        self.info_menu.addActions([self.ayah_info_action, self.surah_info_action, self.page_info_action, self.quarter_info_action, self.hizb_info_action, self.juz_info_action, self.moshaf_info_action])
 
 
         self.tools_menu =self.addMenu("الأدوات(&T)")
@@ -384,10 +384,13 @@ class MenuBar(QMenuBar):
             self.copy_verse_action: ["Shift+C"],
 
         #info
-            self.surah_info_action: ["Ctrl+I", "AltShift+1"],
-            self.juz_info_action: ["Ctrl+J", "AltShift+2"],
-            self.ayah_info_action: ["Shift+I"],
-
+            self.ayah_info_action: ["Shift+I", "Alt+Shift+7"],
+            self.surah_info_action: ["Ctrl+I", "Alt+Shift+1"],
+            self.page_info_action: ["Alt+Shift+2"],
+            self.quarter_info_action: ["Alt+Shift+3"],
+            self.hizb_info_action: ["Alt+Shift+4"],
+            self.juz_info_action: ["Alt+Shift+5"],
+            self.moshaf_info_action: ["Alt+Shift+6"],
 
         #tools
                     self.sura_player_action: ["Shift+P"],
