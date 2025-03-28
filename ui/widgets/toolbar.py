@@ -196,8 +196,6 @@ class AudioToolBar(QToolBar):
 
         if self.navigation.current_ayah == 1 and not self.navigation.has_basmala:
             self.navigation.current_ayah = 0
-        elif self.navigation.current_ayah == 1:
-            self.navigation.has_basmala = False
         elif self.navigation.current_ayah > 1:
             self.navigation.has_basmala = False
 
