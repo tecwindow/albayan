@@ -38,7 +38,7 @@ class SettingsDialog(QDialog):
         self.reciters_manager = AyahReciter(data_folder / "quran" / "reciters.db")
         self.init_ui()
         self.set_current_settings()
-
+        self.open_listening_tab_and_focus_reciter()
 
 
     def init_ui(self):
@@ -46,10 +46,10 @@ class SettingsDialog(QDialog):
         taps_layout = QHBoxLayout()
 
         # Tree widget for navigation
-        tree_widget = QTreeWidget()
-        tree_widget.setHeaderHidden(True)
-        tree_widget.setMinimumWidth(200)
-        tree_widget.setStyleSheet("QTreeWidget { font-size: 14px; }")
+        self.tree_widget = QTreeWidget()
+        self.tree_widget.setHeaderHidden(True)
+        self.tree_widget.setMinimumWidth(200)
+        self.tree_widget.setStyleSheet("QTreeWidget { font-size: 14px; }")
         
         # Adding items to the tree with icons
         general_item = QTreeWidgetItem(["الإعدادات العامة"])
@@ -58,8 +58,8 @@ class SettingsDialog(QDialog):
         audio_item = QTreeWidgetItem(["الصوت"])
         audio_item.setIcon(0, qta.icon("fa.volume-up"))
 
-        listening_item = QTreeWidgetItem(["الاستماع"])
-        listening_item.setIcon(0, qta.icon("fa.headphones"))
+        self.listening_item = QTreeWidgetItem(["الاستماع"])
+        self.listening_item.setIcon(0, qta.icon("fa.headphones"))
 
 
         reading_item = QTreeWidgetItem(["القراءة"])
@@ -70,11 +70,11 @@ class SettingsDialog(QDialog):
 
         
         # Adding top-level items
-        tree_widget.addTopLevelItem(general_item)
-        tree_widget.addTopLevelItem(audio_item)
-        tree_widget.addTopLevelItem(listening_item)
-        tree_widget.addTopLevelItem(reading_item)
-        tree_widget.addTopLevelItem(search_item)
+        self.tree_widget.addTopLevelItem(general_item)
+        self.tree_widget.addTopLevelItem(audio_item)
+        self.tree_widget.addTopLevelItem(self.listening_item)
+        self.tree_widget.addTopLevelItem(reading_item)
+        self.tree_widget.addTopLevelItem(search_item)
         
         # Stacked widget to switch views
         self.stacked_widget = QStackedWidget()
@@ -248,18 +248,18 @@ class SettingsDialog(QDialog):
         self.stacked_widget.addWidget(self.group_reading)
         self.stacked_widget.addWidget(self.group_search)
         
-#        tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(tree_widget.indexOfTopLevelItem(current)))
+#        self.tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(self.tree_widget.indexOfTopLevelItem(current)))
 
         # Linking tree widget with stacked widget
-        tree_widget.currentItemChanged.connect(
+        self.tree_widget.currentItemChanged.connect(
             lambda current, previous: self.stacked_widget.setCurrentIndex(
-                tree_widget.indexOfTopLevelItem(current)
+                self.tree_widget.indexOfTopLevelItem(current)
             )
         )
 
 
         # Layout adjustments
-        taps_layout.addWidget(tree_widget, stretch=1)
+        taps_layout.addWidget(self.tree_widget, stretch=1)
         taps_layout.addWidget(self.stacked_widget, stretch=2)
         
         main_layout.addLayout(taps_layout)
@@ -417,6 +417,10 @@ class SettingsDialog(QDialog):
         index = self.font_type_combo.findData(stored_id)
         if index != -1:
             self.font_type_combo.setCurrentIndex(index)
+
+    def open_listening_tab_and_focus_reciter(self):
+        self.tree_widget.setCurrentItem(self.listening_item)
+        self.reciters_combo.setFocus()
 
     def reject(self):
         self.deleteLater()
