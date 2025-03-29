@@ -209,7 +209,7 @@ class JuzInfo(Base):
             (SELECT numberInSurah FROM quran q3 WHERE q3.juz = q1.juz ORDER BY number DESC LIMIT 1) AS end_ayah_number,
             (SELECT sura_name FROM quran q4 WHERE q4.juz = q1.juz ORDER BY number LIMIT 1) AS start_sura_name,
             (SELECT sura_name FROM quran q5 WHERE q5.juz = q1.juz ORDER BY number DESC LIMIT 1) AS end_sura_name,
-            (SELECT GROUP_CONCAT(sura_name, ' | ') FROM (SELECT DISTINCT sura_name FROM quran WHERE juz = q1.juz)) AS surah_names
+            (SELECT GROUP_CONCAT(REPLACE(sura_name, 'سورة ', ''), ', ') FROM (SELECT DISTINCT sura_name FROM quran WHERE juz = q1.juz)) AS surah_names
         FROM quran q1
         WHERE juz = ?
         GROUP BY juz;
@@ -269,7 +269,7 @@ class HizbInfo(Base):
             (SELECT numberInSurah FROM quran WHERE hizb = q1.hizb ORDER BY number DESC LIMIT 1) AS end_ayah_number,
             (SELECT sura_name FROM quran WHERE hizb = q1.hizb ORDER BY number LIMIT 1) AS start_sura_name,
             (SELECT sura_name FROM quran WHERE hizb = q1.hizb ORDER BY number DESC LIMIT 1) AS end_sura_name,
-            (SELECT GROUP_CONCAT(sura_name, ' | ') FROM (SELECT DISTINCT sura_name FROM quran WHERE hizb = q1.hizb)) AS surah_names
+            (SELECT GROUP_CONCAT(REPLACE(sura_name, 'سورة ', ''), ', ') FROM (SELECT DISTINCT sura_name FROM quran WHERE hizb = q1.hizb)) AS surah_names
         FROM quran q1
         WHERE hizb = ?
         GROUP BY hizb;
@@ -330,7 +330,7 @@ class QuarterInfo(Base):
             (SELECT numberInSurah FROM quran WHERE hizbQuarter = q1.hizbQuarter ORDER BY number DESC LIMIT 1) AS end_ayah_number,
             (SELECT sura_name FROM quran WHERE hizbQuarter = q1.hizbQuarter ORDER BY number LIMIT 1) AS start_sura_name,
             (SELECT sura_name FROM quran WHERE hizbQuarter = q1.hizbQuarter ORDER BY number DESC LIMIT 1) AS end_sura_name,
-            (SELECT GROUP_CONCAT(sura_name, ' | ') FROM (SELECT DISTINCT sura_name FROM quran WHERE hizbQuarter = q1.hizbQuarter)) AS surah_names
+            (SELECT GROUP_CONCAT(REPLACE(sura_name, 'سورة ', ''), ', ') FROM (SELECT DISTINCT sura_name FROM quran WHERE hizbQuarter = q1.hizbQuarter)) AS surah_names
         FROM quran q1
         WHERE hizbQuarter = ?
         GROUP BY hizbQuarter;
@@ -383,7 +383,7 @@ class PageInfo(Base):
             (SELECT numberInSurah FROM quran WHERE page = q1.page ORDER BY number DESC LIMIT 1) AS end_ayah_number,
             (SELECT sura_name FROM quran WHERE page = q1.page ORDER BY number LIMIT 1) AS start_sura_name,
             (SELECT sura_name FROM quran WHERE page = q1.page ORDER BY number DESC LIMIT 1) AS end_sura_name,
-            (SELECT GROUP_CONCAT(sura_name, ' | ') FROM (SELECT DISTINCT sura_name FROM quran WHERE page = q1.page)) AS surah_names
+            (SELECT GROUP_CONCAT(REPLACE(sura_name, 'سورة ', ''), ', ') FROM (SELECT DISTINCT sura_name FROM quran WHERE page = q1.page)) AS surah_names
         FROM quran q1
         WHERE page = ?
         GROUP BY page;
