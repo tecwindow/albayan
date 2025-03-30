@@ -3,7 +3,68 @@ import traceback
 import ctypes
 import os
 import sys
+from enum import Enum
 
+
+class LogLevel(Enum):
+    DISABLE = 0
+    DEBUG = logging.DEBUG
+    INFO = logging.INFO
+    WARNING = logging.WARNING
+    ERROR = logging.ERROR
+    #CRITICAL = logging.CRITICAL
+
+    LABELS = {
+        DISABLE: "تعطيل",
+        DEBUG: "تصحيح (Debug)",
+        INFO: "معلومات (Info)",
+        WARNING: "تحذير (Warning)",
+        ERROR: "خطأ (Error)",
+        #CRITICAL: "حرج (Critical)"
+    }
+
+    @property
+    def label(self):
+        """Returns the label for the log level."""
+        return self.LABELS[self]
+
+    @classmethod
+    def get_labels(cls):
+        """Returns a dictionary mapping each log level name to its label."""
+        return {level.name: level.label for level in cls}
+
+    @classmethod
+    def from_label(cls, label):
+        """
+        Retrieves the log level enum member corresponding to the given label.
+        
+        Args:
+            label (str): The label for level.
+        
+        Returns:
+            LogLevel: The matching log level enum member.
+        
+        Raises:
+            ValueError: If no log level with the given label is found.
+        """
+        for level, lbl in cls.LABELS.items():
+            if lbl == label:
+                return level
+        raise ValueError(f"Invalid log level label: {label}")
+
+    @classmethod
+    def from_name(cls, name):
+        """
+        Retrieves the log level enum member corresponding to the given English name.
+        
+        Args:
+            name (str): The English name of the log level (e.g., "DEBUG").
+        
+        Returns:
+            LogLevel: The matching log level enum member.
+        """
+        return cls[name]
+    
 class LoggerManager:
     _initialized = False
 
