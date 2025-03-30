@@ -6,6 +6,8 @@ tecwindow_folder = os.path.join(os.getenv("AppData"), "tecwindow")
 albayan_folder = os.path.join(tecwindow_folder, "albayan")
 os.makedirs(albayan_folder, exist_ok=True)
 user_db_path = os.path.join(albayan_folder, "user_data.db")
+CONFIG_PATH = os.path.join(albayan_folder, "config.ini")
+LOG_PATH = os.path.join(albayan_folder, "albayan.log")
 data_folder = Path("database")
 
 #athkar

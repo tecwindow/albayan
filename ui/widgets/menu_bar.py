@@ -13,12 +13,12 @@ from core_functions.quran_class import QuranConst
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
 from utils.settings import Config
-
-from utils.logger import Logger
+from utils.logger import LoggerManager
 from utils.const import program_name, program_version, website, Globals
 from utils.audio_player import bass
 from theme import ThemeManager
 
+logger = LoggerManager.get_logger(__name__)
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
@@ -279,7 +279,7 @@ class MenuBar(QMenuBar):
             url = QUrl(f"mailto:{email}")
             QDesktopServices.openUrl(url)
         except Exception as e:
-            Logger.error(str(e))
+            logger.error(str(e))
             QMessageBox.critical(self, "خطأ", "حدث خطأ أثناء محاولة فتح برنامج البريد الإلكتروني")
 
 

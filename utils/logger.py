@@ -1,48 +1,93 @@
 import logging
 import traceback
-import os
 import ctypes
+import os
 import sys
-from utils.settings import Config
-from utils.const import albayan_folder
 
-
-class Logger:
-    log_file = os.path.join(albayan_folder, "albayan.log")
-    last_logging_status = None
+class LoggerManager:
+    _initialized = False
 
     @classmethod
-    def initialize_logger(cls) -> None:
-        current_logging_status = True  # Change to a boolean instead of string comparison
-        if current_logging_status == cls.last_logging_status:
-            return
+    def setup_logger(cls, log_file='app.log', log_level=logging.DEBUG, dev_mode=False):
+        """
+        Configures the root logger with file and (optionally) console handlers using basicConfig.
+        Each handler gets its own formatter.
+        
+        :param log_file: Path to the log file.
+        :param log_level: The logging level.
+        :param dev_mode: If True, adds a console handler for development.
+        """
+        if not cls._initialized:
+            # Organize handlers using the dedicated methods
+            handlers = cls._get_file_handler(log_file, log_level)
+            if dev_mode:
+                handlers.append(cls._get_console_handler(log_level))
+            
+            logging.basicConfig(
+                level=log_level,
+                handlers=handlers
+            )
+            cls._initialized = True
 
-        mode = "a" if current_logging_status else "w"
-        logging.basicConfig(
-            level=logging.INFO,
-            format="(%(asctime)s) | %(name)s | %(levelname)s => '%(message)s'",
-            handlers=[
-                logging.FileHandler(cls.log_file, mode=mode, encoding="utf-8"),
-                logging.StreamHandler()  # Also print logs to the console
-            ]
+    @classmethod
+    def _get_file_handler(cls, log_file, log_level):
+        """
+        Creates and returns a FileHandler with its specific formatter.
+        
+        :param log_file: The file path for logging output.
+        :param log_level: Logging level for the handler.
+        :return: A list containing a configured FileHandler.
+        """
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(log_level)
+        # File handler formatter (detailed format)
+        file_formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]'
         )
-
-        cls.last_logging_status = current_logging_status  
-        logging.info("Logger initialized successfully.")
-
-    @classmethod
-    def info(cls, message:str) -> None:
-        cls.initialize_logger()
-        if Config.general.logging_enabled:
-            logging.info(message)
+        file_handler.setFormatter(file_formatter)
+        return [file_handler]
 
     @classmethod
-    def error(cls, message:str) -> None:
-        cls.initialize_logger()
-        logging.error(message, exc_info=True)
+    def _get_console_handler(cls, log_level):
+        """
+        Creates and returns a console (Stream) handler with its specific formatter.
+        
+        :param log_level: Logging level for the handler.
+        :return: A configured StreamHandler.
+        """
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(log_level)
+        # Console handler formatter (simplified format)
+        console_formatter = logging.Formatter(
+            '%(name)s - %(levelname)s - %(message)s'
+        )
+        console_handler.setFormatter(console_formatter)
+        return console_handler
 
     @classmethod
-    def show_error_message(cls, message:str) -> None:
+    def change_log_level(cls, new_level):
+        """
+        Dynamically changes the log level for the root logger and its handlers.
+        
+        :param new_level: The new logging level (e.g., logging.ERROR).
+        """
+        root_logger = logging.getLogger()
+        root_logger.setLevel(new_level)
+        for handler in root_logger.handlers:
+            handler.setLevel(new_level)
+
+    @classmethod
+    def get_logger(cls, name):
+        """
+        Retrieves a logger by name.
+        
+        :param name: Name of the logger.
+        :return: Logger instance.
+        """
+        return logging.getLogger(name)
+
+    @staticmethod
+    def show_error_message(message:str) -> None:
         ctypes.windll.user32.MessageBoxW(None, message, "Error", 0x10)
 
     @classmethod
@@ -58,7 +103,5 @@ class Logger:
             error_message += "File: {} | Line: {} | Code: {} | ".format(file_name, line_number, code)
 
         error_message += "Error Value: {}".format(value)
-
-        cls.error(error_message)
-        print(error_message)
+        logging.error(error_message, exc_info=True)
         cls.show_error_message("حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")

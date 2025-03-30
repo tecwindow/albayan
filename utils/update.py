@@ -3,12 +3,13 @@ from threading import Thread
 from packaging import version
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtCore import QTimer, QThread, pyqtSignal
-from utils.logger import Logger
+from utils.logger import LoggerManager
 from utils.settings import Config
 from utils.const import program_name, program_version
 from ui.dialogs.update_dialog import UpdateDialog
 from exceptions.base import ErrorMessage
 
+logger = LoggerManager.get_logger(__name__)
 
 class UpdateChecker(QThread):
     update_available = pyqtSignal(dict)
@@ -26,10 +27,10 @@ class UpdateChecker(QThread):
             info = response.json()
             self.update_available.emit(info)
         except requests.exceptions.ConnectionError as e:
-            Logger.error(ErrorMessage(e))
+            logger.error(ErrorMessage(e), exc_info=True)
             self.update_error.emit("لا يوجد اتصال بالإنترنت.")
         except Exception as e:
-            Logger.error(ErrorMessage(e))
+            logger.error(ErrorMessage(e), exc_info=True)
             self.update_error.emit("حدث خطأ أثناء الاتصال بالخادم.")
 
 

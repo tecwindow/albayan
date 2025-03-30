@@ -3,10 +3,10 @@ import configparser
 import logging
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, ClassVar
-from utils.const import albayan_folder
+from utils.const import CONFIG_PATH
+from utils.logger import LoggerManager
 
-logger = logging.getLogger(__name__)
-CONFIG_PATH = os.path.join(albayan_folder, "config.ini")
+logger = LoggerManager.get_logger(__name__)
 
 class BaseSection:
     def get_value(self, key: str) -> Any:
@@ -196,7 +196,7 @@ class Config:
             with open(CONFIG_PATH, "w", encoding='utf-8') as config_file:
                 cls._config_parser.write(config_file)
         except Exception as e:
-            logger.error(f"Error writing config file: {e}")
+            logger.error(f"Error writing config file: {e}", exc_info=True)
 
     @classmethod
     def reset_settings(cls) -> None:

@@ -13,8 +13,10 @@ from .athkar_db_manager import AthkarDBManager
 from .athkar_refresher import AthkarRefresher
 from utils.audio_player import AthkarPlayer
 from utils.const import Globals, program_icon
-from utils.logger import Logger
+from utils.logger import LoggerManager
 from exceptions.base import ErrorMessage
+
+logger = LoggerManager.get_logger(__name__)
 
 class AthkarScheduler:
     def __init__(self, athkar_db_folder: Union[Path, str], default_category_path: Optional[Union[Path, str]] = None, text_athkar_path: Optional[Union[Path, str]] = None, default_category_settings: Optional[Dict[str, int]] = None) -> None:
@@ -102,7 +104,7 @@ class AthkarScheduler:
                 for trigger in triggers:
                     self._add_jobs(category, trigger)
             except Exception as e:
-                Logger.error(ErrorMessage(e))
+                logger.error(ErrorMessage(e))
 
         if not self.scheduler.running:
             self.scheduler.start()

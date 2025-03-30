@@ -1,6 +1,8 @@
 from functools import wraps
 from .base import ErrorMessage
-from utils.logger import Logger
+from utils.logger import LoggerManager
+
+logger = LoggerManager.get_logger(__name__)
 
 def exception_handler(func=None, *, ui_element=None, exception_types=(Exception,)):
     """
@@ -22,7 +24,7 @@ def exception_handler(func=None, *, ui_element=None, exception_types=(Exception,
         except exception_types as e:
             # Create and log the error message
             message = ErrorMessage(e)
-            Logger.error(message.log_message)
+            logger.error(message.log_message, exc_info=True)
 
             # Handle UI element display
             if ui_element:
@@ -31,6 +33,6 @@ def exception_handler(func=None, *, ui_element=None, exception_types=(Exception,
                 elif hasattr(ui_element, "setText"):
                     ui_element.setText(f"{message.title}: {message.body}")
                 else:
-                    Logger.warning("UI element provided does not support error display.")
+                    logger.warning("UI element provided does not support error display.")
 
     return wrapper

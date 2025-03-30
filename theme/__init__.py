@@ -1,6 +1,8 @@
 import os
 from PyQt6.QtWidgets import QMessageBox
-from utils.logger import Logger
+from utils.logger import LoggerManager
+
+logger = LoggerManager.get_logger(__name__)
 
 class ThemeManager:
     def __init__(self, window):
@@ -26,12 +28,12 @@ class ThemeManager:
 
         theme_file = self.themes.get(selected_theme)
         if not theme_file:
-            Logger.error(f"Theme not found: {selected_theme}")
+            logger.error(f"Theme not found: {selected_theme}")
             return None
 
         theme_path = os.path.join(self.theme_dir, theme_file)
         if not os.path.isfile(theme_path):
-            Logger.error(f"File not found: {theme_path}")
+            logger.error(f"File not found: {theme_path}")
             return None
 
         try:
@@ -39,7 +41,7 @@ class ThemeManager:
                 stylesheet = theme_file.read()
                 self.window.setStyleSheet(stylesheet)
         except Exception as e:
-            Logger.error(str(e))
+            logger.error(str(e))
             message_box = QMessageBox()
             message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
             message_box.button(QMessageBox.StandardButton.Ok).setText("موافق")

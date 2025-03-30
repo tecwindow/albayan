@@ -1,7 +1,9 @@
 import winreg as reg
 import os
 import sys
-from utils.logger import Logger
+from utils.logger import LoggerManager
+
+logger = LoggerManager.get_logger(__name__)
 
 class StartupManager:
     STARTUP_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
@@ -20,9 +22,9 @@ class StartupManager:
         try:
             with reg.OpenKey(reg.HKEY_CURRENT_USER, StartupManager.STARTUP_KEY, 0, reg.KEY_SET_VALUE) as registry_key:
                 reg.SetValueEx(registry_key, app_name, 0, reg.REG_SZ, StartupManager.app_path)
-                Logger.info(f"{app_name} added to startup successfully.")
+                logger.info(f"{app_name} added to startup successfully.")
         except WindowsError as e:
-            Logger.error(f"Failed to add {app_name} to startup: {e}")
+            logger.error(f"Failed to add {app_name} to startup: {e}", exc_info=True)
 
     @staticmethod
     def remove_from_startup(app_name: str) -> None:
@@ -30,11 +32,11 @@ class StartupManager:
         try:
             with reg.OpenKey(reg.HKEY_CURRENT_USER, StartupManager.STARTUP_KEY, 0, reg.KEY_SET_VALUE) as registry_key:
                 reg.DeleteValue(registry_key, app_name)
-                Logger.info(f"{app_name} removed from startup successfully.")
+                logger.info(f"{app_name} removed from startup successfully.")
         except FileNotFoundError:
-            Logger.error(f"{app_name} not found in startup.")
+            logger.error(f"{app_name} not found in startup.", exc_info=True)
         except WindowsError as e:
-            Logger.error(f"Failed to remove {app_name} from startup: {e}")
+            logger.error(f"Failed to remove {app_name} from startup: {e}", exc_info=True)
 
     @staticmethod
     def is_in_startup(app_name: str) -> bool:
@@ -46,6 +48,6 @@ class StartupManager:
         except FileNotFoundError:
             return False
         except WindowsError as e:
-            Logger.error(f"Failed to check startup status: {e}")
+            logger.error(f"Failed to check startup status: {e}", exc_info=True)
             return False
         

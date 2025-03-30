@@ -3,8 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import IntegrityError
 from .model import Base, TasbihEntry
-from utils.logger import Logger
+from utils.logger import LoggerManager
 
+logger = LoggerManager.get_logger(__name__)
 
 class TasbihController(QObject):
     # Signal emitted whenever the list of tasbih entries is updated.
@@ -47,11 +48,9 @@ class TasbihController(QObject):
                 session.commit()
                 self.entrieAdded.emit(self.get_entry(new_entry.id))
         except IntegrityError as e:
-            #Logger.error(e)
-            pass
+            logger.debug(f"Entry '{name}' already exists in the database.")
         except Exception as e:
-            #Logger.error(e)
-            pass
+            logger.error(f"Error adding entry to the database: {e}", exc_info=True)
 
     def get_entry(self, entry_id) -> TasbihEntry:
         """Return a specific tasbih entry by its ID."""

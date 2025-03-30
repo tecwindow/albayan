@@ -2,9 +2,10 @@ import sqlite3
 import os
 import datetime
 from PyQt6.QtWidgets import QMessageBox
-from utils.logger import Logger
+from utils.logger import LoggerManager
 from utils.const import albayan_folder
 
+logger = LoggerManager.get_logger(__name__)
 
 class BookmarkManager:
     def __init__(self) -> None:
@@ -19,7 +20,7 @@ class BookmarkManager:
             conn.row_factory = sqlite3.Row
             return conn
         except Exception as e:
-            Logger.error(str(e))
+            logger.error(str(e), exc_info=True)
 
     def create_table(self) -> None:
 
@@ -40,7 +41,7 @@ class BookmarkManager:
             self.cursor.execute(query)
             self.conn.commit()
         except Exception as e:
-            Logger.error(str(e))
+            logger.error(str(e), exc_info=True)
 
     def insert_bookmark(self, name: str, ayah_number: int, ayah_number_in_surah: int, surah_number: int, surah_name: str, criteria_number: int) -> None:
 
@@ -58,8 +59,7 @@ class BookmarkManager:
             self.cursor.execute(query, (name, ayah_number, ayah_number_in_surah, surah_number, surah_name, criteria_number, date))
             self.conn.commit()
         except Exception as e:
-            print(e)
-            Logger.error(str(e))
+            logger.error(str(e), exc_info=True)
 
     def get_bookmarks(self) -> list:
 
@@ -68,7 +68,7 @@ class BookmarkManager:
             self.cursor.execute("SELECT * FROM bookmarks")
             returned_data = self.cursor.fetchall()
         except Exception as e:
-            Logger.error(str(e))
+            logger.error(str(e), exc_info=True)
 
         return returned_data
     
@@ -77,7 +77,7 @@ class BookmarkManager:
             self.cursor.execute("DELETE FROM bookmarks WHERE id=?", (bookmark_id,))
             self.conn.commit()
         except Exception as e:
-            Logger.error(str(e))
+            logger.error(str(e), exc_info=True)
 
     def update_bookmark(self, bookmark_id: int, new_name: str) -> None:
 
@@ -93,7 +93,7 @@ class BookmarkManager:
             self.cursor.execute(query, (new_name, bookmark_id))
             self.conn.commit()
         except Exception as e:
-            Logger.error(str(e))
+            logger.error(str(e), exc_info=True)
 
     def search_bookmarks(self, search_text: str) -> list:
 
@@ -107,7 +107,7 @@ class BookmarkManager:
             self.cursor.execute(query, ('%' + search_text + '%',))
             returned_data = self.cursor.fetchall()
         except Exception as e:
-            Logger.error(str(e))
+            logger.error(str(e), exc_info=True)
 
         return returned_data
     
@@ -125,8 +125,7 @@ class BookmarkManager:
             self.cursor.execute(query, (ayah_number,))
             result = self.cursor.fetchall()
         except Exception as e:
-            print(e)
-            Logger.error(str(e))
+            logger.error(str(e), exc_info=True)
 
         if result:
             return True

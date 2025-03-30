@@ -123,7 +123,3 @@ class DownloadThread(QThread):
                 self.download_progress.emit(progress)
 
         self.download_finished.emit(file_path)
-
-    def reject(self):
-        self.deleteLater()
-        

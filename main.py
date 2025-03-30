@@ -11,11 +11,12 @@ from ui.quran_interface import QuranInterface
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
 from utils.update import UpdateManager
 from utils.settings import Config
-from utils.const import program_name, program_icon, user_db_path
-from utils.logger import Logger
+from utils.const import program_name, program_icon, user_db_path, CONFIG_PATH, LOG_PATH
+from utils.logger import LoggerManager
 from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 
-Logger.initialize_logger()
+LoggerManager.setup_logger(LOG_PATH, dev_mode=True)
+logger = LoggerManager.get_logger(__name__)
 Config.load_settings()
 
 class SingleInstanceApplication(QApplication):
@@ -32,7 +33,7 @@ class SingleInstanceApplication(QApplication):
 
         if not self.is_running:
             if not self.shared_memory.create(1):
-                Logger.error(f"Failed to create shared memory segment: {self.shared_memory.errorString()}")
+                logger.error(f"Failed to create shared memory segment: {self.shared_memory.errorString()}")
                 sys.exit(1)
             self.setup_local_server()
         else:
@@ -75,7 +76,7 @@ class SingleInstanceApplication(QApplication):
 
     def setup_local_server(self) -> None:
         if not self.local_server.listen(self.server_name):
-            Logger.error(f"Failed to start local server: {self.local_server.errorString()}")
+            logger.error(f"Failed to start local server: {self.local_server.errorString()}")
             sys.exit(1)
         self.local_server.newConnection.connect(self.handle_new_connection)
 
@@ -88,7 +89,7 @@ class SingleInstanceApplication(QApplication):
             socket.waitForBytesWritten(1000)
             socket.disconnectFromServer()
         else:
-            Logger.error("Failed to connect to existing instance.")
+            logger.error("Failed to connect to existing instance.")
 
     def handle_new_connection(self) -> None:
         socket = self.local_server.nextPendingConnection()
@@ -130,7 +131,7 @@ def main():
         call_after_starting(main_window)
         sys.exit(app.exec())
     except Exception as e:
-        Logger.error(str(e))
+        logger.error(str(e))
         msg_box = QMessageBox(None)
         msg_box.setIcon(QMessageBox.Icon.Critical)
         msg_box.setWindowTitle("خطأ")

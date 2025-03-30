@@ -7,9 +7,10 @@ from core_functions.Reciters import AyahReciter
 from utils.audio_player import AyahPlayer
 from utils.settings import Config
 from utils.const import data_folder
-from utils.logger import Logger
+from utils.logger import LoggerManager
 from exceptions.base import ErrorMessage
 
+logger = LoggerManager.get_logger(__name__)
 
 class AudioPlayerThread(QThread):
     statusChanged = pyqtSignal()
@@ -39,7 +40,7 @@ class AudioPlayerThread(QThread):
                     self.manually_stopped = False
                 except Exception as e:
                     message = ErrorMessage(e)
-                    Logger.error(message.log_message)
+                    logger.error(message.log_message)
                     if self.send_error_signal:
                         self.error_signal.emit(message)
                         self.manually_stopped = True
