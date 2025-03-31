@@ -77,7 +77,7 @@ class UpdateManager:
                 logger.info(f"A new version {latest_version} is available. Displaying update dialog...")
                 self.show_update_dialog(release_notes, download_url, latest_version)
             else:
-                logger.info(f"Already on the latest version {program_version}. Displaying no update dialog.")
+                logger.info(f"Already on the latest version {program_version}.")
                 self.show_no_update_dialog()
         except Exception as e:
             logger.error(f"Error in on_update_available: {ErrorMessage(e)}", exc_info=True)
