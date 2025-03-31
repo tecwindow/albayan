@@ -17,12 +17,13 @@ class StartupManager:
         :param app_name: Name of the application (Registry key name).
         """
         if not sys.argv[0].endswith(".exe"):
+            logger.warning(f"Skipping startup registration: {sys.argv[0]} is not an .exe file.")
             return
 
         try:
             with reg.OpenKey(reg.HKEY_CURRENT_USER, StartupManager.STARTUP_KEY, 0, reg.KEY_SET_VALUE) as registry_key:
                 reg.SetValueEx(registry_key, app_name, 0, reg.REG_SZ, StartupManager.app_path)
-                logger.info(f"{app_name} added to startup successfully.")
+                logger.debug(f"{app_name} added to startup successfully at {StartupManager.app_path}.")
         except WindowsError as e:
             logger.error(f"Failed to add {app_name} to startup: {e}", exc_info=True)
 
@@ -44,10 +45,12 @@ class StartupManager:
         try:
             with reg.OpenKey(reg.HKEY_CURRENT_USER, StartupManager.STARTUP_KEY, 0, reg.KEY_READ) as registry_key:
                 reg.QueryValueEx(registry_key, app_name)
+                logger.debug(f"{app_name} is found in startup.")
                 return True
         except FileNotFoundError:
             return False
         except WindowsError as e:
             logger.error(f"Failed to check startup status: {e}", exc_info=True)
+            logger.debug(f"{app_name} is not in startup.")
             return False
         
