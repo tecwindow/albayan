@@ -12,10 +12,10 @@ from core_functions.athkar.athkar_scheduler import AthkarScheduler
 from utils.update import UpdateManager
 from utils.settings import Config
 from utils.const import program_name, program_icon, user_db_path, CONFIG_PATH, LOG_PATH
-from utils.logger import LoggerManager
+from utils.logger import LogLevel, LoggerManager
 from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 
-LoggerManager.setup_logger(LOG_PATH, dev_mode=True)
+LoggerManager.setup_logger(LOG_PATH, log_level=LogLevel.DEBUG, dev_mode=True)
 logger = LoggerManager.get_logger(__name__)
 Config.load_settings()
 

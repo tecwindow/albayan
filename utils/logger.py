@@ -7,7 +7,7 @@ from enum import Enum
 
 
 class LogLevel(Enum):
-    DISABLE = 0
+    DISABLE = -1
     DEBUG = logging.DEBUG
     INFO = logging.INFO
     WARNING = logging.WARNING
@@ -69,7 +69,7 @@ class LoggerManager:
     _initialized = False
 
     @classmethod
-    def setup_logger(cls, log_file='app.log', log_level=logging.DEBUG, dev_mode=False):
+    def setup_logger(cls, log_file: str, log_level: LogLevel = LogLevel.ERROR, dev_mode=False):
         """
         Configures the root logger with file and (optionally) console handlers using basicConfig.
         Each handler gets its own formatter.
@@ -78,20 +78,25 @@ class LoggerManager:
         :param log_level: The logging level.
         :param dev_mode: If True, adds a console handler for development.
         """
+        
+        if not isinstance(log_level, LogLevel):
+            raise ValueError("log_level must be an instance of LogLevel")
+        
         if not cls._initialized:
+            handlers = []
             # Organize handlers using the dedicated methods
-            handlers = cls._get_file_handler(log_file, log_level)
+            handlers.append(cls._get_file_handler(log_file, log_level))
             if dev_mode:
                 handlers.append(cls._get_console_handler(log_level))
             
             logging.basicConfig(
-                level=log_level,
+                level=log_level.value,
                 handlers=handlers
             )
             cls._initialized = True
 
     @classmethod
-    def _get_file_handler(cls, log_file, log_level):
+    def _get_file_handler(cls, log_file: str, log_level: LogLevel):
         """
         Creates and returns a FileHandler with its specific formatter.
         
@@ -100,16 +105,16 @@ class LoggerManager:
         :return: A list containing a configured FileHandler.
         """
         file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(log_level)
+        file_handler.setLevel(log_level.value)
         # File handler formatter (detailed format)
         file_formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]'
         )
         file_handler.setFormatter(file_formatter)
-        return [file_handler]
+        return file_handler
 
     @classmethod
-    def _get_console_handler(cls, log_level):
+    def _get_console_handler(cls, log_level: LogLevel):
         """
         Creates and returns a console (Stream) handler with its specific formatter.
         
@@ -117,7 +122,7 @@ class LoggerManager:
         :return: A configured StreamHandler.
         """
         console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(log_level)
+        console_handler.setLevel(log_level.value)
         # Console handler formatter (simplified format)
         console_formatter = logging.Formatter(
             '%(name)s - %(levelname)s - %(message)s'
@@ -126,16 +131,31 @@ class LoggerManager:
         return console_handler
 
     @classmethod
-    def change_log_level(cls, new_level):
+    def change_log_level(cls, new_level: LogLevel):
         """
         Dynamically changes the log level for the root logger and its handlers.
         
-        :param new_level: The new logging level (e.g., logging.ERROR).
+        args:
+        new_level (LogLevel): The new log level to set.
+        
+        Raises:
+        ValueError: If new_level is not an instance of LogLevel.
         """
+
+        if not isinstance(new_level, LogLevel):
+            raise ValueError("new_level must be an instance of LogLevel")
+        
+        if new_level == LogLevel.DISABLE:
+            logging.disable(logging.CRITICAL + 1)
+            return
+        else:
+            # Enable all logging levels
+            logging.disable(logging.NOTSET)  
+
         root_logger = logging.getLogger()
-        root_logger.setLevel(new_level)
+        root_logger.setLevel(new_level.value)
         for handler in root_logger.handlers:
-            handler.setLevel(new_level)
+            handler.setLevel(new_level.value)
 
     @classmethod
     def get_logger(cls, name):
