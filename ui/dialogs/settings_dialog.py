@@ -23,7 +23,7 @@ from PyQt6.QtCore import Qt
 from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name
 from utils.settings import Config
-
+from utils.logger import LogLevel, LoggerManager
 from utils.audio_player import bass_initializer, AthkarPlayer, AyahPlayer, SurahPlayer, SoundEffectPlayer
 from utils.Startup import StartupManager
 import qtawesome as qta
@@ -38,7 +38,6 @@ class SettingsDialog(QDialog):
         self.reciters_manager = AyahReciter(data_folder / "quran" / "reciters.db")
         self.init_ui()
         self.set_current_settings()
-        self.open_listening_tab_and_focus_reciter()
 
 
     def init_ui(self):
@@ -86,7 +85,11 @@ class SettingsDialog(QDialog):
         self.start_on_system_start_checkbox = QCheckBox("تشغيل عند بدء تشغيل النظام")
         self.auto_save_position_checkbox = QCheckBox("حفظ الموضع الحالي تلقائيًا عند إغلاق البرنامج")
         self.update_checkbox = QCheckBox("التحقق من التحديثات")
-        self.log_checkbox = QCheckBox("تمكين تسجيل الأخطاء")
+        self.log_levels_label = QLabel(self, text="مستوى السجل:")
+        self.log_levels_combo = QComboBox(self)
+        self.log_levels_combo.setAccessibleName(self.log_levels_label.text())
+        for level in LogLevel:
+            self.log_levels_combo.addItem(level.label, level.name)
         self.reset_button = QPushButton("استعادة الإعدادات الافتراضية")
         self.reset_button.clicked.connect(self.OnReset)
         
@@ -94,7 +97,8 @@ class SettingsDialog(QDialog):
         self.group_general_layout.addWidget(self.start_on_system_start_checkbox)
         self.group_general_layout.addWidget(self.auto_save_position_checkbox)
         self.group_general_layout.addWidget(self.update_checkbox)
-        self.group_general_layout.addWidget(self.log_checkbox)
+        self.group_general_layout.addWidget(self.log_levels_label)
+        self.group_general_layout.addWidget(self.log_levels_combo)
         self.group_general_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_general_layout.addWidget(self.reset_button)
         self.group_general.setLayout(self.group_general_layout)
@@ -319,6 +323,9 @@ class SettingsDialog(QDialog):
         AthkarPlayer.apply_new_sound_card(self.athkar_device_combo.currentData())
         SoundEffectPlayer.apply_new_sound_card(self.volume_device_combo.currentData())
 
+        #apply new log level
+        LoggerManager.change_log_level(LogLevel.from_name(self.log_levels_combo.currentData()))
+        
         if Config.general.auto_start_enabled != self.start_on_system_start_checkbox.isChecked():
             if self.start_on_system_start_checkbox.isChecked():
                 StartupManager.add_to_startup(program_english_name)
@@ -333,7 +340,7 @@ class SettingsDialog(QDialog):
         Config.general.auto_start_enabled = self.start_on_system_start_checkbox.isChecked()
         Config.general.auto_save_position_enabled = self.auto_save_position_checkbox.isChecked()
         Config.general.check_update_enabled = self.update_checkbox.isChecked()
-        Config.general.logging_enabled = self.log_checkbox.isChecked()
+        Config.general.log_level = self.log_levels_combo.currentData()
 
         Config.audio.sound_effect_enabled = self.sound_checkbox.isChecked()
         Config.audio.start_with_basmala_enabled = self.basmala_checkbox.isChecked()
@@ -397,27 +404,22 @@ class SettingsDialog(QDialog):
         self.update_checkbox.setChecked(Config.general.check_update_enabled)
         self.duration_spinbox.setValue(Config.listening.forward_time)
         self.auto_move_focus_checkbox.setChecked(Config.listening.auto_move_focus)
-        self.log_checkbox.setChecked(Config.general.logging_enabled)
         self.ignore_tashkeel_checkbox.setChecked(Config.search.ignore_tashkeel)
         self.ignore_hamza_checkbox.setChecked(Config.search.ignore_hamza)
         self.match_whole_word_checkbox.setChecked(Config.search.match_whole_word)
-        # Update the reciter ComboBox
-        reciter_id = Config.listening.reciter
-        for index in range(self.reciters_combo.count()):
-            if self.reciters_combo.itemData(index) == reciter_id:
-                self.reciters_combo.setCurrentIndex(index)
-                break
 
-        stored_id = Config.listening.action_after_listening
-        index = self.action_combo.findData(stored_id)
-        if index != -1:
-            self.action_combo.setCurrentIndex(index)
+        combo_config = [
+            (self.log_levels_combo, Config.general.log_level),
+            (self.reciters_combo, Config.listening.reciter),
+            (self.action_combo, Config.listening.action_after_listening),
+            (self.font_type_combo, Config.reading.font_type),
+        ]
 
-        stored_id = Config.reading.font_type
-        index = self.font_type_combo.findData(stored_id)
-        if index != -1:
-            self.font_type_combo.setCurrentIndex(index)
-
+        for combo, value in combo_config:
+            index = combo.findData(value)
+            if index != -1:
+                combo.setCurrentIndex(index)
+        
     def open_listening_tab_and_focus_reciter(self):
         self.tree_widget.setCurrentItem(self.listening_item)
         self.reciters_combo.setFocus()

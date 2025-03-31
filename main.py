@@ -15,9 +15,14 @@ from utils.const import program_name, program_icon, user_db_path, CONFIG_PATH, L
 from utils.logger import LogLevel, LoggerManager
 from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 
-LoggerManager.setup_logger(LOG_PATH, log_level=LogLevel.DEBUG, dev_mode=True)
-logger = LoggerManager.get_logger(__name__)
 Config.load_settings()
+LoggerManager.setup_logger(
+    log_file=LOG_PATH, 
+    log_level=LogLevel.from_name(Config.general.log_level),
+    dev_mode=True
+    )
+logger = LoggerManager.get_logger(__name__)
+
 
 class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs) -> None:

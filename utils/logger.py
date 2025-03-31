@@ -14,43 +14,21 @@ class LogLevel(Enum):
     ERROR = logging.ERROR
     #CRITICAL = logging.CRITICAL
 
-    LABELS = {
-        DISABLE: "تعطيل",
-        DEBUG: "تصحيح (Debug)",
-        INFO: "معلومات (Info)",
-        WARNING: "تحذير (Warning)",
-        ERROR: "خطأ (Error)",
-        #CRITICAL: "حرج (Critical)"
-    }
+    @classmethod
+    def get_labels(cls) -> dict:
+        """Returns a dictionary mapping log levels to their labels."""
+        return {
+            cls.DISABLE: "تعطيل",
+            cls.DEBUG: "تصحيح (Debug)",
+            cls.INFO: "معلومات (Info)",
+            cls.WARNING: "تحذير (Warning)",
+            cls.ERROR: "خطأ (Error)",
+        }
 
     @property
     def label(self):
         """Returns the label for the log level."""
-        return self.LABELS[self]
-
-    @classmethod
-    def get_labels(cls):
-        """Returns a dictionary mapping each log level name to its label."""
-        return {level.name: level.label for level in cls}
-
-    @classmethod
-    def from_label(cls, label):
-        """
-        Retrieves the log level enum member corresponding to the given label.
-        
-        Args:
-            label (str): The label for level.
-        
-        Returns:
-            LogLevel: The matching log level enum member.
-        
-        Raises:
-            ValueError: If no log level with the given label is found.
-        """
-        for level, lbl in cls.LABELS.items():
-            if lbl == label:
-                return level
-        raise ValueError(f"Invalid log level label: {label}")
+        return self.get_labels()[self]
 
     @classmethod
     def from_name(cls, name):

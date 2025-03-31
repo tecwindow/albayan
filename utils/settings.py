@@ -30,7 +30,7 @@ class GeneralSettings(BaseSection):
     auto_start_enabled: bool = False
     auto_save_position_enabled: bool = False
     check_update_enabled: bool = True
-    logging_enabled: bool = True
+    log_level: str = "ERROR"
 
 @dataclass
 class AudioSettings(BaseSection):
