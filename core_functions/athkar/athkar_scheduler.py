@@ -29,26 +29,35 @@ class AthkarScheduler:
         self.setup()
 
     def setup(self) -> None:
+        logger.info("Initializing AthkarScheduler.")
         if self.default_category_path:
+            logger.debug(f"Ensuring category folder exists: {self.default_category_path}")
             self.default_category_path.mkdir(parents=True, exist_ok=True)
             try:
                 category_id = self.db_manager.create_category("default", str(self.default_category_path), **self.default_category_settings)
+                logger.debug(f"Default category created with ID {category_id}")
                 if self.text_athkar_path and self.text_athkar_path.exists():
                     with open(self.text_athkar_path, encoding="UTF-8") as f:
-                        self.db_manager.add_text_athkar(json.load(f), category_id)
+                        text_data = json.load(f)
+                        self.db_manager.add_text_athkar(text_data, category_id)
+                        logger.debug(f"Loaded {len(text_data)} text athkar into default category")
             except IntegrityError:
+                logger.warning("Default category already exists, skipping creation.")
                 pass
 
         self.categories = self.db_manager.get_all_categories()
+        logger.debug(f"Loaded {len(self.categories)} categories from database.")
         for category in self.categories:
             refresher = AthkarRefresher(self.db_manager, category.audio_path, category.id)
             refresher.refresh_data()
 
     def audio_athkar_job(self, category_id: int, audio_path: str) -> None:
+        logger.debug(f"Starting audio athkar for category ID {category_id} using {audio_path}")
         with AthkarPlayer(audio_path, self.db_manager.get_audio_athkar(category_id)) as player:
             player.play()
 
     def text_athkar_job(self, category_id: int) -> None:
+        logger.info(f"Displaying text athkar for category ID {category_id}")
         random_text_athkar = choice(self.db_manager.get_text_athkar(category_id))
         text = random_text_athkar.text
 
@@ -96,6 +105,7 @@ class AthkarScheduler:
             )
 
     def start(self) -> None:
+        logger.info("Starting AthkarScheduler...")
         for category in self.categories:
             try:
                 from_time = self._parse_time(category.from_time)
@@ -103,15 +113,22 @@ class AthkarScheduler:
                 triggers = self._create_triggers(from_time, to_time, category.play_interval)
                 for trigger in triggers:
                     self._add_jobs(category, trigger)
+                    logger.debug(f"Scheduled athkar jobs for category {category.id} from {category.from_time} to {category.to_time}")
             except Exception as e:
-                logger.error(ErrorMessage(e))
+                logger.error(f"Error scheduling category {category.id}: {e}", exc_info=True)
 
         if not self.scheduler.running:
             self.scheduler.start()
+            logger.info("AthkarScheduler started successfully.")
+
 
     def refresh(self) -> None:
+        logger.info("Refreshing AthkarScheduler...")
         if self.scheduler is not None:
             self.scheduler.remove_all_jobs()
 
         self.setup()
         self.start()
+        logger.info("AthkarScheduler refreshed successfully.")
+
+        
