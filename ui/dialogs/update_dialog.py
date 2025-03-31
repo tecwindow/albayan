@@ -16,7 +16,10 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt6.QtGui import QKeySequence, QShortcut
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.const import program_name, temp_folder
+from utils.logger import LoggerManager
 import qtawesome as qta
+
+logger = LoggerManager.get_logger(__name__)
 
 class UpdateDialog(QDialog):
 
@@ -24,7 +27,11 @@ class UpdateDialog(QDialog):
     for file in os.listdir(temp_folder):
         file_path = os.path.join(temp_folder,file )
         if os.path.isfile(file_path):
-            os.remove(file_path)
+            try:
+                os.remove(file_path)
+                logger.debug(f"Deleted temporary file: {file_path}")
+            except Exception as e:
+                logger.warning(f"Could not delete temporary file {file_path}: {e}")
         del file_path
 
     def __init__(self, parent, release_notes, download_url, latest_version):
@@ -33,6 +40,8 @@ class UpdateDialog(QDialog):
         self.setWindowTitle("تحديث متاح")
         self.resize(400, 300)
         self.setWindowModality(Qt.WindowModality.ApplicationModal)
+        logger.debug(f"Opening update dialog for version {latest_version}")
+
 
         layout = QVBoxLayout()
 
@@ -78,6 +87,7 @@ class UpdateDialog(QDialog):
         QTimer.singleShot(300, self.release_notes_edit.setFocus)
 
     def on_update(self):
+        logger.debug("Clicked update button.")
         self.progress_dialog = QProgressDialog("جارٍ التحديث...", "إغلاق", 0, 100, self)
         self.progress_dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.progress_dialog.setWindowTitle("يجري التحديث")
@@ -90,11 +100,19 @@ class UpdateDialog(QDialog):
         self.download_thread.start()
 
     def on_download_finished(self, file_path):
+        logger.info(f"Download finished. Starting installation: {file_path}")
         self.progress_dialog.hide()
-        subprocess.Popen([file_path, "/SILENT", "/NOCANCEL", "/SUPPRESSMSGBOXES", "/NORESTART"])
-        QApplication.exit()
+        try:
+            subprocess.Popen([file_path, "/SILENT", "/NOCANCEL", "/SUPPRESSMSGBOXES", "/NORESTART"])
+            logger.info("Installer started successfully.")
+            QApplication.exit()
+            logger.info("Application exited after installation.")
+        except Exception as e:
+            logger.error(f"Failed to start installer: {e}", exc_info=True)
+
 
     def on_cancel(self):
+        logger.debug("User canceled the update process.")
         self.download_thread.terminate()
         self.progress_dialog.hide()
         self.reject()
@@ -111,15 +129,29 @@ class DownloadThread(QThread):
     def run(self):
         file_name = self.download_url.split('/')[-1]
         file_path = os.path.join(temp_folder, file_name)
-        response = requests.get(self.download_url, stream=True)
-        total_size = int(response.headers.get('content-length', 0))
-        bytes_downloaded = 0
+        logger.info(f"Starting download: {self.download_url}")
+        try:
+            response = requests.get(self.download_url, stream=True)
+            response.raise_for_status()
+            total_size = int(response.headers.get('content-length', 0))
+            bytes_downloaded = 0
 
-        with open(file_path, 'wb') as file:
-            for data in response.iter_content(chunk_size=4096):
-                bytes_downloaded += len(data)
-                file.write(data)
-                progress = int(bytes_downloaded * 100 / total_size)
-                self.download_progress.emit(progress)
+            with open(file_path, 'wb') as file:
+                for data in response.iter_content(chunk_size=4096):
+                    bytes_downloaded += len(data)
+                    file.write(data)
+                    progress = int(bytes_downloaded * 100 / total_size)
+                    self.download_progress.emit(progress)
+                    logger.debug(f"Download progress: {progress}%")
 
-        self.download_finished.emit(file_path)
+            logger.info(f"Download completed successfully: {file_path}")
+            self.download_finished.emit(file_path)
+
+        except requests.exceptions.ConnectionError:
+            logger.error("Failed to connect to update server.")
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"HTTP error occurred while downloading: {e}", exc_info=True)
+        except Exception as e:
+            logger.error(f"Unexpected error during download: {e}", exc_info=True)
+
+            
