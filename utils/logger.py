@@ -86,7 +86,7 @@ class LoggerManager:
         file_handler.setLevel(log_level.value)
         # File handler formatter (detailed format)
         file_formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]'
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(filename)s:%(lineno)d]'
         )
         file_handler.setFormatter(file_formatter)
         return file_handler
@@ -103,7 +103,7 @@ class LoggerManager:
         console_handler.setLevel(log_level.value)
         # Console handler formatter (simplified format)
         console_formatter = logging.Formatter(
-            '%(name)s - %(levelname)s - %(message)s'
+            '%(name)s - %(levelname)s - %(message)s [in %(filename)s:%(lineno)d]'
         )
         console_handler.setFormatter(console_formatter)
         return console_handler
