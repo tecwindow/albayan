@@ -1,6 +1,8 @@
 from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
 from utils.audio_player import AyahPlayer, SoundEffectPlayer, AthkarPlayer, SurahPlayer
+from utils.logger import LoggerManager
+logger = LoggerManager.get_logger(__name__)
 
 
 class VolumeController:
@@ -9,6 +11,7 @@ class VolumeController:
     def __init__(self) -> None:
         self.categories = self._load_categories()
         self.current_category_index = Config.audio.current_volume_category
+        logger.info(f"Initialized VolumeController. Current category index: {self.current_category_index}")
 
     def _load_categories(self) -> dict:
         """Load categories with their custom handling methods."""
@@ -21,11 +24,16 @@ class VolumeController:
 
     def _get_volume(self, category: str) -> int:
         """Retrieve the volume for the given category from the settings."""
-        return Config.audio.get_value(category)
+        volume = Config.audio.get_value(category)
+        logger.debug(f"Retrieved volume for {category}: {volume}%")
+        return volume
+
+
 
     def switch_category(self, direction: str) -> None:
         """Switch between categories in the specified direction ('next' or 'previous')."""
         categories = list(self.categories.keys())
+        prev_category = self.get_current_category()
         if direction == 'next':
             self.current_category_index = (self.current_category_index + 1) % len(categories)  
         elif direction == 'previous':
@@ -37,6 +45,9 @@ class VolumeController:
 
         Config.audio.set_value("current_volume_category", self.current_category_index)
         UniversalSpeech.say(f"{current_label}: {current_volume}%")
+        logger.info(f"Switched category from {prev_category} to {current_category}. New volume: {current_volume}%")
+
+
 
     def adjust_volume(self, change: int) -> None:
         """Adjust the volume for the current category with special handling if needed."""
@@ -46,20 +57,31 @@ class VolumeController:
         current_label = self.categories[current_category]["label"]
         UniversalSpeech.say(f"{new_volume}%: {current_label}")
         Config.audio.set_value(current_category, new_volume)
+        logger.info(f"Adjusted volume for {current_category} from {current_volume}% to {new_volume}%")
 
         # Apply the custom volume handler if it exists for the current category
         handling_method = self.categories[current_category].get("custom_volume_handler")
         if handling_method:
-            handling_method(new_volume)
+            try:
+                handling_method(new_volume)
+                logger.debug(f"Applied custom handler for {current_category}")
+            except Exception as e:
+                logger.warning(f"Error applying custom volume handler for {current_category}: {e}")
+
 
         instances = self.categories[current_category].get("instances")
         if instances:
             for instance in instances:
-                instance.set_volume(new_volume)
+                try:
+                    instance.set_volume(new_volume)
+                    logger.debug(f"Set volume for instance {instance} in {current_category} to {new_volume}%")
+                except Exception as e:
+                    logger.warning(f"Failed to set volume for {instance} in {current_category}: {e}")
 
     def get_category_info(self):
         """Retrieve the information for the current category."""
         current_category = self.get_current_category()
+        logger.debug(f"Retrieved info for category: {current_category}")
         return self.categories[current_category]
 
     def get_current_category(self) -> str:
