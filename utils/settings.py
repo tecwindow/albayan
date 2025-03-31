@@ -11,16 +11,23 @@ logger = LoggerManager.get_logger(__name__)
 class BaseSection:
     def get_value(self, key: str) -> Any:
         if key in self.__dataclass_fields__:
-            return getattr(self, key)
+            value = getattr(self, key)
+            logger.debug(f"Retrieved '{key}' from section '{self.__class__.SECTION_NAME}': {value}")
+            return value
         else:
+            logger.warning(f"Attempted to access invalid key '{key}' in section '{self.__class__.SECTION_NAME}'")
             raise KeyError(f"Key '{key}' not found in section '{self.__class__.SECTION_NAME}'")
+
 
     def set_value(self, key: str, value: Any) -> None:
         if key in self.__dataclass_fields__:
             setattr(self, key, value)
+            logger.debug(f"Updated '{key}' in section '{self.__class__.SECTION_NAME}' to: {value}")
             Config.save_settings()
         else:
+            logger.warning(f"Attempted to set invalid key '{key}' in section '{self.__class__.SECTION_NAME}'")
             raise KeyError(f"Key '{key}' not found in section '{self.__class__.SECTION_NAME}'")
+
 
 @dataclass
 class GeneralSettings(BaseSection):
@@ -80,8 +87,7 @@ class Config:
     All methods are class methods so that settings can be accessed directly via:
       Config.general, Config.audio, etc.
     """
-    _config_parser = configparser.ConfigParser()
-    
+    _config_parser = configparser.ConfigParser()    
     # Define settings sections as class-level attributes.
     general: GeneralSettings = GeneralSettings()
     audio: AudioSettings = AudioSettings()
@@ -98,7 +104,7 @@ class Config:
         """
         if section not in cls._config_parser:
             cls._config_parser[section] = {}
-            logger.info(f"Creating new section '{section}' in config file")
+            logger.debug(f"Created missing section '{section}' in config file.")
 
     @classmethod
     def sections(cls) -> Dict[str, Any]:
@@ -174,7 +180,7 @@ class Config:
                 logger.warning(f"Config file '{CONFIG_PATH}' not found or empty. Saving default settings.")
                 cls.save_settings()
         except configparser.Error as e:
-            logger.error(f"Failed to read config file: {e}. Reverting to default settings.")
+            logger.error(f"Failed to read config file: {e}. Reverting to default settings.", exc_info=True)
             cls.save_settings()            
 
         for section, instance in cls.sections().items():
@@ -195,6 +201,7 @@ class Config:
         try:
             with open(CONFIG_PATH, "w", encoding='utf-8') as config_file:
                 cls._config_parser.write(config_file)
+            logger.info("Configuration saved successfully.")
         except Exception as e:
             logger.error(f"Error writing config file: {e}", exc_info=True)
 
@@ -209,4 +216,5 @@ class Config:
             if isinstance(attr, BaseSection):
                 setattr(cls, attr_name, type(attr)())
         cls.save_settings()
-    
+        logger.info("All settings have been reset to default values.")
+        
