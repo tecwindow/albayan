@@ -20,6 +20,7 @@ logger = LoggerManager.get_logger(__name__)
 
 class AthkarScheduler:
     def __init__(self, athkar_db_folder: Union[Path, str], default_category_path: Optional[Union[Path, str]] = None, text_athkar_path: Optional[Union[Path, str]] = None, default_category_settings: Optional[Dict[str, int]] = None) -> None:
+        logger.debug(f"Initializing AthkarScheduler with db folder: {athkar_db_folder}, default category path: {default_category_path}, text athkar path: {text_athkar_path}")
         self.default_category_path = Path(default_category_path) if isinstance(default_category_path, str) else default_category_path
         self.text_athkar_path = Path(text_athkar_path) if isinstance(text_athkar_path, str) else text_athkar_path
         self.default_category_settings = default_category_settings if default_category_settings is not None else {}
@@ -27,6 +28,8 @@ class AthkarScheduler:
         self.db_manager = AthkarDBManager(athkar_db_folder)
         self.scheduler = BackgroundScheduler()
         self.setup()
+        logger.info("AthkarScheduler initialized successfully.")
+
 
     def setup(self) -> None:
         logger.info("Initializing AthkarScheduler.")
