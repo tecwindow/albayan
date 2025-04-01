@@ -12,6 +12,8 @@ class AthkarDBManager:
         logger.debug(f"Initializing database manager with file path: {db_file_path}")
         self.engine = init_db(db_file_path)
         self.Session = sessionmaker(bind=self.engine)
+        logger.info(f"Database engine created and session factory initialized.")
+
 
     def _add_to_db(self, instance) -> int:
         with self.Session() as session:
