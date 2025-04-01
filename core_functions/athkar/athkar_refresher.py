@@ -7,6 +7,7 @@ logger = LoggerManager.get_logger(__name__)
 
 class AthkarRefresher:
     def __init__(self, db_manager: AthkarDBManager, folder_path: str, category_id: int) -> None:
+        logger.debug(f"Initializing AthkarRefresher with folder path: {folder_path} and category ID: {category_id}")
         self.db_manager = db_manager
         self.folder_path = folder_path
         self.category_id = category_id
