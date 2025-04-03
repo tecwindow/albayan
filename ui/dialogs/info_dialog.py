@@ -11,8 +11,12 @@ from PyQt6.QtGui import QKeySequence, QClipboard, QShortcut, QPixmap, QFontMetri
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.universal_speech import UniversalSpeech
 from utils.const import albayan_documents_dir, Globals, data_folder
+from utils.logger import LoggerManager
 from exceptions.json import JSONFileNotFoundError, InvalidJSONFormatError
 from exceptions.error_decorators import exception_handler
+
+logger = LoggerManager.get_logger(__name__)
+
 
 class InfoDialog(QDialog):
     def __init__(self, parent, title: str, label: str, text: str, is_html_content: bool = False, show_message_button: bool = False, save_message_as_img_button: bool = False):
@@ -26,6 +30,7 @@ class InfoDialog(QDialog):
         self.save_message_as_img_button = save_message_as_img_button
         self.init_ui()
         Globals.effects_manager.play("open")
+        logger.debug(f"InfoDialog initialized with title: {title}, label: {label}.")
 
     def init_ui(self):
         self.setWindowTitle(self.title)
@@ -99,8 +104,11 @@ class InfoDialog(QDialog):
         clipboard.setText(self.text_edit.toPlainText())
         UniversalSpeech.say("تم نسخ النص إلى الحافظة")
         Globals.effects_manager.play("copy")
+        logger.debug("User copied text to clipboard.")
+
 
     def reject(self):
+        logger.debug("User closed InfoDialog.")
         Globals.effects_manager.play("clos")
         self.deleteLater()
 
@@ -113,6 +121,7 @@ class InfoDialog(QDialog):
             with open(file_path, "r", encoding="utf-8") as file:
                 quotes_list = json.load(file)
                 message = random.choice(quotes_list)
+                logger.debug(f"Loaded quote: {message}")
         except json.JSONDecodeError as e:
                 raise InvalidJSONFormatError(file_path, e)
 
@@ -122,6 +131,8 @@ class InfoDialog(QDialog):
     def OnNewMessage(self):
         self.choose_QuotesMessage()
         Globals.effects_manager.play("message")
+        logger.debug("User triggered 'OnNewMessage', displaying a new message.")
+
 
     def save_text_as_image(self):
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -159,4 +170,5 @@ class InfoDialog(QDialog):
 
             ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
             msg_box.exec()
+            logger.debug(f"Saved text as image to {file_path}.")
 
