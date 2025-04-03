@@ -9,6 +9,11 @@ from core_functions.athkar.athkar_db_manager import AthkarDBManager
 from core_functions.athkar.models import AthkarCategory
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
 from utils.const import user_db_path, data_folder, athkar_db_path, default_athkar_path
+from utils.logger import LoggerManager
+
+
+logger = LoggerManager.get_logger(__name__)
+
 
 class AthkarDialog(QDialog):
     athkar_scheduler = AthkarScheduler(athkar_db_path, default_athkar_path, data_folder/"athkar/text_athkar.json")
@@ -16,6 +21,7 @@ class AthkarDialog(QDialog):
 
     def __init__(self, parent):
         super().__init__(parent)
+
         self.setWindowTitle("الأذكار")
         self.resize(400, 350)
         self.athkar_db = AthkarDBManager(athkar_db_path)
@@ -31,7 +37,8 @@ class AthkarDialog(QDialog):
         self.init_ui()
         self.connect_signals()
         self.load_categories()
-        
+        logger.debug("Athkar dialog opened.")
+
     def init_ui(self):
         main_layout = QVBoxLayout()
 
@@ -101,6 +108,10 @@ class AthkarDialog(QDialog):
         self.section_list.currentItemChanged.connect(self.update_ui_based_on_selection)
 
     def load_categories(self):
+        logger.debug("Loading Athkar categories from the database...")
+        categories = self.athkar_db.get_all_categories()
+        if not categories:
+            logger.error("No Athkar categories found in the database!")
         for category in self.athkar_db.get_all_categories():
             category_name = category.name if category.name != "default" else "الافتراضي"
             item = QListWidgetItem(category_name)
@@ -108,6 +119,8 @@ class AthkarDialog(QDialog):
             self.section_list.addItem(item)
         self.section_list.setCurrentRow(0)
         self.update_ui_based_on_selection()
+        logger.debug(f"found {categories}.")
+
 
     def get_selected_category(self) -> Optional[AthkarCategory]:
         selected_item = self.section_list.currentItem()
@@ -118,6 +131,7 @@ class AthkarDialog(QDialog):
     def update_ui_based_on_selection(self):
         selected_category = self.get_selected_category()
         if selected_category:
+            logger.debug(f"Selected category: {selected_category.name}")
             self.audio_athkar_enable_checkbox.setChecked(selected_category.audio_athkar_enabled)
             self.text_athkar_enable_checkbox.setChecked(selected_category.text_athkar_enabled)
             self.from_combobox.setCurrentText(selected_category.from_time)
@@ -126,8 +140,12 @@ class AthkarDialog(QDialog):
                 selected_category.play_interval, "30 دقيقة"
             )
             self.interval_combobox.setCurrentText(interval_text)
+        else:
+            logger.warning("No category selected.")
+
 
     def reset_settings(self):
+        logger.debug("Resetting settings...")
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setWindowTitle("إعادة ضبط الخيارات")
@@ -139,6 +157,7 @@ class AthkarDialog(QDialog):
         msg_box.exec()
 
         if msg_box.clickedButton() == yes_button:
+            logger.debug("Settings reset to default.")
             self.audio_athkar_enable_checkbox.setChecked(False)
             self.text_athkar_enable_checkbox.setChecked(False)
             self.from_combobox.setCurrentIndex(0)
@@ -148,6 +167,7 @@ class AthkarDialog(QDialog):
     def on_save(self) -> None:
         selected_category = self.get_selected_category()
         if not selected_category:
+            logger.error("Attempted to save without selecting a category.", exc_info=True)
             return
         
         play_interval_text = self.interval_combobox.currentText()
@@ -164,11 +184,14 @@ class AthkarDialog(QDialog):
             audio_athkar_enabled=int(self.audio_athkar_enable_checkbox.isChecked()),
             text_athkar_enabled=int(self.text_athkar_enable_checkbox.isChecked())
         )
+        logger.info(f"Updated settings for category: {selected_category.name}.")
         self.athkar_scheduler.refresh()
+        logger.debug("athkar dialog saved.")
         self.accept()
         self.deleteLater()
 
 
     def reject(self):
+        logger.debug("Athkar dialog closed.")
         self.deleteLater()
         
