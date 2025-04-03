@@ -19,6 +19,9 @@ from utils.universal_speech import UniversalSpeech
 from utils.const import albayan_documents_dir, Globals
 from exceptions.error_decorators import exception_handler
 import qtawesome as qta
+from utils.logger import LoggerManager
+
+logger = LoggerManager.get_logger(__name__)
 
 
 class TafaseerDialog(QDialog):
@@ -28,10 +31,12 @@ class TafaseerDialog(QDialog):
         self.ayah_info = ayah_info
         self.default_category = default_category
         self.setWindowTitle(title)
+        logger.debug(f"TafaseerDialog initialized with title: {title}.")
         self.resize(500, 400)
         self.tafaseer_manager = TafaseerManager()
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(self.default_category))
         Globals.effects_manager.play("open")
+        logger.debug(f"Loaded Tafaseer category: {self.default_category}")
 
         self.layout = QVBoxLayout(self)
         
@@ -41,6 +46,7 @@ class TafaseerDialog(QDialog):
         self.text_edit = ReadOnlyTextEdit(self)
         self.text_edit.setAccessibleName(self.label.text())
         self.text_edit.setText(self.tafaseer_manager.get_tafaseer(ayah_info[0], ayah_info[1]))
+        logger.debug("Tafaseer content loaded into text edit")
         self.layout.addWidget(self.text_edit)
 
         self.button_layout = QHBoxLayout()  # استخدام QHBoxLayout بدلاً من QVBoxLayout
@@ -75,9 +81,12 @@ class TafaseerDialog(QDialog):
         self.layout.addLayout(self.button_layout)
         self.setFocus()
         QTimer.singleShot(300, self.text_edit.setFocus)
+        logger.debug("TafaseerDialog setup completed.")
+
 
     @exception_handler(ui_element=QMessageBox)
     def show_menu(self, event):
+        logger.info("User opened Tafaseer category selection menu.")
         menu = QMenu(self)
         arabic_categories = Category.get_categories_in_arabic()
         actions = {}
@@ -96,16 +105,20 @@ class TafaseerDialog(QDialog):
 
         menu.setAccessibleName("اختر المفسر:")
         menu.setFocus()
+        logger.debug("Tafaseer category menu displayed.")
         menu.exec(self.category_button.mapToGlobal(self.category_button.rect().bottomLeft()))
 
     @exception_handler(ui_element=QMessageBox)
     def handle_category_selection(self, event):
         selected_category = self.sender().text()
+        logger.debug(f"User selected Tafaseer category: {selected_category}")
         self.category_button.setText(selected_category)
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(selected_category))
         self.text_edit.setText(self.tafaseer_manager.get_tafaseer(self.ayah_info[0], self.ayah_info[1]))
         self.text_edit.setFocus()
         Globals.effects_manager.play("change")
+        logger.debug(f"Tafaseer content updated for category: {selected_category}")
+
 
     def copy_content(self):
         copied_content = self.text_edit.toPlainText()
@@ -113,9 +126,13 @@ class TafaseerDialog(QDialog):
         clipboard.setText(copied_content) 
         UniversalSpeech.say("تم نسخ التفسير.")
         Globals.effects_manager.play("copy")        
+        logger.debug("User copied Tafaseer content to clipboard.")
+
+
     def save_content(self):            
 
         file_name = os.path.join(albayan_documents_dir, self.windowTitle())
+        logger.debug(f"User attempting to save Tafaseer content to: {file_name}")
         # Open the file dialog in the Albayan directory
         file_path, _ = QFileDialog.getSaveFileName(
             self, "Save File", file_name, "Text files (*.txt)",
@@ -124,7 +141,10 @@ class TafaseerDialog(QDialog):
         if file_path:
             with open(file_path, "w") as file:
                 file.write(self.text_edit.toPlainText())
+                logger.debug(f"Tafaseer content successfully saved to: {file_path}")
+
 
     def reject(self):
         Globals.effects_manager.play("clos")
+        logger.debug("User closed TafaseerDialog.")
         self.deleteLater()
