@@ -222,30 +222,44 @@ class MenuBar(QMenuBar):
         self.setup_shortcuts()
 
     def OnSettings(self):
+        logger.debug("Opening settings dialog.")
         SettingsDialog(self.parent).exec()
         self.close_action.setVisible(Config.general.run_in_background_enabled)
+        logger.debug("Settings dialog closed, setting visibility of close action as {Config.general.run_in_background_enabled}.")
+
 
     def OnUpdate(self):
+        logger.debug("Opening update dialog.")
         self.update_manager.check_updates()
 
 
 
     def OnBookmarkManager(self):
+        logger.debug("Opening bookmark manager dialog.")
         dialog = BookmarkDialog(self.parent)
         if dialog.exec():
+            logger.debug("Bookmark manager closed with changes.")
             self.parent.set_text_ctrl_label()
+        else:
+            logger.debug("Bookmark manager closed without changes.")
+
 
     def OnSuraPlayer(self):
+        logger.debug("Opening Sura Player window.")
         if not self.sura_player_window:
             self.sura_player_window = SuraPlayerWindow(self.parent)
         self.sura_player_window.show()
+        logger.debug("Sura Player window shown.")
         self.sura_player_window.activateWindow()
+        logger.debug("Sura Player window activated.")
         self.parent.hide()
-
+        logger.debug("Main window hidden.")
 
     def OnTasbihAction(self):
+        logger.debug("Opening Tasbih dialog.")
         tasbih_dialog = TasbihDialog(self.parent)
         tasbih_dialog.open()
+        logger.debug("Tasbih dialog opened.")
 
     def OnStoriesAction(self):
         stories_dialog = ProphetsStoriesDialog(self.parent)
@@ -256,34 +270,46 @@ class MenuBar(QMenuBar):
         # apply theme
         theme = self.sender().text()
         theme = "default" if theme == "الافتراضي" else theme
+        logger.debug(f"Applying theme: {theme}")
         self.theme_manager.apply_theme(theme)
 
         # Save selected theme in the settings
         Config.preferences.theme = theme
         Config.save_settings()
+        logger.debug(f"Theme '{theme}' saved in settings.")
+
 
     def set_text_direction_rtl(self):
+        logger.debug("Setting text direction to RTL.")
         option = self.parent.quran_view.document().defaultTextOption()
         option.setTextDirection(Qt.LayoutDirection.RightToLeft)
         self.parent.quran_view.document().setDefaultTextOption(option)
+        logger.debug("Text direction set to RTL.")
+
 
     def set_text_direction_ltr(self):
+        logger.debug("Setting text direction to LTR.")
         option = self.parent.quran_view.document().defaultTextOption()
         option.setTextDirection(Qt.LayoutDirection.LeftToRight)
         self.parent.quran_view.document().setDefaultTextOption(option)
+        logger.debug("Text direction set to LTR.")
+
 
     def OnContact(self):
         name = self.sender().text()
         email = self.our_emails[name]
+        logger.debug(f"Contacting {name} at {email}.")
         try:
             url = QUrl(f"mailto:{email}")
             QDesktopServices.openUrl(url)
+            logger.debug(f"Opened email client for {name}.")
         except Exception as e:
-            logger.error(str(e))
+            logger.error(f"Error opening email client: {e}", exc_info=True)
             QMessageBox.critical(self, "خطأ", "حدث خطأ أثناء محاولة فتح برنامج البريد الإلكتروني")
 
 
     def OnAbout(self):
+        logger.debug("Opening about dialog.")
         about_text = (
             f"{program_name}، هو برنامج يهدف إلى مساعدة المسلم على قراءة القرآن بشكل سهل وبسيط مع العديد من المميزات.\n"
             "تم تصميم البرنامج من فريق نافذة التقنية: محمود عاطف، أحمد بكر وقيس الرفاعي.\n"
@@ -298,6 +324,7 @@ class MenuBar(QMenuBar):
         msg_box.exec()
 
     def OnGoTo(self):
+        logger.debug("Opening GoTo dialog.")
         category_number = self.parent.quran.type
         current_position = self.parent.quran.current_pos
         max = QuranConst.get_max(category_number)
@@ -307,21 +334,38 @@ class MenuBar(QMenuBar):
             value = go_to_dialog.get_input_value()
             text = self.parent.quran.goto(value)
             self.parent.quran_view.setText(text)
+            logger.debug(f"GoTo dialog closed with value: {value}")
         self.parent.set_text_ctrl_label()
         self.parent.quran_view.setFocus()
 
     def OnTafaseerMenu(self):
         if self.tafaseer_menu.isEnabled():
+            logger.debug("Opening tafaseer menu.")
             self.tafaseer_menu.exec()
+            logger.debug("Tafaseer menu closed.")
+
+
 
     def quit_application(self):
+        logger.info("Quitting application.")
         if Config.general.auto_save_position_enabled:
+            logger.info("Auto-saving current position.")
             self.parent.OnSaveCurrentPosition()
+            logger.info("Current position auto-saved.")
+        logger.info("Hiding tray icon.")
         self.parent.tray_manager.hide_icon()
+        logger.info("Tray icon hidden.")
+        logger.info("Closing Sura Player window if open.")
         if self.sura_player_window is not None:
             self.sura_player_window.close()
-        QApplication.quit()
+            logger.info("Sura Player window closed.")
+        logger.info("Freeing audio resources.")
         bass.BASS_Free()
+        logger.info("Audio resources freed.")
+        logger.info("Closing main window.")
+        QApplication.quit()
+        logger.info("Application quit.")
+
 
     def Onopen_log_file(self):
         appdata_path = os.path.expandvars('%appdata%')
@@ -345,16 +389,18 @@ class MenuBar(QMenuBar):
         }
         file_name = file_map.get(doc_type)
         if not file_name:
+            logger.error(f"Invalid documentation type: {doc_type}")
             return
         doc_path = os.path.join("documentation", file_name)
         if os.path.exists(doc_path):
             os.startfile(doc_path)
-
-
+            logger.debug(f"Opened documentation: {doc_path}")
+        else:
+            logger.error(f"Documentation file not found: {doc_path}", exc_info=True)
 
 
     def setup_shortcuts(self, disable=False,):
-
+        logger.debug("Setting up shortcuts.")
         shortcuts = {
         # Navigation actions
             self.next_action: ["Ctrl+N", "Ctrl+Down", "Alt+Right", QKeySequence(Qt.Key.Key_PageDown)],
