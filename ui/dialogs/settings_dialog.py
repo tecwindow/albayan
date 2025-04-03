@@ -28,6 +28,9 @@ from utils.audio_player import bass_initializer, AthkarPlayer, AyahPlayer, Surah
 from utils.Startup import StartupManager
 import qtawesome as qta
 
+logger = LoggerManager.get_logger(__name__)
+
+
 
 class SettingsDialog(QDialog):
     def __init__(self, parent):
@@ -147,6 +150,7 @@ class SettingsDialog(QDialog):
         self.athkar_device_combo.setAccessibleName(self.athkar_device_label.text())
 
         for device in bass_initializer.get_sound_cards():
+            logger.info(f"Detected sound device: {device.name} (Index: {device.index})")
             self.volume_device_combo .addItem(device.name, device.index)
             self.ayah_device_combo.addItem(device.name, device.index)
             self.surah_device_combo.addItem(device.name, device.index)
@@ -288,52 +292,71 @@ class SettingsDialog(QDialog):
 
 
     def OnSurahVolume(self) -> None:
+        volume = self.surah_volume.value()
+        logger.debug(f"Surah volume changed to {volume}.")
         for instance in SurahPlayer.instances:
-            instance.set_volume(self.surah_volume.value())
+            instance.set_volume(volume)
 
     def OnAyahVolume(self) -> None:
+        volume = self.ayah_volume.value()
+        logger.debug(f"Ayah volume changed to {volume}.")
         for instance in AyahPlayer.instances:
-            instance.set_volume(self.ayah_volume.value())
+            instance.set_volume(volume)
 
     def OnAthkarVolume(self) -> None:
+        volume = self.athkar_volume.value()
+        logger.debug(f"Athkar volume changed to {volume}.")
         for instance in AthkarPlayer.instances:
-            instance.set_volume(self.athkar_volume.value())
+            instance.set_volume(volume)
 
     def OnVolume(self) -> None:
+        volume = self.volume.value()
+        logger.debug(f"Sound effects volume changed to {volume}.")
         for instance in SoundEffectPlayer.instances:
-            instance.set_volume(self.volume.value())
+            instance.set_volume(volume)
 
     def updateBackgroundCheckboxState(self):
         # Check if 'start_on_system_start_checkbox' is checked
         if self.start_on_system_start_checkbox.isChecked():
             # If 'start_on_system_start_checkbox' is checked, automatically check 'run_in_background_checkbox'
+            logger.debug("Enabling 'Run in Background' as 'Start on System Startup' is checked.")
             self.run_in_background_checkbox.setChecked(True)
 
     def updateStartCheckboxState(self):
 
         # Check if 'run_in_background_checkbox' is unchecked, then uncheck 'start_on_system_start_checkbox'
         if not self.run_in_background_checkbox.isChecked():
+            logger.debug("'Run in Background' is unchecked, disabling 'Start on System Startup'.")
             self.start_on_system_start_checkbox.setChecked(False)
 
     def save_settings(self):
-
+        logger.debug("Saving user settings.")
         # Apply new sound cards
+        logger.debug("Applying new sound devices.")
         SurahPlayer.apply_new_sound_card(self.surah_device_combo.currentData())
         AyahPlayer.apply_new_sound_card(self.ayah_device_combo.currentData())
         AthkarPlayer.apply_new_sound_card(self.athkar_device_combo.currentData())
         SoundEffectPlayer.apply_new_sound_card(self.volume_device_combo.currentData())
 
         #apply new log level
-        LoggerManager.change_log_level(LogLevel.from_name(self.log_levels_combo.currentData()))
+        log_level = LogLevel.from_name(self.log_levels_combo.currentData())
+        logger.info(f"Changing log level to {log_level}.")
+        LoggerManager.change_log_level(log_level)
+
         
         if Config.general.auto_start_enabled != self.start_on_system_start_checkbox.isChecked():
             if self.start_on_system_start_checkbox.isChecked():
+                logger.debug("Adding application to system startup.")
                 StartupManager.add_to_startup(program_english_name)
             else:
+                logger.debug("Removing application from system startup.")
                 StartupManager.remove_from_startup(program_english_name)
 
         if Config.reading.font_type != self.font_type_combo.currentData():
-            self.parent.quran_view.setText(self.parent.quran.reload_quran(self.font_type_combo.currentData()))
+            new_font_type = self.font_type_combo.currentData()
+        logger.info(f"Font type changed from {Config.reading.font_type} to {new_font_type}. Reloading Quran text.")
+        self.parent.quran_view.setText(self.parent.quran.reload_quran(new_font_type))
+
 
         # Update settings in Config
         Config.general.run_in_background_enabled = self.run_in_background_checkbox.isChecked()
@@ -341,6 +364,7 @@ class SettingsDialog(QDialog):
         Config.general.auto_save_position_enabled = self.auto_save_position_checkbox.isChecked()
         Config.general.check_update_enabled = self.update_checkbox.isChecked()
         Config.general.log_level = self.log_levels_combo.currentData()
+
 
         Config.audio.sound_effect_enabled = self.sound_checkbox.isChecked()
         Config.audio.start_with_basmala_enabled = self.basmala_checkbox.isChecked()
@@ -354,25 +378,59 @@ class SettingsDialog(QDialog):
         Config.audio.athkar_volume_level = self.athkar_volume.value()
         Config.audio.athkar_device = self.athkar_device_combo.currentData()
 
+
         Config.listening.reciter = self.reciters_combo.currentData()
         Config.listening.action_after_listening = self.action_combo.currentData()
         Config.listening.forward_time = self.duration_spinbox.value()
         Config.listening.auto_move_focus = self.auto_move_focus_checkbox.isChecked()
 
+
         Config.reading.font_type = self.font_type_combo.currentData()
         Config.reading.auto_page_turn = self.turn_pages_checkbox.isChecked()
+
 
         Config.search.ignore_tashkeel = self.ignore_tashkeel_checkbox.isChecked()
         Config.search.ignore_hamza = self.ignore_hamza_checkbox.isChecked()
         Config.search.match_whole_word = self.match_whole_word_checkbox.isChecked()
 
+
+        logger.debug(f"""
+Run in background: {Config.general.run_in_background_enabled}
+Auto start on system startup: {Config.general.auto_start_enabled}
+Auto-save position enabled: {Config.general.auto_save_position_enabled}
+Check for updates enabled: {Config.general.check_update_enabled}
+Log level set to: {Config.general.log_level}
+Sound effects enabled: {Config.audio.sound_effect_enabled}
+Start with Basmala enabled: {Config.audio.start_with_basmala_enabled}
+Speak actions enabled: {Config.audio.speak_actions_enabled}
+General volume level: {Config.audio.volume_level}
+General volume device: {Config.audio.volume_device}
+Ayah volume level: {Config.audio.ayah_volume_level}
+Ayah audio device: {Config.audio.ayah_device}
+Surah volume level: {Config.audio.surah_volume_level}
+Surah audio device: {Config.audio.surah_device}
+Athkar volume level: {Config.audio.athkar_volume_level}
+Athkar audio device: {Config.audio.athkar_device}
+Selected reciter: {Config.listening.reciter}
+Action after listening: {Config.listening.action_after_listening}
+Forward time: {Config.listening.forward_time} seconds
+Auto move focus enabled: {Config.listening.auto_move_focus}
+Font type: {Config.reading.font_type}
+Auto page turn enabled: {Config.reading.auto_page_turn}
+Ignore Tashkeel enabled: {Config.search.ignore_tashkeel}
+Ignore Hamza enabled: {Config.search.ignore_hamza}
+Match whole word enabled: {Config.search.match_whole_word}
+""")
+
         # Save settings to file
+        logger.debug("Saving settings to configuration file.")
         Config.save_settings()
 
         self.accept()
         self.deleteLater()
 
     def OnReset(self):
+        logger.warning("User requested settings reset.")
         msg_box = QMessageBox(self)
         msg_box.setWindowTitle("تحذير")
         msg_box.setText("هل أنت متأكد من إعادة تعيين الإعدادات إلى الإعدادات الافتراضية؟")
@@ -382,10 +440,12 @@ class SettingsDialog(QDialog):
         msg_box.exec()
 
         if msg_box.clickedButton() == yes_button:
+            logger.debug("Resetting settings to default values.")
             Config.reset_settings()
             self.set_current_settings()
 
     def set_current_settings(self):
+        logger.debug("Applying current settings to UI elements.")
         self.sound_checkbox.setChecked(Config.audio.sound_effect_enabled)
         self.basmala_checkbox.setChecked(Config.audio.start_with_basmala_enabled)
         self.speech_checkbox.setChecked(Config.audio.speak_actions_enabled)
@@ -425,5 +485,6 @@ class SettingsDialog(QDialog):
         self.reciters_combo.setFocus()
 
     def reject(self):
+        logger.debug("Closing SettingsDialog.")
         self.deleteLater()
         
