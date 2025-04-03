@@ -193,7 +193,10 @@ class Config:
         """
         for section, instance in cls.sections().items():
             cls._save_section(section, instance)
+            logger.debug(f"Saving section '{section}' with values: {asdict(instance)}")
         cls._write_config()
+
+
 
     @classmethod
     def _write_config(cls) -> None:
