@@ -15,6 +15,8 @@ from utils.const import program_name, program_english_name, program_version, pro
 from utils.logger import LogLevel, LoggerManager
 from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 
+
+
 Config.load_settings()
 LoggerManager.setup_logger(
     log_file=LOG_PATH, 
@@ -168,8 +170,10 @@ def main():
         app.set_main_window(main_window)
         logger.debug("Main window set successfully.")
         if "--minimized" not in sys.argv:
-            logger.info("Showing main window.")
+            logger.info("Application started in normal mode, showing main window.")
             main_window.show()
+        else:
+            logger.info("Application started minimized, not showing main window.")
         call_after_starting(main_window)
         logger.debug("Post-startup actions executed successfully.")
         logger.debug("Entering main event loop...")
