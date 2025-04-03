@@ -2,11 +2,15 @@ from PyQt6.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QSpinBox, QDi
 from PyQt6.QtGui import QKeySequence, QShortcut
 from utils.const import Globals
 import qtawesome as qta
+from utils.logger import LoggerManager
 
+logger = LoggerManager.get_logger(__name__)
 
 class GoToDialog(QDialog):
     def __init__(self, parent, current_position: int, max: int, category_label: str):
         super().__init__(parent)
+        
+        logger.info(f"Initializing GoToDialog with current_position={current_position}, max={max}, category_label={category_label}.")
         
         self.setWindowTitle('الذهاب إلى')
         self.setGeometry(100, 100, 300, 150)
@@ -14,6 +18,7 @@ class GoToDialog(QDialog):
         layout = QVBoxLayout()
         
         self.label = QLabel('أدخل رقم ال{}:'.format(category_label))
+        logger.debug(f"Label created with text: {self.label.text()}")
         layout.addWidget(self.label)
         
         self.input_field = QSpinBox(self)
@@ -22,6 +27,7 @@ class GoToDialog(QDialog):
         self.input_field.setMaximum(max)
         self.input_field.setValue(current_position)
         self.input_field.selectAll()
+        logger.debug(f"SpinBox initialized with range (1, {max}) and value {current_position}.")
         layout.addWidget(self.input_field)
         
         button_layout = QHBoxLayout()
@@ -46,11 +52,15 @@ class GoToDialog(QDialog):
         
         self.setLayout(layout)
     
+        logger.info("GoToDialog initialized successfully.")
+
     def get_input_value(self):
-        return self.input_field.value()
+        value = self.input_field.value()
+        logger.debug(f"User selected value: {value}")
+        return value
         self.deleteLater()
 
     def reject(self):
-
+        logger.debug("Go to dialog Closed.")
         self.deleteLater()
         
