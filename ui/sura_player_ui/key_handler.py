@@ -1,7 +1,9 @@
 from PyQt6.QtGui import QKeyEvent
 from PyQt6.QtCore import Qt
 from utils.universal_speech import UniversalSpeech
+from utils.logger import LoggerManager
 
+logger = LoggerManager.get_logger(__name__)
 
 class KeyHandler:
     """
@@ -16,6 +18,7 @@ class KeyHandler:
 
         :param parent: The main application window (QMainWindow).
         """
+        logger.debug("Initializing KeyHandler.")
         self.parent = parent
 
         # Mapping arrow keys to their respective functions
@@ -23,6 +26,7 @@ class KeyHandler:
             Qt.Key_Left: parent.rewind,
             Qt.Key_Right: parent.forward
         }
+        #logger.debug(f"Arrow key actions mapped: {self.arrow_actions}")
 
         # Mapping modifier keys to the corresponding time values for rewinding/forwarding
         self.arrow_modifiers = {
@@ -30,6 +34,7 @@ class KeyHandler:
             Qt.ShiftModifier: 10,  # Shift -> 10 seconds
             Qt.ControlModifier: 20,  # Ctrl -> 20 seconds
         }
+        #logger.debug(f"Arrow key modifiers mapped: {self.arrow_modifiers}")
 
         # Mapping shortcut keys to their corresponding actions
         self.shortcuts = {
@@ -46,6 +51,8 @@ class KeyHandler:
             Qt.Key_MediaPrevious: parent.previous_surah,
             Qt.Key_MediaNext: parent.next_surah,
         }
+        #logger.debug(f"Shortcut keys mapped: {self.shortcuts}")
+
 
     def handle_key_press(self, event: QKeyEvent) -> bool:
         """
@@ -54,15 +61,19 @@ class KeyHandler:
         :param event: The key press event (QKeyEvent).
         :return: True if the event was handled, False otherwise.
         """
+        #logger.debug(f"Key pressed: {event.text()} (KeyCode: {event.key()}, Native KeyCode: {event.nativeVirtualKey()})")
         if self.process_arrows(event):
+            #logger.debug("Arrow key processed successfully.")
             return True
 
         if event.modifiers() & (Qt.ControlModifier | Qt.AltModifier):
+            #logger.debug("Control or Alt key detected. Ignoring key event.")
             return True
 
         if  self.process_shortcuts(event):
+            #logger.debug("Shortcut key processed successfully.")
             return True
-
+        #logger.debug("Key event did not match any conditions, returning False.")
         return False
 
     def process_arrows(self, event: QKeyEvent) -> bool:
@@ -76,6 +87,8 @@ class KeyHandler:
         if action:
             for modifier, value in self.arrow_modifiers.items():
                 if event.modifiers() == modifier:
+                    action(value)
+                    logger.debug(f"Executing action with modifier {modifier}: {value} seconds")
                     action(value)
                     return True
         return False
@@ -94,6 +107,7 @@ class KeyHandler:
         if modifiers & Qt.ShiftModifier:
             if Qt.Key_0 <= key_code <= Qt.Key_9:  # Shift + 0 to Shift + 9
                 number = key_code - Qt.Key_0  # Convert key_code to 0-9
+                logger.debug(f"Shift + {number} detected, setting position to {number * 10}%")
                 self.parent.set_position(number * 10, by_percent=True)
                 return True
 
