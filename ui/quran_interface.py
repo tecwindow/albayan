@@ -39,8 +39,11 @@ from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import UserDataManager
 from utils.const import program_name, program_icon, user_db_path, data_folder, Globals
+from utils.logger import LoggerManager
 from utils.audio_player import SoundEffectPlayer
 from exceptions.error_decorators import exception_handler
+
+logger = LoggerManager.get_logger(__name__)
 
 
 class QuranInterface(QMainWindow):
@@ -165,10 +168,12 @@ class QuranInterface(QMainWindow):
 
 
     def set_text(self):
+        logger.debug("Loading Quran text...")
         position_data = self.user_data_manager.get_last_position()
         ayah_number = position_data.get("ayah_number", 1)
         current_positiom = position_data.get("position", 1)
         mode = position_data.get("criteria_number", 0)
+        logger.debug(f"Current position: {current_positiom}, Ayah number: {ayah_number}, Mode: {mode}")
         self.quran.type = mode
         self.menu_bar.browse_mode_actions[mode].setChecked(True)
         
@@ -176,36 +181,51 @@ class QuranInterface(QMainWindow):
         self.quran_view.setText(text)
         self.set_text_ctrl_label()
         self.set_focus_to_ayah(ayah_number)
+        logger.debug("Quran text loaded successfully.")
+
 
     def set_focus_to_ayah(self, ayah_number: int):
         """set the Cursor to ayah_position in the text"""
+        logger.debug(f"Setting focus to Ayah number: {ayah_number}")
         if ayah_number == -1:
             text_position = len(self.quran_view.toPlainText())
         else:
             text_position = self.quran.ayah_data.get_position(ayah_number)
+        logger.debug(f"Text position: {text_position}")
 
         cursor = QTextCursor(self.quran_view.document())
         cursor.setPosition(text_position)
         self.quran_view.setTextCursor(cursor)
-        
+        logger.debug("Focus set successfully.")
 
     def OnNext(self):
+        logger.debug("Next button clicked.")
         self.quran_view.setText(self.quran.next())
         self.set_text_ctrl_label()
         Globals.effects_manager.play("next")
+        logger.debug("Text set successfully.")
         if self.quran.current_pos == self.quran.max_pos:
+            logger.debug("Reached the end of the Quran.")
             self.quran_view.setFocus()
 
+
     def OnBack(self, is_auto_call: bool = False):
+        logger.debug("Back button clicked.")
         self.quran_view.setText(self.quran.back())
         self.set_text_ctrl_label()
         Globals.effects_manager.play("previous")
+        logger.debug("Text set successfully.")
         if self.quran.current_pos == 1:            
+            logger.debug("Reached the beginning of the Quran.")
             self.quran_view.setFocus()
         if Config.reading.auto_page_turn and is_auto_call:
             self.set_focus_to_ayah(-1)
-    
+            logger.debug("Focus set to previous Text.")
+
+
     def set_text_ctrl_label(self):
+
+        logger.debug("Setting text control label.")
 
         label = ""
         if self.quran.type == 0:
@@ -214,38 +234,44 @@ class QuranInterface(QMainWindow):
             self.menu_bar.next_action.setText("الصفحة التالية")
             self.back_to.setText("الصفحة السابقة")
             self.menu_bar.previous_action.setText("الصفحة السابقة")
+            logger.debug("Page mode selected.")
         elif self.quran.type == 1:
             label = self.quran.data_list[-1][2]
             self.next_to.setText("السورة التالية")
             self.menu_bar.next_action.setText("السورة التالية")
             self.back_to.setText("السورة السابقة")
             self.menu_bar.previous_action.setText("السورة السابقة")    
+            logger.debug("Surah mode selected.")
         elif self.quran.type == 2:
             label = f"الربع {self.quran.current_pos}"
             self.next_to.setText("الربع التالي")
             self.menu_bar.next_action.setText("الربع التالي")
             self.back_to.setText("الربع السابق")
             self.menu_bar.previous_action.setText("الربع السابق")
+            logger.debug("Quarter mode selected.")
         elif self.quran.type == 3:
             label = f"الحزب {self.quran.current_pos}"
             self.next_to.setText("الحزب التالي")
             self.menu_bar.next_action.setText("الحزب التالي")
             self.back_to.setText("الحزب السابق")
             self.menu_bar.previous_action.setText("الحزب السابق")
+            logger.debug("Hizb mode selected.")
         elif self.quran.type == 4:
             label = f"الجزء {self.quran.current_pos}"
             self.next_to.setText("الجزء التالي")
             self.menu_bar.next_action.setText("الجزء التالي")
             self.back_to.setText("الجزء السابق")
             self.menu_bar.previous_action.setText("الجزء السابق")
+            logger.debug("Juz mode selected.")
 
         # set the label
         self.quran_title.setText(label)
         self.quran_view.setAccessibleName(label)
-
+        logger.debug(f"Label set to: {label}")
         if self.isActiveWindow():
                 UniversalSpeech.say(label)
-        
+
+
         # Enable back and next item
         next_status = self.quran.current_pos < self.quran.max_pos
         back_status = self.quran.current_pos > 1
@@ -255,45 +281,66 @@ class QuranInterface(QMainWindow):
         self.menu_bar.previous_action.setEnabled(back_status)
         self.toolbar.navigation.reset_position()
         self.toolbar.set_buttons_status()
+        logger.debug("Buttons status set.")
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnQuickAccess(self, event):
+        logger.debug("Quick access button clicked.")
         dialog = QuickAccess(self, "الوصول السريع")
         if not dialog.exec():
+            logger.debug("QuickAccess dialog canceled.")
             return
         
         self.set_text_ctrl_label()
         self.quran_view.setFocus()
 
+
+
     @exception_handler(ui_element=QMessageBox)
     def OnSearch(self, event):
+        logger.debug("Search button clicked.")
         search_dialog = SearchDialog(self, "بحث")
+        if not search_dialog.exec():
+            logger.debug("Search dialog canceled.")
+            return  
         if search_dialog.exec():
             self.set_text_ctrl_label()
+        logger.debug("Search completed.")
+
 
     def get_current_ayah_info(self) -> list:
+        logger.debug("Getting current Ayah info.")
 
         current_line = self.quran_view.textCursor().block()
         position = current_line.position()
         ayah_info = self.quran.get_ayah_info(position)
-
+        logger.debug(f"Retrieved ayah_info: {ayah_info}")
         return ayah_info
     
     @exception_handler(ui_element=QMessageBox)
     def OnInterpretation(self, event=None):
+        logger.debug("Interpretation opened..")
+
 
         sender = self.sender()
         if sender is not None:
             selected_category = sender.text()
+            logger.debug(f"Selected category: {selected_category}")
         else:
             selected_category = "الميسر"
+        logger.debug(f"set the default category: {selected_category}")
         if selected_category not in Category.get_categories_in_arabic():
+            logger.debug("Invalid category, defaulting to الميسر.")
             selected_category = "الميسر"
 
         ayah_info = self.get_current_ayah_info()
         title = "تفسير آية {} من {}".format(ayah_info[3], ayah_info[2])
+        logger.debug(f"Opening TafaseerDialog with title: {title}")
         dialog = TafaseerDialog(self, title, ayah_info, selected_category)
         dialog.exec()
+        logger.debug("TafaseerDialog closed.")
+
 
     def onContextMenu(self):
         menu = QMenu(self)
@@ -355,30 +402,43 @@ class QuranInterface(QMainWindow):
         menu.exec(self.quran_view.mapToGlobal(self.quran_view.pos()))        
 
     def on_copy_verse(self):
+        logger.debug("Copy verse action triggered.")
         current_line = self.quran_view.textCursor().block().text()
         clipboard = QApplication.clipboard()
         clipboard.setText(current_line)
         UniversalSpeech.say("تم نسخ الآية.")
         Globals.effects_manager.play("copy")
+        logger.debug(f"Ayah {current_line} copied to clipboard.")
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnSyntax(self, event):
+        logger.debug("Syntax action triggered.")
+        logger.debug("Retrieving syntax for current ayah.")
         aya_info = self.get_current_ayah_info()
         title = "إعراب آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "الإعراب"
         text = E3rab(aya_info[0], aya_info[1]).text
+        logger.debug(f"Syntax details retrieved for ayah {aya_info[3]} in {aya_info[2]}")
         InfoDialog(self, title, label, text).exec()
+        logger.debug("Syntax dialog closed.")
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnVerseReasons(self, event):
+        logger.debug("Verse reasons action triggered.")
+        logger.debug("Retrieving reasons for current ayah.")
         aya_info = self.get_current_ayah_info()
         title = "أسباب نزول آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "الأسباب"
         text = TanzilAyah(aya_info[1]).text
 
         if text:
+            logger.debug(f"Reasons retrieved for ayah {aya_info[3]} in {aya_info[2]}")
             InfoDialog(self, title, label, text).exec()
+            logger.debug("Verse reasons dialog closed.")
         else:
+            logger.warning("No reasons available for this ayah.")
             msg_box = QMessageBox(self)
             msg_box.setIcon(QMessageBox.Icon.Information)
             msg_box.setWindowTitle("لا يتوفر معلومات للآية")
@@ -389,87 +449,136 @@ class QuranInterface(QMainWindow):
 
     @exception_handler(ui_element=QMessageBox)
     def OnMoshafInfo(self, event):
+        logger.debug("Moshaf info action triggered.")
         title = "معلومات المصحف"
         label = "معلومات المصحف:"
         text = MoshafInfo().text
+        logger.debug("Moshaf information retrieved.")
         InfoDialog(self, title, label, text).open()
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnAyahInfo(self, event):
+        logger.debug("Ayah info action triggered.")
+        logger.debug("Retrieving Ayah information.")
         aya_info = self.get_current_ayah_info()
         title = "معلومات آية رقم {} من {}".format(aya_info[3], aya_info[2])
         label = "معلومات الآية:"
         text = AyaInfo(aya_info[1]).text
+        logger.debug(f"Information retrieved for ayah {aya_info[3]} in {aya_info[2]}")
+        logger.debug(f"Displaying information for ayah {aya_info[3]} in {aya_info[2]}")
         InfoDialog(self, title, label, text, is_html_content=True).open()
-        
+
+
+
     @exception_handler(ui_element=QMessageBox)
     def OnSurahInfo(self, event):
+        logger.debug("Surah info action triggered.")
+        logger.debug("Retrieving Surah information.")
         aya_info = self.get_current_ayah_info()
         title = "معلومات {}".format(aya_info[2])
         label = "معلومات السورة:"
         sura_info = SuraInfo(aya_info[0])
+        logger.debug(f"Information retrieved for surah {aya_info[2]}")
         InfoDialog(self, title, label, sura_info.text, is_html_content=True).open()
+
+
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnJuzInfo(self, event):
+        logger.debug("Juz info action triggered.")
+        logger.debug("Retrieving Juz information.")
         aya_info = self.get_current_ayah_info()
         title = "معلومات الجزء {}".format(aya_info[4])
         label = "معلومات الجزء:"
         juz_info = JuzInfo(aya_info[4])
+        logger.debug(f"Information retrieved for juz {aya_info[4]}")
         InfoDialog(self, title, label, juz_info.text).open()
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnHizbInfo(self, event):
+        logger.debug("Hizb info action triggered.")
+        logger.debug("Retrieving Hizb information.")
         aya_info = self.get_current_ayah_info()
         title = "معلومات الحزب {}".format(aya_info[5])
         label = "معلومات الحزب:"
         hizb_info = HizbInfo(aya_info[5])
+        logger.debug(f"Information retrieved for hizb {aya_info[5]}")
         InfoDialog(self, title, label, hizb_info.text).open()
+
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnQuarterInfo(self, event):
+        logger.debug("Quarter info action triggered.")
+        logger.debug("Retrieving Quarter information.")
         aya_info = self.get_current_ayah_info()
         title = "معلومات الربع {}".format(aya_info[6])
         label = "معلومات الربع:"
         quarter_info = QuarterInfo(aya_info[6])
+        logger.debug(f"Information retrieved for quarter {aya_info[6]}")
         InfoDialog(self, title, label, quarter_info.text).open()
+
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnPageInfo(self, event):
+        logger.debug("Page info action triggered.")
+        logger.debug("Retrieving Page information.")
         aya_info = self.get_current_ayah_info()
         title = "معلومات الصفحة {}".format(aya_info[7])
         label = "معلومات الصفحة:"
         page_info = PageInfo(aya_info[7])
+        logger.debug(f"Information retrieved for page {aya_info[7]}")
+        logger.debug("Displaying page information.")
         InfoDialog(self, title, label, page_info.text).open()
 
+
+
     def say_played_ayah(self):
+        logger.debug("Say played Ayah action triggered.")
         ayah_info = self.get_current_ayah_info()
         text = f"آية {self.toolbar.navigation.current_ayah} من {ayah_info[2]}"
+        logger.debug(f"Text to be spoken: {text}")
         if self.toolbar.navigation.current_ayah:
             if self.toolbar.player.is_playing():
                 UniversalSpeech.say(f"{text}، الآية المشغلة.")
+                logger.debug(f"{text} is currently playing.")
             elif self.toolbar.player.is_paused():
                 UniversalSpeech.say(f"{text}، تم إيقافها مؤقتًا.")
+                logger.debug(f"{text} is paused.")
             elif self.toolbar.player.is_stopped():
                 UniversalSpeech.say(f"{text}، تم إيقافها.")
+                logger.debug(f"{text} is stopped.")
             elif self.toolbar.player.is_stalled():
                 UniversalSpeech.say(f"{text}، يجري تحميلها.")
+                logger.debug(f"{text} is stalled.")
         else:
             UniversalSpeech.say("لم يتم تشغيل أي آية.")
+            logger.debug("No Ayah is currently playing.")
+
 
     def say_focused_ayah(self):
+        logger.debug("Say focused Ayah action triggered.")
         ayah_info = self.get_current_ayah_info()
         text = f"آية {ayah_info[3]} من {ayah_info[2]}، الآية الحالية."
+        logger.debug(f"Text to be spoken: {text}")
         UniversalSpeech.say(text)
+
 
     @exception_handler(ui_element=QMessageBox)
     def OnSaveBookmark(self, event):
+        logger.debug("Save bookmark action triggered.")
+
 
         bookmark_manager= BookmarkManager()
         aya_info = self.get_current_ayah_info()
         criteria_number = self.quran.type
-
+        logger.debug(f"Information retrieved for bookmark: {aya_info} and criteria number: {criteria_number}")
         if bookmark_manager.is_exist(aya_info[1]):
+            logger.warning("Bookmark already exists for this ayah.")
             msgBox = QMessageBox(self)
             msgBox.setIcon(QMessageBox.Critical)
             msgBox.setWindowTitle("خطأ")
@@ -479,7 +588,7 @@ class QuranInterface(QMainWindow):
 
             return
 
-
+        logger.debug("Bookmark does not exist, proceeding to save.")
         dialog = QInputDialog(self)
         dialog.setWindowTitle("اسم العلامة")
         dialog.setLabelText("أدخل اسم العلامة:")
@@ -493,6 +602,7 @@ class QuranInterface(QMainWindow):
         if dialog.exec() == dialog.Accepted:
             name = dialog.textValue()
             if name:
+                logger.debug(f"Bookmark name entered: {name}")
                 bookmark_manager.insert_bookmark(
                     name, 
                     aya_info[1], 
@@ -501,25 +611,34 @@ class QuranInterface(QMainWindow):
                     aya_info[2], 
                     criteria_number
                 )
+                logger.debug("Bookmark saved successfully.")                    
                 self.quran_view.setFocus()
             else:
-                # Optionally, handle the case where the user accepts without entering a name
+                logger.warning("Bookmark name is empty.")
                 return
         else:
+            logger.debug("Bookmark dialog canceled.")   
             return
 
     def OnSaveCurrentPosition(self):
+        logger.debug("Save current position action triggered.")
         self.user_data_manager.save_position(
             self.get_current_ayah_info()[1],
          self.quran.type,
          self.quran.current_pos
          )
+        logger.debug(f"Current position saved: {self.quran.current_pos}, Ayah number: {self.get_current_ayah_info()[1]}, Criteria number: {self.quran.type}")
+
 
     def OnSave_alert(self):
+        logger.debug("Save alert action triggered.")
         UniversalSpeech.say("تم حفظ الموضع الحالي.")
         Globals.effects_manager.play("save")
+        logger.debug("Save alert played.")
+
 
     def OnChangeNavigationMode(self, mode):
+        logger.debug(f"Changing navigation mode to: {mode}")
         ayah_info = self.get_current_ayah_info()
         if  ayah_info:
             ayah_number = ayah_info[1]
@@ -529,19 +648,32 @@ class QuranInterface(QMainWindow):
             self.set_focus_to_ayah(ayah_number)
             self.set_text_ctrl_label()
         Globals.effects_manager.play("change")
-            
+        logger.debug(f"Navigation mode changed. Now displaying ayah {ayah_number} in mode {mode}")
+
+
+
     def closeEvent(self, event):
+        logger.debug("Close event triggered.")
         if Config.general.run_in_background_enabled:
+            logger.debug("Running in background.")
             event.ignore()
             self.hide()
             icon_path = "Albayan.ico"
+            logger.debug(f"Showing notification.")
             self.tray_manager.tray_icon.showMessage("البيان", "تم تصغير نافذة البيان على صينية النظام, البرنامج يعمل في الخلفية.", QIcon(icon_path), msecs=5000)
+            logger.debug("notification shown.")
+            logger.debug("App minimized to tray.")
         else:
+            logger.debug("Closing application.")
             self.tray_manager.hide_icon()
             
     @exception_handler(ui_element=QMessageBox)
     def OnRandomMessages(self, event):
+        logger.debug("Random messages action triggered.")
         info_dialog = InfoDialog(self, 'رسالة لك', '', "", is_html_content=False, show_message_button=True, save_message_as_img_button=True)
         info_dialog.choose_QuotesMessage()
+        logger.debug("Random message dialog opened.")
         info_dialog.exec()
+        logger.debug("Random message dialog closed.")
+
 
