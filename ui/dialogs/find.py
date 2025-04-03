@@ -21,6 +21,9 @@ from core_functions.search import SearchCriteria, QuranSearchManager
 from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
 from utils.const import Globals
+from utils.logger import LoggerManager
+
+logger = LoggerManager.get_logger(__name__)
 
 
 
@@ -39,6 +42,8 @@ class SearchDialog(QDialog):
         self.resize(500, 400)
         self.search_manager = QuranSearchManager()
         self.criteria = None
+        logger.debug(f"SearchDialog initialized with title: {title}.")
+
 
         self.initUI()
 
@@ -139,16 +144,24 @@ class SearchDialog(QDialog):
 
     def OnEdit(self):
         self.search_button.setEnabled(bool(self.search_box.text()))
+        logger.debug(f"User edited search box: {self.search_box.text()}.")
+
 
     def show_advanced_options(self):
-        self.advanced_search_groupbox.setEnabled(self.advanced_search_checkbox.isChecked())
+        enabled = self.advanced_search_checkbox.isChecked()
+        self.advanced_search_groupbox.setEnabled(enabled)
+        logger.debug(f"Advanced search {'enabled' if enabled else 'disabled'}.")
+
 
     def on_submit(self):
+        logger.debug("Search initiated.")
         self.set_options_search()
         search_text = self.search_box. text()
         self.set_search_phrase(search_text)
+        logger.debug(f"Searching for: {search_text}")
         search_result = self.search_manager.search(search_text)
         if not search_result:
+            logger.warning(f"No results found for '{search_text}'.")
             msg_box = QMessageBox(self)
             msg_box.setIcon(QMessageBox.Icon.Critical)
             msg_box.setWindowTitle("لا توجد نتائج")
@@ -158,16 +171,18 @@ class SearchDialog(QDialog):
             msg_box.exec()
 
             return
-        
+        logger.info(f"Search successful. {len(search_result)} results found.")
         result_dialog = SearchResultsDialog(self, search_result)
         if result_dialog.exec():
             selected_result = result_dialog.list_widget.currentRow()
             ayah_number = search_result[selected_result]["number"]
             ayah_result = self.parent.quran.get_by_ayah_number(ayah_number)
+            logger.debug(f"User selected result {selected_result}, Ayah number: {ayah_number}")
             self.parent.quran_view.setText(ayah_result["full_text"])
             self.parent.set_focus_to_ayah(ayah_number)
             self.parent.quran_view.setFocus()
             self.accept()
+            logger.debug("SearchDialog closed after selection.")
             self.deleteLater()
 
 
@@ -198,11 +213,14 @@ class SearchDialog(QDialog):
             self.search_from_combobox.addItems(self.quarters)
             self.search_to_combobox.addItems(self.quarters)
         self.search_to_combobox.setCurrentIndex(self.search_to_combobox.count() - 1)
+        logger.debug(f"Search type changed to: {self.criteria}.")
+
 
     def set_options_search(self):
         
         search_from = self.search_from_combobox.currentIndex() + 1
         search_to = self.search_to_combobox.currentIndex() + 1
+        logger.debug(f"Search range set: From {search_from} to {search_to}")
         self.search_manager.set(
             no_tashkil=self.ignore_diacritics_checkbox.isChecked(),
             no_hamza=self.ignore_hamza_checkbox.isChecked(),
@@ -218,7 +236,7 @@ class SearchResultsDialog(QDialog):
         super().__init__(parent)
         self.search_result = search_result
         self.setWindowTitle("نتائج البحث")
-
+        logger.debug(f"SearchResultsDialog opened with {len(search_result)} results.")
         self.total_label = QLabel("عدد النتائج: {}.".format(len(search_result)))
         self.label = QLabel("النتائج:")
         self.list_widget = QListWidget(self)
@@ -249,7 +267,7 @@ class SearchResultsDialog(QDialog):
         
         self.setLayout(layout)
         self.list_widget.setCurrentRow(0)
-
+        logger.debug("SearchResultsDialog initialized successfully.")
 
     def format_result(self, row:dict) -> str:
         text = row["text"]
@@ -264,13 +282,15 @@ class SearchResultsDialog(QDialog):
 
         if event.key() == Qt.Key.Key_I and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
             UniversalSpeech.say(self.total_label.text())
+            logger.debug("Ctrl+I pressed: Announcing total results count.")
         elif event.key() == Qt.Key.Key_R and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
             current_row = self.list_widget.currentRow()
             text = self.search_result[current_row]["text"]
             UniversalSpeech.say(text)
-
+            logger.debug(f"Ctrl+R pressed: Reading search result at index {current_row}.")
         return super().keyPressEvent(event)
 
     def reject(self):
+        logger.info("SearchResultsDialog closed.")
         self.deleteLater()
         
