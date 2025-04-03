@@ -40,13 +40,13 @@ class AyahData:
 
     def insert(self, ayah_number: int, surah_number: int, ayah_number_in_surah: int, first_position: int, last_position: int):
         """Insert a new ayah into the table."""
-        logger.debug(f"Inserting ayah number {ayah_number}, surah number {surah_number}, positions {first_position}-{last_position}.")
+        #logger.debug(f"Inserting ayah number {ayah_number}, surah number {surah_number}, positions {first_position}-{last_position}.")
         self.cursor.execute('''
             INSERT INTO ayah_data (ayah_number, surah_number, ayah_number_in_surah, first_position, last_position)
             VALUES (?, ?, ?, ?, ?)
         ''', (ayah_number, surah_number, ayah_number_in_surah, first_position, last_position))
         self.conn.commit()
-        logger.info(f"Inserted ayah number {ayah_number} into the database.")
+        #logger.debug(f"Inserted ayah number {ayah_number} into the database.")
 
 
     def get(self, position: int) -> int:
@@ -72,7 +72,7 @@ class AyahData:
         
     def get_position(self, ayah_number: int) -> int:
         """Get position for Specific ayah"""
-        logger.debug(f"Retrieving first position for ayah number {ayah_number}.")
+        logger.debug(f"Retrieving position for ayah number {ayah_number}.")
         self.cursor.execute("SELECT first_position FROM ayah_data WHERE ayah_number = ?;", (ayah_number,))
         result = self.cursor.fetchone()
 
@@ -109,7 +109,7 @@ class AyahData:
         """)
     
         result = {row["surah_number"]: row for row in self.cursor.fetchall()}
-        logger.info(f"Fetched ayah ranges: {result}")
+        logger.debug(f"Fetched ayah range: {result}.")
         return result
 
     def __del__(self):
@@ -117,6 +117,6 @@ class AyahData:
         logger.debug("Closing database connection.")
         if self.conn:
             self.conn.close()
-            logger.info("Database connection closed.")
+            logger.debug("Database connection closed.")
 
 
