@@ -18,18 +18,22 @@ from utils.audio_player import SurahPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import PreferencesManager
 from utils.settings import Config
-
+from utils.logger import LoggerManager
 from.menubar import MenuBar
 from .key_handler import KeyHandler
 from .audio_looper import AudioLooper
+
+logger = LoggerManager.get_logger(__name__)
 
 
 class SuraPlayerWindow(QMainWindow):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
+        logger.debug("Initializing SuraPlayerWindow.")
         self.parent = parent
         self.setWindowTitle(f"{program_name} - مشغل القرآن")
         self.resize(600, 400)
+        logger.debug("Loading preferences and initializing components.")
         self.preferences_manager = PreferencesManager(user_db_path)
         self.menubar = MenuBar(self)
         self.setMenuBar(self.menubar)
@@ -59,6 +63,7 @@ class SuraPlayerWindow(QMainWindow):
         layout.addLayout(self.control_layout)
         layout.addWidget(self.progress_group)
 
+        logger.debug("SuraPlayerWindow initialized successfully.")
 
     def create_selection_group(self):
         self.selection_group = QGroupBox("التحديدات")
@@ -75,7 +80,7 @@ class SuraPlayerWindow(QMainWindow):
             reciters_list.append(Item(row["id"], display_text))
             if row["id"] == saved_reciter_id:
                 self.reciter_combo.setCurrentText(display_text)
-
+        logger.debug(f"Loaded {len(reciters_list)} reciters. Selected reciter: {self.reciter_combo.currentText()}") 
         self.filter_manager.set_category(1, "القارئ", reciters_list, self.reciter_combo)
 
         self.surah_label = QLabel("السورة:")
@@ -89,6 +94,7 @@ class SuraPlayerWindow(QMainWindow):
             if surah_number == saved_sura_number:
                 self.surah_combo.setCurrentText(surah_name)
 
+        logger.debug(f"Loaded {len(suras_list)} surahs. Selected surah: {self.surah_combo.currentText()}.")
         self.filter_manager.set_category(2, "السورة", suras_list, self.surah_combo)
 
         selection_layout.addWidget(self.reciter_label)
@@ -244,6 +250,7 @@ class SuraPlayerWindow(QMainWindow):
         reciter_data = self.reciters.get_reciter(reciter_id)
 
         if not reciter_data or not reciter_data["available_suras"]:
+            logger.warning(f"Reciter {reciter_id} has no available Surahs.")
             return
 
         available_suras = sorted(map(int, reciter_data["available_suras"].split(",")))
@@ -255,24 +262,32 @@ class SuraPlayerWindow(QMainWindow):
 
         self.filter_manager.change_category_items(2, sura_items)
         self.statusBar().showMessage(f"القارئ الحالي: {self.reciter_combo.currentText()}")
+        logger.debug(f"Selected reciter: {self.reciter_combo.currentText()}")
         saved_sura = self.surah_combo.findData(self.preferences_manager.get_int("sura_number"))
         saved_sura = 0 if saved_sura == -1 else saved_sura
         self.surah_combo.setCurrentIndex(saved_sura)
 
     def update_current_surah(self):
+        logger.debug(f"Updating current Surah to {self.surah_combo.currentText()}")
         self.statusBar().showMessage(f"السورة الحالية: {self.surah_combo.currentText()}")
 
     def toggle_play_pause(self):
+        logger.debug("Toggling play/pause.")
         if self.audio_looper.loop_active and self.player.is_paused():
             self.audio_looper   .resume()
+            logger.debug(f"Resumed loop playback {self.surah_combo.currentText()}.")
         elif self.player.is_playing():
             self.player.pause()
+            logger.debug(f"Paused playback {self.surah_combo.currentText()}.")
         else:
             self.play_current_surah()
+            logger.debug(f"Started playback: {self.surah_combo.currentText()}.")
+
 
     def play_current_surah(self):
         reciter_id = self.reciter_combo.currentData()
         surah_number = self.surah_combo.currentData()
+        logger.debug(f"Playing Surah {surah_number} by reciter {reciter_id}, {self.surah_combo.currentText()}, {self.reciter_combo.currentText()}")
         url = self.reciters.get_url(reciter_id, surah_number)
         self.audio_player_thread.set_audio_url(url)
         self.audio_player_thread.start()
@@ -280,20 +295,24 @@ class SuraPlayerWindow(QMainWindow):
         self.preferences_manager.set_preference("sura_number",  self.surah_combo.currentData())
         
     def stop(self):
+        logger.debug("Stopping playback.")
         self.set_position(0)
         self.player.stop()
         self.audio_looper.clear_loop()
 
 
     def forward(self, step = 5):
+        logger.debug(f"Forwarding {step} seconds.")
         self.player.forward(step)
         self.on_update_time(self.player.get_position(), self.player.get_length())
 
     def rewind(self, step= 5):
+        logger.debug(f"Rewinding {step} seconds.")
         self.player.rewind(step)
         self.on_update_time(self.player.get_position(), self.player.get_length())
 
     def set_position(self, position: int, by_percent: bool = False) -> None:
+        logger.info(f"Setting position to {position} {'%' if by_percent else 'seconds'}.")
         if not self.player.current_channel is None:
             if by_percent:
                 total_length = self.player.get_length()
@@ -304,40 +323,50 @@ class SuraPlayerWindow(QMainWindow):
                 UniversalSpeech.say(f"{self.elapsed_time_label.text()}، الوقت الحالي.")
 
     def replay(self):
+        logger.debug("Replaying Surah.")
         self.set_position(0)
         #self.on_update_time(self.player.get_position(), self.player.get_length())
         UniversalSpeech.say(f"{self.elapsed_time_label.text()}، الوقت الحالي.")
 
 
     def next_surah(self):
+        logger.debug("Moving to next Surah.")
         current_index = self.surah_combo.currentIndex()
         if current_index < self.surah_combo.count() - 1:
             self.surah_combo.setCurrentIndex(current_index + 1)
             UniversalSpeech.say(self.surah_combo.currentText())
+            logger.debug(f"Moved to surah {self.surah_combo.currentText()}.")
             self.play_current_surah()
 
     def previous_surah(self):
+        logger.debug("Moving to previous Surah.")
         current_index = self.surah_combo.currentIndex()
         if current_index > 0:
             self.surah_combo.setCurrentIndex(current_index - 1)
             UniversalSpeech.say(self.surah_combo.currentText())
+            logger.debug(f"Moved to surah {self.surah_combo.currentText()}.")
             self.play_current_surah()
 
     def next_reciter(self):
+        logger.debug("Switching to next reciter.")
         current_index = self.reciter_combo.currentIndex()
         if current_index < self.reciter_combo.count() - 1:
             self.reciter_combo.setCurrentIndex(current_index + 1)
             self.play_current_surah()
+        logger.debug(f"Switched to {self.reciter_combo.currentText()}.")
         UniversalSpeech.say(self.reciter_combo.currentText())
 
     def previous_reciter(self):
+        logger.debug("Switching to previous reciter.")
         current_index = self.reciter_combo.currentIndex()
         if current_index > 0:
             self.reciter_combo.setCurrentIndex(current_index - 1)
             self.play_current_surah()
+        logger.debug(f"Switched to {self.reciter_combo.currentText()}.")
         UniversalSpeech.say(self.reciter_combo.currentText())
         
     def increase_volume(self):
+        logger.debug("Increasing volume.")
         self.player.increase_volume()
         volume = int(self.player.volume * 100)
         Config.audio.surah_volume_level = volume
@@ -345,12 +374,14 @@ class SuraPlayerWindow(QMainWindow):
  
 
     def decrease_volume(self):
+        logger.debug("Decreasing volume.")
         self.player.decrease_volume()
         volume = int(self.player.volume * 100)
         Config.audio.surah_volume_level = volume
         Config.save_settings()
  
     def update_volume(self):
+        logger.debug(f"Setting volume to {self.volume_slider.value()}.")
         self.player.set_volume(self.volume_slider.value())
 
     def update_time(self, position):
@@ -405,6 +436,7 @@ class SuraPlayerWindow(QMainWindow):
             self.setAccessibleDescription(F"أنت تستمع إلى سورة {self.surah_combo.currentText()}، للقارئ {self.reciter_combo.currentText().split(' - ')[0]}، اضغط Space للتشغيل. أو اضغط Ctrl+F لتغيير السورة أو القارئ.")
 
     def OnFilterModeChange(self, active: bool) -> None:
+        logger.debug(f"Filter mode changed: {'Activated' if active else 'Deactivated'}")
         Globals.effects_manager.play("filter clos") if not active else Globals.effects_manager.play("filter open")
         widgets = self.buttons + self.menubar.get_player_actions()
         for widget in widgets:
@@ -412,19 +444,24 @@ class SuraPlayerWindow(QMainWindow):
         UniversalSpeech.say("وضع الفلترة مفعَّل. استخدم الأسهم اليمين و اليسار للتنقل بين القُرَّاء و السور، واستخدم الأسهم للأعلى والأسفل لتصفح المحدد، اكتب لتصفية القُرَّاء و السور." if active else "وضع الفلترة معطَّل.")
 
     def OnActiveCategoryChanged(self, label: str) -> None:
+        logger.debug(f"Active category changed to: {label}")
         UniversalSpeech.say(label)
 
     def OnSearchQueryUpdated(self, search_query: str) -> None:
+        logger.debug(f"Search query updated: {search_query}")
         UniversalSpeech.say(search_query)
         
     def OnItemSelectionChanged(self, widget: QComboBox, index: int) -> None:
+        logger.debug(f"Selection changed in {widget.objectName()} to index {index}")
         widget.setCurrentIndex(index)            
         UniversalSpeech.say(f"{widget.currentText()} {widget.currentIndex() + 1} من {widget.count()}")
 
     def OnOutOfRange(self):
+        logger.debug("Out of range event triggered.")
         Globals.effects_manager.play("alert")
 
     def OnFilteredItemsUpdated(self, widget: QComboBox, items: List[Item], selected_item_text: str) -> None:
+        logger.debug(f"Filtered items updated in {widget.objectName()}, total items: {len(items)}")
         widget.clear()
         for item in items:
             widget.addItem(item.text, item.id)
@@ -432,7 +469,8 @@ class SuraPlayerWindow(QMainWindow):
         #Set last selected item before filtering
         widget.setCurrentText(selected_item_text)
         UniversalSpeech.say(f"{widget.currentText()} {widget.currentIndex() + 1} من {widget.count()}", False)
-        
+        logger.debug(f"Filtered selection set to {widget.currentText()} {widget.currentIndex() + 1} uf {widget.count()}")
+
     def keyPressEvent(self, event: QKeyEvent):
         if self.filter_manager.handle_key_press(event):
             return
@@ -445,11 +483,22 @@ class SuraPlayerWindow(QMainWindow):
 
 
     def OnClose(self):
+        logger.info("Closing the player.")
+        logger.debug("Stopping the player...")
         self.stop()
+        logger.info("Player stopped.")
+        logger.debug("Quitting the audio player thread...")
         self.audio_player_thread.quit()
+        logger.info("Audio player thread quit.")
+        logger.debug("Closing the current window...")
         self.close()
+        logger.info("Window closed.")
+        logger.debug("Showing the main window...")
         self.parent.show()
+    logger.info("Main window shown.")
+    logger.info("Player closed successfully.")
+
 
     def closeEvent(self, a0):
         self.OnClose()
-    
+        logger.info("OnClose method completed.")    
