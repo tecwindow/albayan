@@ -15,6 +15,9 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QKeySequence, QShortcut
 from core_functions.bookmark import BookmarkManager
 from utils.const import Globals
+from utils.logger import LoggerManager
+
+logger = LoggerManager.get_logger(__name__)
 
 
 
@@ -27,6 +30,8 @@ class BookmarkDialog(QDialog):
         self.resize(600, 400)
 
         self.manager = BookmarkManager()
+        logger.debug("Bookmark manager dialog opend.")
+
 
         self.search_label = QLabel("بحث:")
         self.search_input = QLineEdit()
@@ -79,6 +84,7 @@ class BookmarkDialog(QDialog):
         self.load_bookmarks()
 
     def load_bookmarks(self, bookmarks=None):
+        logger.debug("Loading bookmarks...")
         self.bookmark_list.clear()
         if bookmarks is None:
             bookmarks = self.manager.get_bookmarks()
@@ -87,6 +93,8 @@ class BookmarkDialog(QDialog):
         self.update_button.setEnabled(status)
         self.delete_button.setEnabled(status)
         self.go_button.setEnabled(status)
+        if not bookmarks:
+            logger.warning("No bookmarks found.")
 
         for bookmark in bookmarks:
             item_text = f"{bookmark['name']} (آية: {bookmark['ayah_number_in_surah']}, {bookmark['surah_name'].replace('سورة', 'السورة:')}, التاريخ: {bookmark['date']})"
@@ -94,15 +102,19 @@ class BookmarkDialog(QDialog):
             item.setData(Qt.ItemDataRole.UserRole, bookmark)
             self.bookmark_list.addItem(item)
         self.bookmark_list.setCurrentRow(0)
+        logger.info(f"{len(bookmarks)} bookmarks loaded.")
+
 
     def search_bookmarks(self):
         search_text = self.search_input.text()
+        logger.debug(f"Searching bookmarks for: {search_text}")
         bookmarks = self.manager.search_bookmarks(search_text)
         self.load_bookmarks(bookmarks)
 
     def update_bookmark(self):
         selected_items = self.bookmark_list.selectedItems()
         if not selected_items:
+            logger.warning("No bookmark selected for renaming.")
             msg_box = QMessageBox(self)
             msg_box.setIcon(QMessageBox.Icon.Critical)
             msg_box.setWindowTitle("خطأ في التحديد")
@@ -115,6 +127,7 @@ class BookmarkDialog(QDialog):
         item = selected_items[0]
         bookmark = item.data(Qt.ItemDataRole.UserRole)
         bookmark_id = bookmark["id"]
+        logger.debug(f"Renaming bookmark: {bookmark['name']}")
         new_name = ""
     # Create an instance of QInputDialog
         dialog = QInputDialog(self)
@@ -131,6 +144,7 @@ class BookmarkDialog(QDialog):
             new_name = dialog.textValue()
         if new_name:
                 self.manager.update_bookmark(bookmark_id, new_name)
+                logger.debug(f"Bookmark renamed to: {new_name}")
                 current_row = self.bookmark_list.currentRow()
                 self.load_bookmarks()
                 self.bookmark_list.setCurrentRow(current_row)
@@ -142,6 +156,7 @@ class BookmarkDialog(QDialog):
 
         selected_items = self.bookmark_list.selectedItems()
         if not selected_items:
+            logger.warning("No bookmark selected for deletion.")
             msg_box = QMessageBox(self)
             msg_box.setIcon(QMessageBox.Icon.Critical)
             msg_box.setWindowTitle("خطأ في التحديد")
@@ -170,6 +185,7 @@ class BookmarkDialog(QDialog):
 
         if msg_box.clickedButton() == yes_button:
             self.manager.delete_bookmark(bookmark_id)
+            logger.debug(f"Bookmark deleted: {bookmark['name']}")
             self.load_bookmarks()
             self.bookmark_list.setFocus()
 
@@ -178,6 +194,7 @@ class BookmarkDialog(QDialog):
         if selected_items:
             item = selected_items[0]
             bookmark = item.data(Qt.ItemDataRole.UserRole)
+            logger.info(f"Navigating to bookmark: {bookmark['name']} (Ayah: {bookmark['ayah_number']})")
             self.parent.quran.type = bookmark["criteria_number"]
             ayah_result = self.parent.quran.get_by_ayah_number(bookmark["ayah_number"])
             self.parent.quran_view.setText(ayah_result["full_text"])
@@ -188,5 +205,6 @@ class BookmarkDialog(QDialog):
             self.deleteLater()
 
     def reject(self):
+        logger.debug("Bookmark dialog closed.")
         self.deleteLater()
         
