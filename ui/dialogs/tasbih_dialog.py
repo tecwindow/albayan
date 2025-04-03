@@ -9,11 +9,15 @@ from core_functions.tasbih import TasbihController
 from core_functions.tasbih.model import TasbihEntry
 from utils.const import athkar_db_path
 from utils.universal_speech import UniversalSpeech
+from utils.logger import LoggerManager
+
+logger = LoggerManager.get_logger(__name__)
 
  
 class TasbihDialog(QDialog):
     def __init__(self, parent) -> None:
         super().__init__(parent)
+        logger.debug("Initializing TasbihDialog...")
         self.controller = TasbihController(athkar_db_path)
         self.setWindowTitle("المسبحة")
         self.resize(400, 400)
@@ -119,6 +123,8 @@ class TasbihDialog(QDialog):
         self.populate_list()
         self.set_shortcuts()
 
+        logger.debug("TasbihDialog Initialized.")
+
     def set_shortcuts(self):
         shortcuts = {
             self.incrementButton: "Ctrl+C",
@@ -139,9 +145,12 @@ class TasbihDialog(QDialog):
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         tasbih_entry = self.controller.get_entry(entry_id)
+        logger.debug(f"Opening Tasbih entry dialog for: {tasbih_entry.name} (ID: {entry_id}, Count: {tasbih_entry.counter})")
         dialog = TasbihEntryDialog(self, self.controller, tasbih_entry)
         UniversalSpeech.say(F"مرحبا بك في المِسْبَحَة، التسبيح: {tasbih_entry.name}، العدد: {tasbih_entry.counter}. استخدم المفاتيح التالية لزيادة العداد: Space, Enter, +,أو C. لإنقاص العداد استخدم: D, Ctrl+Space, -, أو Backspace. لإعادة تعيين العداد استخدم: Ctrl+R. للمعلومات استخدم: V للعدد، T للذِكر، I للكل.")
         dialog.exec()
+
+
 
     def OnItemSelectionChanged(self):    
         status = bool(self.listWidget.selectedItems())
@@ -157,6 +166,7 @@ class TasbihDialog(QDialog):
         """Populate the list widget with all current tasbih entries."""
         entries = self.controller.get_all_entries()
         for entry in entries:
+            logger.debug(f"Adding Tasbih entry to list: {entry.name} (ID: {entry.id}, Count: {entry.counter})")
             self.add_list_item(entry)
             
     def add_list_item(self, entry):
@@ -166,13 +176,16 @@ class TasbihDialog(QDialog):
         # Store the entry id in the item for later reference.
         item.setData(Qt.ItemDataRole.UserRole, entry.id)
         self.listWidget.addItem(item)
-        
+        logger.debug(f"Added Tasbih entry to list: {entry.name} (ID: {entry.id}, Count: {entry.counter})")
+
+
     def handle_add_entry(self):
         """Called when the Add button is clicked.
         
         Opens a QInputDialog to obtain the name for the new tasbih entry.
         If a valid name is entered, it is added to the list and the list is focused.
         """
+        logger.debug("Opening Add Tasbih Entry dialog.")
         dialog = QInputDialog(self)
         dialog.setWindowTitle("إضافة تسبيح")
         dialog.setLabelText("أدخل اسم التسبيح:")
@@ -182,8 +195,11 @@ class TasbihDialog(QDialog):
         if dialog.exec() == QDialog.Accepted:
             new_name = dialog.textValue().strip()
             if new_name:
+                logger.debug(f"Adding new Tasbih entry: {new_name}")
                 self.controller.add_entry(new_name)
                 self.listWidget.setFocus()
+        else:
+            logger.warning("Attempted to add a Tasbih entry with an empty name.")
 
     def handle_entry_added(self, entry: TasbihEntry):
         """
@@ -203,6 +219,7 @@ class TasbihDialog(QDialog):
             if item.data(Qt.ItemDataRole.UserRole) == entry.id:
                 item_text = f"{entry.name} | {entry.counter}"
                 item.setText(item_text)
+                logger.debug(f"Updated Tasbih entry: {entry.name} (ID: {entry.id}, New Count: {entry.counter})")
                 UniversalSpeech.say(item_text)
                 break
 
@@ -210,24 +227,28 @@ class TasbihDialog(QDialog):
         """Increment the counter for the selected entry."""
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
+        logger.debug(f"Incrementing counter for Tasbih entry ID: {entry_id}")
         self.controller.increment_entry_counter(entry_id)
         
     def handle_decrement(self):
         """Decrement the counter for the selected entry."""
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
+        logger.debug(f"Decrementing counter for Tasbih entry ID: {entry_id}")
         self.controller.decrement_entry_counter(entry_id)
         
     def handle_reset(self):
         """Reset the counter for the selected entry."""
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
+        logger.warning(f"Resetting counter for Tasbih entry ID: {entry_id}")
         self.controller.reset_entry_counter(entry_id)
 
     def handle_delete_entry(self):
         """Delete the selected entry."""
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
+        logger.debug(f"Deleting Tasbih entry ID: {entry_id}")
         self.controller.delete_entry(entry_id)
         row = self.listWidget.row(selected_item)
         self.listWidget.takeItem(row)
@@ -239,6 +260,7 @@ class TasbihDialog(QDialog):
         Displays a confirmation dialog, and if confirmed, calls the controller's reset_all_entries method.
         Afterwards, the UI list is refreshed and focus is set to the last focused index.
         """
+        logger.warning("User requested to reset all Tasbih counters.")
         # Save the index of the currently focused item.
         last_focused_index = self.listWidget.currentRow()
     
@@ -253,6 +275,7 @@ class TasbihDialog(QDialog):
         msg_box.exec()
 
         if msg_box.clickedButton() == yes_button:
+            logger.debug("Resetting all Tasbih counters.")
             self.controller.reset_all_entries()
             # Refresh the UI: clear and repopulate the list widget.
             self.listWidget.clear()
@@ -267,6 +290,7 @@ class TasbihDialog(QDialog):
         Displays a confirmation dialog, and if confirmed, calls the controller's delete_all_entries method.
         Afterwards, the UI list is cleared.
         """
+        logger.debug("User requested to delete all Tasbih entries.")
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setWindowTitle("تأكيد الحذف")
@@ -278,13 +302,16 @@ class TasbihDialog(QDialog):
         msg_box.exec()
 
         if msg_box.clickedButton() == yes_button:
+            logger.debug("Deleting all Tasbih entries.")
             self.controller.delete_all_entries()
             # Clear the list widget to update the UI.
             self.listWidget.clear()
+            logger.debug("All Tasbih entries deleted.")
             self.populate_list()
             self.listWidget.setFocus()
 
     def reject(self):
+        logger.debug("TasbihDialog Closed.")
         self.deleteLater()
 
 
@@ -296,6 +323,7 @@ class TasbihEntryDialog(QDialog):
         super().__init__(parent)
         self.controller = controller
         self.tasbih_entry = tasbih_entry
+        logger.debug(f"Opening TasbihEntryDialog for: {tasbih_entry.name} (ID: {tasbih_entry.id}, Count: {tasbih_entry.counter})")
         self.setWindowTitle(tasbih_entry.name)
         self.resize(300, 200)
         
@@ -341,23 +369,28 @@ class TasbihEntryDialog(QDialog):
         if tasbih_entry is None:
             tasbih_entry = self.tasbih_entry
         
+            logger.debug(f"Loading details for Tasbih entry: {tasbih_entry.name} (ID: {tasbih_entry.id}, Count: {tasbih_entry.counter})")
         self.name_label.setText(tasbih_entry.name)
         self.counter_label.setText(str(tasbih_entry.counter))
         
     def handle_entry_updated(self, tasbih_entry: TasbihEntry):
         self.load_details(tasbih_entry)
+        logger.debug(f"Tasbih entry updated: {tasbih_entry.name} (ID: {tasbih_entry.id}, New Count: {tasbih_entry.counter})")
         UniversalSpeech.say(str(tasbih_entry.counter))
                 
     def handle_increment(self):
         """Handle the increment action."""
+        logger.debug(f"Incrementing Tasbih counter (ID: {self.tasbih_entry.id})")
         self.controller.increment_entry_counter(self.tasbih_entry.id)
         
     def handle_decrement(self):
         """Handle the decrement action."""
+        logger.debug(f"Decrementing Tasbih counter (ID: {self.tasbih_entry.id})")
         self.controller.decrement_entry_counter(self.tasbih_entry.id)
         
     def handle_reset(self):
         """Handle the reset action."""
+        logger.warning(f"Resetting Tasbih counter (ID: {self.tasbih_entry.id})")
         self.controller.reset_entry_counter(self.tasbih_entry.id)
         
     def set_shortcuts(self):
@@ -388,4 +421,5 @@ class TasbihEntryDialog(QDialog):
                 self.addAction(action)  # Attach action to the main window/dialog
 
     def reject(self):
+        logger.debug("TasbihEntryDialog closed.")
         self.deleteLater()
