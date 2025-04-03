@@ -14,6 +14,9 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
 import qtawesome as qta
+from utils.logger import LoggerManager
+
+logger = LoggerManager.get_logger(__name__)
 
 
 class QuickAccess(QDialog):
@@ -24,6 +27,7 @@ class QuickAccess(QDialog):
         self.resize(300, 200)
         self.effects_manager = SoundEffectPlayer("Audio/sounds")
         self.sura = []
+        logger.info(f"Initializing QuickAccess dialog: {title}")
         with open(os.path.join("database", "Surahs.Json"), encoding="UTF-8") as f:
             self.sura = json.load(f)["surahs"]
         self.pages = ["{}".format(i) for i in range(1, 605)]
@@ -78,41 +82,61 @@ class QuickAccess(QDialog):
         self.jus_radio.toggled.connect(self.on_radio_toggled)
         close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
         close_shortcut.activated.connect(self.reject)
+        logger.debug("QuickAccess dialog initialized successfully.")
 
-
-    def on_submit(self):
+    def on_submit(self):    
         selected_item = self.choices.currentIndex() + 1
+        logger.debug(f"User selected index {selected_item}")
         if self.sura_radio.isChecked():
-            self.parent.quran_view.setText(self.parent.quran.get_surah(selected_item))
+            selection_type = "Surah"
+            content = self.parent.quran.get_surah(selected_item)
         elif self.pages_radio.isChecked():
-            self.parent.quran_view.setText(self.parent.quran.get_page(selected_item))
+            selection_type = "Page"
+            content = self.parent.quran.get_page(selected_item)
         elif self.quarters_radio.isChecked():
-            self.parent.quran_view.setText(self.parent.quran.get_quarter(selected_item))
+            selection_type = "Quarter"
+            content = self.parent.quran.get_quarter(selected_item)
         elif self.hizb_radio.isChecked():
-            self.parent.quran_view.setText(self.parent.quran.get_hizb(selected_item))
+            selection_type = "Hizb"
+            content = self.parent.quran.get_hizb(selected_item)
         elif self.jus_radio.isChecked():
-            self.parent.quran_view.setText(self.parent.quran.get_juzz(selected_item))
+            selection_type = "Juzz"
+            content = self.parent.quran.get_juzz(selected_item)
+        else:
+            logger.warning("No selection type was chosen!")
+            return
+
+        self.parent.quran_view.setText(content)
         self.accept()
         self.effects_manager.play("change")
+        logger.info(f"User navigated to {selection_type} {selected_item}")
         self.deleteLater()
 
     def on_radio_toggled(self):
+        logger.debug("Radio button toggled, updating choices.")
         if self.sura_radio.isChecked():
             self.choices.clear()
             self.choices.addItems([sura["name"] for sura in self.sura])
+            logger.debug("Switched to Surah selection")
         elif self.pages_radio.isChecked():
             self.choices.clear()
             self.choices.addItems(self.pages)
+            logger.debug("Switched to Page selection")
         elif self.quarters_radio.isChecked():
             self.choices.clear()
             self.choices.addItems(self.quarters)
+            logger.debug("Switched to Quarter selection")
         elif self.hizb_radio.isChecked():
             self.choices.clear()
             self.choices.addItems(self.hizb)
+            logger.debug("Switched to Hizb selection")
         elif self.jus_radio.isChecked():
             self.choices.clear()
             self.choices.addItems(self.jus)
+            logger.debug("Switched to Juzz selection")
+
 
     def reject(self):
+        logger.info("QuickAccess dialog closed.")
         self.deleteLater()
         
