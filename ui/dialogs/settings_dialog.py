@@ -30,8 +30,6 @@ import qtawesome as qta
 
 logger = LoggerManager.get_logger(__name__)
 
-
-
 class SettingsDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
@@ -63,13 +61,11 @@ class SettingsDialog(QDialog):
         self.listening_item = QTreeWidgetItem(["الاستماع"])
         self.listening_item.setIcon(0, qta.icon("fa.headphones"))
 
-
         reading_item = QTreeWidgetItem(["القراءة"])
         reading_item.setIcon(0, qta.icon("fa.book"))
 
         search_item = QTreeWidgetItem(["البحث"])
         search_item.setIcon(0, qta.icon("fa.search"))
-
         
         # Adding top-level items
         self.tree_widget.addTopLevelItem(general_item)
@@ -108,7 +104,6 @@ class SettingsDialog(QDialog):
 
         self.run_in_background_checkbox.toggled.connect(self.updateStartCheckboxState)
         self.start_on_system_start_checkbox.toggled.connect(self.updateBackgroundCheckboxState)
-
 
         self.group_audio = QGroupBox("إعدادات الصوت")
         self.group_audio_layout = QVBoxLayout()
@@ -319,20 +314,19 @@ class SettingsDialog(QDialog):
         # Check if 'start_on_system_start_checkbox' is checked
         if self.start_on_system_start_checkbox.isChecked():
             # If 'start_on_system_start_checkbox' is checked, automatically check 'run_in_background_checkbox'
-            logger.debug("Enabling 'Run in Background' as 'Start on System Startup' is checked.")
             self.run_in_background_checkbox.setChecked(True)
+            logger.debug("Enabled 'Run in Background' as 'Start on System Startup' is checked.")
 
     def updateStartCheckboxState(self):
 
         # Check if 'run_in_background_checkbox' is unchecked, then uncheck 'start_on_system_start_checkbox'
         if not self.run_in_background_checkbox.isChecked():
-            logger.debug("'Run in Background' is unchecked, disabling 'Start on System Startup'.")
             self.start_on_system_start_checkbox.setChecked(False)
+            logger.debug("'Run in Background' is unchecked, disabled 'Start on System Startup'.")
 
     def save_settings(self):
         logger.debug("Saving user settings.")
         # Apply new sound cards
-        logger.debug("Applying new sound devices.")
         SurahPlayer.apply_new_sound_card(self.surah_device_combo.currentData())
         AyahPlayer.apply_new_sound_card(self.ayah_device_combo.currentData())
         AthkarPlayer.apply_new_sound_card(self.athkar_device_combo.currentData())
@@ -340,23 +334,18 @@ class SettingsDialog(QDialog):
 
         #apply new log level
         log_level = LogLevel.from_name(self.log_levels_combo.currentData())
-        logger.info(f"Changing log level to {log_level}.")
         LoggerManager.change_log_level(log_level)
 
-        
         if Config.general.auto_start_enabled != self.start_on_system_start_checkbox.isChecked():
             if self.start_on_system_start_checkbox.isChecked():
-                logger.debug("Adding application to system startup.")
                 StartupManager.add_to_startup(program_english_name)
             else:
-                logger.debug("Removing application from system startup.")
                 StartupManager.remove_from_startup(program_english_name)
 
         if Config.reading.font_type != self.font_type_combo.currentData():
             new_font_type = self.font_type_combo.currentData()
-        logger.info(f"Font type changed from {Config.reading.font_type} to {new_font_type}. Reloading Quran text.")
-        self.parent.quran_view.setText(self.parent.quran.reload_quran(new_font_type))
-
+            logger.info(f"Font type changed from {Config.reading.font_type} to {new_font_type}. Reloading Quran text.")
+            self.parent.quran_view.setText(self.parent.quran.reload_quran(new_font_type))
 
         # Update settings in Config
         Config.general.run_in_background_enabled = self.run_in_background_checkbox.isChecked()
@@ -364,7 +353,6 @@ class SettingsDialog(QDialog):
         Config.general.auto_save_position_enabled = self.auto_save_position_checkbox.isChecked()
         Config.general.check_update_enabled = self.update_checkbox.isChecked()
         Config.general.log_level = self.log_levels_combo.currentData()
-
 
         Config.audio.sound_effect_enabled = self.sound_checkbox.isChecked()
         Config.audio.start_with_basmala_enabled = self.basmala_checkbox.isChecked()
@@ -378,52 +366,22 @@ class SettingsDialog(QDialog):
         Config.audio.athkar_volume_level = self.athkar_volume.value()
         Config.audio.athkar_device = self.athkar_device_combo.currentData()
 
-
         Config.listening.reciter = self.reciters_combo.currentData()
         Config.listening.action_after_listening = self.action_combo.currentData()
         Config.listening.forward_time = self.duration_spinbox.value()
         Config.listening.auto_move_focus = self.auto_move_focus_checkbox.isChecked()
 
-
         Config.reading.font_type = self.font_type_combo.currentData()
         Config.reading.auto_page_turn = self.turn_pages_checkbox.isChecked()
-
 
         Config.search.ignore_tashkeel = self.ignore_tashkeel_checkbox.isChecked()
         Config.search.ignore_hamza = self.ignore_hamza_checkbox.isChecked()
         Config.search.match_whole_word = self.match_whole_word_checkbox.isChecked()
 
-
-        logger.debug(f"""
-Run in background: {Config.general.run_in_background_enabled}
-Auto start on system startup: {Config.general.auto_start_enabled}
-Auto-save position enabled: {Config.general.auto_save_position_enabled}
-Check for updates enabled: {Config.general.check_update_enabled}
-Log level set to: {Config.general.log_level}
-Sound effects enabled: {Config.audio.sound_effect_enabled}
-Start with Basmala enabled: {Config.audio.start_with_basmala_enabled}
-Speak actions enabled: {Config.audio.speak_actions_enabled}
-General volume level: {Config.audio.volume_level}
-General volume device: {Config.audio.volume_device}
-Ayah volume level: {Config.audio.ayah_volume_level}
-Ayah audio device: {Config.audio.ayah_device}
-Surah volume level: {Config.audio.surah_volume_level}
-Surah audio device: {Config.audio.surah_device}
-Athkar volume level: {Config.audio.athkar_volume_level}
-Athkar audio device: {Config.audio.athkar_device}
-Selected reciter: {Config.listening.reciter}
-Action after listening: {Config.listening.action_after_listening}
-Forward time: {Config.listening.forward_time} seconds
-Auto move focus enabled: {Config.listening.auto_move_focus}
-Font type: {Config.reading.font_type}
-Auto page turn enabled: {Config.reading.auto_page_turn}
-Ignore Tashkeel enabled: {Config.search.ignore_tashkeel}
-Ignore Hamza enabled: {Config.search.ignore_hamza}
-Match whole word enabled: {Config.search.match_whole_word}
-""")
-
         # Save settings to file
         logger.debug("Saving settings to configuration file.")
+        new_settings = "\n".join([str(section_obj) for section_obj in Config.sections().values()])
+        logger.debug(new_settings)
         Config.save_settings()
 
         self.accept()

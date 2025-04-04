@@ -2,13 +2,14 @@ import os
 import configparser
 import logging
 from dataclasses import dataclass, asdict
-from typing import Any, Dict, ClassVar
+from abc import ABC
+from typing import Any, Dict, Tuple, ClassVar
 from utils.const import CONFIG_PATH
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
-class BaseSection:
+class BaseSection(ABC):
     def get_value(self, key: str) -> Any:
         if key in self.__dataclass_fields__:
             value = getattr(self, key)
@@ -17,7 +18,6 @@ class BaseSection:
         else:
             logger.warning(f"Attempted to access invalid key '{key}' in section '{self.__class__.SECTION_NAME}'")
             raise KeyError(f"Key '{key}' not found in section '{self.__class__.SECTION_NAME}'")
-
 
     def set_value(self, key: str, value: Any) -> None:
         if key in self.__dataclass_fields__:
@@ -28,6 +28,8 @@ class BaseSection:
             logger.warning(f"Attempted to set invalid key '{key}' in section '{self.__class__.SECTION_NAME}'")
             raise KeyError(f"Key '{key}' not found in section '{self.__class__.SECTION_NAME}'")
 
+    def items(self) -> Tuple[str, Any]:
+        return asdict(self).items()
 
 @dataclass
 class GeneralSettings(BaseSection):
@@ -107,7 +109,7 @@ class Config:
             logger.debug(f"Created missing section '{section}' in config file.")
 
     @classmethod
-    def sections(cls) -> Dict[str, Any]:
+    def sections(cls) -> Dict[str, BaseSection]:
         """
         Returns a dictionary mapping section names to their corresponding dataclass instances
         by iterating over the class annotations.
@@ -148,7 +150,7 @@ class Config:
         cls.ensure_section(section)
         updated = False
 
-        for field_name, default_value in asdict(section_obj).items():
+        for field_name, default_value in section_obj.items():
             value = cls._get_value(section, field_name, default_value)
             setattr(section_obj, field_name, value)
             if cls._config_parser[section].get(field_name) is None:
@@ -164,7 +166,7 @@ class Config:
         Saves the values of a dataclass section to the config file.
         """
         cls.ensure_section(section)
-        for field_name, value in asdict(section_obj).items():
+        for field_name, value in section_obj.items():
             if not cls._config_parser[section].get(field_name):
                 logger.info(f"Creating new setting '{field_name}' in section '{section}'")
             cls._config_parser[section][field_name] = str(value)
@@ -196,11 +198,10 @@ class Config:
             logger.debug(f"Saving section '{section}' with values: {asdict(instance)}")
         cls._write_config()
 
-
-
     @classmethod
     def _write_config(cls) -> None:
         """Writes the current configuration to the config file."""
+        logger.debug(f"Writing configuration to '{CONFIG_PATH}'")
         try:
             with open(CONFIG_PATH, "w", encoding='utf-8') as config_file:
                 cls._config_parser.write(config_file)

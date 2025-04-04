@@ -119,11 +119,13 @@ class LoggerManager:
         Raises:
         ValueError: If new_level is not an instance of LogLevel.
         """
+        logging.info(f"Changing log level to {new_level.name}")
 
         if not isinstance(new_level, LogLevel):
             raise ValueError("new_level must be an instance of LogLevel")
         
         if new_level == LogLevel.DISABLE:
+            logging.info("Logging disabled. No messages will be logged.")
             logging.disable(logging.CRITICAL + 1)
             return
         else:
@@ -134,6 +136,7 @@ class LoggerManager:
         root_logger.setLevel(new_level.value)
         for handler in root_logger.handlers:
             handler.setLevel(new_level.value)
+        logging.info(f"Log level changed to {new_level.name}")
 
     @classmethod
     def get_logger(cls, name):

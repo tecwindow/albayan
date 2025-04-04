@@ -20,7 +20,7 @@ class AudioPlayer:
 
     @classmethod
     def apply_new_sound_card(cls, device: int) -> None:
-        logger.info(f"Applying new sound card (device: {device}) to all instances.")
+        logger.info(f"Applying new sound card (device: {device}) to all instances of {cls.__name__}.")
         for instance in cls.instances:
             instance.set_channel_device(device)
             logger.info(f"Applied new sound card (device: {device}) to instance {instance.__class__.__name__}.")
