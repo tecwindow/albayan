@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import List
 from exceptions.audio_pplayer import PlaybackInitializationError, SetDeviceError
 from utils.logger import LoggerManager
+
 logger = LoggerManager.get_logger(__name__)
 
 class BassFlag(IntFlag):
@@ -40,7 +41,6 @@ class BassInitializer:
     def setup(self):
         """Prepares the BASS environment by loading the DLL and setting up argument types."""
         if not os.path.exists(self.bass_library_path):
-            logger.error(f"BASS library not found: {self.bass_library_path}.")
             raise FileNotFoundError(f"BASS library not found at {self.bass_library_path}")
 
         # Load the BASS library
@@ -74,14 +74,13 @@ class BassInitializer:
     def initialize(self):
         """Initializes BASS with error handling."""
         if not self.bass:
-            logger.error("BASS library is not set up. Call `setup()` first.")
-            raise RuntimeError("BASS library is not set up. Call `setup()` first.")
+            raise PlaybackInitializationError("BASS library is not set up. Call `setup()` first.")
 
         for card in self.get_sound_cards():
             if not self.bass.BASS_Init(card.index, 44100, 0, 0, 0):
-                logger.error(f"Failed to initialize BASS with device {card.index}: {self.bass.BASS_ErrorGetCode()}")
-                raise PlaybackInitializationError()
+                raise PlaybackInitializationError(f"Failed to initialize BASS with device {card.name}: {self.bass.BASS_ErrorGetCode()}")
 
+        logger.info("BASS initialized successfully.")
         return self.bass
 
     def get_sound_cards(self) -> List[SoundCard]:
@@ -100,15 +99,15 @@ class BassInitializer:
                 driver=info.driver.decode() if info.driver else "Unknown",
                 flag=info.flags
             ))
+            logger.debug(f"Found sound card: {devices[-1]}")
             index += 1
         logger.debug(f"Found {len(devices)} sound cards.")
         return devices
 
     def set_sound_card(self, device_index: int):
         """Set the active sound card by index."""
-        logger.debug(f"Setting sound card to device index: {device_index}.")
+        logger.debug(f"Setting sound card to device index: {device_index} for all channels.")
         if not self.bass.BASS_SetDevice(device_index):
-            logger.error(f"Failed to set sound card to device index {device_index}: {self.bass.BASS_ErrorGetCode()}")
             raise SetDeviceError(device_index)
 
     def close(self):

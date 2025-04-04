@@ -4,19 +4,21 @@ from .bass_player import AudioPlayer
 from utils.settings import Config
 from utils.logger import LoggerManager
 from exceptions.error_decorators import exception_handler
-logger = LoggerManager.get_logger(__name__)
 
+logger = LoggerManager.get_logger(__name__)
 
 class StartupSoundEffectPlayer(AudioPlayer):
     instances = []
+
     def __init__(self, sounds_folder: str) -> None:
         super().__init__(Config.audio.volume_level, device=Config.audio.volume_device)
         self.sounds_folder = sounds_folder
         StartupSoundEffectPlayer.instances.append(self)
-        logger.info("StartupSoundEffectPlayer initialized with sounds folder: %s", self.sounds_folder)
+        logger.debug(f"StartupSoundEffectPlayer initialized with sounds folder: {self.sounds_folder}")
                 
     @exception_handler
-    def play(self):
+    def play(self) -> None:
+        logger.debug("Attempting to play startup sound effect.")
         if not Config.audio.start_with_basmala_enabled:
             logger.info("Startup sound is disabled in the configuration.")
             return
@@ -30,12 +32,12 @@ class StartupSoundEffectPlayer(AudioPlayer):
             if file.lower().endswith(self.supported_extensions)
             ]
         if not audio_files:
-            logger.warning("No supported audio files found in folder: %s", self.sounds_folder)
+            logger.warning(f"No supported audio files found in folder:  {self.sounds_folder}")
             return
 
         random_file = choice(audio_files)
         file_path = os.path.join(self.sounds_folder, random_file)
-        logger.debug("Selected random file for playback: %s", file_path)
+        logger.debug(f"Selected random file for playback: {file_path}")
         self.load_audio(file_path)
-        logger.info("Playing startup sound: %s", file_path)
+        logger.info(f"Playing startup sound:  {file_path}")
         super().play()

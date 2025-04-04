@@ -2,16 +2,15 @@ from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
 from utils.audio_player import AyahPlayer, SoundEffectPlayer, AthkarPlayer, SurahPlayer
 from utils.logger import LoggerManager
-logger = LoggerManager.get_logger(__name__)
 
+logger = LoggerManager.get_logger(__name__)
 
 class VolumeController:
     """Handles volume control for different categories with custom handling."""
-    
     def __init__(self) -> None:
         self.categories = self._load_categories()
         self.current_category_index = Config.audio.current_volume_category
-        logger.info(f"Initialized VolumeController. Current category index: {self.current_category_index}")
+        logger.debug(f"Initialized VolumeController. Current category index: {self.current_category_index}")
 
     def _load_categories(self) -> dict:
         """Load categories with their custom handling methods."""
@@ -27,8 +26,6 @@ class VolumeController:
         volume = Config.audio.get_value(category)
         logger.debug(f"Retrieved volume for {category}: {volume}%")
         return volume
-
-
 
     def switch_category(self, direction: str) -> None:
         """Switch between categories in the specified direction ('next' or 'previous')."""
@@ -46,8 +43,6 @@ class VolumeController:
         Config.audio.set_value("current_volume_category", self.current_category_index)
         UniversalSpeech.say(f"{current_label}: {current_volume}%")
         logger.info(f"Switched category from {prev_category} to {current_category}. New volume: {current_volume}%")
-
-
 
     def adjust_volume(self, change: int) -> None:
         """Adjust the volume for the current category with special handling if needed."""
