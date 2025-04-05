@@ -7,7 +7,7 @@ from enum import Enum
 
 
 class LogLevel(Enum):
-    DISABLE = -1
+    DISABLE = logging.CRITICAL + 1
     DEBUG = logging.DEBUG
     INFO = logging.INFO
     WARNING = logging.WARNING
@@ -58,6 +58,7 @@ class LoggerManager:
         """
         
         if not isinstance(log_level, LogLevel):
+            logging.error("log_level must be an instance of LogLevel")
             raise ValueError("log_level must be an instance of LogLevel")
         
         if not cls._initialized:
@@ -122,6 +123,7 @@ class LoggerManager:
         logging.info(f"Changing log level to {new_level.name}")
 
         if not isinstance(new_level, LogLevel):
+            logging.error("new_level must be an instance of LogLevel")
             raise ValueError("new_level must be an instance of LogLevel")
         
         if new_level == LogLevel.DISABLE:
