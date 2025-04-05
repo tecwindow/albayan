@@ -38,43 +38,44 @@ class Category:
 
 class TafaseerManager:
     def __init__(self) -> None:
-        logger.info("Initializing TafaseerManager...")
+        logger.debug("Initializing TafaseerManager...")
         self._tafaseer_category = None
         self._conn = None  
-        logger.info("TafaseerManager initialized.")
-
+        logger.debug("TafaseerManager initialized.")
 
     def set(self, tafaseer_category: str) -> None:
-        assert Category.is_valid(tafaseer_category), "Invalid tafaseer category."
         logger.debug(f"Setting tafaseer category: {tafaseer_category}")
+        assert Category.is_valid(tafaseer_category), "Invalid tafaseer category."
+        
         if not Category.is_valid(tafaseer_category):
             logger.error(f"Invalid tafaseer category: {tafaseer_category}")
-            raise ValueError("Invalid tafaseer category.")
+            raise ValueError(f"Invalid tafaseer category: {tafaseer_category}")
         
         self._tafaseer_category = tafaseer_category
-        logger.info(f"Setting tafaseer category to: {tafaseer_category}")
+        logger.info(f"Sett tafaseer category to: {tafaseer_category}")
         self._connect_to_database()
-
 
     def _connect_to_database(self) -> None:
         assert self._tafaseer_category is not None, "You must set tafaseer category."
         file_path = os.path.join("database", "tafaseer", self._tafaseer_category + ".db")
         logger.debug(f"Connecting to database at {file_path}...")
+        
         if not os.path.isfile(file_path):
-            logger.error(f"Database file not found at: {file_path}")
+            logger.error(f"Database file not found: {file_path}")
             raise DBNotFoundError(file_path)
-        logger.info(f"Database file found. Connecting to the database...")
+        
         self._conn = sqlite3.connect(file_path)
         self._conn.row_factory = sqlite3.Row 
         self._cursor = self._conn.cursor()
-        logger.info("Database connection established successfully.")
-
+        logger.info(f"Database connection established successfully: {file_path}.")
 
     def get_tafaseer(self, surah_number, ayah_number) -> str:
+        """Fetch tafseer for a specific Surah and Ayah."""
         logger.debug(f"Fetching tafseer for Surah {surah_number}, Ayah {ayah_number}...")
         assert self._conn is not None, "You must connect to database first."
         assert 1 <= surah_number <= 114, "Out of surah range."
         assert 1 <= ayah_number, "Out of ayah range."
+        
         query = "SELECT text FROM tafsir_{} WHERE number = ?".format(surah_number)
         try:
             self._cursor.execute(query, [ayah_number])
@@ -85,9 +86,10 @@ class TafaseerManager:
             logger.error(f"Error fetching tafseer: {e}", exc_info=True)
             return ""
 
-
     def get_text(self, row) -> str:
+        """Process the tafseer text from the database row."""
         logger.debug("Processing tafseer text...")
+        
         if row:
                     text = row["text"].replace(".", ". \n").strip()
         else:
@@ -102,12 +104,12 @@ class TafaseerManager:
         logger.debug("Tafseer text processed successfully.")
         return text
 
-
     def __str__(self) -> str:
         return "Category: {}".format(self._tafaseer_category)
 
     def __del__(self):
+        """Close the database connection when the object is deleted."""
+        logger.debug("Deleting TafaseerManager object and closing database connecting...")
         if self._conn:
-            logger.info("Closing database connection...")
             self._conn.close()
-            logger.info("Database connection closed.")          
+            logger.info("Deleted TafaseerManager object Database connection closed.")          

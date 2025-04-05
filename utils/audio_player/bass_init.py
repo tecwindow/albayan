@@ -41,6 +41,7 @@ class BassInitializer:
     def setup(self):
         """Prepares the BASS environment by loading the DLL and setting up argument types."""
         if not os.path.exists(self.bass_library_path):
+            logger.error(f"BASS library not found at {self.bass_library_path}.")
             raise FileNotFoundError(f"BASS library not found at {self.bass_library_path}")
 
         # Load the BASS library
@@ -74,10 +75,12 @@ class BassInitializer:
     def initialize(self):
         """Initializes BASS with error handling."""
         if not self.bass:
+            logger.error("BASS library is not set up. Call `setup()` first.")
             raise PlaybackInitializationError("BASS library is not set up. Call `setup()` first.")
 
         for card in self.get_sound_cards():
             if not self.bass.BASS_Init(card.index, 44100, 0, 0, 0):
+                logger.error(f"Failed to initialize BASS with device {card.name}: {self.bass.BASS_ErrorGetCode()}")
                 raise PlaybackInitializationError(f"Failed to initialize BASS with device {card.name}: {self.bass.BASS_ErrorGetCode()}")
 
         logger.info("BASS initialized successfully.")
@@ -108,6 +111,7 @@ class BassInitializer:
         """Set the active sound card by index."""
         logger.debug(f"Setting sound card to device index: {device_index} for all channels.")
         if not self.bass.BASS_SetDevice(device_index):
+            logger.error(f"Failed to set sound card to device index: {device_index}. Error code: {self.bass.BASS_ErrorGetCode()}")
             raise SetDeviceError(device_index)
 
     def close(self):

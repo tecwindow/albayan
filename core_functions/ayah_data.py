@@ -2,7 +2,6 @@ import sqlite3
 from typing import List, Dict
 from utils.logger import LoggerManager
 
-
 logger = LoggerManager.get_logger(__name__)
 
 class AyahData:
@@ -12,7 +11,6 @@ class AyahData:
         self.create_table()
         logger.debug("AyahData class initialized.")
 
-
     def connect(self) -> None:
         """Connect to temporary database to store ayah positions in the text."""
         logger.debug("Connecting to in-memory SQLite database.")
@@ -20,7 +18,6 @@ class AyahData:
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
         logger.info("Connected to in-memory SQLite database.")
-
 
     def create_table(self) -> None:
         """Create the table to store ayah data."""
@@ -40,14 +37,12 @@ class AyahData:
 
     def insert(self, ayah_number: int, surah_number: int, ayah_number_in_surah: int, first_position: int, last_position: int):
         """Insert a new ayah into the table."""
-        #logger.debug(f"Inserting ayah number {ayah_number}, surah number {surah_number}, positions {first_position}-{last_position}.")
         self.cursor.execute('''
             INSERT INTO ayah_data (ayah_number, surah_number, ayah_number_in_surah, first_position, last_position)
             VALUES (?, ?, ?, ?, ?)
         ''', (ayah_number, surah_number, ayah_number_in_surah, first_position, last_position))
         self.conn.commit()
         #logger.debug(f"Inserted ayah number {ayah_number} into the database.")
-
 
     def get(self, position: int) -> int:
         """Retrieve ayah number by a specific position."""
@@ -69,7 +64,6 @@ class AyahData:
                 logger.error(f"Position {position} is out of range.")
                 return None
 
-        
     def get_position(self, ayah_number: int) -> int:
         """Get position for Specific ayah"""
         logger.debug(f"Retrieving position for ayah number {ayah_number}.")
@@ -114,9 +108,7 @@ class AyahData:
 
     def __del__(self):
         """Close the connection when the object is deleted."""
-        logger.debug("Closing database connection.")
+        logger.debug("Deleting AyahData object and closing database connection.")       
         if self.conn:
             self.conn.close()
-            logger.debug("Database connection closed.")
-
-
+            logger.info(" Deleted AyahData object Database connection closed.")

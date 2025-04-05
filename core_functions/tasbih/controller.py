@@ -14,16 +14,18 @@ class TasbihController(QObject):
 
     def __init__(self, db_path: str):
         super().__init__()
-        logger.info(f"Initializing TasbihController with database path: {db_path}")
+        logger.debug(f"Initializing TasbihController with database path: {db_path}")
         db_url = f'sqlite:///{db_path}'
         self.engine = create_engine(db_url, echo=False)
         Base.metadata.create_all(self.engine)  # Create tables if they don't exist.
         self.Session = scoped_session(sessionmaker(bind=self.engine))
         self._initialize_default_entries()
-        logger.info("Database initialized successfully.")
+        logger.debug("Database initialized successfully.")
 
     def _initialize_default_entries(self):
-        """Insert a list of default tasbih entries if they are not already in the database."""
+        """Check if default tasbih entries exist, and insert them if not."""
+        logger.debug("Checking for default tasbih entries in the database.")
+        
         default_entries = [
             "سبحان الله",
             "الحمد لله",
@@ -32,6 +34,7 @@ class TasbihController(QObject):
             "الله أكبر",
             "لا إله إلا الله"
         ]
+
         for entry in default_entries:
             self.add_entry(entry)
 
@@ -56,7 +59,7 @@ class TasbihController(QObject):
                 self.entrieAdded.emit(self.get_entry(new_entry.id))
                 logger.info(f"Added new tasbih entry: {name}")
         except IntegrityError as e:
-            logger.warning(f"Entry '{name}' already exists in the database.")
+            logger.debug(f"Entry '{name}' already exists in the database.")
         except Exception as e:
             logger.error(f"Error adding tasbih entry '{name}': {e}", exc_info=True)
 
@@ -74,7 +77,6 @@ class TasbihController(QObject):
             logger.error(f"Error retrieving tasbih entry with ID {entry_id}: {e}", exc_info=True)
             return None
 
-
     def update_entry(self, tasbih_entry: TasbihEntry):
         """Update an existing tasbih entry."""
         try:
@@ -82,7 +84,7 @@ class TasbihController(QObject):
                 session.merge(tasbih_entry)
                 session.commit()
                 self.entrieUpdated.emit(tasbih_entry)
-                logger.info(f"Updated tasbih entry: {tasbih_entry.name} (ID: {tasbih_entry.id})")
+                logger.info(f"Updated tasbih entry: {tasbih_entry.name} (ID: {tasbih_entry.id}) (counter: {tasbih_entry.counter})")
         except Exception as e:
             logger.error(f"Error updating tasbih entry ID {tasbih_entry.id}: {e}", exc_info=True)
 
@@ -94,7 +96,6 @@ class TasbihController(QObject):
             self.update_entry(item)
             logger.debug(f"Incremented counter for entry ID {entry_id}. New count: {item.counter}")
 
-
     def decrement_entry_counter(self, entry_id: int):
         """Decrement the counter for a specific tasbih entry."""
         item = self.get_entry(entry_id)
@@ -103,7 +104,6 @@ class TasbihController(QObject):
             self.update_entry(item)
             logger.debug(f"Decremented counter for entry ID {entry_id}. New count: {item.counter}")
 
-
     def reset_entry_counter(self, entry_id: int):
         """Reset the counter for a specific tasbih entry."""
         item = self.get_entry(entry_id)
@@ -111,7 +111,6 @@ class TasbihController(QObject):
             item.counter = 0
             self.update_entry(item)
             logger.info(f"Reset counter for entry ID {entry_id}.")
-
 
     def delete_entry(self, entry_id: int):
         """Delete a specific tasbih entry by its ID."""
@@ -127,8 +126,6 @@ class TasbihController(QObject):
         except Exception as e:
             logger.error(f"Error deleting tasbih entry ID {entry_id}: {e}", exc_info=True)
 
-
-
     def reset_all_entries(self):
         """Reset the counter for all tasbih entries."""
         try:
@@ -138,7 +135,6 @@ class TasbihController(QObject):
                 logger.info("All tasbih entry counters have been reset.")
         except Exception as e:
             logger.error(f"Error resetting all tasbih counters: {e}", exc_info=True)
-
 
     def delete_all_entries(self):
         """Delete all tasbih entries."""

@@ -9,15 +9,16 @@ logger = LoggerManager.get_logger(__name__)
 class Base(ABC):
     
     def _connect(self, file_path) -> sqlite3.Connection:
+        """Connect to the SQLite database and return the connection object."""
+        logger.debug(f"Connecting to the database: {file_path}, in instance of {self.__class__.__name__}")
         
         if not os.path.isfile(file_path):
-            logger.error(f"Database file not found: {file_path}", exc_info=True)
+            logger.error(f"No database found in: {file_path}")
             raise FileNotFoundError(f"No database found in: {file_path}")
 
-        logger.info(f"Connecting to the database: {file_path}")
         conn = sqlite3.connect(file_path)
         conn.row_factory = sqlite3.Row
-        logger.debug(f"Database connection established successfully.")
+        logger.info(f"Connected to the database successfully: {file_path}, in instance of {self.__class__.__name__}")
         return conn
     
     @property
@@ -26,6 +27,7 @@ class Base(ABC):
         pass
 
     def remove_empty_lines(self, text) -> str:
+        """Remove empty lines from the provided text."""
         logger.debug("Removing empty lines from the provided text.")
         lines = text.split("\n")
         lines = list(filter(lambda x: x.strip(), lines))
@@ -34,65 +36,60 @@ class Base(ABC):
         return text
 
     def __del__(self) -> None:
+        """Destructor to close the database connection."""
+        logger.debug(f"Deleting {self.__class__.__name__} object and closing database.")
         if self._conn is not None:
-            logger.info("Closing database connection.")
             self._conn.close()
-            logger.debug("Database connection closed successfully.")
-
-
+            logger.info(f"Deleted {self.__class__.__name__} object and Database connection closed.")
         
 class E3rab(Base):
     def __init__(self, surah_number: int, ayah_number: int) -> None:
+        logger.debug(f"Initializing E3rab with surah: {surah_number}, ayah: {ayah_number}.")
         assert 1 <= surah_number <= 114, "Out of surah number."
         self._surah_number = surah_number
         self._ayah_number = ayah_number
         file_path = os.path.join("database", "other", "e3rab.db")
-        logger.debug(f"Initializing E3rab with surah: {surah_number}, ayah: {ayah_number}.")
-        try:
-            self._conn = self._connect(file_path)
-        except FileNotFoundError as e:
-            logger.error(f"Failed to connect to E3rab database: {e}", exc_info=True)
-            raise
+        self._conn = self._connect(file_path)
         self.cursor = self._conn.cursor()
-        logger.debug(f"Database connection established successfully for E3rab.")
+        logger.debug(f"Initialized E3rab successfully with surah: {surah_number}, ayah: {ayah_number}.")
 
     @property
     def text(self) -> str:
-        logger.debug(f"Fetching text for Surah {self._surah_number}, Ayah {self._ayah_number}.")
-        sql = f"SELECT text FROM e3rab_{self._surah_number} WHERE number = ?;"
-        self.cursor.execute(sql, (self._ayah_number,))
+        """Fetch the E3rab text for the specified Ayah number."""
+        logger.debug(f"Fetching E3rab for {self._surah_number}, Ayah {self._ayah_number}.")
+        
+        query = f"SELECT text FROM e3rab_{self._surah_number} WHERE number = ?;"
+        self.cursor.execute(query, (self._ayah_number,))
         result = self.cursor.fetchone()
 
         if result:
-            logger.debug(f"Text found for Surah {self._surah_number}, Ayah {self._ayah_number}.")
+            logger.debug(f"E3rab found for Surah {self._surah_number}, Ayah {self._ayah_number}.")
             return self.remove_empty_lines(result["text"])
         else:
-            logger.warning(f"No text found for Surah {self._surah_number}, Ayah {self._ayah_number}. Returning empty string.")
+            logger.warning(f"No E3rab found for Surah {self._surah_number}, Ayah {self._ayah_number}. Returning empty string.")
             return ""
 
 
 class TanzilAyah(Base):
     def __init__(self, ayah_number: int) -> None:
+        logger.debug(f"Initializing TanzilAyah with Ayah {ayah_number}.")
         self._ayah_number = ayah_number
         file_path = os.path.join("database", "other", "tanzil.db")
-        logger.debug(f"Initializing TanzilAyah with Ayah {ayah_number}.")
-        try:
-            self._conn = self._connect(file_path)
-        except FileNotFoundError as e:
-            logger.error(f"Failed to connect to Tanzil database: {e}")
-            raise
+        self._conn = self._connect(file_path)
         self.cursor = self._conn.cursor()
-        logger.debug(f"Database connection established successfully for Tanzil.")
+        logger.debug(f"Initialized TanzilAyah successfully with Ayah {ayah_number}.")
 
     @property
     def text(self) -> str:
-        logger.info(f"Fetching text for Ayah {self._ayah_number} from Tanzil database.")
-        sql = "SELECT text FROM tanzil WHERE number = ?;"
-        self.cursor.execute(sql, (self._ayah_number,))
+        """Fetch the tanzilAyah text for the specified Ayah number from the Tanzil database."""
+        logger.debug(f"Fetching tanzilAyah for Ayah {self._ayah_number} from Tanzil database.")
+        
+        query = "SELECT text FROM tanzil WHERE number = ?;"
+        self.cursor.execute(query, (self._ayah_number,))
         result = self.cursor.fetchone()
 
         if result:
-            logger.debug(f"Text found for Ayah {self._ayah_number}.")
+            logger.debug(f"TanzilAyah found for Ayah {self._ayah_number}.")
             return self.remove_empty_lines(result["text"])
         else:
             logger.warning(f"No text found for Ayah {self._ayah_number}. Returning empty string.")
@@ -101,22 +98,21 @@ class TanzilAyah(Base):
 
 class AyaInfo(Base):
     def __init__(self, ayah_number: int) -> None:
+        logger.debug(f"Initializing AyaInfo with Ayah {ayah_number}.")
         self._ayah_number = ayah_number
         file_path = os.path.join("database", "quran", "quran.DB")
-        logger.debug(f"Initializing AyaInfo with Ayah {ayah_number}.")
-        try:
-            self._conn = self._connect(file_path)
-        except FileNotFoundError as e:
-            logger.error(f"Failed to connect to Quran database: {e}")
-            raise
+        
+        self._conn = self._connect(file_path)
         self.cursor = self._conn.cursor()
-        logger.debug(f"Database connection established successfully for AyaInfo.")
+        logger.debug(f"Initialized AyaInfo successfully with Ayah {ayah_number}.")
 
 
     @property
     def text(self) -> str:
-        logger.info(f"Fetching Aya information for Ayah {self._ayah_number}.")
-        sql = """
+        """Fetch the Aya information for the specified Ayah number."""
+        logger.debug(f"Fetching Aya information for Ayah {self._ayah_number}.")
+        
+        query = """
         SELECT 
         number,
         sura_name,
@@ -138,7 +134,7 @@ class AyaInfo(Base):
         WHERE number = ?;
         """
 
-        self.cursor.execute(sql, (self._ayah_number,))
+        self.cursor.execute(query, (self._ayah_number,))
         result = self.cursor.fetchone()
 
         if result:
@@ -150,6 +146,7 @@ class AyaInfo(Base):
 
     @staticmethod
     def format_text(result: dict) -> str:
+        """Format the Aya information into a readable string."""
         logger.debug(f"Formatting Aya information for Ayah {result['numberInSurah']}.")
         text = """|
         <ul>
@@ -165,27 +162,26 @@ class AyaInfo(Base):
             <li><strong>سجدة واجبة:</strong> {}.</li>
         </ul>
         """.format(result["numberInSurah"], result["number"], result["sura_name"], result["sura_number"], result["page"], result["juz"], result["hizb"], result["hizbQuarter"], result["sajda"], result["sajdaObligation"])
+        logger.debug(f"Aya information formatted successfully.")
 
         return text
-        logger.debug(f"Aya information formatted successfully.")
+        
     
 class SuraInfo(Base):
     def __init__(self, surah_number: int) -> None:
+        logger.debug(f"Initializing SuraInfo for Surah {surah_number}.")
         assert 1 <= surah_number <= 114, "Out of surah number."
         self._surah_number = surah_number
         file_path = os.path.join("database", "other", "quran_info.DB")
-        logger.debug(f"Initializing SuraInfo for Surah {surah_number}.")
-        try:
-            self._conn = self._connect(file_path)
-        except FileNotFoundError as e:
-            logger.error(f"Failed to connect to Quran info database: {e}")
-            raise
+        self._conn = self._connect(file_path)
         self.cursor = self._conn.cursor()
-        logger.debug(f"Database connection established successfully for SuraInfo.")
+        logger.debug(f"Initialized SuraInfo successfully for Surah {surah_number}.")
 
     @property
     def text(self) -> str:
-        logger.info(f"Fetching information for Surah {self._surah_number}.")
+        """Fetch the Surah information for the specified Surah number."""
+        logger.debug(f"Fetching information for Surah {self._surah_number}.")
+        
         self.cursor.execute("SELECT sura_number, info FROM surah_info WHERE sura_number = ?", (self._surah_number,))
         result = self.cursor.fetchone()
 
@@ -201,7 +197,9 @@ class SuraInfo(Base):
         return text
 
     def _format(self, data: dict) -> str:
+        """Format the Surah information into a readable string."""
         logger.debug(f"Formatting information for Surah {data.get('name', 'Unknown')}.")
+
         arabic_labels = {
             "name": "اسم السورة",
             "sura_number": "رقم السورة",
@@ -224,6 +222,7 @@ class SuraInfo(Base):
         for key, label in arabic_labels.items():
             value = data.get(key, "غير متوفر")
             text += f"<li><strong>{label}:</strong> {value}.</li>\n"
+
         logger.debug(f"Formatted information for Surah {data.get('name', 'Unknown')}.")
         return text + "</ul>"
 
@@ -231,21 +230,19 @@ class SuraInfo(Base):
 class JuzInfo(Base):
     def __init__(self, juz_number: int) -> None:
         """Initialize with a specific Juz number"""
+        logger.debug(f"Initializing JuzInfo for Juz {juz_number}.")
         assert 1 <= juz_number <= 30, "❌ Juz number must be between 1 and 30."
         self._juz_number = juz_number
         file_path = os.path.join("database", "quran", "quran.DB")
-        logger.debug(f"Initializing JuzInfo for Juz {juz_number}.")
-        try:
-            self._conn = self._connect(file_path)
-        except FileNotFoundError as e:
-            logger.error(f"Failed to connect to Quran database: {e}")
-            raise
+        self._conn = self._connect(file_path)
         self.cursor = self._conn.cursor()
-        logger.debug(f"Database connection established successfully for JuzInfo.")
+        logger.debug(f"Initialized JuzInfo successfully for Juz {juz_number}.")
 
     @property
     def text(self) -> str:
-        logger.info(f"Fetching information for Juz {self._juz_number}.")
+        """Fetch the Juz information for the specified Juz number."""
+        logger.debug(f"Fetching information for Juz {self._juz_number}.")
+        
         query = """ 
         SELECT 
             juz AS juz_number,
@@ -278,6 +275,7 @@ class JuzInfo(Base):
             return ""
 
     def _format(self, data: dict) -> str:
+        """Format the Juz information into a readable string."""
         logger.debug(f"Formatting information for Juz {data['juz_number']}.")
         text = f"""
 رقم الجزء: {data["juz_number"]}.
@@ -296,21 +294,20 @@ class JuzInfo(Base):
 
 class HizbInfo(Base):
     def __init__(self, hizb_number: int) -> None:
+        """Initialize with a specific Hizb number"""
+        logger.debug(f"Initializing HizbInfo for Hizb {hizb_number}.")
         assert 1 <= hizb_number <= 60, "❌ Hizb number must be between 1 and 60."
         self._hizb_number = hizb_number
         file_path = os.path.join("database", "quran", "quran.DB")
-        logger.debug(f"Initializing HizbInfo for Hizb {hizb_number}.")
-        try:
-            self._conn = self._connect(file_path)
-        except FileNotFoundError as e:
-            logger.error(f"Failed to connect to Quran database: {e}", exc_info=True)
-            raise
+        self._conn = self._connect(file_path)
         self.cursor = self._conn.cursor()
-        logger.debug(f"Database connection established successfully for HizbInfo.")
+        logger.debug(f"Initialized HizbInfo successfully for Hizb {hizb_number}.")
 
     @property
     def text(self) -> str:
-        logger.info(f"Fetching information for Hizb {self._hizb_number}.")
+        """Fetch the Hizb information for the specified Hizb number."""
+        logger.debug(f"Fetching information for Hizb {self._hizb_number}.")
+
         query = """ 
         SELECT 
             hizb AS hizb_number,
@@ -346,6 +343,7 @@ class HizbInfo(Base):
             return ""
 
     def _format(self, data: dict) -> str:
+        """Format the Hizb information into a readable string."""
         logger.debug(f"Formatting information for Hizb {data['hizb_number']}.")
         text = f"""
 رقم الحزب: {data["hizb_number"]}.
@@ -365,22 +363,20 @@ class HizbInfo(Base):
     
 class QuarterInfo(Base):
     def __init__(self, quarter_number: int) -> None:
+        """Initialize with a specific Quarter number"""
+        logger.debug(f"Initializing QuarterInfo for Quarter {quarter_number}.")
         assert 1 <= quarter_number <= 240, "❌ Quarter number must be between 1 and 240."
         self._quarter_number = quarter_number
-        file_path = os.path.join("database", "quran", "quran.DB")
-        logger.debug(f"Initializing QuarterInfo for Quarter {quarter_number}.")
-        try:
-            self._conn = self._connect(file_path)
-        except FileNotFoundError as e:
-            logger.error(f"Failed to connect to Quran database: {e}", exc_info=True)
-            raise
+        file_path = os.path.join("database", "quran", "quran.DB")        
+        self._conn = self._connect(file_path)
         self.cursor = self._conn.cursor()
-        logger.info(f"Database connection established successfully for QuarterInfo.")
-
+        logger.info(f"Initialized QuarterInfo successfully for Quarter {quarter_number}.")
 
     @property
     def text(self) -> str:
-        logger.info(f"Fetching information for Quarter {self._quarter_number}.")
+        """Fetch the Quarter information for the specified Quarter number."""
+        logger.debug(f"Fetching information for Quarter {self._quarter_number}.")
+        
         query = """ 
         SELECT 
             hizbQuarter AS quarter_number,
@@ -416,6 +412,7 @@ class QuarterInfo(Base):
             return ""
 
     def _format(self, data: dict) -> str:
+        """Format the Quarter information into a readable string."""
         logger.debug(f"Formatting information for Quarter {data['quarter_number']}.")
         text = f"""
 رقم الربع: {data["quarter_number"]}.
@@ -433,22 +430,20 @@ class QuarterInfo(Base):
 
 class PageInfo(Base):
     def __init__(self, page_number: int) -> None:
+        """Initialize with a specific Page number"""
+        logger.debug(f"Initializing PageInfo for Page {page_number}.")
         assert 1 <= page_number <= 604, "❌ Page number must be between 1 and 604."
         self._page_number = page_number
         file_path = os.path.join("database", "quran", "quran.DB")
-        logger.debug(f"Initializing PageInfo for Page {page_number}.")
-        try:
-            self._conn = self._connect(file_path)
-        except FileNotFoundError as e:
-            logger.error(f"Failed to connect to Quran database: {e}", exc_info=True)
-            raise
+        self._conn = self._connect(file_path)
         self.cursor = self._conn.cursor()
-        logger.debug(f"Database connection established successfully for PageInfo.")
-
+        logger.debug(f"Initialized PageInfo successfully for Page {page_number}.")
 
     @property
     def text(self) -> str:
-        logger.info(f"Fetching information for Page {self._page_number}.")
+        """Fetch the Page information for the specified Page number."""
+        logger.debug(f"Fetching information for Page {self._page_number}.")
+        
         query = """ 
         SELECT 
             page AS page_number,
@@ -478,6 +473,7 @@ class PageInfo(Base):
             return ""
 
     def _format(self, data: dict) -> str:
+        """Format the Page information into a readable string."""
         logger.debug(f"Formatting information for Page {data['page_number']}.")
         text = f"""
 رقم الصفحة:{data["page_number"]}.
@@ -499,19 +495,18 @@ class MoshafInfo(Base):
     MEDINAN_COUNT = 28
 
     def __init__(self) -> None:
-        file_path = os.path.join("database", "quran", "quran.DB")
+        """Initialize the MoshafInfo class."""
         logger.debug(f"Initializing MoshafInfo.")
-        try:
-            self._conn = self._connect(file_path)
-        except FileNotFoundError as e:
-            logger.error(f"Failed to connect to Quran database: {e}", exc_info=True)
-            raise
+        file_path = os.path.join("database", "quran", "quran.DB")
+        self._conn = self._connect(file_path)
         self.cursor = self._conn.cursor()
-        logger.debug(f"Database connection established successfully for MoshafInfo.")
+        logger.debug(f"Initialized MoshafInfo successfully.")
 
     @property
     def text(self) -> str:
-        logger.info("Fetching general information about the Quran.")
+        """Fetch general information about the Quran."""
+        logger.debug("Fetching general information about the Quran.")
+        
         query = """ 
         SELECT 
             COUNT(DISTINCT sura_number) AS total_surahs,
@@ -534,6 +529,7 @@ class MoshafInfo(Base):
             return "⚠️ لم يتم العثور على بيانات."
 
     def _format(self, data: dict) -> str:
+        """Format the general information into a readable string."""
         logger.debug("Formatting general information about the Quran.")
         text = f"""
 معلومات عامة عن المصحف:

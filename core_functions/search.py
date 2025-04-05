@@ -3,6 +3,7 @@ import re
 import os
 from exceptions.database import DBNotFoundError, DatabaseConnectionError, InvalidSearchTextError, InvalidCriteriaError
 from utils.logger import LoggerManager
+
 logger = LoggerManager.get_logger(__name__)
 
 class SearchCriteria:
@@ -34,7 +35,8 @@ class SearchCriteria:
 
 class QuranSearchManager:
     def __init__(self):
-        logger.info("Initializing QuranSearchManager...")
+        """Initialize the QuranSearchManager class."""
+        logger.debug("Initializing QuranSearchManager...")
         self.no_tashkil = False
         self.no_hamza = False
         self.match_whole_word = False
@@ -46,18 +48,31 @@ class QuranSearchManager:
         self._conn = None
         self._cursor = None
         self._connect()
-        logger.info("QuranSearchManager initialized.")
+        logger.debug("QuranSearchManager initialized.")
 
     def set(self, no_tashkil:bool=False, no_hamza:bool=False, match_whole_word:bool=False, criteria:str=None, _from:int=None, _to:int=None, from_ayah:int=None, to_ayah:int=None) -> None:
+        """
+        Set the parameters for the search.
+
+        :param 
+        no_tashkil: If True, ignore tashkil (diacritics) in the search.
+        no_hamza: If True, ignore hamza in the search.
+        match_whole_word: If True, match the whole word in the search.
+        criteria: The criteria for the search (e.g., page, sura_number, hizb, juz, quarter).
+        _from: The starting value for the criteria.
+        _to: The ending value for the criteria.
+        from_ayah: The starting ayah number.
+        to_ayah: The ending ayah number.
+        """
         logger.debug(f"Setting parameters: no_tashkil={no_tashkil}, no_hamza={no_hamza}, match_whole_word={match_whole_word}, criteria={criteria}, _from={_from}, _to={_to}, from_ayah={from_ayah}, to_ayah={to_ayah}")
 
         if not  SearchCriteria.is_valid(criteria):
-            logger.error(f"Invalid criteria: {criteria}")
+            logger.error(f"Invalid criteria: {criteria}. Must be one of {SearchCriteria.get_arabic_criteria()}.")
             raise InvalidCriteriaError(criteria)
 
         if self._conn is None:
-                logger.error("Database connection is None. You must connect to the database first.")
-                raise DatabaseConnectionError("QuranSearchManager._conn is None, you must connect to database first.")
+            logger.error("Database connection is None. Must connect to database first.")
+            raise DatabaseConnectionError("QuranSearchManager._conn is None, you must connect to database first.")
 
         #Get surah number if the input is surah  name
         if  criteria == SearchCriteria.sura and isinstance(_from, str):
@@ -91,10 +106,10 @@ class QuranSearchManager:
         self._from_ayah = from_ayah
         self._to_ayah = to_ayah
         self._criteria = criteria
-        logger.debug(f"Parameters set: no_tashkil={self.no_tashkil}, no_hamza={self.no_hamza}, match_whole_word={self.match_whole_word}, criteria={self._criteria}, _from={self._from}, _to={self._to}, from_ayah={self._from_ayah}, to_ayah={self._to_ayah}.")
-
+        logger.info(f"Parameters set: no_tashkil={self.no_tashkil}, no_hamza={self.no_hamza}, match_whole_word={self.match_whole_word}, criteria={self._criteria}, _from={self._from}, _to={self._to}, from_ayah={self._from_ayah}, to_ayah={self._to_ayah}.")
 
     def _connect(self):
+        """Connect to the Quran database."""
         file_path = os.path.join("database", "quran", 'Verses.DB')
         if not os.path.isfile(file_path):
             logger.error(f"Database file not found: {file_path}")
@@ -102,32 +117,36 @@ class QuranSearchManager:
         
         # connect to database
         try:
-            logger.info(f"Connecting to database: {file_path}...")
+            logger.debug(f"Connecting to database: {file_path}...")
             self._conn = sqlite3.connect(file_path)
             self._conn.row_factory = sqlite3.Row
             self._conn.create_function("REGEXP", 2, lambda expr, item: re.search(expr, item) is not None)
             self._cursor = self._conn.cursor()
-            logger.info("Database connection established successfully.")
+            logger.debug("Database connection established successfully.")
         except sqlite3.Error as e:
-            logger.error(f"Database connection error: {e}", exc_info=True)
+            logger.error(f"Database connection failed: {e}")
             raise DatabaseConnectionError(cause=e)
     
     def search(self, search_text:str) -> list:
+        """Search for the given text in the Quran database."""
         logger.debug(f"Starting search with text: '{search_text}'")
+        
         if  not isinstance(search_text, str):
-            logger.error(f"Invalid search text: {search_text}")
+            logger.error(f"Invalid search text type: {type(search_text)}. Must be a string.")
             raise InvalidSearchTextError(search_text)
 
         if not search_text:
-            logger.info("Empty search text provided. Returning None.")
+            logger.warning("Empty search text provided. Returning None.")
             return None
 
         if self.match_whole_word:
             operator = "REGEXP"
             search_text = rf"\b{search_text}\b"
+            logger.debug(f"Using REGEXP operator for whole word match: {search_text}")
         else:
             operator = "LIKE"
             search_text = f"%{search_text}%"
+            logger.debug(f"Using LIKE operator for partial match: {search_text}")
 
         query = f"SELECT * FROM quran WHERE {self._criteria} >= ? AND {self._criteria} <= ? AND text {operator} ?;"
         logger.debug(f"Query constructed: {query}")
@@ -149,7 +168,6 @@ class QuranSearchManager:
                 query = query.replace('AND text', f"AND REPLACE(text, '{char}', 'ا')")
                 query = query.replace('REPLACE(text', f"REPLACE(REPLACE(text, '{char}', 'ا')")
 
-        logger.debug("Executing query...")
         try:
             self._cursor.execute(query, (self._from, self._to, search_text))
             result = self._cursor.fetchall()
@@ -162,6 +180,7 @@ class QuranSearchManager:
 
 
     def __str__(self) -> str:
+        """Return a string representation of the QuranSearchManager."""
         return "Quran Search Manager Information:\n" \
             "No Tashkil: {}\n" \
             "No Hamza: {}\n" \
@@ -172,8 +191,8 @@ class QuranSearchManager:
             "To Ayah: {}\n".format(self.no_tashkil, self.no_hamza, self._criteria, self._from, self._to, self._from_ayah, self._to_ayah)
 
     def __del__(self):
+        """Destructor for the QuranSearchManager class."""
+        logger.debug("Deleting QuranSearchManager object and closing database connection...")
         if self._conn is not None:
-            logger.info("Closing database connection...")
             self._conn.close()
-            logger.info("Database connection closed.")          
-
+            logger.info("Deleted QuranSearchManager object Database connection closed.")          

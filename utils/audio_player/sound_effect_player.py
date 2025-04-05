@@ -47,6 +47,7 @@ class SoundEffectPlayer(AudioPlayer):
             return
 
         if file_name not in self.sounds:
+            logger.error(f"Invalid sound effect name: {file_name}. Available sounds: {list(self.sounds.keys())}")
             raise ValueError(f"Invalid file name '{file_name}'. Available sounds: {list(self.sounds.keys())}")
 
         file_path = self.sounds[file_name]

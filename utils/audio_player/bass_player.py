@@ -44,10 +44,12 @@ class AudioPlayer:
             logger.info(f"Stopped previous audio: {self.source}")
 
         if not isinstance(source, str) or not source:
+            logger.error(f"Invalid source: {source}.")
             raise InvalidSourceError(source)
         
         file_name, file_extension = os.path.splitext(source)
         if file_extension.lower() not in self.supported_extensions:
+            logger.error(f"Unsupported file format: {file_extension}. expected: {self.supported_extensions}.")
             raise UnsupportedFormatError(file_extension)
 
         parsed_url = urlparse(source)
@@ -59,6 +61,7 @@ class AudioPlayer:
         else:
             # Load from local file
             if not os.path.isfile(source):
+                logger.error(f"Audio file not found: {source}.")
                 raise AudioFileNotFoundError(source)
             logger.info(f"Loading audio from file: {source}")
             self.current_channel = bass.BASS_StreamCreateFile(False, source.encode('utf-8'), 0, 0, self.flag)
@@ -79,6 +82,7 @@ class AudioPlayer:
     def play(self) -> None:
         """Plays the currently loaded audio."""
         if not self.current_channel:
+            logger.error("No audio file loaded. Use load_audio() first.")
             raise PlaybackControlError("play", "No audio file loaded. Use load_audio() first.")
         bass.BASS_ChannelPlay(self.current_channel, False)
         logger.debug(f"Playing audio: {self.source}, {self.__class__.__name__}, device: {self.device}.")
@@ -227,6 +231,7 @@ class AudioPlayer:
         try:
             if self.current_channel:
                 if not bass.BASS_ChannelSetDevice(self.current_channel, device):
+                    logger.error(f"Failed to set device {device} for channel {self.current_channel}.")
                     raise SetDeviceError(device)
         except Exception as e:
             logger.error(f"Error setting device: {e}", exc_info=True)

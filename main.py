@@ -1,7 +1,25 @@
+# -*- coding: utf-8 -*-
 import sys
 import os
+
+#set PYTHONPATH to the current directory
 current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 os.chdir(current_dir)
+
+from utils.const import program_name, program_english_name, program_version, program_icon, user_db_path, CONFIG_PATH, LOG_PATH
+from utils.settings import Config
+from utils.logger import LogLevel, LoggerManager
+
+#load the config file
+Config.load_settings()
+#setup the logger
+LoggerManager.setup_logger(
+    log_file=LOG_PATH, 
+    log_level=LogLevel.from_name(Config.general.log_level),
+    dev_mode=True
+    )
+logger = LoggerManager.get_logger(__name__)
+logger.info(f"Starting {program_name}, {program_english_name}, version {program_version}...")
 
 from multiprocessing import freeze_support
 from PyQt6.QtWidgets import QApplication, QMessageBox
@@ -10,21 +28,8 @@ from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from ui.quran_interface import QuranInterface
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
 from utils.update import UpdateManager
-from utils.settings import Config
-from utils.const import program_name, program_english_name, program_version, program_icon, user_db_path, CONFIG_PATH, LOG_PATH
-from utils.logger import LogLevel, LoggerManager
 from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 
-
-
-Config.load_settings()
-LoggerManager.setup_logger(
-    log_file=LOG_PATH, 
-    log_level=LogLevel.from_name(Config.general.log_level),
-    dev_mode=True
-    )
-logger = LoggerManager.get_logger(__name__)
-logger.info(f"Starting {program_name}, {program_english_name}, version {program_version}...")
 
 class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs) -> None:
