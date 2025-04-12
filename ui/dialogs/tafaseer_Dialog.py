@@ -1,4 +1,5 @@
 import os
+import qtawesome as qta
 from PyQt6.QtWidgets import (
     QWidget,
     QHBoxLayout, 
@@ -17,16 +18,15 @@ from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
 from utils.universal_speech import UniversalSpeech
 from utils.const import albayan_documents_dir, Globals
-from exceptions.error_decorators import exception_handler
-import qtawesome as qta
 from utils.logger import LoggerManager
+from exceptions.error_decorators import exception_handler
 
 logger = LoggerManager.get_logger(__name__)
-
 
 class TafaseerDialog(QDialog):
     def __init__(self, parent, title, ayah_info, default_category):
         super().__init__(parent)
+        logger.debug("Initializing TafaseerDialog...")
         self.parent = parent
         self.ayah_info = ayah_info
         self.default_category = default_category
@@ -117,19 +117,19 @@ class TafaseerDialog(QDialog):
         self.text_edit.setText(self.tafaseer_manager.get_tafaseer(self.ayah_info[0], self.ayah_info[1]))
         self.text_edit.setFocus()
         Globals.effects_manager.play("change")
-        logger.debug(f"Tafaseer content updated for category: {selected_category}")
-
+        logger.info(f"Tafaseer content updated for category: {selected_category}")
 
     def copy_content(self):
+        logger.debug("User requested to copy Tafaseer content.")
         copied_content = self.text_edit.toPlainText()
         clipboard = QApplication.clipboard()
         clipboard.setText(copied_content) 
         UniversalSpeech.say("تم نسخ التفسير.")
         Globals.effects_manager.play("copy")        
-        logger.debug("User copied Tafaseer content to clipboard.")
-
+        logger.info("User copied Tafaseer content to clipboard.")
 
     def save_content(self):            
+        logger.debug("User requested to save Tafaseer content.")
 
         file_name = os.path.join(albayan_documents_dir, self.windowTitle())
         logger.debug(f"User attempting to save Tafaseer content to: {file_name}")
@@ -141,10 +141,12 @@ class TafaseerDialog(QDialog):
         if file_path:
             with open(file_path, "w") as file:
                 file.write(self.text_edit.toPlainText())
-                logger.debug(f"Tafaseer content successfully saved to: {file_path}")
-
+                logger.info(f"Tafaseer content successfully saved to: {file_path}")
 
     def reject(self):
         Globals.effects_manager.play("clos")
-        logger.debug("User closed TafaseerDialog.")
         self.deleteLater()
+
+    def closeEvent(self, a0):
+        logger.debug("TafaseerDialog closed.")
+        return super().closeEvent(a0)

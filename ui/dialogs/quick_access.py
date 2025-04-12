@@ -1,6 +1,6 @@
 import os
 import json
-from utils.audio_player import SoundEffectPlayer
+import qtawesome as qta
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -13,21 +13,19 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
-import qtawesome as qta
 from utils.logger import LoggerManager
+from utils.const import Globals
 
 logger = LoggerManager.get_logger(__name__)
-
 
 class QuickAccess(QDialog):
     def __init__(self, parent, title):
         super().__init__(parent)
+        logger.debug(f"Initializing QuickAccess dialog: {title}")
         self.parent = parent
         self.setWindowTitle(title)
         self.resize(300, 200)
-        self.effects_manager = SoundEffectPlayer("Audio/sounds")
         self.sura = []
-        logger.info(f"Initializing QuickAccess dialog: {title}")
         with open(os.path.join("database", "Surahs.Json"), encoding="UTF-8") as f:
             self.sura = json.load(f)["surahs"]
         self.pages = ["{}".format(i) for i in range(1, 605)]
@@ -85,6 +83,7 @@ class QuickAccess(QDialog):
         logger.debug("QuickAccess dialog initialized successfully.")
 
     def on_submit(self):    
+        logger.debug("go button clicked.")
         selected_item = self.choices.currentIndex() + 1
         logger.debug(f"User selected index {selected_item}")
         if self.sura_radio.isChecked():
@@ -108,7 +107,7 @@ class QuickAccess(QDialog):
 
         self.parent.quran_view.setText(content)
         self.accept()
-        self.effects_manager.play("change")
+        Globals.effects_manager.play("change")
         logger.info(f"User navigated to {selection_type} {selected_item}")
         self.deleteLater()
 
@@ -135,8 +134,9 @@ class QuickAccess(QDialog):
             self.choices.addItems(self.jus)
             logger.debug("Switched to Juzz selection")
 
-
     def reject(self):
-        logger.info("QuickAccess dialog closed.")
         self.deleteLater()
         
+    def closeEvent(self, a0):
+        logger.debug("QuickAccess dialog closed.")
+        return super().closeEvent(a0)

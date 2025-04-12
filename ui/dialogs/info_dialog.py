@@ -17,10 +17,10 @@ from exceptions.error_decorators import exception_handler
 
 logger = LoggerManager.get_logger(__name__)
 
-
 class InfoDialog(QDialog):
     def __init__(self, parent, title: str, label: str, text: str, is_html_content: bool = False, show_message_button: bool = False, save_message_as_img_button: bool = False):
         super().__init__(parent)
+        logger.debug("Initializing InfoDialog...")
         self.title = title
         self.label = label
         self.text = text
@@ -82,7 +82,6 @@ class InfoDialog(QDialog):
         close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
         close_shortcut.activated.connect(self.reject)
 
-
         # Layout
         layout = QVBoxLayout()
         layout.addWidget(label)
@@ -95,26 +94,26 @@ class InfoDialog(QDialog):
         layout.addLayout(button_layout)
         self.setLayout(layout)
         
-
         # Focus the text edit after dialog opens
         QTimer.singleShot(300, self.text_edit.setFocus)
 
     def copy_text(self):
+        logger.debug("User triggered copy action.")
         clipboard = QApplication.clipboard()
         clipboard.setText(self.text_edit.toPlainText())
         UniversalSpeech.say("تم نسخ النص إلى الحافظة")
         Globals.effects_manager.play("copy")
         logger.debug("User copied text to clipboard.")
 
-
     def reject(self):
-        logger.debug("User closed InfoDialog.")
         Globals.effects_manager.play("clos")
         self.deleteLater()
 
     def choose_QuotesMessage(self):
+        logger.debug("Choosing a random quote message...")
         file_path = data_folder/"quotes/QuotesMessages.json"
         if not file_path.exists():
+            logger.error(f"Quotes file not found: {file_path}")
             raise JSONFileNotFoundError(file_path)
             
         try:
@@ -123,18 +122,21 @@ class InfoDialog(QDialog):
                 message = random.choice(quotes_list)
                 logger.debug(f"Loaded quote: {message}")
         except json.JSONDecodeError as e:
-                raise InvalidJSONFormatError(file_path, e)
+            logger.error(f"Error decoding JSON from file: {file_path}, Error: {e}")
+            raise InvalidJSONFormatError(file_path, e)
 
         self.text_edit.setText(message)
         UniversalSpeech.say(message)
+        logger.debug(f"Displayed message: {message}")
         
     def OnNewMessage(self):
+        logger.debug("User triggered 'OnNewMessage' action.")
         self.choose_QuotesMessage()
         Globals.effects_manager.play("message")
-        logger.debug("User triggered 'OnNewMessage', displaying a new message.")
-
+        logger.debug("User received a new message.")
 
     def save_text_as_image(self):
+        logger.debug("User triggered save as image action.")
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         options = QFileDialog.Options()
         file_name = os.path.join(albayan_documents_dir, f"البيان_{self.windowTitle()}_{timestamp}.png")
@@ -171,4 +173,8 @@ class InfoDialog(QDialog):
             ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
             msg_box.exec()
             logger.debug(f"Saved text as image to {file_path}.")
-
+            
+    def closeEvent(self, a0):
+        logger.debug("InfoDialog closed.")
+        return super().closeEvent(a0)
+    

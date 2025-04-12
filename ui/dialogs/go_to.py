@@ -8,9 +8,8 @@ logger = LoggerManager.get_logger(__name__)
 
 class GoToDialog(QDialog):
     def __init__(self, parent, current_position: int, max: int, category_label: str):
-        super().__init__(parent)
-        
-        logger.info(f"Initializing GoToDialog with current_position={current_position}, max={max}, category_label={category_label}.")
+        super().__init__(parent)        
+        logger.debug(f"Initializing GoToDialog with current_position={current_position}, max={max}, category_label={category_label}.")
         
         self.setWindowTitle('الذهاب إلى')
         self.setGeometry(100, 100, 300, 150)
@@ -47,9 +46,7 @@ class GoToDialog(QDialog):
         close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
         close_shortcut.activated.connect(self.reject)
 
-
-        layout.addLayout(button_layout)
-        
+        layout.addLayout(button_layout)        
         self.setLayout(layout)
     
         logger.info("GoToDialog initialized successfully.")
@@ -58,9 +55,10 @@ class GoToDialog(QDialog):
         value = self.input_field.value()
         logger.debug(f"User selected value: {value}")
         return value
-        self.deleteLater()
 
     def reject(self):
-        logger.debug("Go to dialog Closed.")
         self.deleteLater()
         
+    def closeEvent(self, a0):
+        logger.debug("GoToDialog closed.")
+        return super().closeEvent(a0)

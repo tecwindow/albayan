@@ -42,7 +42,6 @@ class UpdateDialog(QDialog):
         self.setWindowModality(Qt.WindowModality.ApplicationModal)
         logger.debug(f"Opening update dialog for version {latest_version}")
 
-
         layout = QVBoxLayout()
 
         self.groupBox = QGroupBox(self)
@@ -72,7 +71,6 @@ class UpdateDialog(QDialog):
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
         self.cancel_button.setIcon(qta.icon("fa.times"))
 
-
         self.update_button.clicked.connect(self.on_update)
         self.cancel_button.clicked.connect(self.reject)
         close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
@@ -85,6 +83,7 @@ class UpdateDialog(QDialog):
         self.setLayout(layout)
         self.setFocus()
         QTimer.singleShot(300, self.release_notes_edit.setFocus)
+        logger.debug("Update dialog initialized.")
 
     def on_update(self):
         logger.debug("Clicked update button.")
@@ -98,6 +97,7 @@ class UpdateDialog(QDialog):
         self.download_thread.download_progress.connect(self.progress_dialog.setValue)
         self.download_thread.download_finished.connect(self.on_download_finished)
         self.download_thread.start()
+        logger.info("Download thread started.")
 
     def on_download_finished(self, file_path):
         logger.info(f"Download finished. Starting installation: {file_path}")
@@ -110,13 +110,18 @@ class UpdateDialog(QDialog):
         except Exception as e:
             logger.error(f"Failed to start installer: {e}", exc_info=True)
 
-
     def on_cancel(self):
         logger.debug("User canceled the update process.")
         self.download_thread.terminate()
         self.progress_dialog.hide()
         self.reject()
 
+    def reject(self):
+        self.deleteLater()
+
+    def closeEvent(self, event):
+        logger.debug("Close event triggered.")
+        return super().closeEvent(event)
 
 class DownloadThread(QThread):
     download_progress = pyqtSignal(int)
@@ -125,11 +130,12 @@ class DownloadThread(QThread):
     def __init__(self, download_url):
         super().__init__()
         self.download_url = download_url
+        logger.debug(f"Download thread initialized with URL: {download_url}")
 
     def run(self):
         file_name = self.download_url.split('/')[-1]
         file_path = os.path.join(temp_folder, file_name)
-        logger.info(f"Starting download: {self.download_url}")
+        logger.debug(f"Starting download: {self.download_url}")
         try:
             response = requests.get(self.download_url, stream=True)
             response.raise_for_status()
@@ -144,7 +150,7 @@ class DownloadThread(QThread):
                     self.download_progress.emit(progress)
                     logger.debug(f"Download progress: {progress}%")
 
-            logger.info(f"Download completed successfully: {file_path}")
+            logger.debug(f"Download completed successfully: {file_path}")
             self.download_finished.emit(file_path)
 
         except requests.exceptions.ConnectionError:
@@ -153,5 +159,3 @@ class DownloadThread(QThread):
             logger.error(f"HTTP error occurred while downloading: {e}", exc_info=True)
         except Exception as e:
             logger.error(f"Unexpected error during download: {e}", exc_info=True)
-
-            

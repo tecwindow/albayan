@@ -13,7 +13,7 @@ from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
- 
+
 class TasbihDialog(QDialog):
     def __init__(self, parent) -> None:
         super().__init__(parent)
@@ -122,10 +122,11 @@ class TasbihDialog(QDialog):
         # Populate the list with existing entries.
         self.populate_list()
         self.set_shortcuts()
-
         logger.debug("TasbihDialog Initialized.")
 
     def set_shortcuts(self):
+        """Register keyboard shortcuts for actions."""
+        logger.debug("Setting keyboard shortcuts for TasbihDialog.")
         shortcuts = {
             self.incrementButton: "Ctrl+C",
             self.decrementButton: "Ctrl+D",
@@ -140,17 +141,18 @@ class TasbihDialog(QDialog):
         
         for widget, shortcut in shortcuts.items():
             widget.setShortcut(QKeySequence(shortcut))
+            logger.debug(f"Shortcut {shortcut} set for {widget.toolTip()}")
             
     def open_tasbih_entry_dialog(self):
+        """Open the Tasbih entry dialog for the selected item."""
+        logger.debug("the user clicked on a tasbih entry.")
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         tasbih_entry = self.controller.get_entry(entry_id)
-        logger.debug(f"Opening Tasbih entry dialog for: {tasbih_entry.name} (ID: {entry_id}, Count: {tasbih_entry.counter})")
+        logger.info(f"Opening Tasbih entry dialog for: {tasbih_entry.name} (ID: {entry_id}, Count: {tasbih_entry.counter})")
         dialog = TasbihEntryDialog(self, self.controller, tasbih_entry)
         UniversalSpeech.say(F"مرحبا بك في المِسْبَحَة، التسبيح: {tasbih_entry.name}، العدد: {tasbih_entry.counter}. استخدم المفاتيح التالية لزيادة العداد: Space, Enter, +,أو C. لإنقاص العداد استخدم: D, Ctrl+Space, -, أو Backspace. لإعادة تعيين العداد استخدم: Ctrl+R. للمعلومات استخدم: V للعدد، T للذِكر، I للكل.")
         dialog.exec()
-
-
 
     def OnItemSelectionChanged(self):    
         status = bool(self.listWidget.selectedItems())
@@ -161,15 +163,18 @@ class TasbihDialog(QDialog):
         self.delete_button.setEnabled(status)
         self.resetAllButton.setEnabled(status)
         self.deleteAllButton.setEnabled(status)
+        logger.debug(f"List item selection status: {status}. Buttons enabled: {status}.")
         
     def populate_list(self):
         """Populate the list widget with all current tasbih entries."""
+        logger.debug("Populating Tasbih list widget with entries.")        
         entries = self.controller.get_all_entries()
         for entry in entries:
-            logger.debug(f"Adding Tasbih entry to list: {entry.name} (ID: {entry.id}, Count: {entry.counter})")
             self.add_list_item(entry)
-            
+        logger.debug("Tasbih list populated.")
+        
     def add_list_item(self, entry):
+        logger.debug(f"Adding Tasbih entry to list: {entry.name} (ID: {entry.id}, Count: {entry.counter})")
         """Create and add a QListWidgetItem for the given tasbih entry."""
         item_text = f"{entry.name} | {entry.counter}"
         item = QListWidgetItem(item_text)
@@ -177,7 +182,6 @@ class TasbihDialog(QDialog):
         item.setData(Qt.ItemDataRole.UserRole, entry.id)
         self.listWidget.addItem(item)
         logger.debug(f"Added Tasbih entry to list: {entry.name} (ID: {entry.id}, Count: {entry.counter})")
-
 
     def handle_add_entry(self):
         """Called when the Add button is clicked.
@@ -195,7 +199,7 @@ class TasbihDialog(QDialog):
         if dialog.exec() == QDialog.Accepted:
             new_name = dialog.textValue().strip()
             if new_name:
-                logger.debug(f"Adding new Tasbih entry: {new_name}")
+                logger.info(f"Adding new Tasbih entry: {new_name}")
                 self.controller.add_entry(new_name)
                 self.listWidget.setFocus()
         else:
@@ -214,6 +218,7 @@ class TasbihDialog(QDialog):
         Slot called when an entry is updated (via increment or reset).
         Updates the corresponding list item.
         """
+        logger.debug(f"Updating Tasbih entry in list: {entry.name} (ID: {entry.id}, New Count: {entry.counter})")
         for index in range(self.listWidget.count()):
             item = self.listWidget.item(index)
             if item.data(Qt.ItemDataRole.UserRole) == entry.id:
@@ -225,6 +230,7 @@ class TasbihDialog(QDialog):
 
     def handle_increment(self):
         """Increment the counter for the selected entry."""
+        logger.debug("Increment button has been clicked")
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         logger.debug(f"Incrementing counter for Tasbih entry ID: {entry_id}")
@@ -232,6 +238,7 @@ class TasbihDialog(QDialog):
         
     def handle_decrement(self):
         """Decrement the counter for the selected entry."""
+        logger.debug("Decrement button has been clicked")
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         logger.debug(f"Decrementing counter for Tasbih entry ID: {entry_id}")
@@ -239,6 +246,7 @@ class TasbihDialog(QDialog):
         
     def handle_reset(self):
         """Reset the counter for the selected entry."""
+        logger.debug("Reset button has been clicked")
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         logger.warning(f"Resetting counter for Tasbih entry ID: {entry_id}")
@@ -246,6 +254,7 @@ class TasbihDialog(QDialog):
 
     def handle_delete_entry(self):
         """Delete the selected entry."""
+        logger.debug("Delete button has been clicked")
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         logger.debug(f"Deleting Tasbih entry ID: {entry_id}")
@@ -311,8 +320,11 @@ class TasbihDialog(QDialog):
             self.listWidget.setFocus()
 
     def reject(self):
-        logger.debug("TasbihDialog Closed.")
         self.deleteLater()
+
+    def closeEvent(self, a0):
+        logger.debug("TasbihDialog closed.")
+        return super().closeEvent(a0)
 
 
 class TasbihEntryDialog(QDialog):
@@ -395,6 +407,7 @@ class TasbihEntryDialog(QDialog):
         
     def set_shortcuts(self):
         """Register keyboard shortcuts for actions."""
+        logger.debug("Setting keyboard shortcuts for TasbihEntryDialog.")
 
         shortcuts = {
             self.increment_button: ["Space", "Return", "Enter", "C", "+", "="],
@@ -417,9 +430,12 @@ class TasbihEntryDialog(QDialog):
                 action = QAction(self)  # Create a new action
                 action.setShortcut(QKeySequence(key))  # Set the shortcut
                 action.triggered.connect(widget.click)  # Simulate button press
-            
                 self.addAction(action)  # Attach action to the main window/dialog
+                logger.debug(f"Shortcut {key} set for {widget.toolTip()}")
 
     def reject(self):
-        logger.debug("TasbihEntryDialog closed.")
         self.deleteLater()
+
+    def closeEvent(self, a0):
+        logger.debug("TasbihEntryDialog closed.")
+        return super().closeEvent(a0)

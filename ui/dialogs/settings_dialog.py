@@ -443,6 +443,9 @@ class SettingsDialog(QDialog):
         self.reciters_combo.setFocus()
 
     def reject(self):
-        logger.debug("Closing SettingsDialog.")
         self.deleteLater()
-        
+    
+    def closeEvent(self, a0):
+        logger.debug("Settings dialog closed.")
+        return super().closeEvent(a0)
+    

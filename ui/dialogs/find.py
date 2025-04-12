@@ -25,9 +25,6 @@ from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
-
-
-
 class SearchDialog(QDialog):
     search_phrase = ""
 
@@ -42,10 +39,8 @@ class SearchDialog(QDialog):
         self.resize(500, 400)
         self.search_manager = QuranSearchManager()
         self.criteria = None
-        logger.debug(f"SearchDialog initialized with title: {title}.")
-
-
         self.initUI()
+        logger.debug(f"SearchDialog initialized with title: {title}.")
 
     def initUI(self):
         self.search_label = QLabel('اكتب ما تريد البحث عنه:')
@@ -146,15 +141,13 @@ class SearchDialog(QDialog):
         self.search_button.setEnabled(bool(self.search_box.text()))
         logger.debug(f"User edited search box: {self.search_box.text()}.")
 
-
     def show_advanced_options(self):
         enabled = self.advanced_search_checkbox.isChecked()
         self.advanced_search_groupbox.setEnabled(enabled)
         logger.debug(f"Advanced search {'enabled' if enabled else 'disabled'}.")
 
-
     def on_submit(self):
-        logger.debug("Search initiated.")
+        logger.debug("Search button clicked.")
         self.set_options_search()
         search_text = self.search_box. text()
         self.set_search_phrase(search_text)
@@ -175,19 +168,19 @@ class SearchDialog(QDialog):
         result_dialog = SearchResultsDialog(self, search_result)
         if result_dialog.exec():
             selected_result = result_dialog.list_widget.currentRow()
-            ayah_number = search_result[selected_result]["number"]
-            ayah_result = self.parent.quran.get_by_ayah_number(ayah_number)
-            logger.debug(f"User selected result {selected_result}, Ayah number: {ayah_number}")
+            selected_result = search_result[selected_result]
+            ayah_result = self.parent.quran.get_by_ayah_number(selected_result["number"])
+            logger.info(f"User selected result {selected_result}")
             self.parent.quran_view.setText(ayah_result["full_text"])
-            self.parent.set_focus_to_ayah(ayah_number)
+            self.parent.set_focus_to_ayah(selected_result["number"])
             self.parent.quran_view.setFocus()
+            logger.info(f"Moved to Ayah: {selected_result['numberInSurah']} in Surah: {selected_result['sura_name']}")
             self.accept()
-            logger.debug("SearchDialog closed after selection.")
             self.deleteLater()
 
-
     def on_radio_toggled(self):
-
+        logger.debug(f"Radio button toggled. Selected: {self.sender().text()}")
+        
         #clear
         self.search_from_combobox.clear()
         self.search_to_combobox.clear()
@@ -215,12 +208,11 @@ class SearchDialog(QDialog):
         self.search_to_combobox.setCurrentIndex(self.search_to_combobox.count() - 1)
         logger.debug(f"Search type changed to: {self.criteria}.")
 
-
     def set_options_search(self):
+        logger.debug("Setting search options.")
         
         search_from = self.search_from_combobox.currentIndex() + 1
         search_to = self.search_to_combobox.currentIndex() + 1
-        logger.debug(f"Search range set: From {search_from} to {search_to}")
         self.search_manager.set(
             no_tashkil=self.ignore_diacritics_checkbox.isChecked(),
             no_hamza=self.ignore_hamza_checkbox.isChecked(),
@@ -229,8 +221,13 @@ class SearchDialog(QDialog):
             _from=search_from,
 _to=search_to
         )
+        logger.debug(f"Search options set: from {search_from} to {search_to}, criteria {self.criteria}, no_tashkil {self.ignore_diacritics_checkbox.isChecked()}, no_hamza {self.ignore_hamza_checkbox.isChecked()}, match_whole_word {self.match_whole_word_checkbox.isChecked()}.")
 
-
+    def closeEvent(self, a0):
+        logger.debug("SearchDialog closed.")
+        return super().closeEvent(a0)
+    
+    
 class SearchResultsDialog(QDialog):
     def __init__(self, parent=None, search_result=[]):
         super().__init__(parent)
@@ -291,6 +288,9 @@ class SearchResultsDialog(QDialog):
         return super().keyPressEvent(event)
 
     def reject(self):
-        logger.info("SearchResultsDialog closed.")
         self.deleteLater()
         
+    def closeEvent(self, a0):
+        logger.debug("SearchResultsDialog closed.")
+        return super().closeEvent(a0)
+    
