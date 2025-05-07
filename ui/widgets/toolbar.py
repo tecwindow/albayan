@@ -50,11 +50,11 @@ class AudioPlayerThread(QThread):
                     if self.send_error_signal:
                         self.error_signal.emit(message)
                         self.manually_stopped = True
+                        logger.debug("Error signal emitted.")
                 finally:
                     self.statusChanged.emit()
                     self.waiting_to_load.emit(True)
                     logger.debug("Playback status updated.")
-
 
     def check_playback_status(self):
         self.playback_time_changed.emit(self.player.get_position(), self.player.get_length())
@@ -70,6 +70,7 @@ class AudioPlayerThread(QThread):
         self.send_error_signal = send_error_signal
         self.quit()
         self.wait()        
+
 
 class NavigationManager:
     def __init__(self, parent, quran: quran_mgr):
@@ -88,7 +89,7 @@ class NavigationManager:
             logger.debug("Ayah range initialized.")
 
     def reset_position(self):
-        logger.warning("Resetting navigation position.")
+        logger.debug("Resetting navigation position.")
         self.has_basmala = False
         self.initialize_ayah_range()
         ayah_info = self.parent.get_current_ayah_info()
@@ -97,14 +98,11 @@ class NavigationManager:
             self.current_ayah = self.ayah_range[self.current_surah]["min_ayah"] - 1    
         logger.debug(f"Position reset to Surah: {self.current_surah}, Ayah: {self.current_ayah}")
 
-
-
     def set_position(self, surah_number: int, ayah_number: int) -> None:
         self.initialize_ayah_range()
         self.current_surah = surah_number
         self.current_ayah = ayah_number
         logger.debug(f"Position set to Surah: {surah_number}, Ayah: {ayah_number}")
-
 
     def navigate(self, direction: str) -> bool:
         logger.debug(f"Navigating {direction} from Surah: {self.current_surah}, Ayah: {self.current_ayah}")
@@ -120,10 +118,10 @@ class NavigationManager:
             if self.current_surah + 1 in self.ayah_range:
                 self.current_surah += 1
                 self.current_ayah = self.ayah_range[self.current_surah]["min_ayah"]
-                logger.debug(f"Moved to next Surah: {self.current_surah}, Ayah: {self.current_ayah}")
+                logger.debug(f"Moved to next sura: {self.current_surah}, Ayah: {self.current_ayah}")
             else:
                 self.current_ayah = self.ayah_range[self.current_surah]["max_ayah"]
-                logger.debug("Reached the last Ayah of the Quran.")
+                logger.debug("Reached the last Ayah in the page.")
                 return False
         elif direction == "previous" and self.current_ayah < self.ayah_range[self.current_surah]["min_ayah"]:
             if self.current_surah - 1 in self.ayah_range:
@@ -132,7 +130,7 @@ class NavigationManager:
                 logger.debug(f"Moved to previous Surah: {self.current_surah}, Ayah: {self.current_ayah}")
             else:
                 self.current_ayah = self.ayah_range[self.current_surah]["min_ayah"]
-                logger.debug("Reached the first Ayah of the Quran.")
+                logger.debug("Reached the first Ayah in the page.")
                 return False
         logger.info(f"Navigation complete. New position: Surah {self.current_surah}, Ayah {self.current_ayah}")
         return True
@@ -162,7 +160,6 @@ class NavigationManager:
 
         logger.debug(f"Navigation status ({direction}): {result}")
         return result
-
 
 
 class AudioToolBar(QToolBar):
@@ -221,7 +218,6 @@ class AudioToolBar(QToolBar):
             self.play_current_ayah()
             logger.debug("Playback started.")
 
-
     def stop_audio(self):
         logger.debug("Stopping audio playback.")
         self.audio_thread.manually_stopped = True
@@ -244,13 +240,13 @@ class AudioToolBar(QToolBar):
         self.set_buttons_status()
         logger.debug("Audio playback started.")
 
-
     def OnPlayNext(self) -> None:
         logger.debug("Playing next Ayah.")
         self.stop_audio()
         if self.navigation.navigate("next"):
             self.play_current_ayah()
             self.change_ayah_focus()
+            logger.debug("Next Ayah played.")
 
     def OnPlayPrevious(self) -> None:
         logger.debug("Playing previous Ayah.")
@@ -258,6 +254,7 @@ class AudioToolBar(QToolBar):
         if self.navigation.navigate("previous"):
             self.play_current_ayah()
             self.change_ayah_focus()
+            logger.debug("Previous Ayah played.")
 
     def change_ayah_focus(self, manual: bool = False) -> None:
         logger.debug(f"Changing ayah focus...")
@@ -282,17 +279,15 @@ class AudioToolBar(QToolBar):
             self.play_current_ayah()
             logger.debug("Playingcurrent Ayah after listening.")
 
-
-
     def change_volume(self, value: int) -> None:
         logger.debug(f"Changing ayah volume.")
         self.player.set_volume(value)
+        logger.debug(f"Volume changed to {value}.")
 
     def set_volume(self) -> None:
         logger.debug("Setting ayah volume.")
         self.volume_slider.setValue(Config.audio.ayah_volume_level)
         logger.debug(f"Volume set to {Config.audio.ayah_volume_level}.")
-
 
     def update_play_pause_button_text(self):
         #logger.debug("Updating play/pause button text.")
@@ -301,7 +296,6 @@ class AudioToolBar(QToolBar):
         if hasattr(self.parent, "menu_bar"):
             self.parent.menu_bar.play_pause_action.setText(label)
         #logger.debug(f"Play/Pause button text updated to: {label}")
-
 
     def set_buttons_status(self, status: bool = 2) -> None:
         #logger.debug("Setting buttons status.")
@@ -323,14 +317,11 @@ class AudioToolBar(QToolBar):
                 self.audio_thread.timer.start(100)
         #logger.debug(f"Buttons status set: Next: {next_status}, Previous: {previous_status}, Play/Pause: {status}, Stop: {not self.player.is_stopped()}")
 
-
-
     def show_error_message(self, message: ErrorMessage):
+        logger.debug(f"Showing error message: {message.title} - {message.body}")
         msg_box =QMessageBox(self.parent,)
         msg_box.setIcon(QMessageBox.Icon.Critical)
         msg_box.setWindowTitle(message.title)
         msg_box.setText(message.body)
         ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
         msg_box.exec()
-
-        
