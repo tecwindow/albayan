@@ -49,21 +49,18 @@ class UpdateManager:
                 self.check_updates()
             else:
                 # Make one request in thread to open session
-                logger.info("Making a background request to open session for update check.")
+                logger.debug("Making a background request to open session for update check.")
                 Thread(target=UpdateChecker.session.get, kwargs={'url': UpdateChecker.url}, daemon=True).start()
         except Exception as e:
             logger.error(f"Error in check_auto_update: {ErrorMessage(e)}", exc_info=True)
 
     def check_updates(self):
-        try:
-            logger.info("Starting the update check process...")
-            self.update_checker = UpdateChecker()
-            self.update_checker.update_available.connect(lambda info: self.on_update_available(info))
-            self.update_checker.update_error.connect(lambda error: self.on_update_error(error))
-            self.update_checker.start()
-        except Exception as e:
-            logger.error(f"Error during updates check: {ErrorMessage(e)}", exc_info=True)
-
+        logger.debug("Starting the update check process...")
+        self.update_checker = UpdateChecker()
+        self.update_checker.update_available.connect(lambda info: self.on_update_available(info))
+        self.update_checker.update_error.connect(lambda error: self.on_update_error(error))
+        self.update_checker.start()
+        logger.debug("Update check thread started.")
 
     def on_update_available(self, info:dict):
         """Checks for updates and notifies the user if an update is available."""
@@ -82,42 +79,33 @@ class UpdateManager:
         except Exception as e:
             logger.error(f"Error in on_update_available: {ErrorMessage(e)}", exc_info=True)
 
-
     def on_update_error(self, error_message):
-        try:
-            logger.error(f"Update error: {error_message}")
-            if not self.auto_update:
-                msg_box = QMessageBox(self.parent)
-                msg_box.setIcon(QMessageBox.Icon.Critical)
-                msg_box.setWindowTitle("خطأ")
-                msg_box.setText(error_message)
+        logger.debug(f"Showing update error message: {error_message}")
+        if not self.auto_update:
+            msg_box = QMessageBox(self.parent)
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setWindowTitle("خطأ")
+            msg_box.setText(error_message)
 
-                ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
-                msg_box.exec()
-        except Exception as e:
-            logger.error(f"Error in on_update_error: {ErrorMessage(e)}", exc_info=True)
-
-
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
+            logger.debug("Update error message closed.")
 
     def show_update_dialog(self, release_notes, download_url, latest_version):
         try:
-            logger.info("Displaying update dialog for new version...")
+            logger.debug("Displaying update dialog for new version...")
             UpdateDialog(self.parent, release_notes, download_url, latest_version).exec()
         except Exception as e:
             logger.error(f"Error in show_update_dialog: {ErrorMessage(e)}", exc_info=True)
 
     def show_no_update_dialog(self):
-        try:
-            if not self.auto_update:
-                logger.info(f"No update found, displaying 'no update' dialog for version {program_version}.")
-                msg_box = QMessageBox(self.parent)
-                msg_box.setIcon(QMessageBox.Icon.Information)
-                msg_box.setWindowTitle("لا يوجد تحديث.")
-                msg_box.setText(f"أنت تستخدم {program_name} الإصدار {program_version}, وهو الإصدار الأحدث.")
+        if not self.auto_update:
+            logger.debug(f"No update found, displaying 'no update' dialog for version {program_version}.")
+            msg_box = QMessageBox(self.parent)
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setWindowTitle("لا يوجد تحديث.")
+            msg_box.setText(f"أنت تستخدم {program_name} الإصدار {program_version}, وهو الإصدار الأحدث.")
 
-                ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
-                msg_box.exec()
-        except Exception as e:
-            logger.error(f"Error in show_no_update_dialog: {ErrorMessage(e)}", exc_info=True)
-
-            
+            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
+            logger.debug("No update dialog closed.")

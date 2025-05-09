@@ -17,5 +17,5 @@ class UniversalSpeech:
             cls.universal_speech.say(msg, interrupt)
             logger.debug(f"Speaking: {msg} (Interrupt: {interrupt})")
         else:
-            logger.warning(f"Speech action skipped. Message: '{msg}'")
+            logger.debug(f"Speech action skipped. Message: '{msg}'")
 

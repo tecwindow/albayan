@@ -4,10 +4,9 @@ import datetime
 from typing import Union, Optional
 from pathlib import Path
 from utils.logger import LoggerManager
-
+from exceptions.database import DatabaseConnectionError
 
 logger = LoggerManager.get_logger(__name__)
-
 
 class UserDataManager:
     def __init__(self, db_path: Union[Path, str]) -> None:
@@ -18,19 +17,17 @@ class UserDataManager:
         self.create_table()
         logger.debug("UserDataManager initialized")
 
-
     def connect(self):
         """Connect to the SQLite database."""
         logger.debug(f"Connecting to database at {self.db_path}")
         try:
-            logger.debug("Attempting to connect to the database.")
             self.conn = sqlite3.connect(self.db_path)
             self.conn.row_factory = sqlite3.Row
             self.cursor = self.conn.cursor()
             logger.debug("Database connection established successfully,at {self.db_path}.")
         except sqlite3.Error as e:
             logger.error(f"Error connecting to database: {e}", exc_info=True)
-            raise RuntimeError(f"Error connecting to database: {e}")
+            raise DatabaseConnectionError(f"Error connecting to database", e)
 
     def create_table(self):
         """Create the user position table if it does not exist."""
@@ -105,8 +102,7 @@ class UserDataManager:
         """Close the database connection."""
         if hasattr(self, 'conn') and self.conn:
             self.conn.close()
-            logger.debug("Database connection closed.")
-
+            logger.info("Database connection closed.")
 
     def __del__(self):
         """Destructor to ensure database connection is closed."""
@@ -121,7 +117,6 @@ class PreferencesManager:
         self.conn = sqlite3.connect(self.db_path)
         self.create_table()
         logger.debug("PreferencesManager initialized")
-
 
     def create_table(self) -> None:
         """Create the preferences table if it does not exist."""
@@ -138,7 +133,6 @@ class PreferencesManager:
             logger.debug("Preferences table created successfully.")
         except sqlite3.Error as e:
             logger.error(f"Error creating preferences table: {e}", exc_info=True)
-            raise RuntimeError(f"Error creating preferences table: {e}")
 
     def set_preference(self, key: str, value: str) -> None:
         """
@@ -170,8 +164,8 @@ class PreferencesManager:
             return value
         except sqlite3.Error as e:
             logger.error(f"Error retrieving preference '{key}': {e}")
-            return default_value
 
+            return default_value
 
     def get_int(self, key: str, default_value: Optional[int] = None) -> int:
         return int(self.get(key, default_value or -1))
@@ -185,4 +179,5 @@ class PreferencesManager:
     def close(self):
         logger.debug("Closing preferences database connection.")
         self.conn.close()
+        logger.info("Preferences database connection closed.")
 
