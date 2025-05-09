@@ -14,7 +14,7 @@ from core_functions.tafaseer import Category
 from utils.update import UpdateManager
 from utils.settings import Config
 from utils.logger import LoggerManager
-from utils.const import program_name, program_version, website, Globals
+from utils.const import albayan_folder, program_name, program_version, website, Globals
 from utils.audio_player import bass
 from theme import ThemeManager
 
@@ -227,22 +227,19 @@ class MenuBar(QMenuBar):
         self.close_action.setVisible(Config.general.run_in_background_enabled)
         logger.debug("Settings dialog closed, setting visibility of close action as {Config.general.run_in_background_enabled}.")
 
-
     def OnUpdate(self):
         logger.debug("Opening update dialog.")
         self.update_manager.check_updates()
-
-
+        logger.debug("Update dialog closed")
 
     def OnBookmarkManager(self):
         logger.debug("Opening bookmark manager dialog.")
         dialog = BookmarkDialog(self.parent)
         if dialog.exec():
-            logger.debug("Bookmark manager closed with changes.")
+            logger.debug("Bookmark manager closed with selected bookmarks.")
             self.parent.set_text_ctrl_label()
         else:
-            logger.debug("Bookmark manager closed without changes.")
-
+            logger.debug("Bookmark manager closed without selection.")
 
     def OnSuraPlayer(self):
         logger.debug("Opening Sura Player window.")
@@ -272,12 +269,12 @@ class MenuBar(QMenuBar):
         theme = "default" if theme == "الافتراضي" else theme
         logger.debug(f"Applying theme: {theme}")
         self.theme_manager.apply_theme(theme)
-
+        logger.info(f"Applied theme: {theme}")
+        
         # Save selected theme in the settings
         Config.preferences.theme = theme
         Config.save_settings()
         logger.debug(f"Theme '{theme}' saved in settings.")
-
 
     def set_text_direction_rtl(self):
         logger.debug("Setting text direction to RTL.")
@@ -286,14 +283,12 @@ class MenuBar(QMenuBar):
         self.parent.quran_view.document().setDefaultTextOption(option)
         logger.debug("Text direction set to RTL.")
 
-
     def set_text_direction_ltr(self):
         logger.debug("Setting text direction to LTR.")
         option = self.parent.quran_view.document().defaultTextOption()
         option.setTextDirection(Qt.LayoutDirection.LeftToRight)
         self.parent.quran_view.document().setDefaultTextOption(option)
         logger.debug("Text direction set to LTR.")
-
 
     def OnContact(self):
         name = self.sender().text()
@@ -306,7 +301,6 @@ class MenuBar(QMenuBar):
         except Exception as e:
             logger.error(f"Error opening email client: {e}", exc_info=True)
             QMessageBox.critical(self, "خطأ", "حدث خطأ أثناء محاولة فتح برنامج البريد الإلكتروني")
-
 
     def OnAbout(self):
         logger.debug("Opening about dialog.")
@@ -322,6 +316,7 @@ class MenuBar(QMenuBar):
         msg_box.setText(about_text)
         ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
         msg_box.exec()
+        logger.debug("About dialog closed.")
 
     def OnGoTo(self):
         logger.debug("Opening GoTo dialog.")
@@ -329,6 +324,7 @@ class MenuBar(QMenuBar):
         current_position = self.parent.quran.current_pos
         max = QuranConst.get_max(category_number)
         category_label = QuranConst.get_category_label(category_number)
+        logger.debug(f"Current position: {current_position}, Max: {max}, Category label: {category_label}")
         go_to_dialog = GoToDialog(self.parent, current_position, max, category_label)
         if go_to_dialog.exec():
             value = go_to_dialog.get_input_value()
@@ -344,43 +340,33 @@ class MenuBar(QMenuBar):
             self.tafaseer_menu.exec()
             logger.debug("Tafaseer menu closed.")
 
-
-
     def quit_application(self):
         logger.info("Quitting application.")
         if Config.general.auto_save_position_enabled:
-            logger.info("Auto-saving current position.")
+            logger.debug("Auto-saving current position.")
             self.parent.OnSaveCurrentPosition()
             logger.info("Current position auto-saved.")
-        logger.info("Hiding tray icon.")
+        logger.debug("Hiding tray icon.")
         self.parent.tray_manager.hide_icon()
         logger.info("Tray icon hidden.")
-        logger.info("Closing Sura Player window if open.")
+        logger.debug("Closing Sura Player window if open.")
         if self.sura_player_window is not None:
             self.sura_player_window.close()
             logger.info("Sura Player window closed.")
-        logger.info("Freeing audio resources.")
+        logger.debug("Freeing audio resources.")
         bass.BASS_Free()
         logger.info("Audio resources freed.")
-        logger.info("Closing main window.")
+        logger.debug("Closing main window.")
         QApplication.quit()
         logger.info("Application quit.")
 
-
     def Onopen_log_file(self):
-        appdata_path = os.path.expandvars('%appdata%')
-        log_file_path = os.path.join(appdata_path, 'tecwindow', 'albayan', 'albayan.log')
+        log_file_path = os.path.join(albayan_folder, "albayan.log")
 
         try:
             os.startfile(log_file_path)
         except FileNotFoundError:
-            try:
-                os.makedirs(os.path.dirname(log_file_path), exist_ok=True)  
-                with open(log_file_path, 'w', encoding='utf-8') as f:
-                    f.write("")
-                os.startfile(log_file_path)
-            except Exception:
-                pass
+            logger.error(f"Log file not found: {log_file_path}", exc_info=True)
 
     def open_documentation(self, doc_type: str):
         file_map = {
@@ -396,8 +382,7 @@ class MenuBar(QMenuBar):
             os.startfile(doc_path)
             logger.debug(f"Opened documentation: {doc_path}")
         else:
-            logger.error(f"Documentation file not found: {doc_path}", exc_info=True)
-
+            logger.error(f"Documentation file not found: {doc_path}")
 
     def setup_shortcuts(self, disable=False,):
         logger.debug("Setting up shortcuts.")
@@ -455,13 +440,11 @@ class MenuBar(QMenuBar):
         self.update_program_action: ["Ctrl+F2"],
         self.open_log_action: ["Shift+L"],
         self.about_program_action: ["Ctrl+F1"],
-
-
         }
-
-
-
 
         for widget, key_sequence in shortcuts.items():
             key_sequence = [key_sequence] if isinstance(key_sequence, str) else key_sequence
             widget.setShortcuts([QKeySequence(key) for key in key_sequence])
+            logger.debug(f"Set shortcuts for {widget.text()}: {key_sequence}")
+
+        logger.debug("Shortcuts set up completed.")

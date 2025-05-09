@@ -8,8 +8,6 @@ from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
-
-
 @dataclass
 class Item:
     id: int
@@ -43,29 +41,35 @@ class FilterManager(QObject):
         self.current_category_index = 0
         logger.debug("FilterManager initialized.")
 
-
     def set_category(self, id, label: str, items: List[Item], widget: QComboBox) -> None:
+        """Set a new category with items."""
+        logger.debug(f"Setting category: ID={id}, Label={label}, Items={len(items)}.")
         category = Category(id, label, items, widget)
         self.categories.append(category)
         logger.debug(f"Category added: ID={id}, Label={label}, Items={len(items)}.")
 
-
     def change_category_items(self, id: int, new_items: List[Item]) -> None:
+        """Change items of an existing category."""
+        logger.debug(f"Changing items for category ID={id}. New item count: {len(new_items)}.")
         for category in self.categories:
             if category.id == id:
-                logger.debug(f"Changing items for category ID={id}. New item count: {len(new_items)}.")
+                logger.debug(f"Found category ID={id}. Updating items.")
                 category.items = new_items
+                logger.debug(f"Items updated for category ID={id}.")
                 
     def toggle_filter_mode(self) -> None:
         """Toggle filter mode."""
+        logger.debug("Toggling filter mode.")
         self.active = not self.active
         self.filterModeChanged.emit(self.active)
         logger.debug(f"Filter mode {'enabled' if self.active else 'disabled'}.")
         if not self.active:
+            logger.debug("Filter mode is disabled, clearing filters.")
             self.clear_filters()
-
+            
     def switch_category(self, direction: int) -> None:
         """Switch between categories."""
+        logger.debug(f"Switching category. Current index: {self.current_category_index}, Direction: {direction}.")
         if not self.categories:
             logger.warning("No categories available to switch.")
             return
@@ -77,6 +81,7 @@ class FilterManager(QObject):
 
     def navigate_items(self, direction: int) -> None:
         """Navigate through items in the active category."""
+        logger.debug(f"Navigating items. Current category index: {self.current_category_index}, Direction: {direction}.")
         if not self.categories:
             logger.warning("No categories available for navigation.")
             return
@@ -90,17 +95,18 @@ class FilterManager(QObject):
             self.selectOutOfRange.emit(current_index + direction)
             logger.debug(f"Selection out of range: {current_index + direction}.")
 
-
     def filter_items(self, char: str):
         """Filter items in the active category based on the search query."""
+        logger.debug(f"Filtering items with character: {char}.")
         active_category = self.categories[self.current_category_index]
         active_category.search_query += char
         self.searchQueryUpdated.emit(active_category.search_query)
-        logger.debug(f"Filtering with query: {active_category.search_query}.")
         self.update_filtered_items()
+        logger.debug(f"Updated search query: {active_category.search_query}.")
 
     def delete_last_char(self):
         """Delete the last character from the search query."""
+        logger.debug("Deleting last character from search query.")
         active_category = self.categories[self.current_category_index]
         if active_category.search_query:
             active_category.search_query = active_category.search_query[:-1]
@@ -110,6 +116,7 @@ class FilterManager(QObject):
 
     def update_filtered_items(self):
         """Update the items in the active category based on the search query."""
+        logger.debug("Updating filtered items based on the current search query.")
         active_category = self.categories[self.current_category_index]
         combo_box = active_category.widget
         all_items = active_category.items
@@ -119,15 +126,14 @@ class FilterManager(QObject):
         logger.debug(f"Filtered items updated for category {active_category.label}. "
                      f"Query: {active_category.search_query}, Matches: {len(filtered_items)}.")
 
-
     def clear_filters(self):
         """Clear all search filters."""
+        logger.debug("Clearing all filters.")
         for category in self.categories:
             category.search_query = ""
             combo_box = category.widget
             self.filteredItemsUpdated.emit(combo_box, category.items, combo_box.currentText())
         logger.debug("All filters cleared.")
-
 
     def handle_key_press(self, event: QKeyEvent) -> bool:
         """Handle key press events."""

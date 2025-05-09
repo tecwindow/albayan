@@ -23,8 +23,8 @@ class ReadOnlyTextEdit(QTextEdit):
         self.setAcceptRichText(True)
         document = self.document()
         document.setDefaultCursorMoveStyle(Qt.CursorMoveStyle.VisualMoveStyle)
-
         logger.debug(F"ReadOnlyTextEdit initialized, with font size: {font.pointSize()}")
+
 
 class QuranViewer(ReadOnlyTextEdit):
     def __init__(self, parent=None):
@@ -51,7 +51,6 @@ class QuranViewer(ReadOnlyTextEdit):
         self.parent.menu_bar.copy_verse_action.setEnabled(status)
         #logger.debug(f"Control state set to: {status}.")
 
-
     def keyPressEvent(self, e): 
         super().keyPressEvent(e)
         self.set_ctrl()
@@ -60,7 +59,6 @@ class QuranViewer(ReadOnlyTextEdit):
             self.parent.OnInterpretation(event=e)
             logger.debug("Enter key pressed, triggering Tafsir.")
             return
-
 
         if e.key() == Qt.Key.Key_Space:
             if e.modifiers() & Qt.KeyboardModifier.ControlModifier:  # Ctrl + Space

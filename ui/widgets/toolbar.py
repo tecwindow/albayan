@@ -43,7 +43,7 @@ class AudioPlayerThread(QThread):
                         self.player.load_audio(self.url)
                     self.player.play()
                     self.manually_stopped = False
-                    logger.info(f"Playback started for: {self.url}")
+                    logger.debug(f"Playback started for: {self.url}")
                 except Exception as e:
                     message = ErrorMessage(e)
                     logger.error(f"Error during playback: {message.title} - {message.body}", exc_info=True)

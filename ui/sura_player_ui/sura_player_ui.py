@@ -25,7 +25,6 @@ from .audio_looper import AudioLooper
 
 logger = LoggerManager.get_logger(__name__)
 
-
 class SuraPlayerWindow(QMainWindow):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -207,8 +206,8 @@ class SuraPlayerWindow(QMainWindow):
         self.filter_manager.searchQueryUpdated.connect(self.OnSearchQueryUpdated)
         self.setAccessibleDescription(F"أنت تستمع إلى سورة {self.surah_combo.currentText()}، للقارئ {self.reciter_combo.currentText().split(' - ')[0]}، اضغط Space للتشغيل. أو اضغط Ctrl+F لتغيير السورة أو القارئ.")
 
-
     def disable_focus(self):
+        logger.debug("Disabling focus for certain widgets.")
 
         widgets = [
             self.reciter_combo, self.surah_combo,
@@ -218,7 +217,10 @@ class SuraPlayerWindow(QMainWindow):
         for widget in widgets:
             widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
+        logger.debug("Focus disabled for widgets.")
+        
     def setup_shortcuts(self, disable=False,):
+        logger.debug("Setting up keyboard shortcuts.")
 
         shortcuts = {
         self.menubar.play_pause_action: ["Space", "K"],
@@ -244,8 +246,12 @@ class SuraPlayerWindow(QMainWindow):
         for widget, key_sequence in shortcuts.items():
             key_sequence = [key_sequence] if isinstance(key_sequence, str) else key_sequence
             widget.setShortcuts([QKeySequence(key) for key in key_sequence])
+            logger.debug(f"Shortcut set for {widget.toolTip()}: {key_sequence}")
+
+        logger.debug("Keyboard shortcuts set.")
 
     def update_current_reciter(self):
+        logger.debug(f"Updating current reciter to {self.reciter_combo.currentText()}")
         reciter_id = self.reciter_combo.currentData()
         reciter_data = self.reciters.get_reciter(reciter_id)
 
@@ -268,8 +274,8 @@ class SuraPlayerWindow(QMainWindow):
         self.surah_combo.setCurrentIndex(saved_sura)
 
     def update_current_surah(self):
-        logger.debug(f"Updating current Surah to {self.surah_combo.currentText()}")
         self.statusBar().showMessage(f"السورة الحالية: {self.surah_combo.currentText()}")
+        logger.debug(f"Selected Surah: {self.surah_combo.currentText()}")
 
     def toggle_play_pause(self):
         logger.debug("Toggling play/pause.")
@@ -283,14 +289,14 @@ class SuraPlayerWindow(QMainWindow):
             self.play_current_surah()
             logger.debug(f"Started playback: {self.surah_combo.currentText()}.")
 
-
     def play_current_surah(self):
+        logger.debug("Playing current Surah.")
         reciter_id = self.reciter_combo.currentData()
         surah_number = self.surah_combo.currentData()
-        logger.debug(f"Playing Surah {surah_number} by reciter {reciter_id}, {self.surah_combo.currentText()}, {self.reciter_combo.currentText()}")
         url = self.reciters.get_url(reciter_id, surah_number)
         self.audio_player_thread.set_audio_url(url)
         self.audio_player_thread.start()
+        logger.info(f"Playing Surah {surah_number} by reciter {reciter_id}, {self.surah_combo.currentText()}, {self.reciter_combo.currentText()}")
         self.preferences_manager.set_preference("reciter_id", self.reciter_combo.currentData())
         self.preferences_manager.set_preference("sura_number",  self.surah_combo.currentData())
         
@@ -299,17 +305,19 @@ class SuraPlayerWindow(QMainWindow):
         self.set_position(0)
         self.player.stop()
         self.audio_looper.clear_loop()
-
+        logger.info("Playback stopped.")
 
     def forward(self, step = 5):
         logger.debug(f"Forwarding {step} seconds.")
         self.player.forward(step)
         self.on_update_time(self.player.get_position(), self.player.get_length())
+        logger.debug(f"updated time after forwarding: {self.player.get_position()} seconds.")
 
     def rewind(self, step= 5):
         logger.debug(f"Rewinding {step} seconds.")
         self.player.rewind(step)
         self.on_update_time(self.player.get_position(), self.player.get_length())
+        logger.debug(f"updated time after rewinding: {self.player.get_position()} seconds.")
 
     def set_position(self, position: int, by_percent: bool = False) -> None:
         logger.info(f"Setting position to {position} {'%' if by_percent else 'seconds'}.")
@@ -319,6 +327,7 @@ class SuraPlayerWindow(QMainWindow):
                 position = total_length * (position / 100)
             self.player.set_position(position)
             self.on_update_time(self.player.get_position(), self.player.get_length())
+            logger.debug(f"Position set to {position} seconds.")
             if by_percent:
                 UniversalSpeech.say(f"{self.elapsed_time_label.text()}، الوقت الحالي.")
 
@@ -327,15 +336,15 @@ class SuraPlayerWindow(QMainWindow):
         self.set_position(0)
         #self.on_update_time(self.player.get_position(), self.player.get_length())
         UniversalSpeech.say(f"{self.elapsed_time_label.text()}، الوقت الحالي.")
-
-
+        logger.debug("Surah replayed.")
+        
     def next_surah(self):
         logger.debug("Moving to next Surah.")
         current_index = self.surah_combo.currentIndex()
         if current_index < self.surah_combo.count() - 1:
             self.surah_combo.setCurrentIndex(current_index + 1)
             UniversalSpeech.say(self.surah_combo.currentText())
-            logger.debug(f"Moved to surah {self.surah_combo.currentText()}.")
+            logger.info(f"Moved to surah {self.surah_combo.currentText()}.")
             self.play_current_surah()
 
     def previous_surah(self):
@@ -344,7 +353,7 @@ class SuraPlayerWindow(QMainWindow):
         if current_index > 0:
             self.surah_combo.setCurrentIndex(current_index - 1)
             UniversalSpeech.say(self.surah_combo.currentText())
-            logger.debug(f"Moved to surah {self.surah_combo.currentText()}.")
+            logger.info(f"Moved to surah {self.surah_combo.currentText()}.")
             self.play_current_surah()
 
     def next_reciter(self):
@@ -353,7 +362,7 @@ class SuraPlayerWindow(QMainWindow):
         if current_index < self.reciter_combo.count() - 1:
             self.reciter_combo.setCurrentIndex(current_index + 1)
             self.play_current_surah()
-        logger.debug(f"Switched to {self.reciter_combo.currentText()}.")
+        logger.info(f"Switched to {self.reciter_combo.currentText()}.")
         UniversalSpeech.say(self.reciter_combo.currentText())
 
     def previous_reciter(self):
@@ -362,20 +371,21 @@ class SuraPlayerWindow(QMainWindow):
         if current_index > 0:
             self.reciter_combo.setCurrentIndex(current_index - 1)
             self.play_current_surah()
-        logger.debug(f"Switched to {self.reciter_combo.currentText()}.")
+        logger.info(f"Switched to {self.reciter_combo.currentText()}.")
         UniversalSpeech.say(self.reciter_combo.currentText())
         
     def increase_volume(self):
         logger.debug("Increasing volume.")
         self.player.increase_volume()
+        logger.debug(f"Volume increased to {self.player.volume}.")
         volume = int(self.player.volume * 100)
         Config.audio.surah_volume_level = volume
         Config.save_settings()
- 
-
+        
     def decrease_volume(self):
         logger.debug("Decreasing volume.")
         self.player.decrease_volume()
+        logger.debug(f"Volume decreased to {self.player.volume}.")
         volume = int(self.player.volume * 100)
         Config.audio.surah_volume_level = volume
         Config.save_settings()
@@ -383,15 +393,19 @@ class SuraPlayerWindow(QMainWindow):
     def update_volume(self):
         logger.debug(f"Setting volume to {self.volume_slider.value()}.")
         self.player.set_volume(self.volume_slider.value())
+        logger.debug(f"Volume set to {self.player.volume}.")
 
     def update_time(self, position):
+        logger.debug(f"Updating time to {position}%.")
         total_length = self.player.get_length()
         new_position = total_length * (position / 100)
         if not self.player.set_position(new_position):
+            logger.warning("Failed to set position.")
             self.time_slider.blockSignals(True)
             current_position = self.player.get_position()
             self.time_slider.setValue(int((current_position / total_length) * 100))
             self.time_slider.blockSignals(False)
+            logger.debug(f"Time slider updated to {self.time_slider.value()}%.")
 
     def on_update_time(self, position, length):
         if length > 0:
@@ -402,7 +416,7 @@ class SuraPlayerWindow(QMainWindow):
             self.remaining_time_label.setText(self.format_time(length - position))
             self.total_time.setText(self.format_time(self.player.get_length()))
         self.time_slider.blockSignals(False)
-
+        
     def format_time(self, seconds):
         time_delta = datetime.timedelta(seconds=seconds)
         return str(time_delta).split(".")[0]

@@ -26,7 +26,7 @@ class KeyHandler:
             Qt.Key_Left: parent.rewind,
             Qt.Key_Right: parent.forward
         }
-        #logger.debug(f"Arrow key actions mapped: {self.arrow_actions}")
+        logger.debug(f"Arrow key actions mapped: {self.arrow_actions}")
 
         # Mapping modifier keys to the corresponding time values for rewinding/forwarding
         self.arrow_modifiers = {
@@ -34,7 +34,7 @@ class KeyHandler:
             Qt.ShiftModifier: 10,  # Shift -> 10 seconds
             Qt.ControlModifier: 20,  # Ctrl -> 20 seconds
         }
-        #logger.debug(f"Arrow key modifiers mapped: {self.arrow_modifiers}")
+        logger.debug(f"Arrow key modifiers mapped: {self.arrow_modifiers}")
 
         # Mapping shortcut keys to their corresponding actions
         self.shortcuts = {
@@ -51,8 +51,7 @@ class KeyHandler:
             Qt.Key_MediaPrevious: parent.previous_surah,
             Qt.Key_MediaNext: parent.next_surah,
         }
-        #logger.debug(f"Shortcut keys mapped: {self.shortcuts}")
-
+        logger.debug(f"Shortcut keys mapped: {self.shortcuts}")
 
     def handle_key_press(self, event: QKeyEvent) -> bool:
         """
