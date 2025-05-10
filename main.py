@@ -35,7 +35,7 @@ class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         app_id = "Albayan" if sys.argv[0].endswith(".exe") else "Albayan_Source"
-        logger.info("running from source." if app_id == "Albayan_Source" else "running from exe file.")
+        logger.debug("running from source." if app_id == "Albayan_Source" else "running from exe file.")
         self.setApplicationName(program_name)
         self.server_name = app_id
         logger.debug(f"Application ID: {app_id}")
@@ -97,7 +97,6 @@ class SingleInstanceApplication(QApplication):
 
         return super().eventFilter(obj, event)
 
-
     def setup_local_server(self) -> None:
         logger.debug(f"Starting local server with name: {self.server_name}")
         if not self.local_server.listen(self.server_name):
@@ -131,15 +130,16 @@ class SingleInstanceApplication(QApplication):
                 self.main_window.show()
                 self.main_window.raise_()
                 self.main_window.activateWindow()
+                logger.debug("Main window activated.")
                 socket.disconnectFromServer()
 
     def set_main_window(self, main_window) -> None:
-        logger.debug("Main window set.")
         self.main_window = main_window
+        logger.debug("Main window set in SingleInstanceApplication.")
 
 def call_after_starting(parent: QuranInterface) -> None:
     try:
-        logger.info("Playing basmala sound effect...")
+        logger.debug("Playing basmala sound effect...")
         basmala = StartupSoundEffectPlayer("Audio/basmala")
         basmala.play()
         logger.info("Basmala sound effect played successfully.")
@@ -164,16 +164,13 @@ def call_after_starting(parent: QuranInterface) -> None:
 
 def main():
     try:
-        logger.debug("Initializing QApplication...")
         app = SingleInstanceApplication(sys.argv)
-        logger.debug("QApplication initialized successfully.")
+        logger.info("QApplication initialized successfully.")
         app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        logger.debug("Layout direction set to RightToLeft.")
-        logger.info("Initializing main window...")
+        logger.info("Layout direction set to RightToLeft.")
         main_window = QuranInterface(program_name)
         logger.info("Main window initialized successfully.")
         app.set_main_window(main_window)
-        logger.debug("Main window set successfully.")
         if "--minimized" not in sys.argv:
             logger.info("Application started in normal mode, showing main window.")
             main_window.show()
@@ -181,8 +178,6 @@ def main():
             logger.info("Application started minimized, not showing main window.")
         call_after_starting(main_window)
         logger.debug("Post-startup actions executed successfully.")
-        logger.debug("Entering main event loop...")
-        logger.info("The window is now open.")
         sys.exit(app.exec())
     except Exception as e:
         logger.error(f"Unhandled exception: {str(e)}", exc_info=True)
