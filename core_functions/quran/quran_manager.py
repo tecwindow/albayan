@@ -135,6 +135,15 @@ class QuranManager:
             self.current_position -= 1
         return self.get_current_content()
 
+    def go_to(self, position: int) -> List[Ayah]:
+        if 1 <= position <= self.max_position:
+            self.current_position = position
+        elif position < 1:
+            self.current_position = 1
+        else:
+            self.current_position = self.max_position
+        return self.get_current_content()
+    
     def _row_to_ayah(self, row) -> Ayah:
         return Ayah(
             number=row.number,
