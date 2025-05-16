@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
-from sqlalchemy import create_engine
+from typing import List, Tuple
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker, Session
 from .models import Quran, QuranBase
-from .types import QuranFontType, NavigationMode, Ayah
+from .types import QuranFontType, NavigationMode, Surah, Ayah
 from pathlib import Path
 
 
@@ -63,7 +63,19 @@ class QuranManager:
             NavigationMode.QUARTER: cls.MAX_QUARTER,
         }
         return max_values.get(mode)
-
+    
+    def get_suras(self) -> List[Surah]:
+        rows = (
+            self.session.query(
+                Quran.sura_number,
+                func.REPLACE(Quran.sura_name, "سورة ", "")
+            )
+            .distinct()
+            .order_by(Quran.sura_number)
+            .all()
+        )
+        return [Surah(number=row.sura_number, name=row.sura_name) for row in rows]
+    
     def get_page(self, page_number: int) -> List[Ayah]:
         self.navigation_mode = NavigationMode.PAGE
         rows = (

@@ -31,7 +31,12 @@ class QuranFontType(Enum):
             QuranFontType.UTHMANI: data_folder / "quran" / "uthmani.DB",
         }
         return paths[self] 
-    
+ 
+
+@dataclass(eq=True)
+class Surah:
+    number: int
+    name: str
     
 @dataclass(eq=True)
 class Ayah:
