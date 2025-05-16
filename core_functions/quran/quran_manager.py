@@ -2,9 +2,8 @@
 
 from typing import List, Optional
 from pathlib import Path
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine, func, Column
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy import func
 from .models import Quran, QuranBase
 from .types import QuranFontType, NavigationMode, Surah, Ayah
 
@@ -97,60 +96,43 @@ class QuranManager:
         )
         return [Surah(number=row.sura_number, name=row.sura_name) for row in rows]
 
-    def get_page(self, page_number: int) -> List[Ayah]:
-        """Fetch all Ayahs on a given page."""
-        self.navigation_mode = NavigationMode.PAGE
+    def get_ayahs(self, col: Column, pos: int) -> List[Ayah]:
+        """
+        Fetch Ayahs by a given column and value.
+        Helper for page/surah/juz/hizb/quarter getters.
+        """
         rows = (
             self.session.query(Quran)
-            .filter(Quran.page == page_number)
+            .filter(col == pos)
             .order_by(Quran.number)
             .all()
         )
         return [self._row_to_ayah(r) for r in rows]
+
+    def get_page(self, page_number: int) -> List[Ayah]:
+        """Fetch all Ayahs on a given page."""
+        self.navigation_mode = NavigationMode.PAGE
+        return self.get_ayahs(Quran.page, page_number)
 
     def get_surah(self, surah_number: int) -> List[Ayah]:
         """Fetch all Ayahs in a given surah."""
         self.navigation_mode = NavigationMode.SURAH
-        rows = (
-            self.session.query(Quran)
-            .filter(Quran.sura_number == surah_number)
-            .order_by(Quran.numberInSurah)
-            .all()
-        )
-        return [self._row_to_ayah(r) for r in rows]
+        return self.get_ayahs(Quran.sura_number, surah_number)
 
     def get_juz(self, juz_number: int) -> List[Ayah]:
         """Fetch all Ayahs in a given juz."""
         self.navigation_mode = NavigationMode.JUZ
-        rows = (
-            self.session.query(Quran)
-            .filter(Quran.juz == juz_number)
-            .order_by(Quran.number)
-            .all()
-        )
-        return [self._row_to_ayah(r) for r in rows]
+        return self.get_ayahs(Quran.juz, juz_number)
 
     def get_hizb(self, hizb_number: int) -> List[Ayah]:
         """Fetch all Ayahs in a given hizb."""
         self.navigation_mode = NavigationMode.HIZB
-        rows = (
-            self.session.query(Quran)
-            .filter(Quran.hizb == hizb_number)
-            .order_by(Quran.number)
-            .all()
-        )
-        return [self._row_to_ayah(r) for r in rows]
+        return self.get_ayahs(Quran.hizb, hizb_number)
 
     def get_quarter(self, quarter_number: int) -> List[Ayah]:
         """Fetch all Ayahs in a given hizbQuarter."""
         self.navigation_mode = NavigationMode.QUARTER
-        rows = (
-            self.session.query(Quran)
-            .filter(Quran.hizbQuarter == quarter_number)
-            .order_by(Quran.number)
-            .all()
-        )
-        return [self._row_to_ayah(r) for r in rows]
+        return self.get_ayahs(Quran.hizbQuarter, quarter_number)
 
     def get_current_content(self) -> List[Ayah]:
         """Fetch Ayahs for the current position and mode."""
@@ -214,7 +196,6 @@ class QuranManager:
                 .all()
             )
             if sura_ayahs:
-                # clamp from_ayah
                 idx = max(1, min(len(sura_ayahs), from_ayah or 1)) - 1
                 start_num = sura_ayahs[idx].number
 
@@ -244,6 +225,38 @@ class QuranManager:
 
         return [self._row_to_ayah(r) for r in query.all()]
 
+    def get_by_ayah_number(self, ayah_number: int) -> List[Ayah]:
+        """
+        Given a global ayah_number, find which unit (page/surah/juz/etc.) it belongs to
+        and return all Ayahs in that unit.
+        """
+        # Map navigation_mode to the corresponding Quran column
+        mode_to_column = {
+            NavigationMode.PAGE:    Quran.page,
+            NavigationMode.SURAH:   Quran.sura_number,
+            NavigationMode.QUARTER: Quran.hizbQuarter,
+            NavigationMode.HIZB:    Quran.hizb,
+            NavigationMode.JUZ:     Quran.juz,
+        }
+        col = mode_to_column.get(self._navigation_mode)
+
+        if col is None:
+            return []
+
+        # Determine group value (e.g. page number, surah number) that ayah belongs to
+        group_value = (
+            self.session.query(col)
+            .filter(Quran.number == ayah_number)
+            .distinct()
+            .scalar_one_or_none()
+        )
+        if group_value is None:
+            return []
+
+        # Set and return that unit’s Ayahs
+        self.current_position = group_value
+        return self.get_current_content()
+
     def _row_to_ayah(self, row) -> Ayah:
         """Convert a SQLAlchemy Quran row to an Ayah dataclass."""
         return Ayah(
@@ -258,6 +271,4 @@ class QuranManager:
             page=row.page,
             sajda=row.sajda,
             sajdaObligation=row.sajdaObligation,
-            first_position=None,
-            last_position=None
         )
