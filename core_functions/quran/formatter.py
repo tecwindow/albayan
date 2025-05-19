@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from typing import List
 from .types import Ayah
 from .view_content import ViewContent
@@ -7,6 +9,14 @@ logger = LoggerManager.get_logger(__name__)
 
 class AyahFormatter:
     def __init__(self, view_content: ViewContent, show_ayah_number: bool = True, auto_page_turn: bool = False):
+        """
+        Initialize the AyahFormatter with view content and formatting options.
+
+        args:
+     view_content (ViewContent): The view content obj.
+        show_ayah_number (bool): Whether to show the ayah number.
+        auto_page_turn (bool): Whether to automatically turn the page.
+        """
         logger.debug("Initializing AyahFormatter")
         self.view_content = view_content
         self.show_ayah_number = show_ayah_number
@@ -14,6 +24,7 @@ class AyahFormatter:
         logger.debug(f"Initialized AyahFormatter with view_content: {view_content}, show_ayah_number: {show_ayah_number}, auto_page_turn: {auto_page_turn}")
 
     def format_view(self, ayat: List[Ayah]) -> ViewContent:
+        """Format the view content with ayat text and positions."""
         text = ""
         current_position = 0
 
