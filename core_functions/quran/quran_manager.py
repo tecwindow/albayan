@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, func, Column
 from sqlalchemy.orm import sessionmaker, Session
 from .models import Quran, QuranBase
 from .types import QuranFontType, NavigationMode, Surah, Ayah
+from .formatter import FomatterOptions, QuranFormatter
 
 
 class QuranManager:

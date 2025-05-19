@@ -1,27 +1,34 @@
 # -*- coding: utf-8 -*-
 
 from typing import List
+from pydantic import BaseModel
 from .types import Ayah
 from .view_content import ViewContent
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
-class AyahFormatter:
-    def __init__(self, view_content: ViewContent, show_ayah_number: bool = True, auto_page_turn: bool = False):
+class FomatterOptions(BaseModel):
+    """
+    Formatter options for the Quran text.
+    """
+    show_ayah_number: bool = True
+    auto_page_turn: bool = False
+
+
+class QuranFormatter:
+    def __init__(self, view_content: ViewContent, formatter_options: FomatterOptions):
         """
         Initialize the AyahFormatter with view content and formatting options.
 
         args:
      view_content (ViewContent): The view content obj.
-        show_ayah_number (bool): Whether to show the ayah number.
-        auto_page_turn (bool): Whether to automatically turn the page.
+     formatter_options (FomatterOptions): The formatter options obj.
         """
         logger.debug("Initializing AyahFormatter")
         self.view_content = view_content
-        self.show_ayah_number = show_ayah_number
-        self.auto_page_turn = auto_page_turn
-        logger.debug(f"Initialized AyahFormatter with view_content: {view_content}, show_ayah_number: {show_ayah_number}, auto_page_turn: {auto_page_turn}")
+        self.formatter_options = formatter_options
+        logger.debug(f"Initialized AyahFormatter with view_content: {view_content}, formatter_options: {formatter_options}")
 
     def format_view(self, ayat: List[Ayah]) -> ViewContent:
         """Format the view content with ayat text and positions."""
@@ -40,7 +47,7 @@ class AyahFormatter:
                         "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\n"
                     )
 
-            if self.show_ayah_number:
+            if self.formatter_options.show_ayah_number:
                 ayah_text += f" ({ayah.number_in_surah})"
 
             ayah_text = f"{ayah_text}\n"
@@ -53,7 +60,7 @@ class AyahFormatter:
             ayah.last_position = current_position - 1
             self.view_content.insert(ayah)
 
-        if self.auto_page_turn:
+        if self.formatter_options.auto_page_turn:
             text += "|"
         else:
             text = text.strip()
@@ -63,4 +70,4 @@ class AyahFormatter:
         return self.view_content
 
     def __repr__(self) -> str:
-        return f"AyahFormatter(view_content={self.view_content}, show_ayah_number={self.show_ayah_number}, auto_page_turn={self.auto_page_turn})"
+        return f"QuranFormatter(view_content={self.view_content}, formatter_options={self.formatter_options})"

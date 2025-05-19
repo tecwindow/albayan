@@ -1,3 +1,4 @@
+annotated-types==0.7.0
 APScheduler==3.11.0
 cabarchive==0.2.4
 certifi==2025.1.31
@@ -9,6 +10,8 @@ greenlet==3.1.1
 idna==3.10
 lief==0.16.4
 packaging==24.2
+pydantic==2.11.4
+pydantic_core==2.33.2
 PyQt6==6.8.1
 PyQt6-Qt6==6.8.2
 PyQt6_sip==13.10.0
@@ -18,6 +21,7 @@ requests==2.32.3
 setuptools==75.8.0
 SQLAlchemy==2.0.39
 striprtf==0.0.28
+typing-inspection==0.4.0
 typing_extensions==4.12.2
 tzdata==2025.2
 tzlocal==5.3.1
