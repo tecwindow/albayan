@@ -111,3 +111,7 @@ class ViewContent:
             last_position=row.last_position,
             first_position=row.first_position,
         )
+
+    def __repr__(self) -> str:
+        return f"ViewContent(number={self.number}, label={self.label}, mode={self.mode})"
+    
