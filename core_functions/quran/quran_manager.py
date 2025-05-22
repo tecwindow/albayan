@@ -262,13 +262,13 @@ class QuranManager:
             self.session.query(col)
             .filter(Quran.number == ayah_number)
             .distinct()
-            .scalar_one_or_none()
+            .first()
         )
         if group_value is None:
             return ""
 
         # Set and return that unit’s Ayahs
-        self.current_position = group_value
+        self.current_position = group_value[0]
         return self.get_current_content()
 
     def _row_to_ayah(self, row) -> Ayah:

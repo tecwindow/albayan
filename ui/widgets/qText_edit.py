@@ -98,7 +98,7 @@ class QuranViewer(ReadOnlyTextEdit):
             self.is_page_turn_alert = False
 
         if e.key() == Qt.Key.Key_Up:
-            if (current_line == 0) and (self.parent.quran.current_pos > 1):
+            if (current_line == 0) and (self.parent.quran_manager.current_position > 1):
                 if not self.is_page_turn_alert:
                     self.is_page_turn_alert = True
                     Globals.effects_manager.play("alert")
@@ -107,7 +107,7 @@ class QuranViewer(ReadOnlyTextEdit):
                 self.parent.OnBack(is_auto_call=True)
                 logger.debug("Page turned back.")
         elif e.key() == Qt.Key.Key_Down:
-            if (current_line == total_lines - 1) and (self.parent.quran.current_pos < self.parent.quran.max_pos):
+            if (current_line == total_lines - 1) and (self.parent.quran_manager.current_position < self.parent.quran_manager.max_position):
                 if not self.is_page_turn_alert:
                     self.is_page_turn_alert = True
                     Globals.effects_manager.play("alert")

@@ -69,12 +69,11 @@ class ViewContent:
         )
         return self._row_to_ayah(ayah_row) if ayah_row else None
 
-    def get_by_ayah_number(self, ayah_number_in_surah: int, surah_number: int) -> Optional[Ayah]:
+    def get_by_ayah_number(self, ayah_number: int) -> Optional[Ayah]:
         ayah_row = (
             self.session.query(AyahViewMap)
             .filter(
-                AyahViewMap.number_in_surah == ayah_number_in_surah,
-                AyahViewMap.sura_number == surah_number,
+                AyahViewMap.number== ayah_number
             )
             .first()
         )

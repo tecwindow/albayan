@@ -2,7 +2,7 @@ import time
 from typing import Optional
 from PyQt6.QtWidgets import QToolBar, QPushButton, QSlider, QMessageBox
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
-from core_functions.quran_class import quran_mgr
+from core_functions.quran.quran_manager import QuranManager
 from core_functions.Reciters import AyahReciter
 from utils.audio_player import AyahPlayer
 from utils.settings import Config
@@ -73,27 +73,26 @@ class AudioPlayerThread(QThread):
 
 
 class NavigationManager:
-    def __init__(self, parent, quran: quran_mgr):
+    def __init__(self, parent, quran_manager: QuranManager):
         logger.debug("Initializing NavigationManager.")
         self.parent = parent
-        self.quran = quran
+        self.quran_manager = quran_manager
         self.ayah_range = None
         self.current_surah = None
         self.current_ayah = None
         self.has_basmala = False
         logger.debug("NavigationManager initialized.")
 
-
     def initialize_ayah_range(self):
-            self.ayah_range = self.quran.ayah_data.get_ayah_range()
+            self.ayah_range = self.quran_manager.view_content.get_ayah_range()
             logger.debug("Ayah range initialized.")
 
     def reset_position(self):
         logger.debug("Resetting navigation position.")
         self.has_basmala = False
         self.initialize_ayah_range()
-        ayah_info = self.parent.get_current_ayah_info()
-        if ayah_info[0] != self.current_surah or not (self.ayah_range[self.current_surah]["min_ayah"] < ayah_info[3] < self.ayah_range[self.current_surah]["max_ayah"]):
+        current_ayah = self.parent.get_current_ayah()
+        if current_ayah.sura_number != self.current_surah or not (self.ayah_range[self.current_surah]["min_ayah"] < current_ayah.number_in_surah < self.ayah_range[self.current_surah]["max_ayah"]):
             self.current_surah = min(self.ayah_range.keys())
             self.current_ayah = self.ayah_range[self.current_surah]["min_ayah"] - 1    
         logger.debug(f"Position reset to Surah: {self.current_surah}, Ayah: {self.current_ayah}")
@@ -172,7 +171,7 @@ class AudioToolBar(QToolBar):
         self.parent = parent
         self.player = AyahPlayer()
         self.reciters = AyahReciter(data_folder / "quran" / "reciters.db")
-        self.navigation = NavigationManager(self.parent, self.parent.quran)
+        self.navigation = NavigationManager(self.parent, self.parent.quran_manager)
         self.audio_thread = AudioPlayerThread(self.player, self.parent)
         logger.debug("AudioToolBar initialized.")
 

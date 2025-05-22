@@ -169,10 +169,11 @@ class SearchDialog(QDialog):
         if result_dialog.exec():
             selected_result = result_dialog.list_widget.currentRow()
             selected_result = search_result[selected_result]
-            ayah_result = self.parent.quran.get_by_ayah_number(selected_result["number"])
+            ayah_number = selected_result["number"]
+            ayah_result = self.parent.quran_manager.get_by_ayah_number(ayah_number)
             logger.info(f"User selected result {selected_result}")
-            self.parent.quran_view.setText(ayah_result["full_text"])
-            self.parent.set_focus_to_ayah(selected_result["number"])
+            self.parent.quran_view.setText(ayah_result)
+            self.parent.set_focus_to_ayah(ayah_number)
             self.parent.quran_view.setFocus()
             logger.info(f"Moved to Ayah: {selected_result['numberInSurah']} in Surah: {selected_result['sura_name']}")
             self.accept()

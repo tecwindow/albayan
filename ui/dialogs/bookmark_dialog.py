@@ -188,8 +188,8 @@ class BookmarkDialog(QDialog):
             bookmark = item.data(Qt.ItemDataRole.UserRole)
             logger.info(f"Navigating to bookmark: {bookmark['name']} (Ayah: {bookmark['ayah_number']})")
             self.parent.quran.type = bookmark["criteria_number"]
-            ayah_result = self.parent.quran.get_by_ayah_number(bookmark["ayah_number"])
-            self.parent.quran_view.setText(ayah_result["full_text"])
+            ayah_result = self.parent.quran_manager.get_by_ayah_number(bookmark["ayah_number"])
+            self.parent.quran_view.setText(ayah_result)
             self.parent.set_focus_to_ayah(bookmark["ayah_number"])
             self.parent.quran_view.setFocus()
             self.accept()

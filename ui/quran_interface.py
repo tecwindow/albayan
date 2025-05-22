@@ -24,7 +24,7 @@ from PyQt6.QtGui import QIcon, QAction, QShowEvent, QTextCursor, QKeySequence, Q
 from core_functions.quran_class import quran_mgr
 from core_functions.quran.quran_manager import QuranManager
 from core_functions.quran.formatter import FormatterOptions
-from core_functions.quran.types import QuranFontType, NavigationMode
+from core_functions.quran.types import QuranFontType, NavigationMode, Ayah
 from core_functions.tafaseer import Category
 from core_functions.info import MoshafInfo, E3rab, TanzilAyah, AyaInfo, SuraInfo, JuzInfo, HizbInfo, QuarterInfo, PageInfo
 from core_functions.bookmark import BookmarkManager
@@ -177,13 +177,13 @@ class QuranInterface(QMainWindow):
         logger.debug("Loading Quran text...")
         position_data = self.user_data_manager.get_last_position()
         ayah_number = position_data.get("ayah_number", 1)
-        current_positiom = position_data.get("position", 1)
+        current_position = position_data.get("position", 1)
         mode = position_data.get("criteria_number", 0)
-        logger.debug(f"Current position: {current_positiom}, Ayah number: {ayah_number}, Mode: {mode}")
-        self.quran.type = mode
+        self.quran_manager.navigation_mode = NavigationMode.from_int(mode)
+        logger.debug(f"Current position: {current_position}, Ayah number: {ayah_number}, Mode: {self.quran_manager.navigation_mode}")
         self.menu_bar.browse_mode_actions[mode].setChecked(True)
         
-        text = self.quran.goto(current_positiom)
+        text = self.quran_manager.go_to(current_position)
         self.quran_view.setText(text)
         self.set_text_ctrl_label()
         self.set_focus_to_ayah(ayah_number)
@@ -196,7 +196,7 @@ class QuranInterface(QMainWindow):
             logger.debug("Setting focus to the end of the text.")
             text_position = len(self.quran_view.toPlainText())
         else:
-            text_position = self.quran.ayah_data.get_position(ayah_number)
+            text_position = self.quran_manager.view_content.get_by_ayah_number(ayah_number).first_position
         logger.debug(f"Text position: {text_position}")
 
         cursor = QTextCursor(self.quran_view.document())
@@ -206,21 +206,21 @@ class QuranInterface(QMainWindow):
 
     def OnNext(self):
         logger.debug("Next button clicked.")
-        self.quran_view.setText(self.quran.next())
+        self.quran_view.setText(self.quran_manager.next())
         self.set_text_ctrl_label()
         Globals.effects_manager.play("next")
         logger.debug("Text set successfully.")
-        if self.quran.current_pos == self.quran.max_pos:
+        if self.quran_manager.current_position == self.quran_manager.max_position:
             logger.debug("Reached the end of the Quran.")
             self.quran_view.setFocus()
 
     def OnBack(self, is_auto_call: bool = False):
         logger.debug("Back button clicked.")
-        self.quran_view.setText(self.quran.back())
+        self.quran_view.setText(self.quran_manager.back())
         self.set_text_ctrl_label()
         Globals.effects_manager.play("previous")
         logger.debug("Text set successfully.")
-        if self.quran.current_pos == 1:            
+        if self.quran_manager.current_position == 1:            
             logger.debug("Reached the beginning of the Quran.")
             self.quran_view.setFocus()
         if Config.reading.auto_page_turn and is_auto_call:
@@ -230,37 +230,31 @@ class QuranInterface(QMainWindow):
     def set_text_ctrl_label(self):
         logger.debug("Setting text control label.")
 
-        label = ""
-        if self.quran.type == 0:
-            label = f"الصفحة {self.quran.current_pos}"
+        if self.quran_manager.navigation_mode == NavigationMode.PAGE:
             self.next_to.setText("الصفحة التالية")
             self.menu_bar.next_action.setText("الصفحة التالية")
             self.back_to.setText("الصفحة السابقة")
             self.menu_bar.previous_action.setText("الصفحة السابقة")
             logger.debug("Page mode selected.")
-        elif self.quran.type == 1:
-            label = self.quran.data_list[-1][2]
+        elif self.quran_manager.navigation_mode == NavigationMode.SURAH:
             self.next_to.setText("السورة التالية")
             self.menu_bar.next_action.setText("السورة التالية")
             self.back_to.setText("السورة السابقة")
             self.menu_bar.previous_action.setText("السورة السابقة")    
             logger.debug("Surah mode selected.")
-        elif self.quran.type == 2:
-            label = f"الربع {self.quran.current_pos}"
+        elif self.quran_manager.navigation_mode == NavigationMode.QUARTER:
             self.next_to.setText("الربع التالي")
             self.menu_bar.next_action.setText("الربع التالي")
             self.back_to.setText("الربع السابق")
             self.menu_bar.previous_action.setText("الربع السابق")
             logger.debug("Quarter mode selected.")
-        elif self.quran.type == 3:
-            label = f"الحزب {self.quran.current_pos}"
+        elif self.quran_manager.navigation_mode == NavigationMode.HIZB:
             self.next_to.setText("الحزب التالي")
             self.menu_bar.next_action.setText("الحزب التالي")
             self.back_to.setText("الحزب السابق")
             self.menu_bar.previous_action.setText("الحزب السابق")
             logger.debug("Hizb mode selected.")
-        elif self.quran.type == 4:
-            label = f"الجزء {self.quran.current_pos}"
+        elif self.quran_manager.navigation_mode == NavigationMode.JUZ:
             self.next_to.setText("الجزء التالي")
             self.menu_bar.next_action.setText("الجزء التالي")
             self.back_to.setText("الجزء السابق")
@@ -268,6 +262,7 @@ class QuranInterface(QMainWindow):
             logger.debug("Juz mode selected.")
 
         # set the label
+        label = f"ال{self.quran_manager.view_content.label} {self.quran_manager.view_content.number}"
         self.quran_title.setText(label)
         self.quran_view.setAccessibleName(label)
         logger.debug(f"Label set to: {label}")
@@ -275,8 +270,8 @@ class QuranInterface(QMainWindow):
                 UniversalSpeech.say(label)
 
         # Enable back and next item
-        next_status = self.quran.current_pos < self.quran.max_pos
-        back_status = self.quran.current_pos > 1
+        next_status = self.quran_manager.current_position < self.quran_manager.max_position
+        back_status = self.quran_manager.current_position > 1
         self.next_to.setEnabled(next_status)
         self.menu_bar.next_action.setEnabled(next_status)
         self.back_to.setEnabled(back_status)
@@ -309,14 +304,13 @@ class QuranInterface(QMainWindow):
             logger.debug("Search dialog accepted.")
             self.set_text_ctrl_label()
 
-    def get_current_ayah_info(self) -> list:
+    def get_current_ayah(self) -> Ayah:
         logger.debug("Getting current Ayah info.")
-
         current_line = self.quran_view.textCursor().block()
         position = current_line.position()
-        ayah_info = self.quran.get_ayah_info(position)
-        logger.debug(f"Retrieved ayah_info: {ayah_info}")
-        return ayah_info
+        ayah = self.quran_manager.view_content.get_by_position(position)
+        logger.debug(f"Retrieved current Ayah: {ayah.number}")
+        return ayah
     
     @exception_handler(ui_element=QMessageBox)
     def OnInterpretation(self, event=None):
@@ -333,10 +327,10 @@ class QuranInterface(QMainWindow):
             logger.warning("Invalid category, defaulting to الميسر.")
             selected_category = "الميسر"
 
-        ayah_info = self.get_current_ayah_info()
-        title = "تفسير آية {} من {}".format(ayah_info[3], ayah_info[2])
+        current_ayah = self.get_current_ayah()
+        title = "تفسير آية {} من {}".format(current_ayah.number_in_surah, current_ayah.sura_name)
         logger.debug(f"Opening TafaseerDialog with title: {title}")
-        dialog = TafaseerDialog(self, title, ayah_info, selected_category)
+        dialog = TafaseerDialog(self, title, current_ayah, selected_category)
         dialog.exec()
         logger.debug("TafaseerDialog closed.")
 
@@ -413,24 +407,24 @@ class QuranInterface(QMainWindow):
     @exception_handler(ui_element=QMessageBox)
     def OnSyntax(self, event):
         logger.debug("Syntax action triggered.")
-        aya_info = self.get_current_ayah_info()
-        title = "إعراب آية رقم {} من {}".format(aya_info[3], aya_info[2])
+        current_aya = self.get_current_ayah()
+        title = "إعراب آية رقم {} من {}".format(current_aya.number_in_surah, current_aya.sura_name)
         label = "الإعراب"
-        text = E3rab(aya_info[0], aya_info[1]).text
-        logger.debug(f"Syntax details retrieved for ayah {aya_info[3]} in {aya_info[2]}")
+        text = E3rab(current_aya.sura_number, current_aya.number).text
+        logger.debug(f"Syntax details retrieved for ayah {current_aya.number_in_surah} in {current_aya.sura_name}")
         InfoDialog(self, title, label, text).exec()
         logger.debug("Syntax dialog closed.")
 
     @exception_handler(ui_element=QMessageBox)
     def OnVerseReasons(self, event):
         logger.debug("Verse reasons action triggered.")
-        aya_info = self.get_current_ayah_info()
-        title = "أسباب نزول آية رقم {} من {}".format(aya_info[3], aya_info[2])
+        current_aya = self.get_current_ayah()
+        title = "أسباب نزول آية رقم {} من {}".format(current_aya.number_in_surah, current_aya.sura_name)
         label = "الأسباب"
-        text = TanzilAyah(aya_info[1]).text
+        text = TanzilAyah(current_aya.number).text
 
         if text:
-            logger.debug(f"Reasons retrieved for ayah {aya_info[3]} in {aya_info[2]}")
+            logger.debug(f"Reasons retrieved for ayah {current_aya.number_in_surah} in {current_aya.sura_name}")
             InfoDialog(self, title, label, text).exec()
             logger.debug("Verse reasons dialog closed.")
         else:
@@ -455,67 +449,67 @@ class QuranInterface(QMainWindow):
     @exception_handler(ui_element=QMessageBox)
     def OnAyahInfo(self, event):
         logger.debug("Ayah info action triggered.")
-        aya_info = self.get_current_ayah_info()
-        title = "معلومات آية رقم {} من {}".format(aya_info[3], aya_info[2])
+        current_aya = self.get_current_ayah()
+        title = "معلومات آية رقم {} من {}".format(current_aya.number_in_surah, current_aya.sura_name)
         label = "معلومات الآية:"
-        text = AyaInfo(aya_info[1]).text
-        logger.debug(f"Displaying information for ayah {aya_info[3]} in {aya_info[2]}")
+        text = AyaInfo(current_aya.number).text
+        logger.debug(f"Displaying information for ayah {current_aya.number_in_surah} in {current_aya.sura_name}")
         InfoDialog(self, title, label, text, is_html_content=True).open()
 
     @exception_handler(ui_element=QMessageBox)
     def OnSurahInfo(self, event):
         logger.debug("Surah info action triggered.")
-        aya_info = self.get_current_ayah_info()
-        title = "معلومات {}".format(aya_info[2])
+        current_aya = self.get_current_ayah()
+        title = "معلومات {}".format(current_aya.sura_name)
         label = "معلومات السورة:"
-        sura_info = SuraInfo(aya_info[0])
-        logger.debug(f"Displaying information for surah {aya_info[2]}")
+        sura_info = SuraInfo(current_aya.sura_number)
+        logger.debug(f"Displaying information for surah {current_aya.sura_name}")
         InfoDialog(self, title, label, sura_info.text, is_html_content=True).open()
 
     @exception_handler(ui_element=QMessageBox)
     def OnJuzInfo(self, event):
         logger.debug("Juz info action triggered.")
-        aya_info = self.get_current_ayah_info()
-        title = "معلومات الجزء {}".format(aya_info[4])
+        current_aya = self.get_current_ayah()
+        title = "معلومات الجزء {}".format(current_aya.juz)
         label = "معلومات الجزء:"
-        juz_info = JuzInfo(aya_info[4])
-        logger.debug(f"Displaying information for juz {aya_info[4]}")
+        juz_info = JuzInfo(current_aya.juz)
+        logger.debug(f"Displaying information for juz {current_aya.juz}")
         InfoDialog(self, title, label, juz_info.text).open()
 
     @exception_handler(ui_element=QMessageBox)
     def OnHizbInfo(self, event):
         logger.debug("Hizb info action triggered.")
-        aya_info = self.get_current_ayah_info()
-        title = "معلومات الحزب {}".format(aya_info[5])
+        current_aya = self.get_current_ayah()
+        title = "معلومات الحزب {}".format(current_aya.hizb)
         label = "معلومات الحزب:"
-        hizb_info = HizbInfo(aya_info[5])
-        logger.debug(f"Displaying information for hizb {aya_info[5]}")
+        hizb_info = HizbInfo(current_aya.hizb)
+        logger.debug(f"Displaying information for hizb {current_aya.hizb}")
         InfoDialog(self, title, label, hizb_info.text).open()
 
     @exception_handler(ui_element=QMessageBox)
     def OnQuarterInfo(self, event):
         logger.debug("Quarter info action triggered.")
-        aya_info = self.get_current_ayah_info()
-        title = "معلومات الربع {}".format(aya_info[6])
+        current_aya = self.get_current_ayah()
+        title = "معلومات الربع {}".format(current_aya.hizbQuarter)
         label = "معلومات الربع:"
-        quarter_info = QuarterInfo(aya_info[6])
-        logger.debug(f"Displaying information for quarter {aya_info[6]}")
+        quarter_info = QuarterInfo(current_aya.hizbQuarter)
+        logger.debug(f"Displaying information for quarter {current_aya.hizbQuarter}")
         InfoDialog(self, title, label, quarter_info.text).open()
 
     @exception_handler(ui_element=QMessageBox)
     def OnPageInfo(self, event):
         logger.debug("Page info action triggered.")
-        aya_info = self.get_current_ayah_info()
-        title = "معلومات الصفحة {}".format(aya_info[7])
+        current_aya = self.get_current_ayah()
+        title = "معلومات الصفحة {}".format(current_aya.page)
         label = "معلومات الصفحة:"
-        page_info = PageInfo(aya_info[7])
-        logger.debug(f"Displaying information for page {aya_info[7]}")
+        page_info = PageInfo(current_aya.page)
+        logger.debug(f"Displaying information for page {current_aya.page}")
         InfoDialog(self, title, label, page_info.text).open()
 
     def say_played_ayah(self):
         logger.debug("Say played Ayah action triggered.")
-        ayah_info = self.get_current_ayah_info()
-        text = f"آية {self.toolbar.navigation.current_ayah} من {ayah_info[2]}"
+        current_aya = self.get_current_ayah()
+        text = f"آية {self.toolbar.navigation.current_ayah} من {current_aya.sura_name}"
         logger.debug(f"Text to be spoken: {text}")
         if self.toolbar.navigation.current_ayah:
             if self.toolbar.player.is_playing():
@@ -536,8 +530,8 @@ class QuranInterface(QMainWindow):
 
     def say_focused_ayah(self):
         logger.debug("Say focused Ayah action triggered.")
-        ayah_info = self.get_current_ayah_info()
-        text = f"آية {ayah_info[3]} من {ayah_info[2]}، الآية الحالية."
+        current_aya = self.get_current_ayah()
+        text = f"آية {current_aya.number_in_surah} من {current_aya.sura_name}، الآية الحالية."
         logger.debug(f"Text to be spoken: {text}")
         UniversalSpeech.say(text)
 
@@ -546,10 +540,9 @@ class QuranInterface(QMainWindow):
         logger.debug("Save bookmark action triggered.")
 
         bookmark_manager= BookmarkManager()
-        aya_info = self.get_current_ayah_info()
-        criteria_number = self.quran.type
-        logger.debug(f"Information retrieved for bookmark: {aya_info} and criteria number: {criteria_number}")
-        if bookmark_manager.is_exist(aya_info[1]):
+        current_aya = self.get_current_ayah()
+        logger.debug(f"Information retrieved for bookmark: {current_aya} and navigation mode: {self.quran_manager.navigation_mode}")
+        if bookmark_manager.is_exist(current_aya.number):
             logger.warning("Bookmark already exists for this ayah.")
             msgBox = QMessageBox(self)
             msgBox.setIcon(QMessageBox.Critical)
@@ -574,11 +567,11 @@ class QuranInterface(QMainWindow):
                 logger.debug(f"Bookmark name entered: {name}")
                 bookmark_manager.insert_bookmark(
                     name, 
-                    aya_info[1], 
-                    aya_info[3], 
-                    aya_info[0], 
-                    aya_info[2], 
-                    criteria_number
+                    current_aya.number, 
+                    current_aya.number_in_surah, 
+                    current_aya.sura_number,
+                    current_aya.sura_name, 
+                    self.quran_manager.navigation_mode.value
                 )
                 logger.debug("Bookmark saved successfully.")                    
                 self.quran_view.setFocus()
@@ -591,12 +584,13 @@ class QuranInterface(QMainWindow):
 
     def OnSaveCurrentPosition(self):
         logger.debug("Save current position action triggered.")
+        current_ayah = self.get_current_ayah()
         self.user_data_manager.save_position(
-            self.get_current_ayah_info()[1],
-         self.quran.type,
-         self.quran.current_pos
+            current_ayah.number,
+         self.quran_manager.navigation_mode.value,
+         self.quran_manager.current_position
          )
-        logger.debug(f"Current position saved: {self.quran.current_pos}, Ayah number: {self.get_current_ayah_info()[1]}, Criteria number: {self.quran.type}")
+        logger.debug(f"Current position saved: {self.quran_manager.current_position}, Ayah: {current_ayah.number}, navigation mode: {self.quran_manager.navigation_mode}")
 
     def OnSave_alert(self):
         logger.debug("Save alert action triggered.")
@@ -606,16 +600,15 @@ class QuranInterface(QMainWindow):
 
     def OnChangeNavigationMode(self, mode):
         logger.debug(f"Changing navigation mode to: {mode}")
-        ayah_info = self.get_current_ayah_info()
-        if  ayah_info:
-            ayah_number = ayah_info[1]
-            self.quran.type = mode
+        current_ayah = self.get_current_ayah()
+        if  current_ayah:
+            self.quran_manager.navigation_mode = NavigationMode.from_int(mode)
             self.menu_bar.browse_mode_actions[mode].setChecked(True)
-            self.quran_view.setText(self.quran.get_by_ayah_number(ayah_number)["full_text"])
-            self.set_focus_to_ayah(ayah_number)
+            self.quran_view.setText(self.quran_manager.get_by_ayah_number(current_ayah.number))
+            self.set_focus_to_ayah(current_ayah.number)
             self.set_text_ctrl_label()
         Globals.effects_manager.play("change")
-        logger.debug(f"Navigation mode changed. Now focusing on ayah {ayah_number} in mode {mode}")
+        logger.debug(f"Navigation mode changed. Now focusing on ayah {current_ayah.number} in mode {self.quran_manager.navigation_mode}")
 
     def closeEvent(self, event):
         logger.debug("Close event triggered.")
