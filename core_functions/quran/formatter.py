@@ -14,6 +14,7 @@ class FormatterOptions(BaseModel):
     """
     show_ayah_number: bool = True
     auto_page_turn: bool = False
+    use_accessable_marks: bool = False
 
 
 class QuranFormatter:
@@ -29,6 +30,18 @@ class QuranFormatter:
         self.view_content = view_content
         self.formatter_options = formatter_options
         logger.debug(f"Initialized AyahFormatter with view_content: {view_content}, formatter_options: {formatter_options}")
+
+    def replace_marks(self, text: str) -> str:
+        """
+        Replace the marks in the text with accessible marks.
+
+        args:
+            text (str): The text to replace marks in.
+
+        returns:
+            str: The text with replaced marks.
+        """
+            # implement here ya qais your logic
 
     def format_view(self, ayahs: List[Ayah]) -> str:
         """Format the view content with ayat text and positions."""
@@ -64,6 +77,9 @@ class QuranFormatter:
             text += "|"
         else:
             text = text.strip()
+
+        if self.formatter_options.use_accessable_marks:
+            text = self.replace_marks(text)
 
         self.view_content.text = text
         
