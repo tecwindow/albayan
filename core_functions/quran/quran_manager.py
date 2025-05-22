@@ -6,7 +6,8 @@ from sqlalchemy import create_engine, func, Column
 from sqlalchemy.orm import sessionmaker, Session
 from .models import Quran, QuranBase
 from .types import QuranFontType, NavigationMode, Surah, Ayah
-from .formatter import FomatterOptions, QuranFormatter
+from .view_content import ViewContent
+from .formatter import FormatterOptions, QuranFormatter
 
 
 class QuranManager:
@@ -15,6 +16,7 @@ class QuranManager:
     MAX_JUZ     = 30
     MAX_HIZB    = 60
     MAX_QUARTER = 240
+    formatter_options = FormatterOptions()
 
     def __init__(
         self,
@@ -33,9 +35,10 @@ class QuranManager:
         self.current_position: int = 1
         self.max_position: int = 1
         self.navigation_mode = navigation_mode
+        self.view_content: Optional[ViewContent] = None
 
     def _create_engine_and_session(self):
-        """(Re)create SQLAlchemy engine and session for the current DB path."""
+        """(Recreate SQLAlchemy engine and session for the current DB path."""
         self.engine = create_engine(f"sqlite:///{self.db_path}", echo=False)
         QuranBase.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
@@ -58,7 +61,7 @@ class QuranManager:
 
     @property
     def navigation_mode(self) -> NavigationMode:
-        return self._navigation_mode  # type: ignore
+        return self._navigation_mode
 
     @navigation_mode.setter
     def navigation_mode(self, mode: NavigationMode):
@@ -110,36 +113,46 @@ class QuranManager:
         )
         return [self._row_to_ayah(r) for r in rows]
 
-    def get_page(self, page_number: int) -> List[Ayah]:
+    def get_view_content(self, number: int, mode: NavigationMode, label: str, ayahs: List[Ayah]) -> str:
+        self.view_content = ViewContent(number=number, label=label, mode=mode)
+        formatter = QuranFormatter(self.view_content, self.formatter_options)
+        return formatter.format_view(ayahs)
+
+    def get_page(self, page_number: int) -> str:
         """Fetch all Ayahs on a given page."""
         self.navigation_mode = NavigationMode.PAGE
-        return self.get_ayahs(Quran.page, page_number)
+        ayahs = self.get_ayahs(Quran.page, page_number)
+        return self.get_view_content(number=page_number, label="صفحة", mode=NavigationMode.PAGE, ayahs=ayahs)
 
-    def get_surah(self, surah_number: int) -> List[Ayah]:
+    def get_surah(self, surah_number: int) -> str:
         """Fetch all Ayahs in a given surah."""
         self.navigation_mode = NavigationMode.SURAH
-        return self.get_ayahs(Quran.sura_number, surah_number)
+        ayahs = self.get_ayahs(Quran.sura_number, surah_number)
+        return self.get_view_content(number=surah_number, label="سورة", mode=NavigationMode.SURAH, ayahs=ayahs)
 
-    def get_juz(self, juz_number: int) -> List[Ayah]:
+    def get_juz(self, juz_number: int) -> str:
         """Fetch all Ayahs in a given juz."""
         self.navigation_mode = NavigationMode.JUZ
-        return self.get_ayahs(Quran.juz, juz_number)
+        ayahs = self.get_ayahs(Quran.juz, juz_number)   
+        return self.get_view_content(number=juz_number, label="جزء", mode=NavigationMode.JUZ, ayahs=ayahs)
 
-    def get_hizb(self, hizb_number: int) -> List[Ayah]:
+    def get_hizb(self, hizb_number: int) -> str:
         """Fetch all Ayahs in a given hizb."""
         self.navigation_mode = NavigationMode.HIZB
-        return self.get_ayahs(Quran.hizb, hizb_number)
+        ayahs = self.get_ayahs(Quran.hizb, hizb_number)
+        return self.get_view_content(number=hizb_number, label="حزب", mode=NavigationMode.HIZB, ayahs=ayahs)
 
-    def get_quarter(self, quarter_number: int) -> List[Ayah]:
+    def get_quarter(self, quarter_number: int) -> str:
         """Fetch all Ayahs in a given hizbQuarter."""
         self.navigation_mode = NavigationMode.QUARTER
-        return self.get_ayahs(Quran.hizbQuarter, quarter_number)
+        ayahs = self.get_ayahs(Quran.hizbQuarter, quarter_number)
+        return self.get_view_content(number=quarter_number, label="ربع", mode=NavigationMode.QUARTER, ayahs=ayahs)
 
-    def get_current_content(self) -> List[Ayah]:
+    def get_current_content(self) -> str:
         """Fetch Ayahs for the current position and mode."""
         return self.get_by_mode(self._navigation_mode, self.current_position)
 
-    def get_by_mode(self, mode: NavigationMode, pos: int) -> List[Ayah]:
+    def get_by_mode(self, mode: NavigationMode, pos: int) -> str:
         """Dynamic dispatch to the correct getter by mode."""
         dispatch = {
             NavigationMode.PAGE:    self.get_page,
@@ -150,19 +163,19 @@ class QuranManager:
         }
         return dispatch.get(mode, self.get_page)(pos)
 
-    def next(self) -> List[Ayah]:
+    def next(self) -> str:
         """Advance to the next unit (page/surah/etc.) and return its Ayahs."""
         if self.current_position < self.max_position:
             self.current_position += 1
         return self.get_current_content()
 
-    def back(self) -> List[Ayah]:
+    def back(self) -> str:
         """Go back to the previous unit and return its Ayahs."""
         if self.current_position > 1:
             self.current_position -= 1
         return self.get_current_content()
 
-    def go_to(self, position: int) -> List[Ayah]:
+    def go_to(self, position: int) -> str:
         """
         Jump to a specific position (clamped between 1 and max_position)
         and return its Ayahs.
@@ -226,7 +239,7 @@ class QuranManager:
 
         return [self._row_to_ayah(r) for r in query.all()]
 
-    def get_by_ayah_number(self, ayah_number: int) -> List[Ayah]:
+    def get_by_ayah_number(self, ayah_number: int) -> str:
         """
         Given a global ayah_number, find which unit (page/surah/juz/etc.) it belongs to
         and return all Ayahs in that unit.
@@ -242,7 +255,7 @@ class QuranManager:
         col = mode_to_column.get(self._navigation_mode)
 
         if col is None:
-            return []
+            return ""
 
         # Determine group value (e.g. page number, surah number) that ayah belongs to
         group_value = (
@@ -252,7 +265,7 @@ class QuranManager:
             .scalar_one_or_none()
         )
         if group_value is None:
-            return []
+            return ""
 
         # Set and return that unit’s Ayahs
         self.current_position = group_value

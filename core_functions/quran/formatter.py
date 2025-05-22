@@ -8,7 +8,7 @@ from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
-class FomatterOptions(BaseModel):
+class FormatterOptions(BaseModel):
     """
     Formatter options for the Quran text.
     """
@@ -17,7 +17,7 @@ class FomatterOptions(BaseModel):
 
 
 class QuranFormatter:
-    def __init__(self, view_content: ViewContent, formatter_options: FomatterOptions):
+    def __init__(self, view_content: ViewContent, formatter_options: FormatterOptions):
         """
         Initialize the AyahFormatter with view content and formatting options.
 
@@ -30,12 +30,12 @@ class QuranFormatter:
         self.formatter_options = formatter_options
         logger.debug(f"Initialized AyahFormatter with view_content: {view_content}, formatter_options: {formatter_options}")
 
-    def format_view(self, ayat: List[Ayah]) -> ViewContent:
+    def format_view(self, ayahs: List[Ayah]) -> str:
         """Format the view content with ayat text and positions."""
         text = ""
         current_position = 0
 
-        for i, ayah in enumerate(ayat):
+        for i, ayah in enumerate(ayahs):
             ayah_text = ayah.text
 
             if ayah.number_in_surah == 1:
@@ -67,7 +67,7 @@ class QuranFormatter:
 
         self.view_content.text = text
         
-        return self.view_content
+        return text
 
     def __repr__(self) -> str:
         return f"QuranFormatter(view_content={self.view_content}, formatter_options={self.formatter_options})"
