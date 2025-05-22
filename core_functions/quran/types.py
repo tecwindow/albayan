@@ -15,7 +15,11 @@ class NavigationMode(Enum):
     JUZ = 4
     CUSTOM_RANGE = 5
 
-
+    @staticmethod
+    def from_int(value: int) -> "NavigationMode":
+        return NavigationMode(value)
+    
+    
 class QuranFontType(Enum):
     DEFAULT = 0
     UTHMANI = 1

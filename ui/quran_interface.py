@@ -22,6 +22,9 @@ from PyQt6.QtWidgets import (
 import qtawesome as qta
 from PyQt6.QtGui import QIcon, QAction, QShowEvent, QTextCursor, QKeySequence, QShortcut
 from core_functions.quran_class import quran_mgr
+from core_functions.quran.quran_manager import QuranManager
+from core_functions.quran.formatter import FormatterOptions
+from core_functions.quran.types import QuranFontType, NavigationMode
 from core_functions.tafaseer import Category
 from core_functions.info import MoshafInfo, E3rab, TanzilAyah, AyaInfo, SuraInfo, JuzInfo, HizbInfo, QuarterInfo, PageInfo
 from core_functions.bookmark import BookmarkManager
@@ -53,8 +56,10 @@ class QuranInterface(QMainWindow):
         self.resize(800, 600)
         self.center_window()
         self.setWindowIcon(QIcon("Albayan.ico"))
-        self.quran = quran_mgr()
-        self.quran.load_quran(Config.reading.font_type)
+        self.quran_manager = QuranManager(
+            QuranFontType.from_int(Config.reading.font_type)
+        )
+        self.quran_manager.formatter_options.auto_page_turn = Config.reading.auto_page_turn
         self.user_data_manager = UserDataManager(user_db_path)
         self.sura_player_window = None
         Globals.effects_manager = SoundEffectPlayer("Audio/sounds")
