@@ -345,7 +345,7 @@ class SettingsDialog(QDialog):
             else:
                 StartupManager.remove_from_startup(program_english_name)
 
-        if Config.reading.font_type != self.font_type_combo.currentData():
+        if Config.reading.font_type != self.font_type_combo.currentData().value:
             new_font_type = self.font_type_combo.currentData()
             logger.info(f"Font type changed from {Config.reading.font_type} to {new_font_type}. Reloading Quran text.")
             self.parent.quran_manager.font_type = new_font_type
@@ -353,8 +353,6 @@ class SettingsDialog(QDialog):
         if Config.reading.use_accessable_marks != self.use_accessable_marks.isChecked():
             self.parent.quran_manager.formatter_options.use_accessable_marks = self.use_accessable_marks.isChecked()
             self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
-
-
 
         # Update settings in Config
         Config.general.run_in_background_enabled = self.run_in_background_checkbox.isChecked()
@@ -383,7 +381,6 @@ class SettingsDialog(QDialog):
         Config.reading.font_type = self.font_type_combo.currentData().value
         Config.reading.auto_page_turn = self.turn_pages_checkbox.isChecked()
         Config.reading.use_accessable_marks = self.use_accessable_marks.isChecked()
-
 
         Config.search.ignore_tashkeel = self.ignore_tashkeel_checkbox.isChecked()
         Config.search.ignore_hamza = self.ignore_hamza_checkbox.isChecked()
