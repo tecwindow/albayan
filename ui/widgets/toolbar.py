@@ -211,9 +211,9 @@ class AudioToolBar(QToolBar):
             self.player.pause()
             logger.debug("Playback paused.")
         else:
-            ayah_info = self.parent.get_current_ayah_info()
-            self.navigation.set_position(ayah_info[0], ayah_info[3])
-            logger.debug(f"Setting position to Surah: {ayah_info[0]}, Ayah: {ayah_info[3]}")
+            current_ayah = self.parent.get_current_ayah()
+            self.navigation.set_position(current_ayah.sura_number, current_ayah.number_in_surah)
+            logger.debug(f"Setting position to Surah: {current_ayah.number}, Ayah: {current_ayah.sura_number}")
             self.play_current_ayah()
             logger.debug("Playback started.")
 
@@ -257,13 +257,13 @@ class AudioToolBar(QToolBar):
 
     def change_ayah_focus(self, manual: bool = False) -> None:
         logger.debug(f"Changing ayah focus...")
-        aya_number = self.parent.quran.ayah_data.get_ayah_number(self.navigation.current_ayah, self.navigation.current_surah)
+        ayah = self.parent.quran_manager.view_content.get_by_ayah_number_in_surah(self.navigation.current_ayah, self.navigation.current_surah)
         if Config.listening.auto_move_focus:
-            logger.debug(f"Moving focus automatically to Ayah {aya_number}.")
-            self.parent.set_focus_to_ayah(aya_number)
+            logger.debug(f"Moving focus automatically to Ayah {ayah.number}.")
+            self.parent.set_focus_to_ayah(ayah.number)
         if manual:
-            logger.debug(f"Manual focus change to Ayah {aya_number}.")
-            self.parent.set_focus_to_ayah(aya_number)       
+            logger.debug(f"Manual focus change to Ayah {ayah.number}.")
+            self.parent.set_focus_to_ayah(ayah.number)       
             self.parent.quran_view.setFocus()
 
     def OnActionAfterListening(self):

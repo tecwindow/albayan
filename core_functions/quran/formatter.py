@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 from typing import List
 from pydantic import BaseModel
 from .types import Ayah
@@ -41,22 +42,21 @@ class QuranFormatter:
         returns:
             str: The text with replaced marks.
         """
-        marks = {
-                "۩": "(سجدة)",
-    "ۚ": "(ج)",
-    "ۗ": "(قلى)",
-    "ۖ": "(صلى)",
-    "ۘ": "(م)",
-    "ۙ": "(لا)",
-    "ۛ": "--",
-    "ۜ": "س"
-}
+        accessable_marks = {
+            "۩": "(سجدة)",
+            "ۚ": "(ج)",
+            "ۗ": "(قلى)",
+            "ۖ": "(صلى)",
+            "ۘ": "(م)",
+            "ۙ": "(لا)",
+            "ۛ": "--",
+            "ۜ": "س"
+        }
 
-        for mark, replacement in marks.items():
+        for mark, replacement in accessable_marks.items():
             text = text.replace(mark, replacement)
     
         return text
-
 
     def format_view(self, ayahs: List[Ayah]) -> str:
         """Format the view content with ayat text and positions."""
@@ -65,6 +65,8 @@ class QuranFormatter:
 
         for i, ayah in enumerate(ayahs):
             ayah_text = ayah.text
+            if self.formatter_options.use_accessable_marks:
+                ayah_text = self.replace_marks(ayah_text)
 
             if ayah.number_in_surah == 1:
                 start_point = f"{ayah.sura_name} {ayah.number_in_surah}\n|\n"
@@ -93,8 +95,6 @@ class QuranFormatter:
         else:
             text = text.strip()
 
-        if self.formatter_options.use_accessable_marks:
-            text = self.replace_marks(text)
 
         self.view_content.text = text
         

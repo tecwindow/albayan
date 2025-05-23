@@ -25,7 +25,7 @@ class ViewContent:
     @property
     def edit_label(self) -> str:
         if self.mode == NavigationMode.SURAH:
-            return f"{self.label} {self.start_ayah.sura_name}"
+            return self.start_ayah.sura_name
         else:
             return f"ال{self.label} {self.number}"
         
@@ -79,6 +79,17 @@ class ViewContent:
             self.session.query(AyahViewMap)
             .filter(
                 AyahViewMap.number== ayah_number
+            )
+            .first()
+        )
+        return self._row_to_ayah(ayah_row) if ayah_row else None
+
+    def get_by_ayah_number_in_surah(self, ayah_number_in_surah: int, surah_number: int) -> Optional[Ayah]:
+        ayah_row = (
+            self.session.query(AyahViewMap)
+            .filter(
+                AyahViewMap.number_in_surah == ayah_number_in_surah,
+                AyahViewMap.sura_number == surah_number
             )
             .first()
         )
