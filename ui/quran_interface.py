@@ -229,40 +229,22 @@ class QuranInterface(QMainWindow):
 
     def set_text_ctrl_label(self):
         logger.debug("Setting text control label.")
-
-        if self.quran_manager.navigation_mode == NavigationMode.PAGE:
-            self.next_to.setText("الصفحة التالية")
-            self.menu_bar.next_action.setText("الصفحة التالية")
-            self.back_to.setText("الصفحة السابقة")
-            self.menu_bar.previous_action.setText("الصفحة السابقة")
-            logger.debug("Page mode selected.")
-        elif self.quran_manager.navigation_mode == NavigationMode.SURAH:
-            self.next_to.setText("السورة التالية")
-            self.menu_bar.next_action.setText("السورة التالية")
-            self.back_to.setText("السورة السابقة")
-            self.menu_bar.previous_action.setText("السورة السابقة")    
-            logger.debug("Surah mode selected.")
-        elif self.quran_manager.navigation_mode == NavigationMode.QUARTER:
-            self.next_to.setText("الربع التالي")
-            self.menu_bar.next_action.setText("الربع التالي")
-            self.back_to.setText("الربع السابق")
-            self.menu_bar.previous_action.setText("الربع السابق")
-            logger.debug("Quarter mode selected.")
-        elif self.quran_manager.navigation_mode == NavigationMode.HIZB:
-            self.next_to.setText("الحزب التالي")
-            self.menu_bar.next_action.setText("الحزب التالي")
-            self.back_to.setText("الحزب السابق")
-            self.menu_bar.previous_action.setText("الحزب السابق")
-            logger.debug("Hizb mode selected.")
-        elif self.quran_manager.navigation_mode == NavigationMode.JUZ:
-            self.next_to.setText("الجزء التالي")
-            self.menu_bar.next_action.setText("الجزء التالي")
-            self.back_to.setText("الجزء السابق")
-            self.menu_bar.previous_action.setText("الجزء السابق")
-            logger.debug("Juz mode selected.")
+        
+        label = self.quran_manager.view_content.label
+        if self.quran_manager.navigation_mode in (NavigationMode.SURAH, NavigationMode.PAGE):
+            next_label = "التالية"
+            previous_label = "السابقة"
+        else:
+            next_label = "التالي"
+            previous_label = "السابق"
+        
+        self.next_to.setText(f"ال{label} {next_label}")
+        self.menu_bar.next_action.setText(f"ال{label} {next_label}")
+        self.back_to.setText(f"ال{label} {previous_label}")
+        self.menu_bar.previous_action.setText(f"ال{label} {previous_label}")
 
         # set the label
-        label = f"ال{self.quran_manager.view_content.label} {self.quran_manager.view_content.number}"
+        label = self.quran_manager.view_content.edit_label
         self.quran_title.setText(label)
         self.quran_view.setAccessibleName(label)
         logger.debug(f"Label set to: {label}")

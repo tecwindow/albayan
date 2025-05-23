@@ -23,10 +23,16 @@ class ViewContent:
         logger.debug(f"Initialized ViewContent with number: {number}, label: {label}, mode: {mode}")
 
     @property
+    def edit_label(self) -> str:
+        if self.mode == NavigationMode.SURAH:
+            return f"{self.label} {self.start_ayah.sura_name}"
+        else:
+            return f"ال{self.label} {self.number}"
+        
+    @property
     def start_ayah(self) -> Optional[Ayah]:
         ayah_row = (
             self.session.query(AyahViewMap)
-            .filter(AyahViewMap.number == self.number)
             .order_by(AyahViewMap.first_position.asc())
             .first()
         )
@@ -36,7 +42,6 @@ class ViewContent:
     def end_ayah(self) -> Optional[Ayah]:
         ayah_row = (
             self.session.query(AyahViewMap)
-            .filter(AyahViewMap.number == self.number)
             .order_by(AyahViewMap.first_position.desc())
             .first()
         )
