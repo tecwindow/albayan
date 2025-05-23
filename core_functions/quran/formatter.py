@@ -41,7 +41,22 @@ class QuranFormatter:
         returns:
             str: The text with replaced marks.
         """
-            # implement here ya qais your logic
+        marks = {
+                "۩": "(سجدة)",
+    "ۚ": "(ج)",
+    "ۗ": "(قلى)",
+    "ۖ": "(صلى)",
+    "ۘ": "(م)",
+    "ۙ": "(لا)",
+    "ۛ": "--",
+    "ۜ": "س"
+}
+
+        for mark, replacement in marks.items():
+            text = text.replace(mark, replacement)
+    
+        return text
+
 
     def format_view(self, ayahs: List[Ayah]) -> str:
         """Format the view content with ayat text and positions."""
