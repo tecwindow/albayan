@@ -60,6 +60,7 @@ class QuranInterface(QMainWindow):
             QuranFontType.from_int(Config.reading.font_type)
         )
         self.quran_manager.formatter_options.auto_page_turn = Config.reading.auto_page_turn
+        self.quran_manager.formatter_options.use_accessable_marks = Config.reading.use_accessable_marks
         self.user_data_manager = UserDataManager(user_db_path)
         self.sura_player_window = None
         Globals.effects_manager = SoundEffectPlayer("Audio/sounds")

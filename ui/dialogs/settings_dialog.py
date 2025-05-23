@@ -223,11 +223,13 @@ class SettingsDialog(QDialog):
         self.font_type_combo.setAccessibleName(self.font_type_label.text())
 
         self.turn_pages_checkbox = QCheckBox("قلب الصفحات تلقائيا")
+        self.use_accessable_marks = QCheckBox("استخدام علامات الوقف البديلة")
 
         self.group_reading_layout.addWidget(self.font_type_label)
         self.group_reading_layout.addWidget(self.font_type_combo)
         self.group_reading_layout.addSpacerItem(QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))  # مسافة أكبر
         self.group_reading_layout.addWidget(self.turn_pages_checkbox)
+        self.group_reading_layout.addWidget(self.use_accessable_marks)
         self.group_reading_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_reading.setLayout(self.group_reading_layout)
 
@@ -348,6 +350,11 @@ class SettingsDialog(QDialog):
             logger.info(f"Font type changed from {Config.reading.font_type} to {new_font_type}. Reloading Quran text.")
             self.parent.quran_manager.font_type = new_font_type
             self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
+        if Config.reading.use_accessable_marks != self.use_accessable_marks.isChecked():
+            self.parent.quran_manager.formatter_options.use_accessable_marks = self.use_accessable_marks.isChecked()
+            self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
+
+
 
         # Update settings in Config
         Config.general.run_in_background_enabled = self.run_in_background_checkbox.isChecked()
@@ -375,6 +382,8 @@ class SettingsDialog(QDialog):
 
         Config.reading.font_type = self.font_type_combo.currentData().value
         Config.reading.auto_page_turn = self.turn_pages_checkbox.isChecked()
+        Config.reading.use_accessable_marks = self.use_accessable_marks.isChecked()
+
 
         Config.search.ignore_tashkeel = self.ignore_tashkeel_checkbox.isChecked()
         Config.search.ignore_hamza = self.ignore_hamza_checkbox.isChecked()
@@ -419,6 +428,7 @@ class SettingsDialog(QDialog):
         self.surah_volume.setValue(Config.audio.surah_volume_level)
         self.run_in_background_checkbox.setChecked(Config.general.run_in_background_enabled)
         self.turn_pages_checkbox.setChecked(Config.reading.auto_page_turn)
+        self.use_accessable_marks.setChecked(Config.reading.use_accessable_marks)
         self.start_on_system_start_checkbox.setChecked(Config.general.auto_start_enabled)
         self.auto_save_position_checkbox.setChecked(Config.general.auto_save_position_enabled)
         self.update_checkbox.setChecked(Config.general.check_update_enabled)
