@@ -20,7 +20,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
-from core_functions.quran.quran_manager import QuranManager
 from core_functions.quran.types import QuranFontType
 from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name

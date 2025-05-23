@@ -320,15 +320,14 @@ class MenuBar(QMenuBar):
 
     def OnGoTo(self):
         logger.debug("Opening GoTo dialog.")
-        category_number = self.parent.quran.type
-        current_position = self.parent.quran.current_pos
-        max = QuranConst.get_max(category_number)
-        category_label = QuranConst.get_category_label(category_number)
-        logger.debug(f"Current position: {current_position}, Max: {max}, Category label: {category_label}")
-        go_to_dialog = GoToDialog(self.parent, current_position, max, category_label)
+        current_position = self.parent.quran_manager.current_position
+        max_position = self.parent.quran_manager.max_position
+        category_label = self.parent.quran_manager.view_content.label
+        logger.debug(f"Current position: {current_position}, Max: {max_position}, navigation_mode: {self.parent.quran_manager.navigation_mode}")
+        go_to_dialog = GoToDialog(self.parent, current_position, max_position, category_label)
         if go_to_dialog.exec():
             value = go_to_dialog.get_input_value()
-            text = self.parent.quran.goto(value)
+            text = self.parent.quran_manager.go_to(value)
             self.parent.quran_view.setText(text)
             logger.debug(f"GoTo dialog closed with value: {value}")
         self.parent.set_text_ctrl_label()
