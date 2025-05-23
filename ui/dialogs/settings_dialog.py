@@ -20,6 +20,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
+from core_functions.quran.quran_manager import QuranManager
+from core_functions.quran.types import QuranFontType
 from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name
 from utils.settings import Config
@@ -217,8 +219,8 @@ class SettingsDialog(QDialog):
         self.group_reading_layout = QVBoxLayout()
         self.font_type_label = QLabel("نوع الخط:")
         self.font_type_combo = QComboBox()
-        items_with_ids_list = [("الخط الحديث", 0), ("الخط العثماني", 1)]
-        [self.font_type_combo.addItem(text, id) for text, id in items_with_ids_list]
+        items_with_ids_list = [("الخط الحديث", QuranFontType.DEFAULT), ("الخط العثماني", QuranFontType.UTHMANI)]
+        [self.font_type_combo.addItem(text, font_type) for text, font_type in items_with_ids_list]
         self.font_type_combo.setAccessibleName(self.font_type_label.text())
 
         self.turn_pages_checkbox = QCheckBox("قلب الصفحات تلقائيا")
@@ -345,7 +347,8 @@ class SettingsDialog(QDialog):
         if Config.reading.font_type != self.font_type_combo.currentData():
             new_font_type = self.font_type_combo.currentData()
             logger.info(f"Font type changed from {Config.reading.font_type} to {new_font_type}. Reloading Quran text.")
-            self.parent.quran_view.setText(self.parent.quran.reload_quran(new_font_type))
+            self.parent.quran_manager.font_type = new_font_type
+            self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
 
         # Update settings in Config
         Config.general.run_in_background_enabled = self.run_in_background_checkbox.isChecked()
@@ -371,7 +374,7 @@ class SettingsDialog(QDialog):
         Config.listening.forward_time = self.duration_spinbox.value()
         Config.listening.auto_move_focus = self.auto_move_focus_checkbox.isChecked()
 
-        Config.reading.font_type = self.font_type_combo.currentData()
+        Config.reading.font_type = self.font_type_combo.currentData().value
         Config.reading.auto_page_turn = self.turn_pages_checkbox.isChecked()
 
         Config.search.ignore_tashkeel = self.ignore_tashkeel_checkbox.isChecked()
@@ -430,7 +433,7 @@ class SettingsDialog(QDialog):
             (self.log_levels_combo, Config.general.log_level),
             (self.reciters_combo, Config.listening.reciter),
             (self.action_combo, Config.listening.action_after_listening),
-            (self.font_type_combo, Config.reading.font_type),
+            (self.font_type_combo, QuranFontType.from_int(Config.reading.font_type)),
         ]
 
         for combo, value in combo_config:
