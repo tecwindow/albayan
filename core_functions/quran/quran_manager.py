@@ -85,14 +85,14 @@ class QuranManager:
             NavigationMode.QUARTER: cls.MAX_QUARTER,
         }.get(mode, cls.MAX_PAGE)
 
-    def get_suras(self) -> List[Surah]:
+    def get_surahs(self) -> List[Surah]:
         """
         Return a list of Surah objects with their number and name.
         """
         rows = (
             self.session.query(
                 Quran.sura_number,
-                func.REPLACE(Quran.sura_name, "سورة ", "")
+                func.replace(Quran.sura_name, "سورة ", "").label("sura_name")
             )
             .distinct()
             .order_by(Quran.sura_number)

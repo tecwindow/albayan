@@ -16,6 +16,7 @@ from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut
 from PyQt6.QtCore import QTimer
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
+from core_functions.quran.types import Ayah
 from utils.universal_speech import UniversalSpeech
 from utils.const import albayan_documents_dir, Globals
 from utils.logger import LoggerManager
@@ -24,11 +25,11 @@ from exceptions.error_decorators import exception_handler
 logger = LoggerManager.get_logger(__name__)
 
 class TafaseerDialog(QDialog):
-    def __init__(self, parent, title, ayah_info, default_category):
+    def __init__(self, parent, title, ayah: Ayah, default_category):
         super().__init__(parent)
         logger.debug("Initializing TafaseerDialog...")
         self.parent = parent
-        self.ayah_info = ayah_info
+        self.ayah = ayah
         self.default_category = default_category
         self.setWindowTitle(title)
         logger.debug(f"TafaseerDialog initialized with title: {title}.")
@@ -45,7 +46,7 @@ class TafaseerDialog(QDialog):
 
         self.text_edit = ReadOnlyTextEdit(self)
         self.text_edit.setAccessibleName(self.label.text())
-        self.text_edit.setText(self.tafaseer_manager.get_tafaseer(ayah_info[0], ayah_info[1]))
+        self.text_edit.setText(self.tafaseer_manager.get_tafaseer(ayah.sura_number, ayah.number))
         logger.debug("Tafaseer content loaded into text edit")
         self.layout.addWidget(self.text_edit)
 

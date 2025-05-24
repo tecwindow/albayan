@@ -257,7 +257,7 @@ class AudioToolBar(QToolBar):
 
     def change_ayah_focus(self, manual: bool = False) -> None:
         logger.debug(f"Changing ayah focus...")
-        ayah = self.parent.quran_manager.view_content.get_by_ayah_number_in_surah(self.navigation.current_ayah, self.navigation.current_surah)
+        ayah = self.parent.quran_manager.view_content.get_by_ayah_number_in_surah(self.navigation.current_ayah or 1, self.navigation.current_surah)
         if Config.listening.auto_move_focus:
             logger.debug(f"Moving focus automatically to Ayah {ayah.number}.")
             self.parent.set_focus_to_ayah(ayah.number)
