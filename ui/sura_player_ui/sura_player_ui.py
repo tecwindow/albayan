@@ -10,7 +10,6 @@ from PyQt6.QtWidgets import (
     QComboBox, QGroupBox, QSlider, QWidget, QMainWindow, QLineEdit
 )
 from core_functions.Reciters import SurahReciter
-from core_functions.quran_class import QuranConst
 from .FilterManager import Item, FilterManager
 from ui.widgets.toolbar import AudioPlayerThread
 from utils.const import Globals, data_folder, user_db_path, program_name
@@ -87,11 +86,11 @@ class SuraPlayerWindow(QMainWindow):
         self.surah_combo.setAccessibleName(self.surah_label.text())
         suras_list = []
         saved_sura_number = self.preferences_manager.get_int("sura_number")
-        for surah_name, surah_number in QuranConst.SURAS:
-            self.surah_combo.addItem(surah_name, surah_number)
-            suras_list.append(Item(surah_number, surah_name))
-            if surah_number == saved_sura_number:
-                self.surah_combo.setCurrentText(surah_name)
+        for surah in self.parent.quran_manager.get_surahs():
+            self.surah_combo.addItem(surah.name, surah.number)
+            suras_list.append(Item(surah.number, surah.name))
+            if surah.number == saved_sura_number:
+                self.surah_combo.setCurrentText(surah.name)
 
         logger.debug(f"Loaded {len(suras_list)} surahs. Selected surah: {self.surah_combo.currentText()}.")
         self.filter_manager.set_category(2, "السورة", suras_list, self.surah_combo)
@@ -262,7 +261,10 @@ class SuraPlayerWindow(QMainWindow):
         available_suras = sorted(map(int, reciter_data["available_suras"].split(",")))
         self.surah_combo.clear()
 
-        sura_items = [Item(sura_number, QuranConst.SURAS[sura_number - 1][0]) for sura_number in available_suras]
+        sura_items = [
+            Item(sura_number, self.parent.quran_manager.get_surahs()[sura_number - 1].name)
+            for sura_number in available_suras
+            ]
         for item in sura_items:
             self.surah_combo.addItem(item.text, item.id)
 
