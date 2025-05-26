@@ -69,7 +69,7 @@ class QuranFormatter:
                 ayah_text = self.replace_marks(ayah_text)
 
             if ayah.number_in_surah == 1:
-                start_point = f"{ayah.sura_name} {ayah.number_in_surah}\n|\n"
+                start_point = f"{ayah.sura_name} ({ayah.sura_number})\n|\n"
                 ayah_text = start_point + ayah_text
                 if ayah.sura_number != 1:
                     ayah_text = ayah_text.replace(
@@ -94,7 +94,6 @@ class QuranFormatter:
             text += "|"
         else:
             text = text.strip()
-
 
         self.view_content.text = text
         
