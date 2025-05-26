@@ -57,6 +57,20 @@ class QuranFormatter:
             text = text.replace(mark, replacement)
     
         return text
+    
+    @staticmethod
+    def convert_english_to_arabic_number(english_number: int) -> str:
+        """
+        Converts English digits in a string to Arabic-Indic digits.
+
+        Args:
+            english_number (str): A string containing English digits (e.g., "123").
+
+        Returns:
+            str: A string with Arabic digits (e.g., "١٢٣").
+        """
+        english_to_arabic = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
+        return str(english_number).translate(english_to_arabic)
 
     def format_view(self, ayahs: List[Ayah]) -> str:
         """Format the view content with ayat text and positions."""
@@ -69,7 +83,7 @@ class QuranFormatter:
                 ayah_text = self.replace_marks(ayah_text)
 
             if ayah.number_in_surah == 1:
-                start_point = f"{ayah.sura_name} ({ayah.sura_number})\n|\n"
+                start_point = f"{ayah.sura_name} ({self.convert_english_to_arabic_number(ayah.sura_number)})\n|\n"
                 ayah_text = start_point + ayah_text
                 if ayah.sura_number != 1:
                     ayah_text = ayah_text.replace(
@@ -78,7 +92,7 @@ class QuranFormatter:
                     )
 
             if self.formatter_options.show_ayah_number:
-                ayah_text += f" ({ayah.number_in_surah})"
+                ayah_text += f" ({self.convert_english_to_arabic_number(ayah.number_in_surah)})"
 
             ayah_text = f"{ayah_text}\n"
             ayah_text = f"|\n{ayah_text}" if i == 0 and self.view_content.number != 1 else ayah_text                
