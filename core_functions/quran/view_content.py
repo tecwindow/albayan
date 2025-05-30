@@ -98,7 +98,8 @@ class ViewContent:
             .filter(AyahViewMap.first_position <= position, AyahViewMap.last_position >= position)
             .first()
         )
-        return self._row_to_ayah(ayah_row) if ayah_row else None
+        ayah = self._row_to_ayah(ayah_row) if ayah_row else None
+        return ayah or self.get_by_position(position - 1)
 
     def get_by_ayah_number(self, ayah_number: int) -> Optional[Ayah]:
         ayah_row = (
@@ -155,4 +156,11 @@ class ViewContent:
 
     def __repr__(self) -> str:
         return f"ViewContent(number={self.number}, label={self.label}, mode={self.mode})"
+    
+    def __del__(self):
+        if self.session:
+            self.session.close()
+        if self.engine:
+            self.engine.dispose()
+        logger.debug(f"ViewContent {self.number} closed.")
     
