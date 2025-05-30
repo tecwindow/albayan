@@ -35,12 +35,13 @@ from ui.widgets.menu_bar import MenuBar
 from ui.widgets.qText_edit import QuranViewer
 from ui.dialogs.tafaseer_Dialog import TafaseerDialog
 from ui.dialogs.info_dialog import InfoDialog
+from ui.dialogs.custom_range import CustomRangeDialog
 from ui.sura_player_ui.sura_player_ui import SuraPlayerWindow
 from ui.widgets.system_tray import SystemTrayManager
 from ui.widgets.toolbar import AudioToolBar
 from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
-from utils.user_data import UserDataManager
+from utils.user_data import PreferencesManager
 from utils.const import program_name, program_icon, user_db_path, data_folder, Globals
 from utils.logger import LoggerManager
 from utils.audio_player import SoundEffectPlayer
@@ -61,7 +62,7 @@ class QuranInterface(QMainWindow):
         )
         self.quran_manager.formatter_options.auto_page_turn = Config.reading.auto_page_turn
         self.quran_manager.formatter_options.use_accessable_marks = Config.reading.use_accessable_marks
-        self.user_data_manager = UserDataManager(user_db_path)
+        self.preferences_manager = PreferencesManager(user_db_path)
         self.sura_player_window = None
         Globals.effects_manager = SoundEffectPlayer("Audio/sounds")
 
@@ -176,15 +177,20 @@ class QuranInterface(QMainWindow):
 
     def set_text(self):
         logger.debug("Loading Quran text...")
-        position_data = self.user_data_manager.get_last_position()
-        ayah_number = position_data.get("ayah_number", 1)
-        current_position = position_data.get("position", 1)
-        mode = position_data.get("criteria_number", 0)
+        ayah_number = self.preferences_manager.get_int("current_ayah_number", 1)
+        current_position = self.preferences_manager.get_int("current_position", 1)
+        mode = self.preferences_manager.get_int("navigation_mode", NavigationMode.SURAH.value)
         self.quran_manager.navigation_mode = NavigationMode.from_int(mode)
         logger.debug(f"Current position: {current_position}, Ayah number: {ayah_number}, Mode: {self.quran_manager.navigation_mode}")
         self.menu_bar.browse_mode_actions[mode].setChecked(True)
         
-        text = self.quran_manager.go_to(current_position)
+        if self.quran_manager.navigation_mode == NavigationMode.CUSTOM_RANGE:
+            range = {key: self.preferences_manager.get_int(key, 1) for key in ("from_surah", "from_ayah", "to_surah", "to_ayah")}
+            logger.debug(f"Custom range detected: {range}")
+            text = self.quran_manager.get_range(**range)
+        else:
+            text = self.quran_manager.go_to(current_position)
+            
         self.quran_view.setText(text)
         self.set_text_ctrl_label()
         self.set_focus_to_ayah(ayah_number)
@@ -253,8 +259,8 @@ class QuranInterface(QMainWindow):
                 UniversalSpeech.say(label)
 
         # Enable back and next item
-        next_status = self.quran_manager.current_position < self.quran_manager.max_position
-        back_status = self.quran_manager.current_position > 1
+        next_status = self.quran_manager.current_position < self.quran_manager.max_position and self.quran_manager.navigation_mode != NavigationMode.CUSTOM_RANGE
+        back_status = self.quran_manager.current_position > 1 and self.quran_manager.navigation_mode != NavigationMode.CUSTOM_RANGE
         self.next_to.setEnabled(next_status)
         self.menu_bar.next_action.setEnabled(next_status)
         self.back_to.setEnabled(back_status)
@@ -568,11 +574,11 @@ class QuranInterface(QMainWindow):
     def OnSaveCurrentPosition(self):
         logger.debug("Save current position action triggered.")
         current_ayah = self.get_current_ayah()
-        self.user_data_manager.save_position(
-            current_ayah.number,
-         self.quran_manager.navigation_mode.value,
-         self.quran_manager.current_position
-         )
+        self.preferences_manager.set_preferences({
+                "current_ayah_number": current_ayah.number,
+                "current_position": self.quran_manager.current_position,
+                "navigation_mode": self.quran_manager.navigation_mode.value
+            })
         logger.debug(f"Current position saved: {self.quran_manager.current_position}, Ayah: {current_ayah.number}, navigation mode: {self.quran_manager.navigation_mode}")
 
     def OnSave_alert(self):
@@ -581,15 +587,28 @@ class QuranInterface(QMainWindow):
         Globals.effects_manager.play("save")
         logger.debug("Save alert played.")
 
+    def OnCustomRange(self):
+        range = {key: self.preferences_manager.get_int(key, 1) for key in ("from_surah", "from_ayah", "to_surah", "to_ayah")}
+        ccustom_range_dialog = CustomRangeDialog(self, self.quran_manager.get_surahs(), range)
+        if ccustom_range_dialog.exec():
+            range = ccustom_range_dialog.get_range()
+            self.preferences_manager.set_preferences(range)
+            text = self.quran_manager.get_range(**range)
+            self.quran_view.setText(text)
+            self.set_text_ctrl_label()
+        
     def OnChangeNavigationMode(self, mode):
         logger.debug(f"Changing navigation mode to: {mode}")
         current_ayah = self.get_current_ayah()
-        if  current_ayah:
-            self.quran_manager.navigation_mode = NavigationMode.from_int(mode)
-            self.menu_bar.browse_mode_actions[mode].setChecked(True)
-            self.quran_view.setText(self.quran_manager.get_by_ayah_number(current_ayah.number))
-            self.set_focus_to_ayah(current_ayah.number)
-            self.set_text_ctrl_label()
+        self.quran_manager.navigation_mode = NavigationMode.from_int(mode)
+        self.menu_bar.browse_mode_actions[mode].setChecked(True)
+
+        if mode == NavigationMode.CUSTOM_RANGE.value:
+            return self.OnCustomRange()
+            
+        self.quran_view.setText(self.quran_manager.get_by_ayah_number(current_ayah.number))
+        self.set_focus_to_ayah(current_ayah.number)
+        self.set_text_ctrl_label()
         Globals.effects_manager.play("change")
         logger.debug(f"Navigation mode changed. Now focusing on ayah {current_ayah.number} in mode {self.quran_manager.navigation_mode}")
 

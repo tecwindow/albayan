@@ -41,6 +41,10 @@ class QuranFontType(Enum):
 class Surah:
     number: int
     name: str
+    ayah_count: int
+    first_ayah_number: int
+    last_ayah_number: int
+
     
 @dataclass(eq=True)
 class Ayah:

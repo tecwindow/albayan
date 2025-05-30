@@ -87,18 +87,21 @@ class QuranManager:
 
     def get_surahs(self) -> List[Surah]:
         """
-        Return a list of Surah objects with their number and name.
+        Return a list of Surah objects.
         """
         rows = (
             self.session.query(
                 Quran.sura_number,
-                func.replace(Quran.sura_name, "سورة ", "").label("sura_name")
+                func.replace(Quran.sura_name, "سورة ", "").label("sura_name"),
+                func.count(Quran.number).label("ayah_count"),
+                func.min(Quran.number).label("first_ayah_number"),
+                func.max(Quran.number).label("last_ayah_number")
             )
-            .distinct()
+            .group_by(Quran.sura_number)
             .order_by(Quran.sura_number)
             .all()
         )
-        return [Surah(number=row.sura_number, name=row.sura_name) for row in rows]
+        return [Surah(number=row.sura_number, name=row.sura_name, ayah_count=row.ayah_count, first_ayah_number=row.first_ayah_number, last_ayah_number=row.last_ayah_number) for row in rows]
 
     def get_ayahs(self, col: Column, pos: int) -> List[Ayah]:
         """
@@ -200,6 +203,7 @@ class QuranManager:
           - (from_surah, from_ayah) up to (to_surah, to_ayah)
         If one end is omitted, it defaults to start=1 or end=last Ayah.
         """
+        self.navigation_mode = NavigationMode.CUSTOM_RANGE
         # Determine global numbering for start
         start_num = None
         if from_surah is not None:
@@ -237,7 +241,10 @@ class QuranManager:
         else:
             query = query.filter(Quran.number > 1)
 
-        return [self._row_to_ayah(r) for r in query.all()]
+        ayahs = [self._row_to_ayah(r) for r in query.all()]
+        view_content = self.get_view_content(number=None, label="نطاق", mode=self.navigation_mode, ayahs=ayahs)
+
+        return view_content
 
     def get_by_ayah_number(self, ayah_number: int) -> str:
         """

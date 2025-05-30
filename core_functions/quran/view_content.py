@@ -26,6 +26,10 @@ class ViewContent:
     def edit_label(self) -> str:
         if self.mode == NavigationMode.SURAH:
             return self.start_ayah.sura_name
+        elif self.mode == NavigationMode.CUSTOM_RANGE:
+            start_ayah = self.start_ayah
+            end_ayah = self.end_ayah
+            return f"آية {start_ayah.number_in_surah} {start_ayah.sura_name} / آية {end_ayah.number_in_surah} {end_ayah.sura_name}"
         else:
             return f"ال{self.label} {self.number}"
         

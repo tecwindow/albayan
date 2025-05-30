@@ -10,6 +10,7 @@ from ui.sura_player_ui import SuraPlayerWindow
 from ui.dialogs.tasbih_dialog import TasbihDialog
 from ui.dialogs.prophets_stories_dialog import ProphetsStoriesDialog
 from core_functions.quran_class import QuranConst
+from core_functions.quran.types import NavigationMode
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
 from utils.settings import Config
@@ -116,11 +117,12 @@ class MenuBar(QMenuBar):
 
         # List of browse modes (name, mode value, shortcut)
         modes = [
-            ("سور", 1, "Ctrl+1"),
-        ("صفحات", 0, "Ctrl+2"),
-        ("أرباع", 2, "Ctrl+3"),
-        ("أحزاب", 3, "Ctrl+4"),
-        ("أجزاء", 4, "Ctrl+5"),
+            ("سور", NavigationMode.SURAH, "Ctrl+1"),
+        ("صفحات", NavigationMode.PAGE, "Ctrl+2"),
+        ("أرباع", NavigationMode.QUARTER, "Ctrl+3"),
+        ("أحزاب", NavigationMode.HIZB, "Ctrl+4"),
+        ("أجزاء", NavigationMode.JUZ, "Ctrl+5"),
+        ("نطاق مخصص", NavigationMode.CUSTOM_RANGE, "Ctrl+6"),
     ]
 
     # Create actions using a loop
@@ -128,10 +130,10 @@ class MenuBar(QMenuBar):
             action = QAction(name, self)
             action.setCheckable(True)
             action.setShortcut(QKeySequence(shortcut))  # Assign shortcut
-            action.triggered.connect(lambda checked, m=mode: self.parent.OnChangeNavigationMode(m))
+            action.triggered.connect(lambda checked, m=mode: self.parent.OnChangeNavigationMode(m.value))
             self.browse_mode_group.addAction(action)
             self.browse_mode_menu.addAction(action)
-            self.browse_mode_actions.insert(mode, action)
+            self.browse_mode_actions.insert(mode.value, action)
 
         # Add the menu to the parent
         self.addMenu(self.browse_mode_menu)
