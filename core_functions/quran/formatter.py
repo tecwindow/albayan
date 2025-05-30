@@ -76,6 +76,7 @@ class QuranFormatter:
         """Format the view content with ayat text and positions."""
         text = ""
         current_position = 0
+        final_ayahs = []
 
         for i, ayah in enumerate(ayahs):
             ayah_text = ayah.text
@@ -102,7 +103,8 @@ class QuranFormatter:
             ayah.first_position = current_position
             current_position += len(ayah_text)
             ayah.last_position = current_position - 1
-            self.view_content.insert(ayah)
+            #self.view_content.insert(ayah)
+            final_ayahs.append(ayah)
 
         if self.formatter_options.auto_page_turn:
             text += "|"
@@ -110,6 +112,7 @@ class QuranFormatter:
             text = text.strip()
 
         self.view_content.text = text
+        self.view_content.insert_bulk(final_ayahs)
         
         return text
 

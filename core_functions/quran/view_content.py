@@ -70,6 +70,28 @@ class ViewContent:
         self.session.add(ayah_row)
         self.session.commit()
 
+    def insert_bulk(self, ayahs: list[Ayah]):
+        ayah_rows = [
+            AyahViewMap(
+                number=ayah.number,
+                text=ayah.text,
+                sura_name=ayah.sura_name,
+                sura_number=ayah.sura_number,
+                number_in_surah=ayah.number_in_surah,
+                juz=ayah.juz,
+                hizb=ayah.hizb,
+                hizbQuarter=ayah.hizbQuarter,
+                page=ayah.page,
+                first_position=ayah.first_position,
+                last_position=ayah.last_position,
+                sajda=ayah.sajda,
+                sajdaObligation=ayah.sajdaObligation,
+            )
+            for ayah in ayahs
+        ]
+        self.session.bulk_save_objects(ayah_rows)
+        self.session.commit()
+
     def get_by_position(self, position: int) -> Optional[Ayah]:
         ayah_row = (
             self.session.query(AyahViewMap)
