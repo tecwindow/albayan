@@ -606,7 +606,7 @@ class QuranInterface(QMainWindow):
 
     def OnChangeNavigationMode(self, mode):
         logger.debug(f"Changing navigation mode to: {mode}")
-        self.preferences_manager.set_preference("previous_navigation_mode", self.quran_manager.navigation_mode.value)
+        self.preferences_manager.set_preference("previous_navigation_mode", self.get_valid_navigation_mode().value)
         current_ayah = self.get_current_ayah()
         self.quran_manager.navigation_mode = NavigationMode.from_int(mode)
         self.menu_bar.browse_mode_actions[mode].setChecked(True)
