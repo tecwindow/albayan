@@ -53,6 +53,18 @@ class QuranFormatter:
             "ۜ": "س"
         }
 
+        text_marks = {
+            "۩": "(سجدة)",
+            "ۚ": "(ج)",
+            "ۗ": "(قلى)",
+            "ۖ": "(صلى)",
+            "ۘ": "(م)",
+            "ۙ": "(لا)",
+            "ۛ": "--",
+            "ۜ": "س"
+        }
+
+
         for mark, replacement in accessable_marks.items():
             text = text.replace(mark, replacement)
     
