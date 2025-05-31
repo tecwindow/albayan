@@ -560,7 +560,7 @@ class QuranInterface(QMainWindow):
                     current_aya.number_in_surah, 
                     current_aya.sura_number,
                     current_aya.sura_name, 
-                    self.quran_manager.navigation_mode.value
+                    self.get_valid_navigation_mode().value
                 )
                 logger.debug("Bookmark saved successfully.")                    
                 self.quran_view.setFocus()
