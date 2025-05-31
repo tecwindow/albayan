@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QKeySequence, QShortcut
+from core_functions.quran.quran_manager import QuranManager
 from utils.logger import LoggerManager
 from utils.const import Globals
 
@@ -25,13 +26,11 @@ class QuickAccess(QDialog):
         self.parent = parent
         self.setWindowTitle(title)
         self.resize(300, 200)
-        self.sura = []
-        with open(os.path.join("database", "Surahs.Json"), encoding="UTF-8") as f:
-            self.sura = json.load(f)["surahs"]
-        self.pages = ["{}".format(i) for i in range(1, 605)]
-        self.quarters = ["{}".format(i) for i in range(1, 241)]
-        self.jus = ["{}".format(i) for i in range(1, 31)]
-        self.hizb = ["{}".format(i) for i in range(1, 61)]
+        self.sura = [surah.name for surah in parent.quran_manager.get_surahs()]
+        self.pages = ["{}".format(i) for i in range(1, QuranManager.MAX_PAGE + 1)]
+        self.quarters = ["{}".format(i) for i in range(1, QuranManager.MAX_QUARTER + 1)]
+        self.jus = ["{}".format(i) for i in range(1, QuranManager.MAX_JUZ + 1)]
+        self.hizb = ["{}".format(i) for i in range(1, QuranManager.MAX_HIZB + 1)]
 
         layout = QVBoxLayout()
         self.view_by = QGroupBox("عرض وفقا ل:")
@@ -69,7 +68,7 @@ class QuickAccess(QDialog):
         self.setLayout(layout)
 
         self.sura_radio.setChecked(True)
-        self.choices.addItems([sura["name"] for sura in self.sura])
+        self.choices.addItems(self.sura)
 
         self.go_button.clicked.connect(self.on_submit)
         self.cancel_button.clicked.connect(self.reject)
@@ -115,7 +114,7 @@ class QuickAccess(QDialog):
         logger.debug("Radio button toggled, updating choices.")
         if self.sura_radio.isChecked():
             self.choices.clear()
-            self.choices.addItems([sura["name"] for sura in self.sura])
+            self.choices.addItems(self.sura)
             logger.debug("Switched to Surah selection")
         elif self.pages_radio.isChecked():
             self.choices.clear()

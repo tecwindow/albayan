@@ -16,7 +16,7 @@ Config.load_settings()
 LoggerManager.setup_logger(
     log_file=LOG_PATH, 
     log_level=LogLevel.from_name(Config.general.log_level),
-    dev_mode=False
+    dev_mode=True
     )
 logger = LoggerManager.get_logger(__name__)
 logger.info(f"Starting {program_name}, {program_english_name}, version {program_version}...")
