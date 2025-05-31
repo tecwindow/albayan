@@ -11,7 +11,7 @@ class GoToDialog(QDialog):
         super().__init__(parent)        
         logger.debug(f"Initializing GoToDialog with current_position={current_position}, max={max}, category_label={category_label}.")
         
-        self.setWindowTitle('الذهاب إلى')
+        self.setWindowTitle(f"الذهاب إلى {category_label}")
         self.setGeometry(100, 100, 300, 150)
         
         layout = QVBoxLayout()

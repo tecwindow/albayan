@@ -244,10 +244,12 @@ class QuranInterface(QMainWindow):
             next_label = "التالي"
             previous_label = "السابق"
         
-        self.next_to.setText(f"ال{label} {next_label}")
+        self.next_to.setAccessibleName(f"ال{label} {next_label}")
         self.menu_bar.next_action.setText(f"ال{label} {next_label}")
-        self.back_to.setText(f"ال{label} {previous_label}")
+        self.back_to.setAccessibleName(f"ال{label} {previous_label}")
         self.menu_bar.previous_action.setText(f"ال{label} {previous_label}")
+        self.menu_bar.go_to_action.setText(f"الذهاب إلى {label}")
+
 
         # set the label
         label = self.quran_manager.view_content.edit_label
@@ -566,6 +568,12 @@ class QuranInterface(QMainWindow):
                 self.quran_view.setFocus()
             else:
                 logger.warning("Bookmark name is empty.")
+                msgBox = QMessageBox(self)
+                msgBox.setIcon(QMessageBox.Warning)
+                msgBox.setWindowTitle("علامة بلا اسم")
+                msgBox.setText("لا يمكن حفظ علامة بدون اسم.")
+                msgBox.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+                msgBox.exec()
                 return
         else:
             logger.debug("Bookmark dialog canceled.")   
