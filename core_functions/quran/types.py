@@ -36,6 +36,16 @@ class QuranFontType(Enum):
         }
         return paths[self] 
  
+ 
+class MarksType(Enum):
+    DEFAULT = 0
+    TEXT = 1
+    ACCESSIBLE = 2
+    
+    @staticmethod
+    def from_int(value: int) -> "MarksType":
+        return MarksType(value)
+
 
 @dataclass(eq=True)
 class Surah:

@@ -3,7 +3,7 @@
 import re
 from typing import List
 from pydantic import BaseModel
-from .types import Ayah
+from .types import MarksType, Ayah
 from .view_content import ViewContent
 from utils.logger import LoggerManager
 
@@ -15,7 +15,7 @@ class FormatterOptions(BaseModel):
     """
     show_ayah_number: bool = True
     auto_page_turn: bool = False
-    use_accessable_marks: bool = False
+    marks_type: MarksType = MarksType.DEFAULT
 
 
 class QuranFormatter:
@@ -42,30 +42,31 @@ class QuranFormatter:
         returns:
             str: The text with replaced marks.
         """
-        accessable_marks = {
-            "۩": "(سجدة)",
-            "ۚ": "(،)",
-            "ۗ": "(ء)",
-            "ۖ": "(;)",
-            "ۘ": "(.)",
-            "ۙ": "(لا)",
-            "ۛ": "--",
-            "ۜ": "س"
-        }
+        
+        if self.formatter_options.marks_type == MarksType.TEXT:
+            marks = {
+                "۩": "(سجدة)",
+                "ۚ": "(ج)",
+                "ۗ": "(قلى)",
+                "ۖ": "(صلى)",
+                "ۘ": "(م)",
+                "ۙ": "(لا)",
+                "ۛ": "--",
+                "ۜ": "س"
+            }
+        elif self.formatter_options.marks_type == MarksType.ACCESSIBLE:
+            marks = {
+                "۩": "(سجدة)",
+                "ۚ": "(،)",
+                "ۗ": "(ء)",
+                "ۖ": "(;)",
+                "ۘ": "(.)",
+                "ۙ": "(لا)",
+                "ۛ": "--",
+                "ۜ": "س"
+            }
 
-        text_marks = {
-            "۩": "(سجدة)",
-            "ۚ": "(ج)",
-            "ۗ": "(قلى)",
-            "ۖ": "(صلى)",
-            "ۘ": "(م)",
-            "ۙ": "(لا)",
-            "ۛ": "--",
-            "ۜ": "س"
-        }
-
-
-        for mark, replacement in accessable_marks.items():
+        for mark, replacement in marks.items():
             text = text.replace(mark, replacement)
     
         return text
@@ -92,7 +93,7 @@ class QuranFormatter:
 
         for i, ayah in enumerate(ayahs):
             ayah_text = ayah.text
-            if self.formatter_options.use_accessable_marks:
+            if self.formatter_options.marks_type != MarksType.DEFAULT:
                 ayah_text = self.replace_marks(ayah_text)
 
             if ayah.number_in_surah == 1:
@@ -115,7 +116,6 @@ class QuranFormatter:
             ayah.first_position = current_position
             current_position += len(ayah_text)
             ayah.last_position = current_position - 1
-            #self.view_content.insert(ayah)
             final_ayahs.append(ayah)
 
         if self.formatter_options.auto_page_turn:

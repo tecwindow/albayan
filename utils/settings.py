@@ -77,7 +77,7 @@ class ReadingSettings(BaseSection):
     SECTION_NAME: ClassVar[str] = "reading"
     font_type: int = 0
     auto_page_turn: bool = False
-    use_accessable_marks: int = 0
+    marks_type: int = 0
 
 @dataclass
 class PreferencesSettings(BaseSection):

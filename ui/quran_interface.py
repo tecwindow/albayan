@@ -21,10 +21,9 @@ from PyQt6.QtWidgets import (
 )
 import qtawesome as qta
 from PyQt6.QtGui import QIcon, QAction, QShowEvent, QTextCursor, QKeySequence, QShortcut
-from core_functions.quran_class import quran_mgr
 from core_functions.quran.quran_manager import QuranManager
 from core_functions.quran.formatter import FormatterOptions
-from core_functions.quran.types import QuranFontType, NavigationMode, Ayah
+from core_functions.quran.types import QuranFontType, NavigationMode, Ayah, MarksType
 from core_functions.tafaseer import Category
 from core_functions.info import MoshafInfo, E3rab, TanzilAyah, AyaInfo, SuraInfo, JuzInfo, HizbInfo, QuarterInfo, PageInfo
 from core_functions.bookmark import BookmarkManager
@@ -61,7 +60,7 @@ class QuranInterface(QMainWindow):
             QuranFontType.from_int(Config.reading.font_type)
         )
         self.quran_manager.formatter_options.auto_page_turn = Config.reading.auto_page_turn
-        self.quran_manager.formatter_options.use_accessable_marks = Config.reading.use_accessable_marks
+        self.quran_manager.formatter_options.marks_type = MarksType.from_int(Config.reading.marks_type)
         self.preferences_manager = PreferencesManager(user_db_path)
         self.sura_player_window = None
         Globals.effects_manager = SoundEffectPlayer("Audio/sounds")

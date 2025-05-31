@@ -20,7 +20,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
-from core_functions.quran.types import QuranFontType
+from core_functions.quran.types import QuranFontType, MarksType
 from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name
 from utils.settings import Config
@@ -222,24 +222,22 @@ class SettingsDialog(QDialog):
         [self.font_type_combo.addItem(text, font_type) for text, font_type in items_with_ids_list]
         self.font_type_combo.setAccessibleName(self.font_type_label.text())
 
-        self.accessible_marks_label = QLabel("نوع علامات الوقف:")
-        self.accessible_marks_combo = QComboBox()
-        marks_options = [("العثماني", 0), ("النصي", 1), ("برايل", 2)]
-        [self.accessible_marks_combo.addItem(text, id) for text, id in marks_options]
-        self.accessible_marks_combo.setAccessibleName(self.accessible_marks_label.text())
+        self.marks_type_label = QLabel("نوع علامات الوقف:")
+        self.marks_type_combo = QComboBox()
+        marks_options = [("العثماني", MarksType.DEFAULT), ("النصي", MarksType.TEXT), ("برايل", MarksType.ACCESSIBLE)]
+        [self.marks_type_combo.addItem(text, id) for text, id in marks_options]
+        self.marks_type_combo.setAccessibleName(self.marks_type_label.text())
 
         self.turn_pages_checkbox = QCheckBox("قلب الصفحات تلقائيا")
-
 
         self.group_reading_layout.addWidget(self.font_type_label)
         self.group_reading_layout.addWidget(self.font_type_combo)
         self.group_reading_layout.addSpacerItem(QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))  # مسافة أكبر
-        self.group_reading_layout.addWidget(self.accessible_marks_label)
-        self.group_reading_layout.addWidget(self.accessible_marks_combo)
+        self.group_reading_layout.addWidget(self.marks_type_label)
+        self.group_reading_layout.addWidget(self.marks_type_combo)
         self.group_reading_layout.addWidget(self.turn_pages_checkbox)
         self.group_reading_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         self.group_reading.setLayout(self.group_reading_layout)
-
 
         self.group_search = QGroupBox("إعدادات البحث")
         self.group_search_layout = QVBoxLayout()
@@ -354,11 +352,13 @@ class SettingsDialog(QDialog):
 
         if Config.reading.font_type != self.font_type_combo.currentData().value:
             new_font_type = self.font_type_combo.currentData()
-            logger.info(f"Font type changed from {Config.reading.font_type} to {new_font_type}. Reloading Quran text.")
+            logger.info(f"Font type changed from {QuranFontType.from_int(Config.reading.font_type)} to {new_font_type}. Reloading Quran text.")
             self.parent.quran_manager.font_type = new_font_type
             self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
-        if Config.reading.use_accessable_marks != self.use_accessable_marks.isChecked():
-            self.parent.quran_manager.formatter_options.use_accessable_marks = self.use_accessable_marks.isChecked()
+        if Config.reading.marks_type != self.marks_type_combo.currentData().value:
+            new_marks_type = self.marks_type_combo.currentData()
+            self.parent.quran_manager.formatter_options.marks_type = new_marks_type
+            logger.info(f"Marks type changed from {MarksType.from_int(Config.reading.marks_type)} to {new_marks_type}. Reloading Quran text.")
             self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
 
         # Update settings in Config
@@ -387,7 +387,7 @@ class SettingsDialog(QDialog):
 
         Config.reading.font_type = self.font_type_combo.currentData().value
         Config.reading.auto_page_turn = self.turn_pages_checkbox.isChecked()
-        Config.reading.use_accessable_marks = self.accessible_marks_combo.currentData()
+        Config.reading.marks_type = self.marks_type_combo.currentData().value
 
         Config.search.ignore_tashkeel = self.ignore_tashkeel_checkbox.isChecked()
         Config.search.ignore_hamza = self.ignore_hamza_checkbox.isChecked()
@@ -446,7 +446,7 @@ class SettingsDialog(QDialog):
             (self.reciters_combo, Config.listening.reciter),
             (self.action_combo, Config.listening.action_after_listening),
             (self.font_type_combo, QuranFontType.from_int(Config.reading.font_type)),
-    (self.accessible_marks_combo, Config.reading.use_accessable_marks),
+    (self.marks_type_combo, MarksType.from_int(Config.reading.marks_type)),
         ]
 
         for combo, value in combo_config:
