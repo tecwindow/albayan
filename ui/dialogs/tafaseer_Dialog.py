@@ -30,9 +30,10 @@ class TafaseerDialog(QDialog):
         logger.debug("Initializing TafaseerDialog...")
         self.parent = parent
         self.ayah = ayah
+        self.title = title
         self.default_category = default_category
-        self.setWindowTitle(title)
-        logger.debug(f"TafaseerDialog initialized with title: {title}.")
+        self.setWindowTitle(f"{self.title} - {default_category}")
+        logger.debug(f"TafaseerDialog initialized with title: {self.title}.")
         self.resize(500, 400)
         self.tafaseer_manager = TafaseerManager()
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(self.default_category))
@@ -116,6 +117,7 @@ class TafaseerDialog(QDialog):
         self.category_button.setText(selected_category)
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(selected_category))
         self.text_edit.setText(self.tafaseer_manager.get_tafaseer(self.ayah_info[0], self.ayah_info[1]))
+        self.setWindowTitle(f"{self.title} - {selected_category}")
         self.text_edit.setFocus()
         Globals.effects_manager.play("change")
         logger.info(f"Tafaseer content updated for category: {selected_category}")
