@@ -116,7 +116,7 @@ class TafaseerDialog(QDialog):
         logger.debug(f"User selected Tafaseer category: {selected_category}")
         self.category_button.setText(selected_category)
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(selected_category))
-        self.text_edit.setText(self.tafaseer_manager.get_tafaseer(self.ayah_info[0], self.ayah_info[1]))
+        self.text_edit.setText(self.tafaseer_manager.get_tafaseer(self.ayah.sura_number, self.ayah.number))
         self.setWindowTitle(f"{self.title} - {selected_category}")
         self.text_edit.setFocus()
         Globals.effects_manager.play("change")
