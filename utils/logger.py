@@ -8,21 +8,20 @@ from enum import Enum
 
 class LogLevel(Enum):
     DISABLE = logging.CRITICAL + 1
-    DEBUG = logging.DEBUG
-    INFO = logging.INFO
-    WARNING = logging.WARNING
     ERROR = logging.ERROR
-    #CRITICAL = logging.CRITICAL
+    WARNING = logging.WARNING
+    INFO = logging.INFO
+    DEBUG = logging.DEBUG
 
     @classmethod
     def get_labels(cls) -> dict:
         """Returns a dictionary mapping log levels to their labels."""
         return {
             cls.DISABLE: "تعطيل",
-            cls.DEBUG: "تصحيح (Debug)",
-            cls.INFO: "معلومات (Info)",
-            cls.WARNING: "تحذير (Warning)",
             cls.ERROR: "خطأ (Error)",
+            cls.WARNING: "تحذير (Warning)",
+            cls.INFO: "معلومات (Info)",
+            cls.DEBUG: "تصحيح (Debug)",
         }
 
     @property
