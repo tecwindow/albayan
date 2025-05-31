@@ -568,6 +568,12 @@ class QuranInterface(QMainWindow):
                 self.quran_view.setFocus()
             else:
                 logger.warning("Bookmark name is empty.")
+                msgBox = QMessageBox(self)
+                msgBox.setIcon(QMessageBox.Warning)
+                msgBox.setWindowTitle("علامة بلا اسم")
+                msgBox.setText("لا يمكن حفظ علامة بدون اسم.")
+                msgBox.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+                msgBox.exec()
                 return
         else:
             logger.debug("Bookmark dialog canceled.")   
