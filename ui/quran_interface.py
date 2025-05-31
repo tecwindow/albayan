@@ -562,7 +562,7 @@ class QuranInterface(QMainWindow):
                     current_aya.number_in_surah, 
                     current_aya.sura_number,
                     current_aya.sura_name, 
-                    self.quran_manager.navigation_mode.value
+                    self.get_valid_navigation_mode().value
                 )
                 logger.debug("Bookmark saved successfully.")                    
                 self.quran_view.setFocus()
@@ -604,9 +604,17 @@ class QuranInterface(QMainWindow):
             text = self.quran_manager.get_range(**range)
             self.quran_view.setText(text)
             self.set_text_ctrl_label()
-        
+
+    def get_valid_navigation_mode(self) -> NavigationMode:
+        if self.quran_manager.navigation_mode != NavigationMode.CUSTOM_RANGE:
+            navigation_mode = self.quran_manager.navigation_mode
+        else:
+            navigation_mode = NavigationMode.from_int(self.preferences_manager.get_int("previous_navigation_mode", NavigationMode.SURAH.value))
+        return navigation_mode
+
     def OnChangeNavigationMode(self, mode):
         logger.debug(f"Changing navigation mode to: {mode}")
+        self.preferences_manager.set_preference("previous_navigation_mode", self.quran_manager.navigation_mode.value)
         current_ayah = self.get_current_ayah()
         self.quran_manager.navigation_mode = NavigationMode.from_int(mode)
         self.menu_bar.browse_mode_actions[mode].setChecked(True)

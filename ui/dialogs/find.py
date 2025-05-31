@@ -169,6 +169,7 @@ class SearchDialog(QDialog):
             selected_result = result_dialog.list_widget.currentRow()
             selected_result = search_result[selected_result]
             ayah_number = selected_result["number"]
+            self.parent.quran_manager.navigation_mode = self.parent.get_valid_navigation_mode()
             ayah_result = self.parent.quran_manager.get_by_ayah_number(ayah_number)
             logger.info(f"User selected result {selected_result}")
             self.parent.quran_view.setText(ayah_result)
