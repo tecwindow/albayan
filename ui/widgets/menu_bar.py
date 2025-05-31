@@ -9,7 +9,6 @@ from ui.dialogs.athkar_dialog import AthkarDialog
 from ui.sura_player_ui import SuraPlayerWindow
 from ui.dialogs.tasbih_dialog import TasbihDialog
 from ui.dialogs.prophets_stories_dialog import ProphetsStoriesDialog
-from core_functions.quran_class import QuranConst
 from core_functions.quran.types import NavigationMode
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
