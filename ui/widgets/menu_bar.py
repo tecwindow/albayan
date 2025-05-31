@@ -417,7 +417,7 @@ class MenuBar(QMenuBar):
 
         #info
             self.ayah_info_action: ["Shift+I", "Alt+Shift+7"],
-            self.surah_info_action: ["Ctrl+I", "Alt+Shift+1"],
+            self.surah_info_action: ["Alt+Shift+1", "Ctrl+I"],
             self.page_info_action: ["Alt+Shift+2"],
             self.quarter_info_action: ["Alt+Shift+3"],
             self.hizb_info_action: ["Alt+Shift+4"],
