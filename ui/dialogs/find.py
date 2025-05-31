@@ -18,6 +18,7 @@ QMessageBox,
 from PyQt6.QtCore import Qt, QRegularExpression
 from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator, QShortcut
 from core_functions.search import SearchCriteria, QuranSearchManager
+from core_functions.quran.quran_manager import QuranManager
 from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
 from utils.const import Globals
@@ -116,13 +117,11 @@ class SearchDialog(QDialog):
 
         self.setLayout(main_layout)
 
-        self.sura = []
-        with open(os.path.join("database", "Surahs.Json"), encoding="UTF-8") as f:
-            self.sura = json.load(f)["surahs"]
-        self.pages = ["{}".format(i) for i in range(1, 605)]
-        self.quarters = ["{}".format(i) for i in range(1, 241)]
-        self.jus = ["{}".format(i) for i in range(1, 31)]
-        self.hizb = ["{}".format(i) for i in range(1, 61)]
+        self.sura = [surah.name for surah in self.parent.quran_manager.get_surahs()]
+        self.pages = ["{}".format(i) for i in range(1, QuranManager.MAX_PAGE + 1)]
+        self.quarters = ["{}".format(i) for i in range(1, QuranManager.MAX_QUARTER + 1)]
+        self.jus = ["{}".format(i) for i in range(1, QuranManager.MAX_JUZ + 1)]
+        self.hizb = ["{}".format(i) for i in range(1, QuranManager.MAX_HIZB + 1)]
 
         self.search_button.clicked.connect(self.on_submit)
         self.cancel_button.clicked.connect(self.reject)
@@ -192,8 +191,8 @@ class SearchDialog(QDialog):
             self.search_to_combobox.addItems([str(i) for i in range(1, 605)])
         elif self.search_type_radio_sura.isChecked():
             self.criteria = SearchCriteria.sura
-            self.search_from_combobox.addItems([sura["name"] for sura in self.sura])
-            self.search_to_combobox.addItems([sura["name"] for sura in self.sura])
+            self.search_from_combobox.addItems(self.sura)
+            self.search_to_combobox.addItems(self.sura)
         elif self.search_type_radio_juz.isChecked():
             self.criteria = SearchCriteria.juz
             self.search_from_combobox.addItems(self.jus)

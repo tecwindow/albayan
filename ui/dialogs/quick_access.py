@@ -1,5 +1,4 @@
 import os
-import json
 import qtawesome as qta
 from PyQt6.QtWidgets import (
     QDialog,
