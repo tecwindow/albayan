@@ -2,6 +2,7 @@ import re
 from PyQt6.QtCore import QEvent, Qt, QLocale
 from PyQt6.QtGui import QKeyEvent, QTextCursor
 from PyQt6.QtWidgets import QTextEdit
+from core_functions.quran.types import NavigationMode
 from utils.settings import Config
 from utils.const import Globals
 from utils.logger import LoggerManager
@@ -88,7 +89,7 @@ class QuranViewer(ReadOnlyTextEdit):
                     logger.debug("Text direction set to Right-to-Left (Ctrl + Right Shift).")
 
 
-        if not Config.reading.auto_page_turn:
+        if not Config.reading.auto_page_turn or self.parent.quran_manager.navigation_mode == NavigationMode.CUSTOM_RANGE:
             return
 
         current_line = self.textCursor().block().blockNumber()

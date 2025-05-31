@@ -265,6 +265,7 @@ class QuranInterface(QMainWindow):
         self.menu_bar.next_action.setEnabled(next_status)
         self.back_to.setEnabled(back_status)
         self.menu_bar.previous_action.setEnabled(back_status)
+        self.menu_bar.go_to_action.setEnabled(self.quran_manager.navigation_mode != NavigationMode.CUSTOM_RANGE)
         self.toolbar.navigation.reset_position()
         self.toolbar.set_buttons_status()
         logger.debug("Buttons status set.")
