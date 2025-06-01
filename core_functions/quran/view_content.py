@@ -127,14 +127,16 @@ class ViewContent:
         rows = (
             self.session.query(
                 AyahViewMap.sura_number,
+                AyahViewMap.sura_name,
                 func.min(AyahViewMap.number_in_surah).label("min_ayah"),
                 func.max(AyahViewMap.number_in_surah).label("max_ayah"),
             )
             .group_by(AyahViewMap.sura_number)
+            .order_by(AyahViewMap.sura_number)
             .all()
         )
         for row in rows:
-            result[row.sura_number] = {"min_ayah": row.min_ayah, "max_ayah": row.max_ayah}
+            result[row.sura_number] = {"surah_name": row.sura_name, "min_ayah": row.min_ayah, "max_ayah": row.max_ayah}
         return result
 
     def _row_to_ayah(self, row) -> Ayah:
@@ -158,9 +160,10 @@ class ViewContent:
         return f"ViewContent(number={self.number}, label={self.label}, mode={self.mode})"
     
     def __del__(self):
+        """Close the session and dispose of the engine when the object is deleted."""
         if self.session:
             self.session.close()
         if self.engine:
             self.engine.dispose()
-        logger.debug(f"ViewContent {self.number} closed.")
+        logger.debug(f"ViewContent {self.label} closed.")
     
