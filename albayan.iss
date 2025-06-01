@@ -21,7 +21,6 @@ VersionInfoOriginalFileName=Albayan_Setup.exe
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-ArchitecturesAllowed=x64
 SetupIconFile=Albayan.ico
 
 DefaultDirName={sd}\program files\tecwindow\{#MyAppName}
