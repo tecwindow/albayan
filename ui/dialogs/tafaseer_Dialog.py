@@ -124,7 +124,17 @@ class TafaseerDialog(QDialog):
 
     def copy_content(self):
         logger.debug("User requested to copy Tafaseer content.")
-        copied_content = self.text_edit.toPlainText()
+    
+        tafseer_text = self.text_edit.toPlainText()
+        mufassir_name = self.category_button.text()
+        ayah_num = self.ayah.number
+        sura_name = self.ayah.sura_name  # استخرج اسم السورة مباشرة
+    
+        copied_content = (
+            f"تفسير {mufassir_name} للآية رقم {ayah_num} من {sura_name}:\n\n"
+            f"{tafseer_text}"
+        )
+    
         clipboard = QApplication.clipboard()
         clipboard.setText(copied_content) 
         UniversalSpeech.say("تم نسخ التفسير.")
