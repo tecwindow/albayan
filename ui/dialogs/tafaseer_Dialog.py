@@ -124,12 +124,18 @@ class TafaseerDialog(QDialog):
 
     def copy_content(self):
         logger.debug("User requested to copy Tafaseer content.")
-        copied_content = self.text_edit.toPlainText()
+        tafseer_text = self.text_edit.toPlainText()
+        category_name = self.category_button.text().strip()
+        ayah_info = f"آية {self.ayah.number} من {self.ayah.sura_name}، تفسير: {category_name}."
+        final_text = f"{ayah_info}\n{tafseer_text}"
+
         clipboard = QApplication.clipboard()
-        clipboard.setText(copied_content) 
-        UniversalSpeech.say("تم نسخ التفسير.")
-        Globals.effects_manager.play("copy")        
-        logger.info("User copied Tafaseer content to clipboard.")
+        clipboard.setText(final_text)
+
+        UniversalSpeech.say(f"تم نسخ التفسير: آية {self.ayah.number} من {self.ayah.sura_name} للمفسر {category_name}.")
+        Globals.effects_manager.play("copy")
+        logger.info(f"Tafseer copied with header: {ayah_info}")
+
 
     def save_content(self):            
         logger.debug("User requested to save Tafaseer content.")
