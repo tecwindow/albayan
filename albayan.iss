@@ -9,7 +9,6 @@
 AppName={#MyAppName}
 AppId={{5BDDE425-E22F-4A82-AF2F-72AF71301D3F}
 AppVersion={#AppVersion}
-;AppVersion={#MyAppVersion}
 VersionInfoDescription=Albayan كل ما يخص الإسلام.
 AppPublisher=tecwindow
 VersionInfoVersion={#MyAppVersion}
@@ -21,11 +20,12 @@ VersionInfoOriginalFileName=Albayan_Setup.exe
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
+ArchitecturesAllowed=x64compatible arm64
+ArchitecturesInstallIn64BitMode=x64compatible arm64
 SetupIconFile=Albayan.ico
 
 DefaultDirName={sd}\program files\tecwindow\{#MyAppName}
 DisableProgramGroupPage=yes
-; Uncomment the following line to run in non-administrative install mode (install for the current user only.)
 PrivilegesRequired=admin
 OutputDir=albayan_build
 OutputBaseFilename=AlbayanSetup
@@ -36,8 +36,6 @@ SolidCompression=yes
 WizardStyle=modern
 DisableWelcomePage=no
 MinVersion=0,6.2
-ArchitecturesAllowed=x64compatible arm64
-ArchitecturesInstallIn64BitMode=x64compatible arm64
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -83,42 +81,34 @@ Type: filesandordirs; Name: "{app}\*"
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
 
 [Code]
+procedure DeleteSettingsFolder();
+begin
+  DelTree(ExpandConstant('{userappdata}\tecwindow\albayan'), True, True, True);
+end;
+
 function InitializeSetup(): Boolean;
 begin
   Result := True;
 end;
-
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssInstall then
   begin
     if FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini')) then
-begin
-RenameFile(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini'), ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\config.ini'));
-end;
-
-  end;
-end;
-
-procedure DeleteSettingsFolder();
-begin
-  DelTree(ExpandConstant('{userappdata}\tecwindow\albayan'), True, True, True);
-end;
-
-function AskDeleteSettingsFolder(): Boolean;
-begin
-  Result := MsgBox(ExpandConstant('{cm:DeleteSettingsPrompt}') + #13#10 + ExpandConstant('{userappdata}\tecwindow\albayan'), mbConfirmation, MB_YESNO) = IDYES;
-end;
-
-procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
-begin
-  if CurUninstallStep = usUninstall then
-  begin
-    if AskDeleteSettingsFolder() then
     begin
-      DeleteSettingsFolder();
+      RenameFile(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini'),
+                 ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\config.ini'));
     end;
   end;
 end;
 
+procedure DeinitializeUninstall();
+begin
+  if MsgBox(ExpandConstant('{cm:DeleteSettingsPrompt}') + #13#10 +
+            ExpandConstant('{userappdata}\tecwindow\albayan'),
+            mbConfirmation, MB_YESNO) = IDYES then
+  begin
+    DeleteSettingsFolder();
+  end;
+end;
