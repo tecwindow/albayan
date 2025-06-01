@@ -445,7 +445,7 @@ class QuranInterface(QMainWindow):
         label = "معلومات الآية:"
         text = AyaInfo(current_aya.number).text
         logger.debug(f"Displaying information for ayah {current_aya.number_in_surah} in {current_aya.sura_name}")
-        InfoDialog(self, title, label, text, is_html_content=True).open()
+        InfoDialog(self, title, label, text, is_html_content=False).open()
 
     @exception_handler(ui_element=QMessageBox)
     def OnSurahInfo(self, event):
@@ -455,7 +455,7 @@ class QuranInterface(QMainWindow):
         label = "معلومات السورة:"
         sura_info = SuraInfo(current_aya.sura_number)
         logger.debug(f"Displaying information for surah {current_aya.sura_name}")
-        InfoDialog(self, title, label, sura_info.text, is_html_content=True).open()
+        InfoDialog(self, title, label, sura_info.text, is_html_content=False).open()
 
     @exception_handler(ui_element=QMessageBox)
     def OnJuzInfo(self, event):
