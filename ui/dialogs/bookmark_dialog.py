@@ -74,8 +74,17 @@ class BookmarkDialog(QDialog):
         self.delete_button.clicked.connect(self.delete_bookmark)
         self.go_button.clicked.connect(self.go_to_bookmark)
         self.cancel_button.clicked.connect(self.reject)
+        self.bookmark_list.itemSelectionChanged.connect(self.toggle_buttons)
+        self.toggle_buttons()
 
         self.load_bookmarks()
+
+    def toggle_buttons(self):
+        has_selection = bool(self.bookmark_list.selectedItems())
+        self.update_button.setEnabled(has_selection)
+        self.delete_button.setEnabled(has_selection)
+        self.go_button.setEnabled(has_selection)
+
 
     def load_bookmarks(self, bookmarks=None):
         logger.debug("Loading bookmarks...")
@@ -95,7 +104,8 @@ class BookmarkDialog(QDialog):
             item = QListWidgetItem(item_text)
             item.setData(Qt.ItemDataRole.UserRole, bookmark)
             self.bookmark_list.addItem(item)
-        self.bookmark_list.setCurrentRow(0)
+        if bookmarks:
+            self.bookmark_list.setCurrentRow(0)
         logger.info(f"{len(bookmarks)} bookmarks loaded.")
 
     def search_bookmarks(self):
