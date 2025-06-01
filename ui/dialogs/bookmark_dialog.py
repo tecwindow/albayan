@@ -44,7 +44,12 @@ class BookmarkDialog(QDialog):
         self.delete_button = QPushButton("حذف العلامة")
         self.delete_button.setIcon(qta.icon("fa.trash"))
         self.delete_button.setShortcut(QKeySequence(Qt.Key.Key_Delete))
-        
+                
+                
+        self.delete_all_button = QPushButton("حذف جميع العلامات")
+        self.delete_all_button.setIcon(qta.icon("fa.trash-o"))
+        self.delete_all_button.setShortcut(QKeySequence("Ctrl+Delete"))
+
         self.go_button = QPushButton("الذهاب إلى العلامة")
         self.go_button.setIcon(qta.icon("fa.location-arrow"))
         self.go_button.setDefault(True)
@@ -58,6 +63,7 @@ class BookmarkDialog(QDialog):
         form_layout = QHBoxLayout()
         form_layout.addWidget(self.update_button)
         form_layout.addWidget(self.delete_button)
+        form_layout.addWidget(self.delete_all_button)
         form_layout.addWidget(self.go_button)
         form_layout.addWidget(self.cancel_button)
 
@@ -72,6 +78,7 @@ class BookmarkDialog(QDialog):
         self.search_input.textChanged.connect(self.search_bookmarks)
         self.update_button.clicked.connect(self.update_bookmark)
         self.delete_button.clicked.connect(self.delete_bookmark)
+        self.delete_all_button.clicked.connect(self.delete_all_bookmarks)
         self.go_button.clicked.connect(self.go_to_bookmark)
         self.cancel_button.clicked.connect(self.reject)
         self.bookmark_list.itemSelectionChanged.connect(self.toggle_buttons)
@@ -191,6 +198,37 @@ class BookmarkDialog(QDialog):
             logger.info(f"Bookmark deleted: {bookmark['name']}")
             self.load_bookmarks()
             self.bookmark_list.setFocus()
+
+    def delete_all_bookmarks(self):
+        logger.debug("User requested to delete all bookmarks.")
+        bookmarks = self.manager.get_bookmarks()
+
+        if not bookmarks:
+            logger.info("No bookmarks to delete.")
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setWindowTitle("لا توجد علامات")
+            msg_box.setText("لا توجد علامات لحذفها.")
+            msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
+            msg_box.exec()
+            return
+
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Icon.Warning)
+        msg_box.setWindowTitle("تأكيد الحذف")
+        msg_box.setText("هل أنت متأكد أنك تريد حذف **جميع** العلامات؟ لا يمكن التراجع عن هذا الإجراء.")
+        yes_button = msg_box.addButton("نعم", QMessageBox.ButtonRole.AcceptRole)
+        no_button = msg_box.addButton("لا", QMessageBox.ButtonRole.RejectRole)
+
+        msg_box.exec()
+
+        if msg_box.clickedButton() == yes_button:
+            self.manager.delete_all_bookmarks()
+            logger.info("All bookmarks deleted by user request.")
+            self.load_bookmarks()
+            self.bookmark_list.setFocus()
+ 
+
 
     def go_to_bookmark(self):
         selected_items = self.bookmark_list.selectedItems()
