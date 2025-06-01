@@ -4,7 +4,7 @@ from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut, QDesktopService
 from PyQt6.QtCore import Qt, QUrl
 from ui.dialogs.settings_dialog import SettingsDialog
 from ui.dialogs.bookmark_dialog import BookmarkDialog
-from ui.dialogs.go_to import GoToDialog
+from ui.dialogs.go_to import GoToDialog, GoToStyle
 from ui.dialogs.athkar_dialog import AthkarDialog
 from ui.sura_player_ui import SuraPlayerWindow
 from ui.dialogs.tasbih_dialog import TasbihDialog
@@ -47,6 +47,8 @@ class MenuBar(QMenuBar):
         self.search_action.triggered.connect(self.parent.OnSearch)        
         self.go_to_action = QAction("اذهب إلى", self)
         self.go_to_action.triggered.connect(self.OnGoTo)
+        self.go_to_ayah_action = QAction("اذهب إلى آية", self)
+        self.go_to_ayah_action.triggered.connect(self.OnGoToAyah)
         self.quick_access_action = QAction("الوصول السريع", self)
         self.quick_access_action.triggered.connect(self.parent.OnQuickAccess)
         self.close_action = QAction("إغلاق النافذة", self)
@@ -55,7 +57,7 @@ class MenuBar(QMenuBar):
         self.exit_action = QAction("إغلاق البرنامج", self)
         self.exit_action.triggered.connect(self.quit_application)
 
-        self.navigation_menu.addActions([self.next_action, self.previous_action, self.go_to_saved_position_action, self.search_action, self.go_to_action, self.quick_access_action, self.close_action, self.exit_action])
+        self.navigation_menu.addActions([self.next_action, self.previous_action, self.go_to_saved_position_action, self.search_action, self.go_to_action, self.go_to_ayah_action, self.quick_access_action, self.close_action, self.exit_action])
 
 
         self.player_menu = self.addMenu("المشغل(&P)")
@@ -324,14 +326,44 @@ class MenuBar(QMenuBar):
         current_position = self.parent.quran_manager.current_position
         max_position = self.parent.quran_manager.max_position
         category_label = self.parent.quran_manager.view_content.label
+        title = f"الذهاب إلى {category_label} - {current_position}/{max_position}"
+        label = f"ادخل رقم ال{category_label}"
         logger.debug(f"Current position: {current_position}, Max: {max_position}, navigation_mode: {self.parent.quran_manager.navigation_mode}")
-        go_to_dialog = GoToDialog(self.parent, current_position, max_position, category_label)
+        go_to_dialog = GoToDialog(self.parent, title=title, initial_value=current_position, max_value=max_position, min_value=1)
+        go_to_dialog.set_spin_label(label)
         if go_to_dialog.exec():
             value = go_to_dialog.get_input_value()
             text = self.parent.quran_manager.go_to(value)
             self.parent.quran_view.setText(text)
             logger.debug(f"GoTo dialog closed with value: {value}")
         self.parent.set_text_ctrl_label()
+        self.parent.quran_view.setFocus()
+
+    def OnGoToAyah(self):
+        logger.debug("Opening GoTo dialog for Ayah.")
+        current_ayah = self.parent.get_current_ayah()
+        combo_data = {
+            surah_number: {
+            "label": data.get("surah_name"),
+            "min": data.get("min_ayah"),
+            "max": data.get("max_ayah")
+            }
+        for surah_number, data in self.parent.quran_manager.view_content.get_ayah_range().items()
+        }
+
+        category_label = self.parent.quran_manager.view_content.label
+        title = f"الذهاب إلى آية داخل ال{category_label}"
+        spin_label = "ادخل رقم الآية"
+        combo_label = "اختر السورة"
+        
+        logger.debug(f"Current Ayah: {current_ayah}, combo_data: {combo_data}")
+        go_to_dialog = GoToDialog(self.parent, title=title, initial_value=current_ayah.number_in_surah, combo_data=combo_data, style=GoToStyle.NUMERIC_FIELD|GoToStyle.COMBO_FIELD)
+        go_to_dialog.set_spin_label(spin_label)
+        go_to_dialog.set_combo_label(combo_label)
+        if go_to_dialog.exec():
+            surah_number, ayah_number_in_surah = go_to_dialog.get_input_value()
+            ayah = self.parent.quran_manager.view_content.get_by_ayah_number_in_surah(ayah_number_in_surah, surah_number)
+            self.parent.set_focus_to_ayah(ayah.number)
         self.parent.quran_view.setFocus()
 
     def OnTafaseerMenu(self):

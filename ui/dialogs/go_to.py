@@ -2,10 +2,10 @@
 from enum import IntFlag
 from typing import  Optional
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QComboBox,
-    QPushButton, QShortcut
+    QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
+    QSpinBox, QComboBox, QPushButton
 )
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
 import qtawesome as qta
 
 from utils.const import Globals
@@ -13,7 +13,7 @@ from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
-class GoToMode(IntFlag):
+class GoToStyle(IntFlag):
     NUMERIC_FIELD = 1
     COMBO_FIELD = 2
 
@@ -23,15 +23,16 @@ class GoToDialog(QDialog):
         self,
         parent,
         title: str,
-        initial_value: int,
-        min_value: int,
-        max_value: int,
-        mode: GoToMode,
+        initial_value: int = 1,
+        min_value: int = 1,
+        max_value: int = 1,
+        style: GoToStyle = GoToStyle.NUMERIC_FIELD,
         combo_data: Optional[dict] = None
     ):
         super().__init__(parent)
 
-        self.mode = mode
+        self.initial_value = initial_value
+        self.style = style
         self.combo_data = combo_data or {}
 
         self.setWindowTitle(title)
@@ -40,7 +41,7 @@ class GoToDialog(QDialog):
         main_layout = QVBoxLayout()
 
         # Combo Field
-        if self.mode & GoToMode.COMBO_FIELD:
+        if self.style & GoToStyle.COMBO_FIELD:
             self.combo_label = QLabel("اختر")
             main_layout.addWidget(self.combo_label)
 
@@ -53,7 +54,7 @@ class GoToDialog(QDialog):
             main_layout.addWidget(self.combo_box)
 
         # Numeric Field
-        if self.mode & GoToMode.NUMERIC_FIELD:
+        if self.style & GoToStyle.NUMERIC_FIELD:
             self.spin_label = QLabel("أدخل الرقم:")
             main_layout.addWidget(self.spin_label)
 
@@ -65,7 +66,7 @@ class GoToDialog(QDialog):
             self.spin_box.valueChanged.connect(self._validate_input)
             main_layout.addWidget(self.spin_box)
 
-            if self.mode == (GoToMode.NUMERIC_FIELD | GoToMode.COMBO_FIELD):
+            if self.style == (GoToStyle.NUMERIC_FIELD | GoToStyle.COMBO_FIELD):
                 self.combo_box.currentIndexChanged.connect(self._update_spinbox_range_from_combo)
                 self._update_spinbox_range_from_combo()
 
@@ -96,7 +97,7 @@ class GoToDialog(QDialog):
 
     def _update_spinbox_range_from_combo(self):
         """Updates spinbox min/max when combo changes (only in COMBO+NUMERIC mode)."""
-        if not (self.mode & GoToMode.COMBO_FIELD and self.mode & GoToMode.NUMERIC_FIELD):
+        if not (self.style & GoToStyle.COMBO_FIELD and self.style & GoToStyle.NUMERIC_FIELD):
             return
 
         item_id = self.combo_box.currentData()
@@ -115,38 +116,38 @@ class GoToDialog(QDialog):
         """Enable/disable go_to_button based on input validity."""
         is_valid = True
 
-        if self.mode & GoToMode.COMBO_FIELD:
+        if self.style & GoToStyle.COMBO_FIELD:
             current_index = self.combo_box.currentIndex()
             if current_index < 0:
                 is_valid = False
 
-        if self.mode & GoToMode.NUMERIC_FIELD:
+        if self.style & GoToStyle.NUMERIC_FIELD:
             if not (self.spin_box.minimum() <= self.spin_box.value() <= self.spin_box.maximum()):
                 is_valid = False
 
         self.go_to_button.setEnabled(is_valid)
 
     def get_input_value(self):
-        """Returns selected values depending on mode."""
-        if self.mode == GoToMode.NUMERIC_FIELD:
+        """Returns selected values depending on style."""
+        if self.style == GoToStyle.NUMERIC_FIELD:
             return self.spin_box.value()
-        elif self.mode == GoToMode.COMBO_FIELD:
+        elif self.style == GoToStyle.COMBO_FIELD:
             return self.combo_box.currentData()
-        elif self.mode == (GoToMode.NUMERIC_FIELD | GoToMode.COMBO_FIELD):
+        elif self.style == (GoToStyle.NUMERIC_FIELD | GoToStyle.COMBO_FIELD):
             item_id = self.combo_box.currentData()
             value = self.spin_box.value()
-            return {"item_id": item_id, "value": value}
+            return item_id, value
 
     def set_combo_label(self, label: str):
         """Sets the label for the combo box."""
-        if self.mode & GoToMode.COMBO_FIELD:
+        if self.style & GoToStyle.COMBO_FIELD:
             self.combo_label.setText(label)
             self.combo_box.setAccessibleName(label)
             logger.debug(f"Combo label set to: {label}")
     
     def set_spin_label(self, label: str):
         """Sets the label for the spin box."""
-        if self.mode & GoToMode.NUMERIC_FIELD:
+        if self.style & GoToStyle.NUMERIC_FIELD:
             self.spin_label.setText(label)
             self.spin_box.setAccessibleName(label)
             logger.debug(f"Spin label set to: {label}")
