@@ -36,9 +36,9 @@ restartApplications=yes
 SolidCompression=yes
 WizardStyle=modern
 DisableWelcomePage=no
-
-ArchitecturesInstallIn64BitMode=x64
 MinVersion=0,6.2
+ArchitecturesAllowed=x64compatible arm64
+ArchitecturesInstallIn64BitMode=x64compatible arm64
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
