@@ -100,6 +100,19 @@ class BookmarkManager:
         except Exception as e:
             logger.error(f"Error deleting bookmark (ID: {bookmark_id}): {str(e)}", exc_info=True)
 
+
+
+    def delete_all_bookmarks(self) -> None:
+        """Delete all bookmarks from the database."""
+        logger.debug("Deleting all bookmarks from the database...")
+        try:
+            self.cursor.execute("DELETE FROM bookmarks")
+            self.conn.commit()
+            logger.info("All bookmarks have been deleted successfully.")
+        except Exception as e:
+            logger.error(f"Error deleting all bookmarks: {str(e)}", exc_info=True)
+
+
     def update_bookmark(self, bookmark_id: int, new_name: str) -> None:
         """Update a bookmark's name by its ID."""
         logger.debug(f"Updating bookmark ID {bookmark_id} with new name: {new_name}...")
