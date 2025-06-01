@@ -149,18 +149,16 @@ class AyaInfo(Base):
         """Format the Aya information into a readable string."""
         logger.debug(f"Formatting Aya information for Ayah {result['numberInSurah']}.")
         text = """|
-        <ul>
-            <li><strong>رقم الآية:</strong> {}.</li>
-            <li><strong>رقم الآية في المصحف:</strong> {}.</li>
-            <li><strong>السورة:</strong> {}.</li>
-            <li><strong>رقم السورة:</strong> {}.</li>
-            <li><strong>رقم الصفحة:</strong> {}.</li>
-            <li><strong>رقم الجزء:</strong> {}.</li>
-            <li><strong>رقم الحزب:</strong> {}.</li>
-            <li><strong>رقم الربع:</strong> {}.</li>
-            <li><strong>سجدة:</strong> {}.</li>
-            <li><strong>سجدة واجبة:</strong> {}.</li>
-        </ul>
+            رقم الآية: {}.
+            رقم الآية في المصحف: {}.
+            السورة: {}.
+            رقم السورة: {}.
+            رقم الصفحة: {}.
+            رقم الجزء: {}.
+            رقم الحزب: {}.
+            رقم الربع: {}.
+            سجدة: {}.
+            سجدة واجبة: {}.
         """.format(result["numberInSurah"], result["number"], result["sura_name"], result["sura_number"], result["page"], result["juz"], result["hizb"], result["hizbQuarter"], result["sajda"], result["sajdaObligation"])
         logger.debug(f"Aya information formatted successfully.")
 
@@ -218,13 +216,13 @@ class SuraInfo(Base):
             "end_hizb_quarter": "تنتهي في الربع"
         }
         
-        text = "<ul>\n"
+        text = "|\n"
         for key, label in arabic_labels.items():
             value = data.get(key, "غير متوفر")
-            text += f"<li><strong>{label}:</strong> {value}.</li>\n"
+            text += f"{label}: {value}.\n"
 
         logger.debug(f"Formatted information for Surah {data.get('name', 'Unknown')}.")
-        return text + "</ul>"
+        return text + ""
 
 
 class JuzInfo(Base):
