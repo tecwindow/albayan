@@ -125,7 +125,8 @@ class GoToDialog(QDialog):
             if not (self.spin_box.minimum() <= self.spin_box.value() <= self.spin_box.maximum()):
                 is_valid = False
 
-        self.go_to_button.setEnabled(is_valid)
+        if hasattr(self, "go_to_button"):
+            self.go_to_button.setEnabled(is_valid)
 
     def get_input_value(self):
         """Returns selected values depending on style."""
