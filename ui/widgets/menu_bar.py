@@ -351,13 +351,14 @@ class MenuBar(QMenuBar):
         for surah_number, data in self.parent.quran_manager.view_content.get_ayah_range().items()
         }
 
+        combo_data[current_ayah.sura_number] ["initial_value"] = current_ayah.number_in_surah
         category_label = self.parent.quran_manager.view_content.label
         title = f"الذهاب إلى آية داخل ال{category_label}"
         spin_label = "ادخل رقم الآية"
         combo_label = "اختر السورة"
         
         logger.debug(f"Current Ayah: {current_ayah}, combo_data: {combo_data}")
-        go_to_dialog = GoToDialog(self.parent, title=title, initial_value=current_ayah.number_in_surah, combo_data=combo_data, style=GoToStyle.NUMERIC_FIELD|GoToStyle.COMBO_FIELD)
+        go_to_dialog = GoToDialog(self.parent, title=title, initial_value=current_ayah.sura_name, combo_data=combo_data, style=GoToStyle.NUMERIC_FIELD|GoToStyle.COMBO_FIELD)
         go_to_dialog.set_spin_label(spin_label)
         go_to_dialog.set_combo_label(combo_label)
         if go_to_dialog.exec():
