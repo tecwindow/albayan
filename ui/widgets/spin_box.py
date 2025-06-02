@@ -17,4 +17,17 @@ class SpinBox(QSpinBox):
         super().focusInEvent(event)
         self.lineEdit().selectAll()
 
-    def fixup(self, text: str
+    def fixup(self, text: str) -> str:
+
+        try:
+            value = int(text)
+            if value < self.minimum():
+                QApplication.beep()
+                return str(self.minimum())
+            elif value > self.maximum():
+                QApplication.beep()
+                return str(self.maximum())
+        except ValueError:
+            QApplication.beep()
+            return str(self.minimum())
+        return text
