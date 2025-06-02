@@ -108,7 +108,6 @@ class GoToDialog(QDialog):
         return self.has_combo_field and self.has_numeric_field
 
     def _set_current_value(self):
-        self.spin_box.update_validator()
         if self.has_both_fields or not self.has_numeric_field:
             self.combo_box.setCurrentText(str(self.initial_value))
         elif self.has_numeric_field:
@@ -127,7 +126,6 @@ class GoToDialog(QDialog):
 
         self.spin_box.setMinimum(min_val)
         self.spin_box.setMaximum(max_val)
-        self.spin_box.update_validator()
         self.spin_box.setValue(initial_value)
         
         logger.debug(f"Spinbox range updated: min={min_val}, max={max_val} for item_id={item_id}")
