@@ -1,33 +1,42 @@
 from PyQt6.QtWidgets import QSpinBox, QApplication
-from PyQt6.QtGui import QIntValidator
+from PyQt6.QtGui import QValidator
 from PyQt6.QtCore import Qt
+
+
+class CustomRangeValidator(QValidator):
+    def __init__(self, min_val: int, max_val: int, parent=None):
+        super().__init__(parent)
+        self.min_val = min_val
+        self.max_val = max_val
+
+    def validate(self, input_str: str, pos: int):
+        if input_str == "":
+            return QValidator.State.Intermediate, input_str, pos
+
+        if input_str.isdigit():
+            value = int(input_str)
+            if self.min_val <= value <= self.max_val:
+                return QValidator.State.Acceptable, input_str, pos
+            else:
+                QApplication.beep()
+                return QValidator.State.Invalid, input_str, pos
+        QApplication.beep()
+        return QValidator.State.Invalid, input_str, pos
+
+    def fixup(self, input_str: str):
+        return str(self.min_val)
 
 
 class SpinBox(QSpinBox):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.update_validator()
+        self.validator = CustomRangeValidator(self.minimum(), self.maximum(), self)
+        self.lineEdit().setValidator(self.validator)
 
     def update_validator(self):
-        validator = QIntValidator(self.minimum(), self.maximum(), self)
-        self.lineEdit().setValidator(validator)
-        self.lineEdit().inputRejected.connect(QApplication.beep)
-
+        self.validator.min_val = self.minimum()
+        self.validator.max_val = self.maximum()
+        
     def focusInEvent(self, event):
         super().focusInEvent(event)
         self.lineEdit().selectAll()
-
-    def fixup(self, text: str) -> str:
-
-        try:
-            value = int(text)
-            if value < self.minimum():
-                QApplication.beep()
-                return str(self.minimum())
-            elif value > self.maximum():
-                QApplication.beep()
-                return str(self.maximum())
-        except ValueError:
-            QApplication.beep()
-            return str(self.minimum())
-        return text
