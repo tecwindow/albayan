@@ -1,6 +1,7 @@
 import os
 import json
 from PyQt6.QtWidgets import (
+    QApplication,
     QDialog,
     QVBoxLayout,
     QHBoxLayout,
@@ -50,6 +51,7 @@ class SearchDialog(QDialog):
         regex = QRegularExpression("[\u0621-\u0652\u0670\u0671[:space:]]+")  # Arabic letters, hamzas, diacritics, and spaces.
         validator = QRegularExpressionValidator(regex)
         self.search_box.setValidator(validator)
+        self.search_box.inputRejected.connect(QApplication.beep)
         self.search_box.textChanged.connect(self.OnEdit)
         self.search_box.setAccessibleName(self.search_label.text())
         self.advanced_search_checkbox = QCheckBox('البحث المتقدم')
