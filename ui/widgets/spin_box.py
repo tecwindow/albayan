@@ -18,9 +18,7 @@ class CustomRangeValidator(QValidator):
             if self.min_val <= value <= self.max_val:
                 return QValidator.State.Acceptable, input_str, pos
             else:
-                QApplication.beep()
                 return QValidator.State.Invalid, input_str, pos
-        QApplication.beep()
         return QValidator.State.Invalid, input_str, pos
 
     def fixup(self, input_str: str):
@@ -32,6 +30,7 @@ class SpinBox(QSpinBox):
         super().__init__(parent)
         self.validator = CustomRangeValidator(self.minimum(), self.maximum(), self)
         self.lineEdit().setValidator(self.validator)
+        self.lineEdit().inputRejected.connect(QApplication.beep)
 
     def update_validator(self):
         self.validator.min_val = self.minimum()
