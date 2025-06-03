@@ -20,6 +20,7 @@ from PyQt6.QtCore import Qt, QRegularExpression
 from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator, QShortcut
 from core_functions.search import SearchCriteria, QuranSearchManager
 from core_functions.quran.quran_manager import QuranManager
+from ui.widgets.search_box import ArabicSearchBox
 from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
 from utils.const import Globals
@@ -46,7 +47,7 @@ class SearchDialog(QDialog):
 
     def initUI(self):
         self.search_label = QLabel('اكتب ما تريد البحث عنه:')
-        self.search_box = QLineEdit(self)
+        self.search_box = ArabicSearchBox(self)
         self.search_box.setText(self.search_phrase)
         regex = QRegularExpression("[\u0621-\u0652\u0670\u0671[:space:]]+")  # Arabic letters, hamzas, diacritics, and spaces.
         validator = QRegularExpressionValidator(regex)
