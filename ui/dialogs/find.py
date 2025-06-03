@@ -38,6 +38,7 @@ class SearchDialog(QDialog):
         self.setWindowTitle(title)
         self.resize(500, 400)
         self.search_manager = QuranSearchManager()
+        self.reset_search_options()
         self.criteria = None
         self.initUI()
         logger.debug(f"SearchDialog initialized with title: {title}.")
@@ -142,7 +143,9 @@ class SearchDialog(QDialog):
         enabled = self.advanced_search_checkbox.isChecked()
         self.advanced_search_groupbox.setEnabled(enabled)
         logger.debug(f"Advanced search {'enabled' if enabled else 'disabled'}.")
-
+        if not enabled:
+            self.reset_search_options()
+            
     def on_submit(self):
         logger.debug("Search button clicked.")
         self.set_options_search()
@@ -209,6 +212,9 @@ class SearchDialog(QDialog):
 
     def set_options_search(self):
         logger.debug("Setting search options.")
+        if not self.advanced_search_checkbox.isChecked():
+            logger.debug("Advanced search is not enabled, skipping setting options.")
+            return
         
         search_from = self.search_from_combobox.currentIndex() + 1
         search_to = self.search_to_combobox.currentIndex() + 1
@@ -221,6 +227,13 @@ class SearchDialog(QDialog):
 _to=search_to
         )
         logger.debug(f"Search options set: from {search_from} to {search_to}, criteria {self.criteria}, no_tashkil {self.ignore_diacritics_checkbox.isChecked()}, no_hamza {self.ignore_hamza_checkbox.isChecked()}, match_whole_word {self.match_whole_word_checkbox.isChecked()}.")
+
+    def reset_search_options(self):
+            self.search_manager.set(
+                no_tashkil=Config.search.ignore_tashkeel,
+                                   no_hamza=Config.search.ignore_hamza,
+                                   match_whole_word=Config.search.match_whole_word,
+            )
 
     def closeEvent(self, a0):
         logger.debug("SearchDialog closed.")
