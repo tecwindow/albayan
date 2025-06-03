@@ -287,7 +287,8 @@ class QuranInterface(QMainWindow):
     @exception_handler(ui_element=QMessageBox)
     def OnSearch(self, event):
         logger.debug("Search button clicked.")
-        search_dialog = SearchDialog(self, "بحث")
+        search_dialog = SearchDialog(self, "بحث", self.preferences_manager.get("last_search_phrase", ""))
+        search_dialog.search_submitted.connect(lambda search_phrase: self.preferences_manager.set_preference("last_search_phrase", search_phrase))
         if not search_dialog.exec():
             logger.debug("Search dialog canceled.")
             return  

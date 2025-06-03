@@ -16,7 +16,7 @@ QListWidget,
 QListWidgetItem,
 QMessageBox,
 )
-from PyQt6.QtCore import Qt, QRegularExpression
+from PyQt6.QtCore import Qt, QRegularExpression, pyqtSignal
 from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator, QShortcut
 from core_functions.search import SearchCriteria, QuranSearchManager
 from core_functions.quran.quran_manager import QuranManager
@@ -29,15 +29,12 @@ from utils.logger import LoggerManager
 logger = LoggerManager.get_logger(__name__)
 
 class SearchDialog(QDialog):
-    search_phrase = ""
-
-    @classmethod
-    def set_search_phrase(cls, search_phrase: str) -> None:
-        cls.search_phrase = search_phrase
-
-    def __init__(self, parent, title):
+    search_submitted = pyqtSignal(str)
+    
+    def __init__(self, parent, title, default_search_phrase: str = ""):
         super().__init__(parent)
         self.parent = parent
+        self.default_search_phrase = default_search_phrase
         self.setWindowTitle(title)
         self.resize(500, 400)
         self.search_manager = QuranSearchManager()
@@ -48,7 +45,7 @@ class SearchDialog(QDialog):
     def initUI(self):
         self.search_label = QLabel('اكتب ما تريد البحث عنه:')
         self.search_box = ArabicSearchBox(self)
-        self.search_box.setText(self.search_phrase)
+        self.search_box.setText(self.default_search_phrase)
         regex = QRegularExpression("[\u0621-\u0652\u0670\u0671[:space:]]+")  # Arabic letters, hamzas, diacritics, and spaces.
         validator = QRegularExpressionValidator(regex)
         self.search_box.setValidator(validator)
@@ -61,8 +58,6 @@ class SearchDialog(QDialog):
         self.search_button.setEnabled(False)
         self.cancel_button = QPushButton('إلغاء')
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
-
-
 
         self.advanced_search_groupbox = QGroupBox('البحث المتقدم')
         self.advanced_search_groupbox.setEnabled(False)
@@ -152,7 +147,7 @@ class SearchDialog(QDialog):
         logger.debug("Search button clicked.")
         self.set_options_search()
         search_text = self.search_box. text()
-        self.set_search_phrase(search_text)
+        self.search_submitted.emit(search_text)
         logger.debug(f"Searching for: {search_text}")
         search_result = self.search_manager.search(search_text)
         if not search_result:
