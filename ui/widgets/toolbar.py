@@ -215,6 +215,7 @@ class AudioToolBar(QToolBar):
             self.navigation.set_position(current_ayah.sura_number, current_ayah.number_in_surah)
             logger.debug(f"Setting position to Surah: {current_ayah.number}, Ayah: {current_ayah.sura_number}")
             self.play_current_ayah()
+            self.parent.statusBar().showMessage(f"تشغيل الآية {current_ayah.number_in_surah} من  {current_ayah.sura_name}")
             logger.debug("Playback started.")
 
     def stop_audio(self):
