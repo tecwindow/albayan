@@ -499,10 +499,9 @@ class QuranInterface(QMainWindow):
 
     def say_played_ayah(self):
         logger.debug("Say played Ayah action triggered.")
-        current_aya = self.get_current_ayah()
-        text = f"آية {self.toolbar.navigation.current_ayah} من {current_aya.sura_name}"
+        text = self.statusBar().currentMessage()
         logger.debug(f"Text to be spoken: {text}")
-        if self.toolbar.navigation.current_ayah:
+        if text:
             if self.toolbar.player.is_playing():
                 UniversalSpeech.say(f"{text}، الآية المشغلة.")
                 logger.debug(f"{text} is currently playing.")
