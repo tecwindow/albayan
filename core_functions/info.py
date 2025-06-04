@@ -122,6 +122,16 @@ class AyaInfo(Base):
           hizb, 
           page,
           hizbQuarter,
+          CASE
+          WHEN hizbQuarter % 4 = 1 THEN 'الأول'
+          WHEN hizbQuarter % 4 = 2 THEN 'الثاني'
+          WHEN hizbQuarter % 4 = 3 THEN 'الثالث'
+            ELSE 'الرابع'
+        END AS hizbQuarterOrder,
+        CASE
+        WHEN Hizb % 2 = 1 THEN 'الأول'
+        ELSE 'الثاني'
+        END AS hizbOrderInJuz,
         CASE 
             WHEN sajda = 1 THEN 'نعم'
             ELSE 'لا'
@@ -148,18 +158,19 @@ class AyaInfo(Base):
     def format_text(result: dict) -> str:
         """Format the Aya information into a readable string."""
         logger.debug(f"Formatting Aya information for Ayah {result['numberInSurah']}.")
-        text = """|
-            رقم الآية: {}.
-            رقم الآية في المصحف: {}.
-            السورة: {}.
-            رقم السورة: {}.
-            رقم الصفحة: {}.
-            رقم الجزء: {}.
-            رقم الحزب: {}.
-            رقم الربع: {}.
-            سجدة: {}.
-            سجدة واجبة: {}.
-        """.format(result["numberInSurah"], result["number"], result["sura_name"], result["sura_number"], result["page"], result["juz"], result["hizb"], result["hizbQuarter"], result["sajda"], result["sajdaObligation"])
+        text = f"""|
+رقم الآية: {result['numberInSurah']}.
+رقم الآية في المصحف: {result['number']}.
+موضع الآية في المصحف:  في الربع {result['hizbQuarterOrder']} في الحزب {result['HizbOrderInJuz']} في الجزء {result['juz']}.
+السورة: {result['sura_name']}.
+رقم السورة: {result['sura_number']}.
+رقم الصفحة: {result['page']}.
+رقم الجزء: {result['juz']}.
+رقم الحزب: {result['hizb']}.
+رقم الربع: {result['hizbQuarter']}.
+سجدة: {result['sajda']}.
+سجدة واجبة: {result['sajdaObligation']}.
+        """
         logger.debug(f"Aya information formatted successfully.")
 
         return text
@@ -348,7 +359,6 @@ class HizbInfo(Base):
         يبدأ الحزب {data["hizb_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
 ينتهي الحزب في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
 موضع الحزب في الجزء: الحزب {data["hizb_order_in_juz"]} من الجزء {data["juz"]}.
-موضع الحزب في المصحف:
 يبدأ من الصفحة {data["start_page"]} وينتهي في الصفحة {data["end_page"]}.
 يبدأ في الربع {data["start_hizbQuarter"]} وينتهي في الربع {data["end_hizbQuarter"]}.
 عدد السور في الحزب: {data["count_surahs"]}.
@@ -384,6 +394,7 @@ class QuarterInfo(Base):
                 WHEN hizbQuarter % 4 = 3 THEN 'الثالث'
                 ELSE 'الرابع'
             END AS quarter_order_in_hizb,
+            MIN(juz) AS juz_number,
             MIN(hizb) AS hizb,
             MIN(page) AS start_page,
             MAX(page) AS end_page,
@@ -416,7 +427,7 @@ class QuarterInfo(Base):
 رقم الربع: {data["quarter_number"]}.
         يبدأ الربع {data["quarter_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
 ينتهي الربع في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
-موضع الربع في الجزء: الربع {data["quarter_order_in_hizb"]} من الحزب {data["hizb"]} في الجزء .
+موضع الربع في الجزء: الربع {data["quarter_order_in_hizb"]} من الحزب {data["hizb"]} في الجزء {data["juz_number"]}.
 موضع الربع في المصحف:
 يبدأ من الصفحة {data["start_page"]} وينتهي في الصفحة {data["end_page"]}.
 عدد السور في الربع: {data["count_surahs"]}.
