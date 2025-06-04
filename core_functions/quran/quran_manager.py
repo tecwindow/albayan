@@ -2,6 +2,7 @@
 
 from typing import List, Optional
 from pathlib import Path
+from functools import lru_cache
 from sqlalchemy import create_engine, func, Column
 from sqlalchemy.orm import sessionmaker, Session
 from .models import Quran, QuranBase
@@ -85,6 +86,7 @@ class QuranManager:
             NavigationMode.QUARTER: cls.MAX_QUARTER,
         }.get(mode, cls.MAX_PAGE)
 
+    @lru_cache(maxsize=1)
     def get_surahs(self) -> List[Surah]:
         """
         Return a list of Surah objects.

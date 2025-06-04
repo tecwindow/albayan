@@ -353,6 +353,7 @@ class SettingsDialog(QDialog):
         if Config.reading.font_type != self.font_type_combo.currentData().value:
             new_font_type = self.font_type_combo.currentData()
             logger.info(f"Font type changed from {QuranFontType.from_int(Config.reading.font_type)} to {new_font_type}. Reloading Quran text.")
+            self.parent.quran_manager.get_surahs.cache_clear()
             self.parent.quran_manager.font_type = new_font_type
             self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
             Globals.effects_manager.play("change")
