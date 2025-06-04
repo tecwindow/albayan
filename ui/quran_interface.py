@@ -287,7 +287,8 @@ class QuranInterface(QMainWindow):
     @exception_handler(ui_element=QMessageBox)
     def OnSearch(self, event):
         logger.debug("Search button clicked.")
-        search_dialog = SearchDialog(self, "بحث")
+        search_dialog = SearchDialog(self, "بحث", self.preferences_manager.get("last_search_phrase", ""))
+        search_dialog.search_submitted.connect(lambda search_phrase: self.preferences_manager.set_preference("last_search_phrase", search_phrase))
         if not search_dialog.exec():
             logger.debug("Search dialog canceled.")
             return  
@@ -308,20 +309,19 @@ class QuranInterface(QMainWindow):
         logger.debug("Interpretation clicked.")
 
         sender = self.sender()
-        if sender is not None:
+        if sender is not None and sender.text() in Category.get_categories_in_arabic():
             selected_category = sender.text()
+            self.preferences_manager.set_preference("last_tafaseer_category", selected_category)
             logger.debug(f"Selected category: {selected_category}")
         else:
-            selected_category = "الميسر"
+            selected_category = self.preferences_manager.get("last_tafaseer_category", "الميسر")
         logger.debug(f"set the default category: {selected_category}")
-        if selected_category not in Category.get_categories_in_arabic():
-            logger.warning("Invalid category, defaulting to الميسر.")
-            selected_category = "الميسر"
 
         current_ayah = self.get_current_ayah()
         title = "تفسير آية {} من {}".format(current_ayah.number_in_surah, current_ayah.sura_name)
         logger.debug(f"Opening TafaseerDialog with title: {title}")
         dialog = TafaseerDialog(self, title, current_ayah, selected_category)
+        dialog.tafaseer_updated.connect(lambda category: self.preferences_manager.set_preference("last_tafaseer_category", category))
         dialog.exec()
         logger.debug("TafaseerDialog closed.")
 

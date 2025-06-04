@@ -16,10 +16,11 @@ QListWidget,
 QListWidgetItem,
 QMessageBox,
 )
-from PyQt6.QtCore import Qt, QRegularExpression
+from PyQt6.QtCore import Qt, QRegularExpression, pyqtSignal
 from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator, QShortcut
 from core_functions.search import SearchCriteria, QuranSearchManager
 from core_functions.quran.quran_manager import QuranManager
+from ui.widgets.search_box import ArabicSearchBox
 from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
 from utils.const import Globals
@@ -28,26 +29,24 @@ from utils.logger import LoggerManager
 logger = LoggerManager.get_logger(__name__)
 
 class SearchDialog(QDialog):
-    search_phrase = ""
-
-    @classmethod
-    def set_search_phrase(cls, search_phrase: str) -> None:
-        cls.search_phrase = search_phrase
-
-    def __init__(self, parent, title):
+    search_submitted = pyqtSignal(str)
+    
+    def __init__(self, parent, title, default_search_phrase: str = ""):
         super().__init__(parent)
         self.parent = parent
+        self.default_search_phrase = default_search_phrase
         self.setWindowTitle(title)
         self.resize(500, 400)
         self.search_manager = QuranSearchManager()
+        self.reset_search_options()
         self.criteria = None
         self.initUI()
         logger.debug(f"SearchDialog initialized with title: {title}.")
 
     def initUI(self):
         self.search_label = QLabel('اكتب ما تريد البحث عنه:')
-        self.search_box = QLineEdit(self)
-        self.search_box.setText(self.search_phrase)
+        self.search_box = ArabicSearchBox(self)
+        self.search_box.setText(self.default_search_phrase)
         regex = QRegularExpression("[\u0621-\u0652\u0670\u0671[:space:]]+")  # Arabic letters, hamzas, diacritics, and spaces.
         validator = QRegularExpressionValidator(regex)
         self.search_box.setValidator(validator)
@@ -60,8 +59,6 @@ class SearchDialog(QDialog):
         self.search_button.setEnabled(False)
         self.cancel_button = QPushButton('إلغاء')
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
-
-
 
         self.advanced_search_groupbox = QGroupBox('البحث المتقدم')
         self.advanced_search_groupbox.setEnabled(False)
@@ -146,12 +143,14 @@ class SearchDialog(QDialog):
         enabled = self.advanced_search_checkbox.isChecked()
         self.advanced_search_groupbox.setEnabled(enabled)
         logger.debug(f"Advanced search {'enabled' if enabled else 'disabled'}.")
-
+        if not enabled:
+            self.reset_search_options()
+            
     def on_submit(self):
         logger.debug("Search button clicked.")
         self.set_options_search()
         search_text = self.search_box. text()
-        self.set_search_phrase(search_text)
+        self.search_submitted.emit(search_text)
         logger.debug(f"Searching for: {search_text}")
         search_result = self.search_manager.search(search_text)
         if not search_result:
@@ -213,6 +212,9 @@ class SearchDialog(QDialog):
 
     def set_options_search(self):
         logger.debug("Setting search options.")
+        if not self.advanced_search_checkbox.isChecked():
+            logger.debug("Advanced search is not enabled, skipping setting options.")
+            return
         
         search_from = self.search_from_combobox.currentIndex() + 1
         search_to = self.search_to_combobox.currentIndex() + 1
@@ -225,6 +227,13 @@ class SearchDialog(QDialog):
 _to=search_to
         )
         logger.debug(f"Search options set: from {search_from} to {search_to}, criteria {self.criteria}, no_tashkil {self.ignore_diacritics_checkbox.isChecked()}, no_hamza {self.ignore_hamza_checkbox.isChecked()}, match_whole_word {self.match_whole_word_checkbox.isChecked()}.")
+
+    def reset_search_options(self):
+            self.search_manager.set(
+                no_tashkil=Config.search.ignore_tashkeel,
+                                   no_hamza=Config.search.ignore_hamza,
+                                   match_whole_word=Config.search.match_whole_word,
+            )
 
     def closeEvent(self, a0):
         logger.debug("SearchDialog closed.")

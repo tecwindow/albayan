@@ -50,7 +50,7 @@ class QuranSearchManager:
         self._connect()
         logger.debug("QuranSearchManager initialized.")
 
-    def set(self, no_tashkil:bool=False, no_hamza:bool=False, match_whole_word:bool=False, criteria:str=None, _from:int=None, _to:int=None, from_ayah:int=None, to_ayah:int=None) -> None:
+    def set(self, no_tashkil:bool=False, no_hamza:bool=False, match_whole_word:bool=False, criteria:str = SearchCriteria.page, _from:int = 1, _to:int = 604, from_ayah:int=None, to_ayah:int=None) -> None:
         """
         Set the parameters for the search.
 

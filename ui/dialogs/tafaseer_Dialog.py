@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QApplication
 )
 from PyQt6.QtGui import QIcon, QAction, QKeySequence, QShortcut
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import QTimer, pyqtSignal
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import TafaseerManager, Category
 from core_functions.quran.types import Ayah
@@ -25,6 +25,8 @@ from exceptions.error_decorators import exception_handler
 logger = LoggerManager.get_logger(__name__)
 
 class TafaseerDialog(QDialog):
+    tafaseer_updated = pyqtSignal(str)
+    
     def __init__(self, parent, title, ayah: Ayah, default_category):
         super().__init__(parent)
         logger.debug("Initializing TafaseerDialog...")
@@ -116,6 +118,7 @@ class TafaseerDialog(QDialog):
         logger.debug(f"User selected Tafaseer category: {selected_category}")
         self.category_button.setText(selected_category)
         self.tafaseer_manager.set(Category.get_category_by_arabic_name(selected_category))
+        self.tafaseer_updated.emit(selected_category)
         self.text_edit.setText(self.tafaseer_manager.get_tafaseer(self.ayah.sura_number, self.ayah.number))
         self.setWindowTitle(f"{self.title} - {selected_category}")
         self.text_edit.setFocus()
