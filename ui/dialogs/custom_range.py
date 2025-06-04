@@ -2,10 +2,11 @@ from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QComboBox,
     QPushButton, QGroupBox, QLabel
 )
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
 from typing import List, Dict, Optional
 from core_functions.quran.types import Surah
+from utils.const import Globals
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
@@ -59,6 +60,8 @@ class CustomRangeDialog(QDialog):
 
         self.btn_close = QPushButton("إغلاق")
         self.btn_close.setIcon(QIcon.fromTheme("window-close"))
+        self.btn_close.setShortcut("Ctrl+W")
+
 
         button_layout.addWidget(self.btn_go)
         button_layout.addWidget(self.btn_close)
@@ -70,14 +73,18 @@ class CustomRangeDialog(QDialog):
 
     def connect_events(self):
         """Connect signals to their respective slots."""
+
+
         self.combo_surah_from.currentIndexChanged.connect(
             lambda: self.update_ayahs(self.combo_surah_from, self.combo_ayah_from)
         )
         self.combo_surah_to.currentIndexChanged.connect(
             lambda: self.update_ayahs(self.combo_surah_to, self.combo_ayah_to)
         )
+        self.btn_go.clicked.connect(lambda: Globals.effects_manager.play("change"))
         self.btn_go.clicked.connect(self.accept)
         self.btn_close.clicked.connect(self.reject)
+        QShortcut(QKeySequence("Ctrl+F4"), self).activated.connect(self.reject)
 
     def set_surahs(self):
         """Populate the surah combo boxes with given list of Surah objects."""
@@ -142,3 +149,12 @@ class CustomRangeDialog(QDialog):
             "to_surah": self.combo_surah_to.currentData(),
             "to_ayah": self.combo_ayah_to.currentData()
         }
+
+
+
+    def reject(self):
+        self.deleteLater()
+
+    def closeEvent(self, event):
+        logger.debug("GoToDialog closed.")
+        return super().closeEvent(event)

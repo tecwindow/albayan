@@ -22,7 +22,7 @@ from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
 from core_functions.quran.types import QuranFontType, MarksType
 from core_functions.Reciters import AyahReciter
-from utils.const import data_folder, program_english_name
+from utils.const import data_folder, program_english_name, Globals
 from utils.settings import Config
 from utils.logger import LogLevel, LoggerManager
 from utils.audio_player import bass_initializer, AthkarPlayer, AyahPlayer, SurahPlayer, SoundEffectPlayer
@@ -114,7 +114,7 @@ class SettingsDialog(QDialog):
         self.volume.valueChanged.connect(self.OnVolume)
         self.volume.setAccessibleName(self.volume_label.text())
         self.volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        self.volume_device_label = QLabel("كرت الصوت لتشغيل أصوات البرنامج")
+        self.volume_device_label = QLabel("كرت الصوت لتشغيل أصوات البرنامج:")
         self.volume_device_combo = QComboBox(self)
         self.volume_device_combo .setAccessibleName(self.volume_device_label.text())
         self.ayah_volume_label = QLabel("مستوى صوت الآيات")
@@ -123,7 +123,7 @@ class SettingsDialog(QDialog):
         self.ayah_volume.valueChanged.connect(self.OnAyahVolume)
         self.ayah_volume.setAccessibleName(self.ayah_volume_label.text())
         self.ayah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        self.ayah_device_label = QLabel("كرت الصوت لتشغيل الآيات")
+        self.ayah_device_label = QLabel("كرت الصوت لتشغيل الآيات:")
         self.ayah_device_combo = QComboBox(self)
         self.ayah_device_combo.setAccessibleName(self.ayah_device_label.text())
         self.surah_volume_label = QLabel("مستوى صوت السور")
@@ -132,7 +132,7 @@ class SettingsDialog(QDialog):
         self.surah_volume.valueChanged.connect(self.OnSurahVolume)
         self.surah_volume.setAccessibleName(self.surah_volume_label.text())
         self.surah_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        self.surah_device_label = QLabel("كرت الصوت لتشغيل السور")
+        self.surah_device_label = QLabel("كرت الصوت لتشغيل السور:")
         self.surah_device_combo = QComboBox(self)
         self.surah_device_combo.setAccessibleName(self.surah_device_label.text())
         self.athkar_volume_label = QLabel("مستوى صوت الأذكار")
@@ -141,7 +141,7 @@ class SettingsDialog(QDialog):
         self.athkar_volume.valueChanged.connect(self.OnAthkarVolume)
         self.athkar_volume.setAccessibleName(self.athkar_volume_label.text())
         self.athkar_volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        self.athkar_device_label = QLabel("كرت الصوت لتشغيل الأذكار")
+        self.athkar_device_label = QLabel("كرت الصوت لتشغيل الأذكار:")
         self.athkar_device_combo = QComboBox(self)
         self.athkar_device_combo.setAccessibleName(self.athkar_device_label.text())
 
@@ -224,7 +224,7 @@ class SettingsDialog(QDialog):
 
         self.marks_type_label = QLabel("نوع علامات الوقف:")
         self.marks_type_combo = QComboBox()
-        marks_options = [("العثماني", MarksType.DEFAULT), ("النصي", MarksType.TEXT), ("برايل", MarksType.ACCESSIBLE)]
+        marks_options = [("الافتراضي", MarksType.DEFAULT), ("النصي", MarksType.TEXT), ("برايل", MarksType.ACCESSIBLE)]
         [self.marks_type_combo.addItem(text, id) for text, id in marks_options]
         self.marks_type_combo.setAccessibleName(self.marks_type_label.text())
 
@@ -355,11 +355,13 @@ class SettingsDialog(QDialog):
             logger.info(f"Font type changed from {QuranFontType.from_int(Config.reading.font_type)} to {new_font_type}. Reloading Quran text.")
             self.parent.quran_manager.font_type = new_font_type
             self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
+            Globals.effects_manager.play("change")
         if Config.reading.marks_type != self.marks_type_combo.currentData().value:
             new_marks_type = self.marks_type_combo.currentData()
             self.parent.quran_manager.formatter_options.marks_type = new_marks_type
             logger.info(f"Marks type changed from {MarksType.from_int(Config.reading.marks_type)} to {new_marks_type}. Reloading Quran text.")
             self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
+            Globals.effects_manager.play("change")
 
         # Update settings in Config
         Config.general.run_in_background_enabled = self.run_in_background_checkbox.isChecked()
@@ -457,6 +459,11 @@ class SettingsDialog(QDialog):
     def open_listening_tab_and_focus_reciter(self):
         self.tree_widget.setCurrentItem(self.listening_item)
         self.reciters_combo.setFocus()
+
+    def open_listening_tab_and_focus_action(self):
+        self.tree_widget.setCurrentItem(self.listening_item)
+        self.action_combo.setFocus()
+
 
     def reject(self):
         self.deleteLater()

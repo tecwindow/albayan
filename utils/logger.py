@@ -18,10 +18,10 @@ class LogLevel(Enum):
         """Returns a dictionary mapping log levels to their labels."""
         return {
             cls.DISABLE: "تعطيل",
-            cls.ERROR: "خطأ (Error)",
-            cls.WARNING: "تحذير (Warning)",
+            cls.ERROR: "أخطاء (Errors)",
+            cls.WARNING: "تحذيرات (Warnings)",
             cls.INFO: "معلومات (Info)",
-            cls.DEBUG: "تصحيح (Debug)",
+            cls.DEBUG: "تصحيح الأخطاء (Debug)",
         }
 
     @property

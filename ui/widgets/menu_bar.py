@@ -47,7 +47,7 @@ class MenuBar(QMenuBar):
         self.search_action.triggered.connect(self.parent.OnSearch)        
         self.go_to_action = QAction("اذهب إلى", self)
         self.go_to_action.triggered.connect(self.OnGoTo)
-        self.go_to_ayah_action = QAction("اذهب إلى آية", self)
+        self.go_to_ayah_action = QAction("الذهاب إلى آية", self)
         self.go_to_ayah_action.triggered.connect(self.OnGoToAyah)
         self.quick_access_action = QAction("الوصول السريع", self)
         self.quick_access_action.triggered.connect(self.parent.OnQuickAccess)
@@ -57,7 +57,7 @@ class MenuBar(QMenuBar):
         self.exit_action = QAction("إغلاق البرنامج", self)
         self.exit_action.triggered.connect(self.quit_application)
 
-        self.navigation_menu.addActions([self.next_action, self.previous_action, self.go_to_saved_position_action, self.search_action, self.go_to_action, self.go_to_ayah_action, self.quick_access_action, self.close_action, self.exit_action])
+        self.navigation_menu.addActions([self.next_action, self.previous_action, self.search_action, self.go_to_saved_position_action, self.go_to_ayah_action, self.go_to_action,  self.quick_access_action, self.close_action, self.exit_action])
 
 
         self.player_menu = self.addMenu("المشغل(&P)")
@@ -123,7 +123,7 @@ class MenuBar(QMenuBar):
         ("أرباع", NavigationMode.QUARTER, "Ctrl+3"),
         ("أحزاب", NavigationMode.HIZB, "Ctrl+4"),
         ("أجزاء", NavigationMode.JUZ, "Ctrl+5"),
-        ("نطاق مخصص", NavigationMode.CUSTOM_RANGE, "Ctrl+6"),
+        ("مخصص", NavigationMode.CUSTOM_RANGE, "Ctrl+6"),
     ]
 
     # Create actions using a loop
@@ -176,8 +176,14 @@ class MenuBar(QMenuBar):
 
         self.preferences_menu = self.addMenu("التفضيلات(&R)")
         self.settings_action = QAction("الإعدادات", self)
-        self.settings_action.setShortcuts([QKeySequence("F3"), QKeySequence("Alt+S")])
         self.settings_action.triggered.connect(self.OnSettings)
+
+        self.change_reciter_action = QAction("تغيير القارئ", self)
+        self.change_reciter_action.triggered.connect(self.open_reciter_settings)
+
+        self.change_after_listening_action = QAction("تغيير الإجراء بعد الاستماع", self)
+        self.change_after_listening_action.triggered.connect(self.open_after_listening_settings)
+
 
         self.theme_menu = QMenu("تغيير الثيم", self)
         for theme in self.theme_manager.get_themes():
@@ -196,6 +202,8 @@ class MenuBar(QMenuBar):
         self.text_direction_action.addAction(self.ltr_action)
 
         self.preferences_menu.addAction(self.settings_action)
+        self.preferences_menu.addAction(self.change_reciter_action)
+        self.preferences_menu.addAction(self.change_after_listening_action)
         self.preferences_menu.addMenu(self.theme_menu)
         self.preferences_menu.addMenu(self.text_direction_action)
 
@@ -326,11 +334,13 @@ class MenuBar(QMenuBar):
         current_position = self.parent.quran_manager.current_position
         max_position = self.parent.quran_manager.max_position
         category_label = self.parent.quran_manager.view_content.label
-        title = f"الذهاب إلى {category_label} - {current_position}/{max_position}"
+        title = f"الذهاب إلى {category_label}"
+        info_label = (f"أنت في  ال{category_label} {current_position}، يمكنك الذهاب بين ال{category_label} 1 و ال{category_label} {max_position}.")
         label = f"ادخل رقم ال{category_label}"
         logger.debug(f"Current position: {current_position}, Max: {max_position}, navigation_mode: {self.parent.quran_manager.navigation_mode}")
         go_to_dialog = GoToDialog(self.parent, title=title, initial_value=current_position, max_value=max_position, min_value=1)
         go_to_dialog.set_spin_label(label)
+        go_to_dialog.set_info_label(info_label)
         if go_to_dialog.exec():
             value = go_to_dialog.get_input_value()
             text = self.parent.quran_manager.go_to(value)
@@ -361,6 +371,16 @@ class MenuBar(QMenuBar):
         go_to_dialog = GoToDialog(self.parent, title=title, initial_value=current_ayah.sura_name, combo_data=combo_data, style=GoToStyle.NUMERIC_FIELD|GoToStyle.COMBO_FIELD)
         go_to_dialog.set_spin_label(spin_label)
         go_to_dialog.set_combo_label(combo_label)
+        min_surah_number = min(combo_data.keys())
+        max_surah_number = max(combo_data.keys())
+
+        min_ayah_number = combo_data[min_surah_number]["min"]
+        max_ayah_number = combo_data[max_surah_number]["max"]
+
+        min_surah_name = combo_data[min_surah_number]["label"]
+        max_surah_name = combo_data[max_surah_number]["label"]
+        info_label = (f"أنت في الآية رقم {current_ayah.number_in_surah} من {current_ayah.sura_name}، يمكنك الذهاب بين الآية {min_ayah_number} من {min_surah_name} والآية {max_ayah_number} من {max_surah_name}.")
+        go_to_dialog.set_info_label(info_label)
         if go_to_dialog.exec():
             surah_number, ayah_number_in_surah = go_to_dialog.get_input_value()
             ayah = self.parent.quran_manager.view_content.get_by_ayah_number_in_surah(ayah_number_in_surah, surah_number)
@@ -426,6 +446,7 @@ class MenuBar(QMenuBar):
             self.go_to_saved_position_action: ["Ctrl+Backspace"],
             self.search_action: ["Ctrl+F"],
             self.go_to_action: ["Ctrl+G"],
+        self.go_to_ayah_action: ["Shift+G"],
             self.quick_access_action: ["Ctrl+Q"],
             self.close_action: ["Ctrl+W", "Ctrl+F4"],
             self.exit_action: ["Ctrl+Shift+W", "Ctrl+Shift+F4"],
@@ -465,7 +486,11 @@ class MenuBar(QMenuBar):
             #self.stories_action: ["Shift+O"],
 
         #Preferences
-        self.settings_action: ["F3", "Alt+S"],    
+        self.settings_action: ["Alt+S", "F3"],
+        self.change_reciter_action: ["Ctrl+Shift+R"],
+        self.change_after_listening_action: ["Ctrl+Shift+U"],
+        
+
 
         #Help
         self.user_guide_action: ["F1"],
@@ -481,3 +506,16 @@ class MenuBar(QMenuBar):
             logger.debug(f"Set shortcuts for {widget.text()}: {key_sequence}")
 
         logger.debug("Shortcuts set up completed.")
+
+
+
+    def open_reciter_settings(self):
+        dialog = SettingsDialog(self.parent)
+        dialog.open_listening_tab_and_focus_reciter()
+        dialog.exec()
+
+    def open_after_listening_settings(self):
+        dialog = SettingsDialog(self.parent)
+        dialog.open_listening_tab_and_focus_action()
+        dialog.exec()
+ 

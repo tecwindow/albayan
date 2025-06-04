@@ -42,6 +42,8 @@ class GoToDialog(QDialog):
 
         main_layout = QVBoxLayout()
 
+        self.info_label = QLabel("")
+        main_layout.addWidget(self.info_label)
         if self.has_combo_field:
             self.combo_label = QLabel("اختر")
             main_layout.addWidget(self.combo_label)
@@ -53,6 +55,8 @@ class GoToDialog(QDialog):
                 self.combo_box.addItem(label, item_id)
             self.combo_box.currentIndexChanged.connect(self._validate_input)
             main_layout.addWidget(self.combo_box)
+
+
 
         if self.has_numeric_field:
             self.spin_label = QLabel("أدخل الرقم:")
@@ -163,6 +167,12 @@ class GoToDialog(QDialog):
             self.spin_label.setText(label)
             self.spin_box.setAccessibleName(label)
             logger.debug(f"Spin label set to: {label}")
+
+    def set_info_label(self, text: str):
+        self.info_label.setText(text)
+        self.info_label.setAccessibleName(text)
+        logger.debug(f"Info label set to: {text}")
+
 
     def reject(self):
         self.deleteLater()
