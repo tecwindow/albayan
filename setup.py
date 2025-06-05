@@ -81,7 +81,7 @@ def clean_unused_folders(build_dir="albayan_build"):
 
 def main():
     build_dir = os.environ.get("ALBAYAN_BUILD_DIR", "albayan_build")
-    version = os.environ.get("ALBAYAN_VERSION", "3.0.1")
+    version = os.environ.get("ALBAYAN_VERSION", "4.0.0")
 
     script_name = rename_main_file()
     try:
