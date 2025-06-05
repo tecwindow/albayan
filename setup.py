@@ -29,7 +29,7 @@ def get_include_files():
     base_files.extend(get_pyqt_dll_files())
     return base_files
 
-def build_setup(script_name="Albayan.py", build_dir="albayan_build", version="3.0.1"):
+def build_setup(script_name="Albayan.py", build_dir="albayan_build", version="4.0.0"):
     include_files = get_include_files()
     build_exe_options = {
         "build_exe": build_dir,
