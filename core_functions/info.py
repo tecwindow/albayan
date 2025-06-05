@@ -215,8 +215,8 @@ class SuraInfo(Base):
             "english_name": "الاسم بالإنجليزية",
             "revelationType": "نوع السورة",
             "numberOfAyahs": "عدد الآيات",
-            "firstAyahNumber": "رقم أول آية في المصحف",
-            "lastAyahNumber": "رقم آخر آية في المصحف",
+            "firstAyahNumber": "رقم أول آية بترتيب المصحف",
+            "lastAyahNumber": "رقم آخر آية بترتيب المصحف",
             "start_page": "تبدأ في الصفحة",
             "end_page": "تنتهي في الصفحة",
             "start_hizb": "تبدأ في الحزب",
@@ -295,7 +295,7 @@ class JuzInfo(Base):
 يبدأ في الحزب {data["start_hizb"]} وينتهي في الحزب {data["end_hizb"]}.
 عدد السور في الجزء: {data["count_surahs"]}.
 عدد الآيات في الجزء: {data["count_ayahs"]}.
-السور الموجودة في الجزء: {data["surah_names"]}.
+السور في الجزء: {data["surah_names"]}.
 """
         logger.debug(f"Formatted information for Juz {data['juz_number']}.")
         return text.strip()
@@ -363,7 +363,7 @@ class HizbInfo(Base):
 يبدأ في الربع {data["start_hizbQuarter"]} وينتهي في الربع {data["end_hizbQuarter"]}.
 عدد السور في الحزب: {data["count_surahs"]}.
 عدد الآيات في الحزب: {data["count_ayahs"]}.
-السور الموجودة في الحزب: {data["surah_names"]}.
+السور في الحزب: {data["surah_names"]}.
 """
         logger.debug(f"Formatted information for Hizb {data['hizb_number']}.")
         return text.strip()
@@ -431,12 +431,12 @@ class QuarterInfo(Base):
 رقم الربع: {data["quarter_number"]}.
         يبدأ الربع {data["quarter_number"]} من الآية {data["start_ayah_number"]} في {data["start_sura_name"]}.
 ينتهي الربع في الآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
-موضع الربع في الجزء: الربع {data["quarter_order_in_hizb"]} من الحزب {data["hizb"]} في الجزء {data["juz_number"]}.
-موضع الربع في المصحف:
+موضع الربع في الجزء: الربع {data["quarter_order_in_hizb"]} في الحزب {data["hizbOrderInJuz"]} في الجزء  {data["juz_number"]}.
+موضع الربع في المصحف: الربع {data["quarter_order_in_hizb"]} من الحزب {data["hizb"]} في الجزء {data["juz_number"]}.
 يبدأ من الصفحة {data["start_page"]} وينتهي في الصفحة {data["end_page"]}.
 عدد السور في الربع: {data["count_surahs"]}.
 عدد الآيات في الربع: {data["count_ayahs"]}.
-السور الموجودة في الربع: {data["surah_names"]}.
+السور في الربع: {data["surah_names"]}.
 """
         logger.debug(f"Formatted information for Quarter {data['quarter_number']}.")
         return text.strip()
@@ -497,7 +497,7 @@ class PageInfo(Base):
 تنتهي الصفحة بالآية {data["end_ayah_number"]} من {data["end_sura_name"]}.
  عدد السور في الصفحة: {data["count_surahs"]}.
 عدد الآيات في الصفحة: {data["count_ayahs"]}.
-السور الموجودة في الصفحة: {data["surah_names"]}.
+السور في الصفحة: {data["surah_names"]}.
 """
         logger.debug(f"Formatted information for Page {data['page_number']}.")
         return text.strip()
@@ -550,10 +550,14 @@ class MoshafInfo(Base):
 عدد السور المكية: {self.MECCAN_COUNT} سورة.
 عدد السور المدنية: {self.MEDINAN_COUNT} سورة.
 عدد الآيات: {data["total_ayahs"]} آية.
-عدد الأجزاء: {data["total_juz"]} جزء.
-- عدد الأحزاب: {data["total_hizb"]} حزب 
-عدد الأرباع: {data["total_hizb_quarters"]} ربع.
+عدد الأجزاء: {data["total_juz"]} جزءًا.
+- عدد الأحزاب: {data["total_hizb"]} حزبًا.
+عدد الأرباع: {data["total_hizb_quarters"]} ربعًا.
 عدد الصفحات: {data["total_pages"]} صفحة.
+عدد الأرباع في الحزب: 4.
+عدد الأرباع في الجزء: 8.
+عدد الأحزاب في الجزء: 2.
+الرواية الحالية: حفص عن عاصم.
 """
         logger.debug("General information about the Quran formatted successfully.")
         return text.strip()
