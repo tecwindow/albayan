@@ -158,7 +158,7 @@ class AyaInfo(Base):
     def format_text(result: dict) -> str:
         """Format the Aya information into a readable string."""
         logger.debug(f"Formatting Aya information for Ayah {result['numberInSurah']}.")
-        text = f"""|
+        text = f"""
 رقم الآية: {result['numberInSurah']}.
 رقم الآية في المصحف: {result['number']}.
 موضع الآية في المصحف:  في الربع {result['hizbQuarterOrder']} في الحزب {result['HizbOrderInJuz']} في الجزء {result['juz']}.
@@ -173,7 +173,7 @@ class AyaInfo(Base):
         """
         logger.debug(f"Aya information formatted successfully.")
 
-        return text
+        return text.strip()
         
     
 class SuraInfo(Base):
@@ -227,13 +227,13 @@ class SuraInfo(Base):
             "end_hizb_quarter": "تنتهي في الربع"
         }
         
-        text = "|\n"
+        text = ""
         for key, label in arabic_labels.items():
             value = data.get(key, "غير متوفر")
             text += f"{label}: {value}.\n"
 
         logger.debug(f"Formatted information for Surah {data.get('name', 'Unknown')}.")
-        return text + ""
+        return text.strip()
 
 
 class JuzInfo(Base):
@@ -388,6 +388,10 @@ class QuarterInfo(Base):
         query = """ 
         SELECT 
             hizbQuarter AS quarter_number,
+            CASE
+            WHEN hizb % 2 = 1 THEN 'الأول'
+            ELSE 'الثاني'
+            END AS hizbOrderInJuz,
             CASE 
                 WHEN hizbQuarter % 4 = 1 THEN 'الأول'
                 WHEN hizbQuarter % 4 = 2 THEN 'الثاني'
