@@ -15,6 +15,9 @@ class BassFlag(IntFlag):
     MUSIC_NOSAMPLE = 0x100000
     STREAM_STATUS = 0x800000
     STREAM_RESTRATE = 0x80000
+    BASS_DEVICE_DEFAULT = 0x2 
+    BASS_DEVICE_ENABLED = 0x1 
+
 
 class BASS_DEVICEINFO(ctypes.Structure):
     _fields_ = [
@@ -23,12 +26,20 @@ class BASS_DEVICEINFO(ctypes.Structure):
         ("flags", c_uint),
     ]
 
-@dataclass(frozen=True)
+@dataclass(eq=True, frozen=True)
 class SoundCard:
     index: int
     name: str
     driver: str
     flag: int
+
+    @property
+    def is_default(self) -> bool:
+        return bool(self.flag & BassFlag.BASS_DEVICE_DEFAULT)
+
+    @property
+    def is_enabled(self) -> bool:
+        return bool(self.flag & BassFlag.BASS_DEVICE_ENABLED)
 
 
 class BassInitializer:
@@ -90,20 +101,26 @@ class BassInitializer:
         """Retrieve a list of available sound cards."""
         logger.debug("Retrieving available sound cards.")
         devices = []
-        index = 0
+        index = 1
 
         while True:
             info = BASS_DEVICEINFO()
             if not self.bass.BASS_GetDeviceInfo(index, ctypes.byref(info)):
                 break
+            
+            name=info.name.decode() if info.name else "Unknown"
+            if name.strip().lower() == "default":
+                name = "الافتراضي"
+                
             devices.append(SoundCard(
                 index=index,
-                name=info.name.decode() if info.name else "Unknown",
+                name=name,
                 driver=info.driver.decode() if info.driver else "Unknown",
                 flag=info.flags
             ))
             logger.debug(f"Found sound card: {devices[-1]}")
             index += 1
+            
         logger.debug(f"Found {len(devices)} sound cards.")
         return devices
 

@@ -427,10 +427,6 @@ class SettingsDialog(QDialog):
         self.speech_checkbox.setChecked(Config.audio.speak_actions_enabled)
         self.volume.setValue(Config.audio.volume_level)
         self.athkar_volume.setValue(Config.audio.athkar_volume_level)
-        self.ayah_device_combo.setCurrentIndex(Config.audio.ayah_device)
-        self.surah_device_combo.setCurrentIndex(Config.audio.surah_device)
-        self.volume_device_combo.setCurrentIndex(Config.audio.volume_device)
-        self.athkar_device_combo.setCurrentIndex(Config.audio.athkar_device)
         self.ayah_volume.setValue(Config.audio.ayah_volume_level)
         self.surah_volume.setValue(Config.audio.surah_volume_level)
         self.run_in_background_checkbox.setChecked(Config.general.run_in_background_enabled)
@@ -450,6 +446,10 @@ class SettingsDialog(QDialog):
             (self.action_combo, Config.listening.action_after_listening),
             (self.font_type_combo, QuranFontType.from_int(Config.reading.font_type)),
     (self.marks_type_combo, MarksType.from_int(Config.reading.marks_type)),
+            (self.ayah_device_combo, Config.audio.ayah_device),
+            (self.surah_device_combo, Config.audio.surah_device),
+            (        self.volume_device_combo, Config.audio.volume_device),
+            (self.athkar_device_combo, Config.audio.athkar_device)
         ]
 
         for combo, value in combo_config:
