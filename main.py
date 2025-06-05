@@ -64,11 +64,11 @@ class SingleInstanceApplication(QApplication):
 
             if key == Qt.Key.Key_F5:
                 logger.debug("F5 pressed: Switching to previous volume category.")
-                self.volume_controller.switch_category("next")
+                self.volume_controller.switch_category("previous")
                 return True
             elif key == Qt.Key.Key_F6:
                 logger.debug("F6 pressed: Switching to next volume category.")
-                self.volume_controller.switch_category("previous")
+                self.volume_controller.switch_category("next")
                 return True
             elif key == Qt.Key.Key_F7:
                 volume_change = -1

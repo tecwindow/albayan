@@ -7,9 +7,9 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QKeySequence, QShortcut
 import qtawesome as qta
-
 from ui.widgets.spin_box import SpinBox
 from utils.const import Globals
+from utils.universal_speech import UniversalSpeech
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
@@ -92,6 +92,8 @@ class GoToDialog(QDialog):
         button_layout.addWidget(self.cancel_button)
 
         QShortcut(QKeySequence("Ctrl+F4"), self).activated.connect(self.reject)
+
+        QShortcut(QKeySequence("Ctrl+I"), self).activated.connect(lambda: UniversalSpeech.say(self.info_label.text()))
 
         main_layout.addLayout(button_layout)
         self.setLayout(main_layout)

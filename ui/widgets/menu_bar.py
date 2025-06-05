@@ -201,11 +201,13 @@ class MenuBar(QMenuBar):
         self.ltr_action.triggered.connect(self.set_text_direction_ltr)
         self.text_direction_action.addAction(self.ltr_action)
 
-        self.preferences_menu.addAction(self.settings_action)
+
         self.preferences_menu.addAction(self.change_reciter_action)
         self.preferences_menu.addAction(self.change_after_listening_action)
         self.preferences_menu.addMenu(self.theme_menu)
         self.preferences_menu.addMenu(self.text_direction_action)
+        self.preferences_menu.addAction(self.settings_action)
+
 
 
         self.help_menu = self.addMenu("المساعدة(&H)")
