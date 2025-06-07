@@ -38,6 +38,12 @@ class TasbihDialog(QDialog):
         self.addButton.setToolTip("إضافة تسبيح")
         self.addButton.setAccessibleName("إضافة تسبيح")
         
+        self.editButton = QPushButton()
+        self.editButton.setIcon(qta.icon("fa.edit"))
+        self.editButton.setToolTip("تعديل التسبيح")
+        self.editButton.setAccessibleName("تعديل التسبيح")
+        self.editButton.setEnabled(False)
+
         self.delete_button = QPushButton()
         self.delete_button.setIcon(qta.icon("fa.trash"))
         self.delete_button.setToolTip("حذف تسبيح")
@@ -88,6 +94,7 @@ class TasbihDialog(QDialog):
         gridLayout = QGridLayout()
         gridLayout.addWidget(self.openButton, 0, 0)
         gridLayout.addWidget(self.addButton, 0, 1)
+        gridLayout.addWidget(self.editButton, 0, 3)
         gridLayout.addWidget(self.delete_button, 0, 2)
         gridLayout.addWidget(self.incrementButton, 1, 0)
         gridLayout.addWidget(self.decrementButton, 1, 1)
@@ -102,6 +109,7 @@ class TasbihDialog(QDialog):
         # Connect UI button clicks to slots.
         self.openButton.clicked.connect(self.open_tasbih_entry_dialog)
         self.addButton.clicked.connect(self.handle_add_entry)
+        self.editButton.clicked.connect(self.handle_edit_entry)
         self.delete_button.clicked.connect(self.handle_delete_entry)
         self.incrementButton.clicked.connect(self.handle_increment)
         self.decrementButton.clicked.connect(self.handle_decrement)
@@ -154,6 +162,20 @@ class TasbihDialog(QDialog):
         UniversalSpeech.say(F"مرحبا بك في المِسْبَحَة، التسبيح: {tasbih_entry.name}، العدد: {tasbih_entry.counter}. استخدم المفاتيح التالية لزيادة العداد: Space, Enter, +,أو C. لإنقاص العداد استخدم: D, Ctrl+Space, -, أو Backspace. لإعادة تعيين العداد استخدم: Ctrl+R. للمعلومات استخدم: V للعدد، T للذِكر، I للكل.")
         dialog.exec()
 
+    def update_edit_button_state(self):
+        selected_item = self.listWidget.currentItem()
+        if not selected_item:
+            self.editButton.setEnabled(False)
+            return
+
+        entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
+        entry = self.controller.get_entry(entry_id)
+        if entry and entry.counter > 0:
+            self.editButton.setEnabled(False)
+        else:
+            self.editButton.setEnabled(True)
+
+
     def OnItemSelectionChanged(self):    
         status = bool(self.listWidget.selectedItems())
         self.openButton.setEnabled(status)
@@ -162,7 +184,10 @@ class TasbihDialog(QDialog):
         self.resetButton.setEnabled(status)
         self.delete_button.setEnabled(status)
         self.resetAllButton.setEnabled(status)
+        self.editButton.setEnabled(status)
         self.deleteAllButton.setEnabled(status)
+        self.update_edit_button_state()
+
         logger.debug(f"List item selection status: {status}. Buttons enabled: {status}.")
         
     def populate_list(self):
@@ -182,6 +207,21 @@ class TasbihDialog(QDialog):
         item.setData(Qt.ItemDataRole.UserRole, entry.id)
         self.listWidget.addItem(item)
         logger.debug(f"Added Tasbih entry to list: {entry.name} (ID: {entry.id}, Count: {entry.counter})")
+
+    def handle_edit_entry(self):
+        selected_item = self.listWidget.currentItem()
+        if not selected_item:
+            return
+        entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
+        old_entry = self.controller.get_entry(entry_id)
+
+        new_name, ok = QInputDialog.getText(self, "تعديل التسبيح", "أدخل الاسم الجديد:", text=old_entry.name)
+        if ok and new_name.strip():
+            self.controller.update_entry_name(entry_id, new_name.strip())
+            updated_entry = self.controller.get_entry(entry_id)
+            item_text = f"{updated_entry.name} | {updated_entry.counter}"
+            selected_item.setText(item_text)
+            UniversalSpeech.say(f"تم تعديل التسبيح إلى: {updated_entry.name}")
 
     def handle_add_entry(self):
         """Called when the Add button is clicked.
@@ -235,6 +275,7 @@ class TasbihDialog(QDialog):
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         logger.debug(f"Incrementing counter for Tasbih entry ID: {entry_id}")
         self.controller.increment_entry_counter(entry_id)
+        self.update_edit_button_state()
         
     def handle_decrement(self):
         """Decrement the counter for the selected entry."""
@@ -243,7 +284,8 @@ class TasbihDialog(QDialog):
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         logger.debug(f"Decrementing counter for Tasbih entry ID: {entry_id}")
         self.controller.decrement_entry_counter(entry_id)
-        
+        self.update_edit_button_state()        
+
     def handle_reset(self):
         """Reset the counter for the selected entry."""
         logger.debug("Reset button has been clicked")
@@ -251,6 +293,7 @@ class TasbihDialog(QDialog):
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         logger.warning(f"Resetting counter for Tasbih entry ID: {entry_id}")
         self.controller.reset_entry_counter(entry_id)
+        self.update_edit_button_state()
 
     def handle_delete_entry(self):
         """Delete the selected entry."""
