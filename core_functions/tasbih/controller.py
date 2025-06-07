@@ -145,16 +145,5 @@ class TasbihController(QObject):
                 logger.info("All tasbih entries deleted. Reinitializing default entries.")
             self._initialize_default_entries()
         except Exception as e:
-            logger.error(f"Error deleting all tasbih entries: {e}", exc_info=True) 
-
-
-    def update_entry_name(self, entry_id: int, new_name: str):
-        """update tasbih entrie."""
-        logger.debug(f"Updating name of tasbih entry ID {entry_id} to '{new_name}'")
-        entry = self.get_entry(entry_id)
-        if entry:
-            old_name = entry.name
-            entry.name = new_name
-            self.update_entry(entry)
-            self.entrieUpdated.emit(entry)
-            logger.info(f"Updated tasbih name from '{old_name}' to '{new_name}' (ID: {entry_id})")
+            logger.error(f"Error deleting all tasbih entries: {e}", exc_info=True)
+ 
