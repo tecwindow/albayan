@@ -73,7 +73,6 @@ class QuranManager:
         if mode != self._navigation_mode:
             self._navigation_mode = mode
             self.max_position     = self.get_max_for_navigation(mode)
-            self.current_position = 1
 
     @classmethod
     def get_max_for_navigation(cls, mode: NavigationMode) -> int:
