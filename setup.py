@@ -29,7 +29,7 @@ def get_include_files():
     base_files.extend(get_pyqt_dll_files())
     return base_files
 
-def build_setup(script_name="Albayan.py", build_dir="albayan_build", version="4.0.0"):
+def build_setup(script_name="Albayan.py", build_dir="albayan_build", version="4.0.1"):
     include_files = get_include_files()
     build_exe_options = {
         "build_exe": build_dir,
@@ -81,7 +81,7 @@ def clean_unused_folders(build_dir="albayan_build"):
 
 def main():
     build_dir = os.environ.get("ALBAYAN_BUILD_DIR", "albayan_build")
-    version = os.environ.get("ALBAYAN_VERSION", "4.0.0")
+    version = os.environ.get("ALBAYAN_VERSION", "4.0.1")
 
     script_name = rename_main_file()
     try:

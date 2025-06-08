@@ -318,9 +318,9 @@ class MenuBar(QMenuBar):
     def OnAbout(self):
         logger.debug("Opening about dialog.")
         about_text = (
+                    f"{program_name} - الإصدار {program_version}.\n"
             f"{program_name}، هو برنامج يهدف إلى مساعدة المسلم على قراءة القرآن بشكل سهل وبسيط مع العديد من المميزات.\n"
             "تم تصميم البرنامج من فريق نافذة التقنية: محمود عاطف، أحمد بكر وقيس الرفاعي.\n"
-            f"إصدار البرنامج: {program_version}\n"
             f"الموقع الرسمي للبرنامج: {website}\n"
         )
         msg_box = QMessageBox(self)
