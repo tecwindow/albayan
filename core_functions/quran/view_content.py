@@ -102,6 +102,7 @@ class ViewContent:
         return ayah or self.get_by_position(position - 1)
 
     def get_by_ayah_number(self, ayah_number: int) -> Optional[Ayah]:
+        logger.debug(f"Fetching Ayah by number: {ayah_number}")
         ayah_row = (
             self.session.query(AyahViewMap)
             .filter(
