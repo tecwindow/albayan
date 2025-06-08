@@ -97,6 +97,19 @@ class BassInitializer:
         logger.info("BASS initialized successfully.")
         return self.bass
 
+    @staticmethod
+    def decode_sound_card_name(name: bytes) -> str:
+        encodings = ['cp1256', 'utf-8', 'latin1', 'iso8859-6', 'windows-1252',  'utf-16']
+        for encoding in encodings:
+            try:
+                return name.decode(encoding)
+            except (UnicodeDecodeError, UnicodeEncodeError):
+                logger.debug(f"Failed to decode sound card name '{name}' with encoding '{encoding}'. Trying next encoding.")
+                continue    
+
+        logger.warning(f"Failed to decode sound card name '{name}' with all encodings. Returning original name.")
+        return str(name)
+        
     def get_sound_cards(self) -> List[SoundCard]:
         """Retrieve a list of available sound cards."""
         logger.debug("Retrieving available sound cards.")
@@ -108,7 +121,7 @@ class BassInitializer:
             if not self.bass.BASS_GetDeviceInfo(index, ctypes.byref(info)):
                 break
             
-            name=info.name.decode() if info.name else "Unknown"
+            name = self.decode_sound_card_name(info.name) if info.name else "Unknown"
             if name.strip().lower() == "default":
                 name = "الافتراضي"
                 
