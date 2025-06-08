@@ -16,7 +16,7 @@ class CustomRangeDialog(QDialog):
         super().__init__(parent)
         self.surahs = surahs
         self.saved_range = saved_range
-        self.setWindowTitle("اختيار السورة والآية")
+        self.setWindowTitle("العرض المخصص")
         self.setMinimumWidth(400)
         self.init_ui()
         self.connect_events()
