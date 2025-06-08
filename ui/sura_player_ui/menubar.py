@@ -2,7 +2,9 @@ from typing import List
 from PyQt6.QtWidgets import QMenuBar, QApplication
 from PyQt6.QtGui import QAction, QKeyEvent, QKeySequence
 from PyQt6.QtCore import Qt, QEvent
+from utils.logger import LoggerManager
 
+logger = LoggerManager.get_logger(__name__)
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
@@ -70,8 +72,12 @@ class MenuBar(QMenuBar):
     def eventFilter(self, obj, event: QEvent):
         if obj == self:
             if (event.type() == QKeyEvent.Type.KeyPress and event.key() in (Qt.Key.Key_Escape, Qt.Key.Key_Enter)) or (event.type() in (QEvent.Type.Close, QEvent.Type.Hide)):
-                self.clearFocus()
-                self.parent.setFocus()
+                try:
+                    self.clearFocus()
+                    self.parent.setFocus()
+                except Exception as e:
+                    logger.debug(f"Error clearing focus: {e}")
+
             event.accept()
         return super().eventFilter(obj, event)
     

@@ -6,7 +6,7 @@ import os
 current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 os.chdir(current_dir)
 
-from utils.const import program_name, program_english_name, program_version, program_icon, user_db_path, CONFIG_PATH, LOG_PATH
+from utils.const import program_name, program_english_name, program_version, program_icon, user_db_path, CONFIG_PATH, LOG_PATH, dev_mode
 from utils.settings import Config
 from utils.logger import LogLevel, LoggerManager
 
@@ -16,7 +16,7 @@ Config.load_settings()
 LoggerManager.setup_logger(
     log_file=LOG_PATH, 
     log_level=LogLevel.from_name(Config.general.log_level),
-    dev_mode=True
+    dev_mode=dev_mode
     )
 logger = LoggerManager.get_logger(__name__)
 logger.info(f"Starting {program_name}, {program_english_name}, version {program_version}...")

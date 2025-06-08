@@ -603,6 +603,8 @@ class QuranInterface(QMainWindow):
             text = self.quran_manager.get_range(**range)
             self.quran_view.setText(text)
             self.set_text_ctrl_label()
+        else:
+            self.quran_manager.navigation_mode = self.get_valid_navigation_mode()
 
     def get_valid_navigation_mode(self) -> NavigationMode:
         if self.quran_manager.navigation_mode != NavigationMode.CUSTOM_RANGE:

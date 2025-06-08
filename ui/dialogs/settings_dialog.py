@@ -363,7 +363,10 @@ class SettingsDialog(QDialog):
             logger.info(f"Marks type changed from {MarksType.from_int(Config.reading.marks_type)} to {new_marks_type}. Reloading Quran text.")
             self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
             Globals.effects_manager.play("change")
-
+        if Config.reading.auto_page_turn != self.turn_pages_checkbox.isChecked():
+            self.parent.quran_manager.formatter_options.auto_page_turn = self.turn_pages_checkbox.isChecked()
+            self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
+                
         # Update settings in Config
         Config.general.run_in_background_enabled = self.run_in_background_checkbox.isChecked()
         Config.general.auto_start_enabled = self.start_on_system_start_checkbox.isChecked()

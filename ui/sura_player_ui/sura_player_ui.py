@@ -271,7 +271,7 @@ class SuraPlayerWindow(QMainWindow):
         self.filter_manager.change_category_items(2, sura_items)
         self.statusBar().showMessage(f"القارئ الحالي: {self.reciter_combo.currentText()}")
         logger.debug(f"Selected reciter: {self.reciter_combo.currentText()}")
-        saved_sura = self.surah_combo.findData(self.preferences_manager.get_int("sura_number"))
+        saved_sura = self.surah_combo.findData(self.preferences_manager.get_int("sura_number", 1))
         saved_sura = 0 if saved_sura == -1 else saved_sura
         self.surah_combo.setCurrentIndex(saved_sura)
 
