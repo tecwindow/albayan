@@ -109,7 +109,7 @@ class ViewContent:
             )
             .first()
         )
-        return self._row_to_ayah(ayah_row) if ayah_row else None
+        return self._row_to_ayah(ayah_row) if ayah_row else self.start_ayah
 
     def get_by_ayah_number_in_surah(self, ayah_number_in_surah: int, surah_number: int) -> Optional[Ayah]:
         ayah_row = (
