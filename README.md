@@ -1,6 +1,6 @@
 # البيان - Al-Bayan: كل ما يخص الإسلام
 
-
+![الواجهة الرئيسية لبرنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/main_window.jpg)
 
 ## ما هو البيان؟
 
