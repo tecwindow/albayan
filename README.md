@@ -40,6 +40,37 @@
 - وغير ذلك الكثير.
 
 ## لقطات الشاشة 
+### النوافذ الرئيسية
+
+![عرض التفاسير  في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/view_tafaseer.jpg)
+
+![مشغل القرآن في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/quran_player.jpg)
+
+![البحث عن القرآن في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/quran_search.jpg)
+
+![الإنتقال السريع بين أجزاء وأرباع وأحزاب وسور القرآن الكريم في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/quick_access.jpg)
+
+![العرض المخصص لسور القرآن الكريم في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/custom_range.jpg)
+
+![معلومات الآية في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/verse_info.jpg)
+
+![المسبحة في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/tasbih.jpg)
+
+![التحكم في الأذكار في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/athkar.jpg)
+
+![الرسائل التحفيزية في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/motivational_messages.jpg)
+
+### الإعدادات 
+
+![الإعدادات العامة في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/general_settings.jpg)
+
+![إعدادات الصوت في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/audio_settings.jpg)
+
+![إعدادات الإستماع في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/listening_settings.jpg)
+
+![إعدادات القراءة في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/reading_settings.jpg)
+
+![إعدادات البحث في برنامج البيان](https://github.com/tecwindow/albayan/raw/main/screens/dark/search_settings.jpg)
 
 ## معلومات تقنية
 
