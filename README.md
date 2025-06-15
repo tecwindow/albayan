@@ -39,6 +39,18 @@
 - مجموعة كبيرة من اختصارات لوحة المفاتيح التي تهدف للوصول إلى مختلف أقسام البرنامج بسرعة وسهولة.
 - وغير ذلك الكثير.
 
+## تحميل برنامج البيان - Albayan
+
+يمكنكم تحميل أي إصدار من برنامج البيان عبر قسم Releases, أو يمكنكم تنزيل أحدث إصدار عبر الرابط التالي 
+
+[![Download Albayan](https://a.fsdn.com/con/app/sf-download-button)](https://github.com/tecwindow/albayan/releases/download/4.0.1/AlbayanV4.0.1.exe)
+
+أيضا، يمكنكم تحميل وتثبيت أحدث إصدار من برنامج البيان بستخدام Winget 
+
+```
+winget install --id=tecwindow.Albayan -e
+```
+
 ## لقطات الشاشة 
 ### النوافذ الرئيسية
 
