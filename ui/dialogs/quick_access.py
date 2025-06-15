@@ -98,7 +98,7 @@ class QuickAccess(QDialog):
             content = self.parent.quran_manager.get_hizb(selected_item)
         elif self.jus_radio.isChecked():
             selection_type = "Juzz"
-            content = self.parent.quran_manager.get_juzz(selected_item)
+            content = self.parent.quran_manager.get_juz(selected_item)
         else:
             logger.warning("No selection type was chosen!")
             return
