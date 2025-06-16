@@ -44,7 +44,7 @@ logger
 logger.debug("Initializing program information.")
 program_name = "البيان"
 program_english_name = "Albayan"
-program_version = "4.0.1"
+program_version = "4.0.2"
 dev_mode = False
 program_icon = "Albayan.ico"
 website = "https://tecwindow.net/"

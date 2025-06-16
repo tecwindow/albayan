@@ -47,7 +47,7 @@
 
 يمكنكم تحميل أي إصدار من برنامج البيان عبر قسم Releases, أو يمكنكم تنزيل أحدث إصدار عبر الرابط التالي 
 
-[![Download Albayan](https://a.fsdn.com/con/app/sf-download-button)](https://github.com/tecwindow/albayan/releases/download/4.0.1/AlbayanV4.0.1.exe)
+[![Download Albayan](https://a.fsdn.com/con/app/sf-download-button)](https://github.com/tecwindow/albayan/releases/download/4.0.2/AlbayanV4.0.2.exe)
 
 أيضا، يمكنكم تحميل وتثبيت أحدث إصدار من برنامج البيان بستخدام Winget 
 
