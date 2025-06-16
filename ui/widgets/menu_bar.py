@@ -8,7 +8,6 @@ from ui.dialogs.go_to import GoToDialog, GoToStyle
 from ui.dialogs.athkar_dialog import AthkarDialog
 from ui.sura_player_ui import SuraPlayerWindow
 from ui.dialogs.tasbih_dialog import TasbihDialog
-from ui.dialogs.prophets_stories_dialog import ProphetsStoriesDialog
 from core_functions.quran.types import NavigationMode
 from core_functions.tafaseer import Category
 from utils.update import UpdateManager
@@ -168,8 +167,7 @@ class MenuBar(QMenuBar):
         self.tasbih_action.triggered.connect(self.OnTasbihAction)
         self.message_for_you_action = QAction("رسالة لك", self)
         self.message_for_you_action.triggered.connect(self.parent.OnRandomMessages)
-        self.stories_action = QAction("قصص الأنبياء", self)
-        self.stories_action.triggered.connect(self.OnStoriesAction)
+
 
         self.tools_menu.addActions([self.sura_player_action, self.athkar_action, self.bookmark_manager_action, self.tasbih_action, self.message_for_you_action])
 
@@ -271,9 +269,6 @@ class MenuBar(QMenuBar):
         tasbih_dialog.open()
         logger.debug("Tasbih dialog opened.")
 
-    def OnStoriesAction(self):
-        stories_dialog = ProphetsStoriesDialog(self.parent)
-        stories_dialog.open()
 
     def OnTheme    (self):
 
@@ -485,7 +480,7 @@ class MenuBar(QMenuBar):
         self.bookmark_manager_action: ["Shift+D"],
         self.tasbih_action: ["Shift+S"],
         self.message_for_you_action: ["Shift+M"],
-            #self.stories_action: ["Shift+O"],
+
 
         #Preferences
         self.settings_action: ["Alt+S", "F3"],
