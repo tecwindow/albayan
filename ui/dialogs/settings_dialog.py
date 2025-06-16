@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtCore import Qt
+from ui.widgets.spin_box import SpinBox
 from core_functions.quran.types import QuranFontType, MarksType
 from core_functions.Reciters import AyahReciter
 from utils.const import data_folder, program_english_name, Globals
@@ -196,7 +197,7 @@ class SettingsDialog(QDialog):
         self.action_combo.setAccessibleName(self.action_label.text())
 
         self.duration_label = QLabel("مدة التقديم والترجيع (بالثواني):")
-        self.duration_spinbox = QSpinBox()
+        self.duration_spinbox = SpinBox(self)
         self.duration_spinbox.setAccessibleName(self.duration_label.text())        
         self.duration_spinbox.setRange(2, 15)
         self.duration_spinbox.setSingleStep(1)
