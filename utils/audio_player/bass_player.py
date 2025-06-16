@@ -82,7 +82,7 @@ class AudioPlayer:
     def play(self) -> None:
         """Plays the currently loaded audio."""
         if not self.current_channel:
-            logger.error("No audio file loaded. Use load_audio() first.")
+            logger.debug("No audio file loaded. Use load_audio() first.")
             raise PlaybackControlError("play", "No audio file loaded. Use load_audio() first.")
         bass.BASS_ChannelPlay(self.current_channel, False)
         logger.debug(f"Playing audio: {self.source}, {self.__class__.__name__}, device: {self.device}.")
@@ -162,7 +162,7 @@ class AudioPlayer:
     def get_length(self) -> float:
         logger.debug(f"Getting length of audio: {self.source}, {self.__class__.__name__}.")        
         if not self.current_channel:
-            logger.error("No audio file loaded. Use load_audio() first.")
+            logger.debug("No audio file loaded. Use load_audio() first.")
             return 0
 
         length = bass.BASS_ChannelGetLength( self.current_channel, 0)
@@ -179,7 +179,7 @@ class AudioPlayer:
         """Returns the current playback position in seconds."""
         logger.debug(f"Getting current position of audio: {self.source}, {self.__class__.__name__}.")
         if not self.current_channel:
-            logger.error("No audio file loaded. Use load_audio() first.")
+            logger.debug("No audio file loaded. Use load_audio() first.")
             return 0
         
         current_position = bass.BASS_ChannelGetPosition(self.current_channel, 0)
