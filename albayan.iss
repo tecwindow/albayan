@@ -97,17 +97,25 @@ begin
   begin
     if FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini')) then
     begin
-      RenameFile(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini'),
-                 ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\config.ini'));
+      RenameFile(
+        ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini'),
+        ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\config.ini')
+      );
     end;
+  end;
+
+  if CurStep = ssPostInstall then
+  begin
+    DelTree(ExpandConstant('{app}\Audio\athkar'), True, True, True);
   end;
 end;
 
 procedure DeinitializeUninstall();
 begin
-  if MsgBox(ExpandConstant('{cm:DeleteSettingsPrompt}') + #13#10 +
-            ExpandConstant('{userappdata}\tecwindow\albayan'),
-            mbConfirmation, MB_YESNO) = IDYES then
+  if MsgBox(
+      ExpandConstant('{cm:DeleteSettingsPrompt}') + #13#10 +
+      ExpandConstant('{userappdata}\tecwindow\albayan'),
+      mbConfirmation, MB_YESNO) = IDYES then
   begin
     DeleteSettingsFolder();
   end;
