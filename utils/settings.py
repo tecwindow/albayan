@@ -63,12 +63,12 @@ class ListeningSettings(BaseSection):
     SECTION_NAME: ClassVar[str] = "listening"
     reciter: int = 58
     secondary_reciter: int = 0
-    use_secondary_reciter_when_moving: bool = True
+    use_secondary_reciter_when_moving: bool = False
     use_secondary_reciter_when_repeating: bool = False
     action_after_listening: int = 0
-    ayah_repeat_count: int = 0
+    ayah_repeat_count: int = 1
     action_after_text: int = 0
-    text_repeat_count: int = 0
+    text_repeat_count: int = 1
     forward_time: int = 5
     auto_move_focus: bool = True
     auto_play_ayah_after_go_to: bool = False

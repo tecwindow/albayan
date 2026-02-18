@@ -609,7 +609,7 @@ class MenuBar(QMenuBar):
         self.change_after_listening_action: ["Ctrl+Shift+U"],
         self.change_repeat_limit_action: ["Ctrl+Shift+Y"],
         self.change_text_repeat_action: ["Ctrl+Shift+T"],
-        self.change_after_text_action: ["Ctrl+Alt+U"],
+        self.change_after_text_action: ["Ctrl+Shift+E"],
 
 
 
