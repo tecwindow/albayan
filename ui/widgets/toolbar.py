@@ -269,7 +269,7 @@ class AudioToolBar(QToolBar):
         self.set_buttons_status()
         
         repeat_count = Config.listening.ayah_repeat_count
-        action_after_listening = Config.listening.action_after_listening # 1: تكرار مستمر، 2: انتقال للتالية
+        action_after_listening = Config.listening.action_after_listening
         
         switch_on_repeat = Config.listening.use_secondary_reciter_when_repeating
         switch_on_move = Config.listening.use_secondary_reciter_when_moving
