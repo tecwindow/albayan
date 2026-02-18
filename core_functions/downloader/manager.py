@@ -170,9 +170,9 @@ class DownloadManager(QObject):
             self._downloads[download_id]["total_bytes"] = total_bytes
             size_text = f"{total_bytes / (1024 * 1024):.2f} MB" if total_bytes > 1024 * 1024 else f"{total_bytes / 1024:.2f} KB"
             self._downloads[download_id]["size_text"] = size_text
-            logger.debug("Set size text for download ID %d: %s", download_id, size_text)
-        else:
-            logger.warning("Attempted to set size text for unknown download ID: %d", download_id)
+            #logger.debug("Set size text for download ID %d: %s", download_id, size_text)
+        #else:
+            #logger.warning("Attempted to set size text for unknown download ID: %d", download_id)
 
     def _on_error(self, download_id: int, message: str):
         logger.error("Download error (ID: %d): %s", download_id, message)

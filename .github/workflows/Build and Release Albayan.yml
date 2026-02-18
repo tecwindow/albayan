@@ -1,0 +1,101 @@
+# This workflow builds Albayan using cx-Freeze on Windows, then publishes it as a GitHub release
+name: Build and Release Albayan
+
+on:
+  workflow_dispatch:
+    inputs:
+      file_name:
+        description: 'Installer file name (with or without .exe)'
+        required: true
+        default: 'AlbayanSetup'
+      tag_name:
+        description: 'Tag name (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+      release_name:
+        description: 'Release title (e.g. Albayan v1.0.0)'
+        required: true
+        default: 'Albayan Release'
+      release_body:
+        description: 'Release description (Markdown supported)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.13 (latest patch)
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+
+    - name: Upgrade pip and install dependencies
+      shell: pwsh
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade cx-Freeze
+        if (Test-Path "requirements.txt") {
+            pip install -r requirements.txt
+        }
+
+    - name: Build with cx-Freeze
+      shell: pwsh
+      run: |
+        python setup.py build
+
+    - name: Remove markdown documentation files
+      shell: pwsh
+      run: |
+        $docPath = "albayan_build\documentation"
+        if (Test-Path $docPath) {
+            Remove-Item "$docPath\UserGuide.md" -ErrorAction SilentlyContinue
+            Remove-Item "$docPath\WhatsNew.md" -ErrorAction SilentlyContinue
+        }
+
+    - name: Download and install latest Inno Setup
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile is.exe
+        Start-Process -Wait -FilePath .\is.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP'
+
+    - name: Package with Inno Setup
+      shell: pwsh
+      run: |
+        $isccPath = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+        if (!(Test-Path $isccPath)) {
+            $isccPath = "C:\Program Files\Inno Setup 6\ISCC.exe"
+        }
+        Start-Process -Wait -FilePath $isccPath -ArgumentList "albayan.iss"
+
+    - name: Rename installer
+      shell: pwsh
+      run: |
+        $input = "${{ github.event.inputs.file_name }}"
+        if (-not $input.ToLower().EndsWith(".exe")) {
+            $input = "$input.exe"
+        }
+        $source = "albayan_build\AlbayanSetup.exe"
+        $dest   = "albayan_build\$input"
+        if ($source -ne $dest) {
+            Rename-Item -Path $source -NewName $input
+        }
+        echo "INSTALLER_NAME=$input" >> $env:GITHUB_ENV
+
+    - name: Create tag and release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.event.inputs.tag_name }}
+        name: ${{ github.event.inputs.release_name }}
+        body: ${{ github.event.inputs.release_body }}
+        files: albayan_build/${{ env.INSTALLER_NAME }}
+        target_commitish: ${{ github.ref_name }}
+        prerelease: false
+        draft: false
+        make_latest: true

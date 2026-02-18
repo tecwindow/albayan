@@ -12,7 +12,7 @@ HTML_HEADER = """<!DOCTYPE html>
     <link rel='stylesheet' type='text/css' media='screen' href='styles.css'>
     <style>
         html {{
-            scroll-behavior: smooth;
+
         }}
     </style>
 </head>
@@ -190,7 +190,7 @@ def main():
     parser = argparse.ArgumentParser(description="Convert Markdown to HTML with Arabic TOC and custom IDs.")
     parser.add_argument("-i", "--input", help="Input folder containing Markdown files. Default: current folder.")
     parser.add_argument("-o", "--output", help="Output folder for generated HTML files. Default: same as input.")
-    parser.add_argument("-v", "--version", default="4.0.2", help="Version number (default: 4.0.2).")
+    parser.add_argument("-v", "--version", default="5.0.0", help="Version number (default: 4.0.2).")
     parser.add_argument("--no-toc", action="store_true", help="Disable Table of Contents generation.")
     args = parser.parse_args()
 

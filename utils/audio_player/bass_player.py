@@ -168,7 +168,7 @@ class AudioPlayer:
             self.set_position(new_seconds)
 
     def get_length(self) -> float:
-        logger.debug(f"Getting length of audio: {self.source}, {self.__class__.__name__}.")        
+        #logger.debug(f"Getting length of audio: {self.source}, {self.__class__.__name__}.")        
         if not self.current_channel:
             logger.debug("No audio file loaded. Use load_audio() first.")
             return 0
@@ -180,12 +180,12 @@ class AudioPlayer:
             logger.error("Error getting length.", self.get_error())
             return 0
         else:
-            logger.debug(f"Audio length: {duration} seconds, {self.__class__.__name__}.")
+            #logger.debug(f"Audio length: {duration} seconds, {self.__class__.__name__}.")
             return duration
     
     def get_position(self) -> float:
         """Returns the current playback position in seconds."""
-        logger.debug(f"Getting current position of audio: {self.source}, {self.__class__.__name__}.")
+        #logger.debug(f"Getting current position of audio: {self.source}, {self.__class__.__name__}.")
         if not self.current_channel:
             logger.debug("No audio file loaded. Use load_audio() first.")
             return 0
@@ -197,7 +197,7 @@ class AudioPlayer:
             logger.error("Error getting current position.", self.get_error())
             return 0
         else:
-            logger.debug(f"Current position: {current_seconds} seconds, {self.__class__.__name__}.")
+            #logger.debug(f"Current position: {current_seconds} seconds, {self.__class__.__name__}.")
             return current_seconds
             
     def get_playback_status(self) -> PlaybackStatus:
