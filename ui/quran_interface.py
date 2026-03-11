@@ -269,7 +269,7 @@ class QuranInterface(QMainWindow):
         self.quran_title.setText(label)
         self.quran_view.setAccessibleName(label)
         logger.debug(f"Label set to: {label}")
-        if self.isActiveWindow():
+        if self.isActiveWindow() and not self.quran_view.hasFocus():
                 UniversalSpeech.say(label)
 
         # Enable back and next item
