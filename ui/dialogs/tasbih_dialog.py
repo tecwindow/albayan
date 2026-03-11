@@ -225,7 +225,8 @@ class TasbihDialog(QDialog):
                 item_text = f"{entry.name} | {entry.counter}"
                 item.setText(item_text)
                 logger.debug(f"Updated Tasbih entry: {entry.name} (ID: {entry.id}, New Count: {entry.counter})")
-                UniversalSpeech.say(item_text)
+                if self.isActiveWindow():
+                    UniversalSpeech.say(item_text)
                 break
 
     def handle_increment(self):
