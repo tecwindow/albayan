@@ -355,7 +355,7 @@ class SuraPlayerWindow(QMainWindow):
         current_index = self.surah_combo.currentIndex()
         if current_index < self.surah_combo.count() - 1:
             self.surah_combo.setCurrentIndex(current_index + 1)
-            UniversalSpeech.say(self.surah_combo.currentText())
+            UniversalSpeech.say(self.surah_combo.currentText(), interrupt=self.isActiveWindow())
             logger.info(f"Moved to surah {self.surah_combo.currentText()}.")
             self.play_current_surah()
 
@@ -364,7 +364,7 @@ class SuraPlayerWindow(QMainWindow):
         current_index = self.surah_combo.currentIndex()
         if current_index > 0:
             self.surah_combo.setCurrentIndex(current_index - 1)
-            UniversalSpeech.say(self.surah_combo.currentText())
+            UniversalSpeech.say(self.surah_combo.currentText(), interrupt=self.isActiveWindow())
             logger.info(f"Moved to surah {self.surah_combo.currentText()}.")
             self.play_current_surah()
 
@@ -568,7 +568,7 @@ class SuraPlayerWindow(QMainWindow):
                 self.current_surah_repeat_count += 1
                 logger.debug(f"Repeating Surah: repeat {self.current_surah_repeat_count}/{repeat_count}")
                 self._repeat_current_surah()
-                UniversalSpeech.say(f"تكرار سورة {self.surah_combo.currentText()}، {self.current_surah_repeat_count +1} من {repeat_count} مرات.", interrupt=True)
+                UniversalSpeech.say(f"تكرار سورة {self.surah_combo.currentText()}، {self.current_surah_repeat_count + 1} من {repeat_count} مرات.", interrupt=self.isActiveWindow())
                 return True
             else:
                 logger.debug("Surah repeat count reached limit, resetting counter.")
@@ -606,7 +606,7 @@ class SuraPlayerWindow(QMainWindow):
         """
         self.replay()
         self.play_current_surah()
-        UniversalSpeech.say(f"تكرار سورة {self.surah_combo.currentText()}.", interrupt=True)
+        UniversalSpeech.say(f"تكرار سورة {self.surah_combo.currentText()}.", interrupt=self.isActiveWindow())
 
 
     def _play_next_surah(self):
