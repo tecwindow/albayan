@@ -259,6 +259,10 @@ class MenuBar(QMenuBar):
         self.user_guide_action.triggered.connect(lambda: self.open_documentation("user_guide"))
         self.whats_new_action = QAction("المستجدات", self)
         self.whats_new_action.triggered.connect(lambda: self.open_documentation("Whats_new"))
+        self.shortcuts_action = QAction("اختصارات لوحة المفاتيح", self)
+        self.shortcuts_action.triggered.connect(lambda: self.open_documentation("Shortcuts"))
+        self.marks_action = QAction("علامات الوقف", self)
+        self.marks_action.triggered.connect(lambda: self.open_documentation("Marks"))
         self.contact_us_menu = QMenu("اتصل بنا", self)
         for name in self.our_emails:
             name_action = QAction(name, self)
@@ -271,7 +275,7 @@ class MenuBar(QMenuBar):
         self.about_program_action = QAction("حول البرنامج", self)
         self.about_program_action.triggered.connect(self.OnAbout)
 
-        self.help_menu.addActions([self.user_guide_action, self.whats_new_action, self.update_program_action, self.open_log_action, self.about_program_action])
+        self.help_menu.addActions([self.user_guide_action, self.whats_new_action, self.shortcuts_action, self.marks_action, self.update_program_action, self.open_log_action, self.about_program_action])
         self.help_menu.insertMenu(self.open_log_action, self.contact_us_menu)
 
 
@@ -541,18 +545,41 @@ class MenuBar(QMenuBar):
     def open_documentation(self, doc_type: str):
         file_map = {
             "user_guide": "UserGuide.html",
-            "Whats_new": "WhatsNew.html"
+            "Whats_new": "WhatsNew.html",
+            "Marks": "Marks.html",
+            "Shortcuts": "Shortcuts.html"
         }
+
+        logger.debug(f"Documentation request received: type={doc_type}")
+
         file_name = file_map.get(doc_type)
+
         if not file_name:
-            logger.error(f"Invalid documentation type: {doc_type}")
+            logger.error(f"Invalid documentation type requested: {doc_type}")
             return
+
         doc_path = os.path.join("documentation", file_name)
+
+        logger.debug(f"Resolved documentation path: {doc_path}")
+
         if os.path.exists(doc_path):
-            os.startfile(doc_path)
-            logger.debug(f"Opened documentation: {doc_path}")
+            try:
+                os.startfile(doc_path)
+                logger.debug(
+                    f"Documentation opened successfully: "
+                    f"type={doc_type}, file={file_name}, path={doc_path}"
+                )
+            except Exception as e:
+                logger.error(
+                    f"Failed to open documentation: "
+                    f"type={doc_type}, path={doc_path}, error={e}"
+                )
         else:
-            logger.error(f"Documentation file not found: {doc_path}")
+            logger.error(
+                f"Documentation file not found: "
+                f"type={doc_type}, expected_path={doc_path}"
+            )
+
 
     def setup_shortcuts(self, disable=False,):
         logger.debug("Setting up shortcuts.")
@@ -617,6 +644,8 @@ class MenuBar(QMenuBar):
         #Help
         self.user_guide_action: ["F1"],
         self.whats_new_action: ["F2"],
+        self.shortcuts_action: ["Shift+F1"],
+        self.marks_action: ["Shift+F2"],
         self.update_program_action: ["Ctrl+F2"],
         self.open_log_action: ["Shift+L"],
         self.about_program_action: ["Ctrl+F1"],
