@@ -57,6 +57,8 @@ jobs:
         if (Test-Path $docPath) {
             Remove-Item "$docPath\UserGuide.md" -ErrorAction SilentlyContinue
             Remove-Item "$docPath\WhatsNew.md" -ErrorAction SilentlyContinue
+            Remove-Item "$docPath\Marks.md" -ErrorAction SilentlyContinue
+            Remove-Item "$docPath\Shortcuts.md" -ErrorAction SilentlyContinue
         }
 
     - name: Download and install latest Inno Setup
