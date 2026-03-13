@@ -1,6 +1,6 @@
 ﻿#define MyAppName "Albayan"
-#define MyAppVersion "5.0.0"
-#define AppVersion "5.0.0"
+#define MyAppVersion "5.0.1"
+#define AppVersion "5.0.1"
 #define MyAppPublisher "Tecwindow"
 #define MyAppURL "https://tecwindow.net/"
 #define MyAppExeName "Albayan.exe"
@@ -13,7 +13,7 @@ VersionInfoDescription=Albayan كل ما يخص الإسلام.
 AppPublisher=tecwindow
 VersionInfoVersion={#MyAppVersion}
 VersionInfoCompany=tecwindow
-VersionInfoCopyright=copyright, ©2023; tecwindow
+VersionInfoCopyright=copyright, ©2026; tecwindow
 VersionInfoProductName=Albayan
 VersionInfoProductVersion={#MyAppVersion}
 VersionInfoOriginalFileName=Albayan_Setup.exe
