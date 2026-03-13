@@ -253,7 +253,6 @@ class DownloadManagerDialog(QDialog):
         cancel_all_action = menu.addAction("إلغاء تنزيل الكل", self.cancel_all)
         menu.addSeparator()
         delete_action = menu.addAction("حذف الملف المحدد", self.delete_selected_item)
-        delete_all_action = menu.addAction("حذف الكل", self.delete_all)
         info_action = menu.addAction("معلومات الملف المحدد", self.show_selected_item_info)
 
         # status of actions based on current status
@@ -268,7 +267,7 @@ class DownloadManagerDialog(QDialog):
         cancel_action.setEnabled(current_status in {DownloadStatus.PENDING, DownloadStatus.DOWNLOADING, DownloadStatus.PAUSED})
         cancel_all_action.setEnabled(len(self.current_manager.get_downloads([DownloadStatus.PENDING, DownloadStatus.DOWNLOADING])) > 0)
         delete_action.setEnabled(self.current_download_id is not None)
-        delete_all_action.setEnabled(len(self.current_manager.get_downloads()) > 0)
+
 
         menu.setAccessibleName("الإجراءات")
         menu.setFocus()
