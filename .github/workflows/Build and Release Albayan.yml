@@ -61,6 +61,22 @@ jobs:
             Remove-Item "$docPath\Shortcuts.md" -ErrorAction SilentlyContinue
         }
 
+    - name: Create Portable ZIP
+      shell: pwsh
+      run: |
+        # Strip .exe if provided to format the zip name nicely
+        $baseName = "${{ github.event.inputs.file_name }}"
+        if ($baseName.ToLower().EndsWith(".exe")) {
+            $baseName = $baseName.Substring(0, $baseName.Length - 4)
+        }
+        $zipName = "$baseName`_Portable.zip"
+        
+        # Zip the contents of the build folder
+        Compress-Archive -Path "albayan_build\*" -DestinationPath $zipName
+        
+        # Save the zip file name to environment variables for the release step
+        echo "PORTABLE_NAME=$zipName" >> $env:GITHUB_ENV
+
     - name: Download and install latest Inno Setup
       shell: pwsh
       run: |
@@ -96,7 +112,9 @@ jobs:
         tag_name: ${{ github.event.inputs.tag_name }}
         name: ${{ github.event.inputs.release_name }}
         body: ${{ github.event.inputs.release_body }}
-        files: albayan_build/${{ env.INSTALLER_NAME }}
+        files: |
+          albayan_build/${{ env.INSTALLER_NAME }}
+          ${{ env.PORTABLE_NAME }}
         target_commitish: ${{ github.ref_name }}
         prerelease: false
         draft: false
