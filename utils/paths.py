@@ -1,7 +1,14 @@
 import os
+import sys
 from pathlib import Path
+
+# Import the registry class from registry library
+from .registry import registry, RegistryError
 from .const import program_english_name, author
 from utils.logger import LoggerManager
+
+# The AppId defined in InnoSetup script
+APP_ID = "{5BDDE425-E22F-4A82-AF2F-72AF71301D3F}"
 
 logger = LoggerManager.get_logger(__name__)
 logger.debug("Logger initialized for PathManager module.")
@@ -14,17 +21,66 @@ except ImportError:
     logger.debug("winrt.windows.storage.ApplicationData not available, using fallback.")
 
 
+def get_current_app_dir() -> str:
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    else:
+        return os.path.dirname(os.path.abspath(sys.argv[0]))
+
+
+def is_installed(app_id: str = APP_ID) -> bool:
+    current_path = os.path.normcase(os.path.normpath(get_current_app_dir()))
+    inno_key = f"{app_id}_is1"
+
+    registry_paths = [
+        f"HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{inno_key}",
+        f"HKLM\\Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{inno_key}",
+        f"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{inno_key}",
+        f"HKCU\\Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{inno_key}"
+    ]
+
+    for path in registry_paths:
+        install_dir = None
+        try:
+            install_dir = registry.read(path, "Inno Setup: App Path")
+            if not install_dir:
+                install_dir = registry.read(path, "InstallLocation")
+        except RegistryError:
+            continue
+        except Exception:
+            continue
+
+        if install_dir:
+            install_dir = os.path.normcase(os.path.normpath(str(install_dir)))
+            if current_path == install_dir or current_path.startswith(install_dir + os.sep):
+                return True
+
+    return False
+
+
+def is_portable(app_id: str = APP_ID) -> bool:
+    return not is_installed(app_id)
+
+
 class PathManager:
     def __init__(self, app_name, author):
         self.app_name = app_name
         self.author = author
         logger.debug(f"Initializing PathManager with app_name='{app_name}' and author='{author}'.")
 
-        # detect environment (MSIX vs external)
+        # detect operating mode
+        self.is_portable_mode = is_portable()
+        logger.debug(f"Portable mode: {self.is_portable_mode}")
+
+        # detect environment (MSIX vs external vs portable)
         self._base_dir = self._detect_base_dir()
 
         # main app folder
-        self._app_folder = self._base_dir / self.author / app_name
+        if self.is_portable_mode:
+            self._app_folder = self._base_dir / "userdata"
+        else:
+            self._app_folder = self._base_dir / self.author / app_name
+            
         self._app_folder.mkdir(parents=True, exist_ok=True)
         logger.debug(f"App folder created/existing: {self._app_folder}")
 
@@ -37,12 +93,20 @@ class PathManager:
         logger.debug(f"Athkar audio folder created/existing: {self._athkar_audio}")
 
         # temp folder
-        self._temp_folder = Path(os.getenv("TEMP", "/tmp")) / app_name
+        if self.is_portable_mode:
+            self._temp_folder = self._app_folder / "temp"
+        else:
+            self._temp_folder = Path(os.getenv("TEMP", "/tmp")) / app_name
+            
         self._temp_folder.mkdir(parents=True, exist_ok=True)
         logger.debug(f"Temp folder created/existing: {self._temp_folder}")
 
         # documents folder
-        self._documents_dir = Path.home() / "Documents" / app_name
+        if self.is_portable_mode:
+            self._documents_dir = self._app_folder / "Documents"
+        else:
+            self._documents_dir = Path.home() / "Documents" / app_name
+            
         self._documents_dir.mkdir(parents=True, exist_ok=True)
         logger.debug(f"Documents folder created/existing: {self._documents_dir}")
 
@@ -59,6 +123,12 @@ class PathManager:
     def _detect_base_dir(self) -> Path:
         """Detects base directory depending on app context."""
         logger.debug("Detecting base directory...")
+        
+        if self.is_portable_mode:
+            path = Path(get_current_app_dir())
+            logger.debug(f"Portable environment detected, base folder: {path}")
+            return path
+            
         if ApplicationData:
             try:
                 path = Path(ApplicationData.current.local_folder.path)
@@ -66,11 +136,11 @@ class PathManager:
                 return path
             except Exception as e:
                 logger.debug(f"Failed to get MSIX base folder, error: {e}")
+                
         fallback_path = Path(os.getenv("APPDATA", Path.home()))
         logger.debug(f"Fallback base folder: {fallback_path}")
         return fallback_path
 
-    
     # Properties with debug
 
     @property
@@ -135,6 +205,7 @@ class PathManager:
 
     def __repr__(self):
         paths = {
+            "PortableMode": self.is_portable_mode,
             "BaseDir": self.base_dir,
             "AppFolder": self.app_folder,
             "UserDB": self.user_db,
@@ -149,7 +220,6 @@ class PathManager:
         lines += [f"  {key}: {val}" for key, val in paths.items()]
         logger.debug(f"PathManager representation: {lines}")
         return "\n".join(lines)
-
 
 
 # Singleton instance
