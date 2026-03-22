@@ -68,12 +68,20 @@ class PathManager:
         self.author = author
         logger.debug(f"Initializing PathManager with app_name='{app_name}' and author='{author}'.")
 
-        # detect operating mode
+        # detect initial operating mode
         self.is_portable_mode = is_portable()
-        logger.debug(f"Portable mode: {self.is_portable_mode}")
+        logger.debug(f"Initial portable mode check: {self.is_portable_mode}")
 
         # detect environment (MSIX vs external vs portable)
         self._base_dir = self._detect_base_dir()
+
+        # check permissions if in portable mode to prevent crashes in read-only locations
+        if self.is_portable_mode:
+            if not self._check_write_permission(self._base_dir):
+                logger.warning(f"No write permission in {self._base_dir}. Falling back to AppData paths.")
+                self.is_portable_mode = False
+                # Re-detect the base directory now that we are forcing installed mode behavior
+                self._base_dir = self._detect_base_dir()
 
         # main app folder
         if self.is_portable_mode:
@@ -119,6 +127,19 @@ class PathManager:
         self._athkar_db = self._app_folder / "athkar.db"
 
         logger.debug("Standard DB/config/log paths initialized.")
+
+    def _check_write_permission(self, target_dir: Path) -> bool:
+        """Silently tests if the application can write to the target directory."""
+        test_file = target_dir / ".write_test"
+        try:
+            # Attempt to write and immediately delete a temp file
+            test_file.touch(exist_ok=True)
+            test_file.unlink()
+            logger.debug(f"Write permission confirmed for: {target_dir}")
+            return True
+        except Exception as e:
+            logger.debug(f"Write permission check failed for {target_dir} | Error: {e}")
+            return False
 
     def _detect_base_dir(self) -> Path:
         """Detects base directory depending on app context."""
