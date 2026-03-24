@@ -19,7 +19,7 @@ from core_functions.downloader.status import DownloadProgress
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from utils.const import program_name, Globals
 from utils.universal_speech import UniversalSpeech
-from utils.paths import paths
+from utils.paths import paths, is_portable, get_current_app_dir
 from utils.logger import LoggerManager
 import qtawesome as qta
 
@@ -125,7 +125,10 @@ class UpdateDialog(QDialog):
         logger.info(f"Download finished. Starting installation: {file_path}")
         self.progress_dialog.hide()
         try:
-            subprocess.Popen([file_path, "/SILENT", "/NOCANCEL", "/SUPPRESSMSGBOXES", "/NORESTART"])
+            if is_portable():
+                subprocess.Popen([file_path, "/SILENT", "/PORTABLE", f"/DIR={get_current_app_dir()}", "/NOCANCEL", "/SUPPRESSMSGBOXES", "/NORESTART"])
+            else:
+                subprocess.Popen([file_path, "/SILENT", "/NOCANCEL", "/SUPPRESSMSGBOXES", "/NORESTART"])
             logger.info("Installer started successfully.")
             QApplication.exit()
             logger.info("Application exited after installation.")
