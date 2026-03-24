@@ -23,8 +23,8 @@ AppUpdatesURL={#MyAppURL}
 ArchitecturesAllowed=x64compatible arm64
 ArchitecturesInstallIn64BitMode=x64compatible arm64
 SetupIconFile=Albayan.ico
+DefaultDirName={code:GetDefaultDirName}
 
-DefaultDirName={sd}\program files\tecwindow\{#MyAppName}
 DisableProgramGroupPage=yes
 DisableDirPage=no
 PrivilegesRequired=admin
@@ -99,73 +99,57 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 [Code]
 var
   InstallModePage: TInputOptionWizardPage;
-  OriginalDirPath: String;
+  IsPortableMode: Boolean;
+  UserProvidedDir: String;
 
-// Helper function to check if Normal Install is selected
-function IsNormalInstall: Boolean;
+// Helper: Check if a specific parameter (like /PORTABLE) was passed to Setup.exe
+function HasCmdLineParam(const ParamName: String): Boolean;
+var
+  I: Integer;
 begin
-  if InstallModePage <> nil then
-    Result := InstallModePage.Values[0]
-  else
-    Result := True; // Safe fallback during setup initialization
-end;
-
-// Helper function to check if Portable Install is selected
-function IsPortableInstall: Boolean;
-begin
-  if InstallModePage <> nil then
-    Result := InstallModePage.Values[1]
-  else
-    Result := False;
-end;
-procedure InitializeWizard;
-begin
-  // Save the default or previous installation path Inno Setup automatically calculated
-  OriginalDirPath := WizardForm.DirEdit.Text;
-  
-  // Create a custom page to ask for the installation mode, using translated strings
-  InstallModePage := CreateInputOptionPage(wpWelcome,
-    CustomMessage('InstallModeTitle'), 
-    CustomMessage('InstallModeDesc'),
-    CustomMessage('InstallModeText'),
-    True, False);
-
-  // Add the radio button options with translations
-  InstallModePage.Add(CustomMessage('InstallModeNormal'));
-  InstallModePage.Add(CustomMessage('InstallModePortable'));
-
-  // Set default selection to "Normal Installation"
-  InstallModePage.Values[0] := True;
-end;
-
-// Intercept the "Next" button click to change the target directory dynamically
-function NextButtonClick(CurPageID: Integer): Boolean;
-begin
-  // When leaving our custom page, update the directory input box
-  if CurPageID = InstallModePage.ID then
+  Result := False;
+  for I := 1 to ParamCount do
   begin
-    if IsPortableInstall then
+    if CompareText(ParamStr(I), ParamName) = 0 then
     begin
-      // Set to Documents\App Name 
-      // تم إزالة السطر الذي يقوم بتفريغ مسار قائمة ابدأ لمنع خطأ "يجب إدخال اسم مجلد"
-      WizardForm.DirEdit.Text := ExpandConstant('{userdocs}\{#MyAppName}');
-    end
-    else
-    begin
-      // Restore the original path (either default Program Files or previously installed path)
-      WizardForm.DirEdit.Text := OriginalDirPath;
+      Result := True;
+      Exit;
     end;
   end;
+end;
+
+// InitializeSetup fires before the UI even loads. 
+// Perfect place to capture our command-line arguments.
+function InitializeSetup(): Boolean;
+begin
+  // Check for the custom /PORTABLE switch
+  IsPortableMode := HasCmdLineParam('/PORTABLE');
+
+  // Check if user utilized Inno's native /DIR="X:\Path" argument
+  UserProvidedDir := ExpandConstant('{param:DIR}');
+
   Result := True;
 end;
 
-// Skip the Start Menu program group selection AND Tasks (desktop shortcut) pages if Portable mode is selected
-function ShouldSkipPage(PageID: Integer): Boolean;
+// Provides the initial dynamic default directory for the engine.
+// This guarantees that /SILENT installs work flawlessly without UI interaction.
+function GetDefaultDirName(Param: String): String;
 begin
-  if ((PageID = wpSelectProgramGroup) or (PageID = wpSelectTasks)) and IsPortableInstall then
-    Result := True
+  if IsPortableMode then
+    Result := ExpandConstant('{userdocs}\{#MyAppName}')
   else
-    Result := False;
+    Result := ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}');
+end;
+
+// Used by Check: parameters in [Tasks], [Icons], [Setup]
+function IsNormalInstall: Boolean;
+begin
+  Result := not IsPortableMode;
+end;
+
+function IsPortableInstall: Boolean;
+begin
+  Result := IsPortableMode;
 end;
 
 procedure DeleteSettingsFolder();
@@ -173,10 +157,73 @@ begin
   DelTree(ExpandConstant('{userappdata}\tecwindow\albayan'), True, True, True);
 end;
 
-function InitializeSetup(): Boolean;
+
+procedure InitializeWizard;
 begin
+  // Create our custom mode selection page
+  InstallModePage := CreateInputOptionPage(wpWelcome,
+    CustomMessage('InstallModeTitle'), 
+    CustomMessage('InstallModeDesc'),
+    CustomMessage('InstallModeText'),
+    True, False);
+
+  InstallModePage.Add(CustomMessage('InstallModeNormal'));
+  InstallModePage.Add(CustomMessage('InstallModePortable'));
+
+  // Pre-select radio button based on command-line argument
+  if IsPortableMode then
+  begin
+    InstallModePage.Values[0] := False;
+    InstallModePage.Values[1] := True;
+  end
+  else
+  begin
+    InstallModePage.Values[0] := True;
+    InstallModePage.Values[1] := False;
+  end;
+end;
+
+// Intercept "Next" button click to change the target directory dynamically
+function NextButtonClick(CurPageID: Integer): Boolean;
+var
+  ExpectedNormalDir, ExpectedPortableDir: String;
+begin
+  if CurPageID = InstallModePage.ID then
+  begin
+    ExpectedNormalDir := ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}');
+    ExpectedPortableDir := ExpandConstant('{userdocs}\{#MyAppName}');
+
+    // Smart Directory Override Logic:
+    // Only auto-switch the target path if the user hasn't specified /DIR via command line
+    // AND hasn't manually clicked "Browse" to set a custom path yet.
+    if (UserProvidedDir = '') and
+       ((CompareText(WizardForm.DirEdit.Text, ExpectedNormalDir) = 0) or
+        (CompareText(WizardForm.DirEdit.Text, ExpectedPortableDir) = 0)) then
+    begin
+      IsPortableMode := InstallModePage.Values[1]; // Get UI state
+      if IsPortableMode then
+        WizardForm.DirEdit.Text := ExpectedPortableDir
+      else
+        WizardForm.DirEdit.Text := ExpectedNormalDir;
+    end
+    else
+    begin
+      // If they have a custom browsed path or used /DIR, respect it and just update internal state
+      IsPortableMode := InstallModePage.Values[1];
+    end;
+  end;
   Result := True;
 end;
+
+// Skip the Start Menu program group and Task selection pages if Portable mode is active
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  if ((PageID = wpSelectProgramGroup) or (PageID = wpSelectTasks)) and IsPortableMode then
+    Result := True
+  else
+    Result := False;
+end;
+
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
@@ -207,3 +254,4 @@ begin
     DeleteSettingsFolder();
   end;
 end;
+
