@@ -22,7 +22,7 @@ from utils.update import UpdateManager
 from utils.settings import Config
 from utils.logger import LoggerManager
 from utils.const import program_name, program_version, website, Globals
-from utils.paths import paths
+from utils.paths import paths, is_installed, is_portable
 from utils.audio_player import bass
 from theme import ThemeManager
 
@@ -389,8 +389,14 @@ class MenuBar(QMenuBar):
 
     def OnAbout(self):
         logger.debug("Opening about dialog.")
+        version_type = (
+        "نسخة مثبتة" if is_installed()
+    else "نسخة محمولة" if paths.is_portable_mode
+    else "نسخة المصدر"
+        )
+
         about_text = (
-                    f"{program_name} - الإصدار {program_version}.\n"
+        f"{program_name} - الإصدار {program_version} ({version_type}).\n"
             f"{program_name}، هو برنامج يهدف إلى مساعدة المسلم على قراءة القرآن بشكل سهل وبسيط مع العديد من المميزات.\n"
             "تم تصميم البرنامج من فريق نافذة التقنية: محمود عاطف، أحمد بكر وقيس الرفاعي.\n"
             f"الموقع الرسمي للبرنامج: {website}\n"

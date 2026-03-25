@@ -6,7 +6,7 @@ import os
 current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 os.chdir(current_dir)
 from utils.const import program_name, program_english_name, program_version, program_icon, dev_mode
-from utils.paths import paths
+from utils.paths import paths, is_installed, is_portable
 from utils.settings import Config
 from utils.logger import LogLevel, LoggerManager
 
@@ -34,7 +34,13 @@ from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        app_id = "Albayan" if sys.argv[0].endswith(".exe") else "Albayan_Source"
+        if getattr(sys, "frozen", False):
+            if is_installed():
+                app_id = "Albayan_Installed"
+            else:
+                app_id = "Albayan_Portable"
+        else:
+            app_id = "Albayan_Source"
         logger.debug("running from source." if app_id == "Albayan_Source" else "running from exe file.")
         self.setApplicationName(program_name)
         self.server_name = app_id
