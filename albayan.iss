@@ -71,7 +71,8 @@ Name: "autorun"; Description: "{cm:autorun}"; GroupDescription: "{cm:AdditionalI
 [Files]
 Source: "albayan_build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "albayan_build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "albayan_build\Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "albayan_build\Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsNormalInstall
+Source: "albayan_build\Audio\athkar\*"; DestDir: "{app}\UserData\audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsPortableInstall
 
 [Icons]
 Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Albayan.ico";  Check: IsNormalInstall

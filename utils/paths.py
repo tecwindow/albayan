@@ -85,7 +85,7 @@ class PathManager:
 
         # main app folder
         if self.is_portable_mode:
-            self._app_folder = self._base_dir / "userdata"
+            self._app_folder = self._base_dir / "UserData"
         else:
             self._app_folder = self._base_dir / self.author / app_name
             
