@@ -72,7 +72,7 @@ Name: "autorun"; Description: "{cm:autorun}"; GroupDescription: "{cm:AdditionalI
 Source: "albayan_build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "albayan_build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "albayan_build\Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsNormalInstall
-Source: "albayan_build\Audio\athkar\*"; DestDir: "{app}\User Data\audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsPortableInstall
+Source: "albayan_build\Audio\athkar\*"; DestDir: "{app}\user_data\audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsPortableInstall
 
 [Icons]
 Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Albayan.ico";  Check: IsNormalInstall
@@ -234,14 +234,15 @@ begin
   begin
     if IsPortableInstall then
     begin
-      // Delete all contents of {app} except User Data folder
+      // Delete all contents of {app} except user_data folder
       AppDir := ExpandConstant('{app}');
       if FindFirst(AppDir + '\*', FindRec) then
       begin
         try
           repeat
             if (FindRec.Name <> '.') and (FindRec.Name <> '..') and
-               (CompareText(FindRec.Name, 'User Data') <> 0) then
+               (CompareText(FindRec.Name, 'user_data') <> 0) and
+(CompareText(FindRec.Name, 'downloads') <> 0) then
             begin
               if FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY <> 0 then
                 DelTree(AppDir + '\' + FindRec.Name, True, True, True)

@@ -6,6 +6,7 @@ from abc import ABC
 from typing import Any, Dict, Tuple, ClassVar
 from utils.paths import paths
 from utils.logger import LoggerManager
+from utils.paths import paths
 
 logger = LoggerManager.get_logger(__name__)
 
@@ -101,7 +102,7 @@ class SurahPlayerSettings(BaseSection):
 class DownloadingSettings(BaseSection):
     SECTION_NAME: ClassVar[str] = "downloading"
     files_to_download_at_the_same_time: int = 1
-    download_path: str = os.path.join(paths.documents_dir, "Downloads")
+    download_path: str = paths.download_folder
     show_incomplete_download_warning: bool = True
     offline_playback: bool = True
     auto_refresh_downloads_lists: bool = False

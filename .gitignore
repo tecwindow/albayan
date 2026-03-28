@@ -3,6 +3,8 @@ __pycache__/
 UserData/
 userdata/
 User Data/
+user_data/
+Downloads
 
 # Ignore virtual environment directory
 albayan_env/

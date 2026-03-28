@@ -29,7 +29,7 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Set up Python 3.13 (latest patch)
       uses: actions/setup-python@v6
@@ -97,7 +97,7 @@ jobs:
       run: |
         # Move athkar folder to User Data\audio\athkar (portable structure)
         $source = "albayan_build\Audio\athkar"
-        $dest   = "albayan_build\User Data\audio\athkar"
+        $dest   = "albayan_build\user_data\audio\athkar"
         if (Test-Path $source) {
             New-Item -ItemType Directory -Path $dest -Force | Out-Null
             Move-Item -Path "$source\*" -Destination $dest -Force
