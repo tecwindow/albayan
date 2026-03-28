@@ -390,9 +390,9 @@ class MenuBar(QMenuBar):
     def OnAbout(self):
         logger.debug("Opening about dialog.")
         version_type = (
-        "نسخة مثبتة" if is_installed()
-    else "نسخة محمولة" if paths.is_portable_mode
-    else "نسخة المصدر"
+        "نسخة مثبتة" if getattr(sys, "frozen", False) and is_installed()
+        else "نسخة محمولة" if getattr(sys, "frozen", False)
+        else "نسخة المصدر"
         )
 
         about_text = (

@@ -167,4 +167,10 @@ class LoggerManager:
 
         error_message += "Error Value: {}".format(value)
         logging.error(error_message, exc_info=True)
-        cls.show_error_message("حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")
+        full_message = (
+        "حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين."
+        "\n\n"
+        f"{error_message}"
+        )
+
+        cls.show_error_message(full_message)

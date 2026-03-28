@@ -9,7 +9,9 @@ from utils.const import program_name, program_english_name, program_version, pro
 from utils.paths import paths, is_installed, is_portable
 from utils.settings import Config
 from utils.logger import LogLevel, LoggerManager
-
+sys.excepthook = LoggerManager.my_excepthook
+current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+os.chdir(current_dir)
 #load the config file
 Config.load_settings()
 #setup the logger
