@@ -11,7 +11,7 @@ logger = LoggerManager.get_logger(__name__)
 logger.debug("Initializing program information.")
 program_name = "البيان"
 program_english_name = "Albayan"
-program_version = "5.0.1"
+program_version = "6.0.0"
 author= "Tecwindow"
 dev_mode = False
 program_icon = "Albayan.ico"

@@ -176,7 +176,13 @@ def main():
         logger.info("QApplication initialized successfully.")
         app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         logger.info("Layout direction set to RightToLeft.")
-        main_window = QuranInterface(program_name)
+        display_name = (
+        program_name if getattr(sys, "frozen", False) and is_installed()
+        else f"{program_name} (Portable)" if getattr(sys, "frozen", False)
+        else f"{program_name} (Source)"
+        )
+
+        main_window = QuranInterface(display_name)
         logger.info("Main window initialized successfully.")
         app.set_main_window(main_window)
         if "--minimized" not in sys.argv:

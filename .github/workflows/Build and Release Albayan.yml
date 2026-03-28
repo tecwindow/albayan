@@ -114,8 +114,10 @@ jobs:
         }
         $zipName = "$baseName`_Portable.zip"
 
-        # Zip the contents of the build folder
-        Compress-Archive -Path "albayan_build\*" -DestinationPath $zipName
+        # Copy build contents into an Albayan subfolder, then zip that folder
+        New-Item -ItemType Directory -Path "portable_output\Albayan" -Force | Out-Null
+        Copy-Item -Path "albayan_build\*" -Destination "portable_output\Albayan" -Recurse -Force
+        Compress-Archive -Path "portable_output\Albayan" -DestinationPath $zipName
 
         # Save the zip file name to environment variables for the release step
         echo "PORTABLE_NAME=$zipName" >> $env:GITHUB_ENV
