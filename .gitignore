@@ -1,6 +1,9 @@
 # Ignore Python bytecode files
 __pycache__/
 UserData/
+userdata/
+User Data/
+
 # Ignore virtual environment directory
 albayan_env/
 

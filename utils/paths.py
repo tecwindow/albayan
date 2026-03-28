@@ -85,7 +85,7 @@ class PathManager:
 
         # main app folder
         if self.is_portable_mode:
-            self._app_folder = self._base_dir / "UserData"
+            self._app_folder = self._base_dir / "User Data"
         else:
             self._app_folder = self._base_dir / self.author / app_name
             
@@ -101,20 +101,13 @@ class PathManager:
         logger.debug(f"Athkar audio folder created/existing: {self._athkar_audio}")
 
         # temp folder
-        if self.is_portable_mode:
-            self._temp_folder = self._app_folder / "temp"
-        else:
-            self._temp_folder = Path(os.getenv("TEMP", "/tmp")) / app_name
+        self._temp_folder = Path(os.getenv("TEMP", "/tmp")) / app_name
             
         self._temp_folder.mkdir(parents=True, exist_ok=True)
         logger.debug(f"Temp folder created/existing: {self._temp_folder}")
 
         # documents folder
-        if self.is_portable_mode:
-            self._documents_dir = self._app_folder / "Documents"
-        else:
-            self._documents_dir = Path.home() / "Documents" / app_name
-            
+        self._documents_dir = Path.home() / "Documents" / app_name
         self._documents_dir.mkdir(parents=True, exist_ok=True)
         logger.debug(f"Documents folder created/existing: {self._documents_dir}")
 

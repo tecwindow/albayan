@@ -72,7 +72,7 @@ Name: "autorun"; Description: "{cm:autorun}"; GroupDescription: "{cm:AdditionalI
 Source: "albayan_build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "albayan_build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "albayan_build\Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsNormalInstall
-Source: "albayan_build\Audio\athkar\*"; DestDir: "{app}\UserData\audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsPortableInstall
+Source: "albayan_build\Audio\athkar\*"; DestDir: "{app}\User Data\audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsPortableInstall
 
 [Icons]
 Name: "{autoprograms}\Albayan"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Albayan.ico";  Check: IsNormalInstall
@@ -92,7 +92,6 @@ Filename: "taskkill"; Parameters: "/F /IM Albayan.exe"; Flags: runhidden
 Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
 
 [InstallDelete]
-Type: filesandordirs; Name: "{app}\*"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
@@ -137,7 +136,7 @@ end;
 function GetDefaultDirName(Param: String): String;
 begin
   if IsPortableMode then
-    Result := ExpandConstant('{userdocs}\{#MyAppName}')
+    Result := ExpandConstant('{src}\{#MyAppName}')
   else
     Result := ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}');
 end;
@@ -192,7 +191,7 @@ begin
   if CurPageID = InstallModePage.ID then
   begin
     ExpectedNormalDir := ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}');
-    ExpectedPortableDir := ExpandConstant('{userdocs}\{#MyAppName}');
+    ExpectedPortableDir := ExpandConstant('{src}\{#MyAppName}');
 
     // Smart Directory Override Logic:
     // Only auto-switch the target path if the user hasn't specified /DIR via command line
@@ -227,9 +226,35 @@ end;
 
 
 procedure CurStepChanged(CurStep: TSetupStep);
+var
+  FindRec: TFindRec;
+  AppDir: String;
 begin
   if CurStep = ssInstall then
   begin
+    if IsPortableInstall then
+    begin
+      // Delete all contents of {app} except User Data folder
+      AppDir := ExpandConstant('{app}');
+      if FindFirst(AppDir + '\*', FindRec) then
+      begin
+        try
+          repeat
+            if (FindRec.Name <> '.') and (FindRec.Name <> '..') and
+               (CompareText(FindRec.Name, 'User Data') <> 0) then
+            begin
+              if FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY <> 0 then
+                DelTree(AppDir + '\' + FindRec.Name, True, True, True)
+              else
+                DeleteFile(AppDir + '\' + FindRec.Name);
+            end;
+          until not FindNext(FindRec);
+        finally
+          FindClose(FindRec);
+        end;
+      end;
+    end;
+
     if FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini')) then
     begin
       RenameFile(
@@ -241,9 +266,10 @@ begin
 
   if CurStep = ssPostInstall then
   begin
-    DelTree(ExpandConstant('{app}\Audio\athkar'), True, True, True);
+  DelTree(ExpandConstant('{app}\Audio\athkar'), True, True, True);
   end;
 end;
+
 
 procedure DeinitializeUninstall();
 begin

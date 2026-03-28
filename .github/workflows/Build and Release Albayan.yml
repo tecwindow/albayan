@@ -32,7 +32,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Python 3.13 (latest patch)
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: "3.13"
 
@@ -61,22 +61,6 @@ jobs:
             Remove-Item "$docPath\Shortcuts.md" -ErrorAction SilentlyContinue
         }
 
-    - name: Create Portable ZIP
-      shell: pwsh
-      run: |
-        # Strip .exe if provided to format the zip name nicely
-        $baseName = "${{ github.event.inputs.file_name }}"
-        if ($baseName.ToLower().EndsWith(".exe")) {
-            $baseName = $baseName.Substring(0, $baseName.Length - 4)
-        }
-        $zipName = "$baseName`_Portable.zip"
-        
-        # Zip the contents of the build folder
-        Compress-Archive -Path "albayan_build\*" -DestinationPath $zipName
-        
-        # Save the zip file name to environment variables for the release step
-        echo "PORTABLE_NAME=$zipName" >> $env:GITHUB_ENV
-
     - name: Download and install latest Inno Setup
       shell: pwsh
       run: |
@@ -104,7 +88,37 @@ jobs:
         if ($source -ne $dest) {
             Rename-Item -Path $source -NewName $input
         }
+        # Copy installer outside albayan_build so it won't be included in the portable ZIP
+        Copy-Item -Path "albayan_build\$input" -Destination "$input"
         echo "INSTALLER_NAME=$input" >> $env:GITHUB_ENV
+
+    - name: Create Portable ZIP
+      shell: pwsh
+      run: |
+        # Move athkar folder to User Data\audio\athkar (portable structure)
+        $source = "albayan_build\Audio\athkar"
+        $dest   = "albayan_build\User Data\audio\athkar"
+        if (Test-Path $source) {
+            New-Item -ItemType Directory -Path $dest -Force | Out-Null
+            Move-Item -Path "$source\*" -Destination $dest -Force
+            Remove-Item $source -Recurse -Force
+        }
+
+        # Remove installer from build folder before zipping
+        Remove-Item "albayan_build\$env:INSTALLER_NAME" -ErrorAction SilentlyContinue
+
+        # Strip .exe if provided to format the zip name nicely
+        $baseName = "${{ github.event.inputs.file_name }}"
+        if ($baseName.ToLower().EndsWith(".exe")) {
+            $baseName = $baseName.Substring(0, $baseName.Length - 4)
+        }
+        $zipName = "$baseName`_Portable.zip"
+
+        # Zip the contents of the build folder
+        Compress-Archive -Path "albayan_build\*" -DestinationPath $zipName
+
+        # Save the zip file name to environment variables for the release step
+        echo "PORTABLE_NAME=$zipName" >> $env:GITHUB_ENV
 
     - name: Create tag and release
       uses: softprops/action-gh-release@v2
@@ -113,7 +127,7 @@ jobs:
         name: ${{ github.event.inputs.release_name }}
         body: ${{ github.event.inputs.release_body }}
         files: |
-          albayan_build/${{ env.INSTALLER_NAME }}
+          ${{ env.INSTALLER_NAME }}
           ${{ env.PORTABLE_NAME }}
         target_commitish: ${{ github.ref_name }}
         prerelease: false
