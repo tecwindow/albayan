@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QDialog,
     QFileDialog,
     QVBoxLayout,
@@ -17,10 +17,10 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
     QHBoxLayout,
     QLineEdit,
-    QStackedWidget
+    QStackedWidget,
 )
-from PyQt6.QtGui import QKeySequence, QShortcut
-from PyQt6.QtCore import Qt
+from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtCore import Qt
 from ui.widgets.spin_box import SpinBox
 from core_functions.quran.types import QuranFontType, MarksType
 from core_functions.Reciters import AyahReciter
@@ -28,11 +28,18 @@ from utils.const import program_english_name, Globals
 from utils.paths import paths
 from utils.settings import Config
 from utils.logger import LogLevel, LoggerManager
-from utils.audio_player import bass_initializer, AthkarPlayer, AyahPlayer, SurahPlayer, SoundEffectPlayer
+from utils.audio_player import (
+    bass_initializer,
+    AthkarPlayer,
+    AyahPlayer,
+    SurahPlayer,
+    SoundEffectPlayer,
+)
 from utils.Startup import StartupManager
 import qtawesome as qta
 
 logger = LoggerManager.get_logger(__name__)
+
 
 class SettingsDialog(QDialog):
     def __init__(self, parent):
@@ -44,7 +51,6 @@ class SettingsDialog(QDialog):
         self.init_ui()
         self.set_current_settings()
 
-
     def init_ui(self):
         main_layout = QVBoxLayout()
         taps_layout = QHBoxLayout()
@@ -54,7 +60,7 @@ class SettingsDialog(QDialog):
         self.tree_widget.setHeaderHidden(True)
         self.tree_widget.setMinimumWidth(200)
         self.tree_widget.setStyleSheet("QTreeWidget { font-size: 14px; }")
-        
+
         # Adding items to the tree with icons
         general_item = QTreeWidgetItem(["الإعدادات العامة"])
         general_item.setIcon(0, qta.icon("fa5s.cogs"))
@@ -73,11 +79,10 @@ class SettingsDialog(QDialog):
 
         downloading_item = QTreeWidgetItem(["التنزيل"])
         downloading_item.setIcon(0, qta.icon("fa5s.download"))
- 
 
         search_item = QTreeWidgetItem(["البحث"])
         search_item.setIcon(0, qta.icon("fa5s.search"))
-        
+
         # Adding top-level items
         self.tree_widget.addTopLevelItem(general_item)
         self.tree_widget.addTopLevelItem(audio_item)
@@ -86,17 +91,21 @@ class SettingsDialog(QDialog):
         self.tree_widget.addTopLevelItem(surah_player_item)
         self.tree_widget.addTopLevelItem(downloading_item)
         self.tree_widget.addTopLevelItem(search_item)
-        
+
         # Stacked widget to switch views
         self.stacked_widget = QStackedWidget()
-        
+
         # General settings
         self.group_general = QGroupBox("الإعدادات العامة")
         self.group_general_layout = QVBoxLayout()
         self.run_in_background_checkbox = QCheckBox("تشغيل البرنامج في الخلفية")
         self.start_on_system_start_checkbox = QCheckBox("تشغيل عند بدء تشغيل النظام")
-        self.auto_save_position_checkbox = QCheckBox("حفظ الموضع الحالي تلقائيًا عند إغلاق البرنامج")
-        self.auto_restore_position_checkbox = QCheckBox("استعادة الموضع الحالي عند فتح البرنامج")
+        self.auto_save_position_checkbox = QCheckBox(
+            "حفظ الموضع الحالي تلقائيًا عند إغلاق البرنامج"
+        )
+        self.auto_restore_position_checkbox = QCheckBox(
+            "استعادة الموضع الحالي عند فتح البرنامج"
+        )
         self.update_checkbox = QCheckBox("التحقق من التحديثات")
         self.log_levels_label = QLabel(self, text="مستوى السجل:")
         self.log_levels_combo = QComboBox(self)
@@ -105,7 +114,7 @@ class SettingsDialog(QDialog):
             self.log_levels_combo.addItem(level.label, level.name)
         self.reset_button = QPushButton("استعادة الإعدادات الافتراضية")
         self.reset_button.clicked.connect(self.OnReset)
-        
+
         self.group_general_layout.addWidget(self.run_in_background_checkbox)
         self.group_general_layout.addWidget(self.start_on_system_start_checkbox)
         self.group_general_layout.addWidget(self.auto_save_position_checkbox)
@@ -113,12 +122,18 @@ class SettingsDialog(QDialog):
         self.group_general_layout.addWidget(self.update_checkbox)
         self.group_general_layout.addWidget(self.log_levels_label)
         self.group_general_layout.addWidget(self.log_levels_combo)
-        self.group_general_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        self.group_general_layout.addSpacerItem(
+            QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
         self.group_general_layout.addWidget(self.reset_button)
         self.group_general.setLayout(self.group_general_layout)
 
         self.run_in_background_checkbox.toggled.connect(self.updateStartCheckboxState)
-        self.start_on_system_start_checkbox.toggled.connect(self.updateBackgroundCheckboxState)
+        self.start_on_system_start_checkbox.toggled.connect(
+            self.updateBackgroundCheckboxState
+        )
 
         self.group_audio = QGroupBox("إعدادات الصوت")
         self.group_audio_layout = QVBoxLayout()
@@ -130,7 +145,7 @@ class SettingsDialog(QDialog):
         self.volume.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.volume_device_label = QLabel("كرت الصوت لتشغيل أصوات البرنامج:")
         self.volume_device_combo = QComboBox(self)
-        self.volume_device_combo .setAccessibleName(self.volume_device_label.text())
+        self.volume_device_combo.setAccessibleName(self.volume_device_label.text())
         self.ayah_volume_label = QLabel("مستوى صوت الآيات")
         self.ayah_volume = QSlider(Qt.Orientation.Horizontal)
         self.ayah_volume.setRange(0, 100)
@@ -161,7 +176,7 @@ class SettingsDialog(QDialog):
 
         for device in bass_initializer.get_sound_cards():
             logger.info(f"Detected sound device: {device.name} (Index: {device.index})")
-            self.volume_device_combo .addItem(device.name, device.index)
+            self.volume_device_combo.addItem(device.name, device.index)
             self.ayah_device_combo.addItem(device.name, device.index)
             self.surah_device_combo.addItem(device.name, device.index)
             self.athkar_device_combo.addItem(device.name, device.index)
@@ -189,9 +204,13 @@ class SettingsDialog(QDialog):
         self.group_audio_layout.addWidget(self.sound_checkbox)
         self.group_audio_layout.addWidget(self.basmala_checkbox)
         self.group_audio_layout.addWidget(self.speech_checkbox)
-        self.group_audio_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        self.group_audio_layout.addSpacerItem(
+            QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
         self.group_audio.setLayout(self.group_audio_layout)
-        
+
         self.group_listening = QGroupBox("إعدادات الاستماع")
         self.group_listening_layout = QVBoxLayout()
 
@@ -199,11 +218,11 @@ class SettingsDialog(QDialog):
         self.reciters_combo = QComboBox()
         self.reciters_combo.setAccessibleName(self.reciters_label.text())
 
-
         self.secondary_reciter_label = QLabel("القارئ الثانوي:")
         self.secondary_reciter_combo = QComboBox()
-        self.secondary_reciter_combo.setAccessibleName(self.secondary_reciter_label.text())
-
+        self.secondary_reciter_combo.setAccessibleName(
+            self.secondary_reciter_label.text()
+        )
 
         reciters = self.reciters_manager.get_reciters()
         for row in reciters:
@@ -214,26 +233,30 @@ class SettingsDialog(QDialog):
             display_text = f"{row['name']} - {row['rewaya']} - {row['type']} - ({row['bitrate']} kbps)"
             self.secondary_reciter_combo.addItem(display_text, row["id"])
 
+        self.sswitch_when_moving_checkbox = QCheckBox(
+            "تبديل القارئ عند الانتقال إلى الآية التالية تلقائيًا"
+        )
 
-        self.sswitch_when_moving_checkbox = QCheckBox("تبديل القارئ عند الانتقال إلى الآية التالية تلقائيًا")
-
-        self.sswitch_when_repeating_checkbox = QCheckBox("تبديل القارئ عند تكرار الآية تلقائيًا")
-
-
+        self.sswitch_when_repeating_checkbox = QCheckBox(
+            "تبديل القارئ عند تكرار الآية تلقائيًا"
+        )
 
         self.repeat_limit_label = QLabel("عدد مرات تشغيل وتكرار الآية:")
         self.repeat_limit_spinbox = SpinBox(self)
-        self.repeat_limit_spinbox.setAccessibleName(self.repeat_limit_label.text())        
+        self.repeat_limit_spinbox.setAccessibleName(self.repeat_limit_label.text())
         self.repeat_limit_spinbox.setRange(1, 10)
         self.repeat_limit_spinbox.setSingleStep(1)
 
         self.action_label = QLabel("الإجراء بعد الاستماع لكل آية:")
         self.action_combo = QComboBox()
-        items_with_ids = [("إيقاف", 0), ("تكرار الآية بلا نهاية", 1), ("الانتقال إلى الآية التالية", 2)]
-        for text, id in sorted(items_with_ids, key=lambda x: x[1]==1): self.action_combo.addItem(text, id)
+        items_with_ids = [
+            ("إيقاف", 0),
+            ("تكرار الآية بلا نهاية", 1),
+            ("الانتقال إلى الآية التالية", 2),
+        ]
+        for text, id in sorted(items_with_ids, key=lambda x: x[1] == 1):
+            self.action_combo.addItem(text, id)
         self.action_combo.setAccessibleName(self.action_label.text())
-
-
 
         self.text_repeat_label = QLabel("عدد مرات تشغيل وتكرار النص:")
         self.text_repeat_spinbox = SpinBox(self)
@@ -241,23 +264,33 @@ class SettingsDialog(QDialog):
         self.text_repeat_spinbox.setRange(1, 10)
         self.text_repeat_spinbox.setSingleStep(1)
 
-
         self.action_after_text_label = QLabel("الإجراء بعد نهاية النص:")
         self.action_after_text_combo = QComboBox()
-        items_after_text = [("إيقاف", 0), ("تكرار النص الحالي بلا نهاية", 1), ("تنبيه صوتي", 2), ("الانتقال إلى التالي", 3)]
-        for text, id in sorted(items_after_text, key=lambda x: x[1]==1): self.action_after_text_combo.addItem(text, id)
-        self.action_after_text_combo.setAccessibleName(self.action_after_text_label.text())
+        items_after_text = [
+            ("إيقاف", 0),
+            ("تكرار النص الحالي بلا نهاية", 1),
+            ("تنبيه صوتي", 2),
+            ("الانتقال إلى التالي", 3),
+        ]
+        for text, id in sorted(items_after_text, key=lambda x: x[1] == 1):
+            self.action_after_text_combo.addItem(text, id)
+        self.action_after_text_combo.setAccessibleName(
+            self.action_after_text_label.text()
+        )
 
         self.duration_label = QLabel("مدة التقديم والترجيع (بالثواني):")
         self.duration_spinbox = SpinBox(self)
-        self.duration_spinbox.setAccessibleName(self.duration_label.text())        
+        self.duration_spinbox.setAccessibleName(self.duration_label.text())
         self.duration_spinbox.setRange(2, 15)
         self.duration_spinbox.setSingleStep(1)
 
+        self.auto_move_focus_checkbox = QCheckBox(
+            "نقل المؤشر تلقائيًا إلى الآية التي يتم تشغيلها"
+        )
 
-        self.auto_move_focus_checkbox = QCheckBox("نقل المؤشر تلقائيًا إلى الآية التي يتم تشغيلها")
-
-        self.auto_play_checkbox = QCheckBox("تشغيل الآية تلقائيًا عند الذهاب إليها من الذهاب إلى")
+        self.auto_play_checkbox = QCheckBox(
+            "تشغيل الآية تلقائيًا عند الذهاب إليها من الذهاب إلى"
+        )
 
         self.group_listening_layout.addWidget(self.reciters_label)
         self.group_listening_layout.addWidget(self.reciters_combo)
@@ -265,7 +298,9 @@ class SettingsDialog(QDialog):
         self.group_listening_layout.addWidget(self.secondary_reciter_combo)
         self.group_listening_layout.addWidget(self.sswitch_when_moving_checkbox)
         self.group_listening_layout.addWidget(self.sswitch_when_repeating_checkbox)
-        self.group_listening_layout.addSpacerItem(QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))  # مسافة نتوسطة
+        self.group_listening_layout.addSpacerItem(
+            QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        )  # مسافة نتوسطة
         self.group_listening_layout.addWidget(self.repeat_limit_label)
         self.group_listening_layout.addWidget(self.repeat_limit_spinbox)
         self.group_listening_layout.addWidget(self.action_label)
@@ -279,27 +314,42 @@ class SettingsDialog(QDialog):
         self.group_listening_layout.addWidget(self.auto_move_focus_checkbox)
         self.group_listening_layout.addWidget(self.auto_play_checkbox)
         self.group_listening.setLayout(self.group_listening_layout)
-        self.group_listening_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
-
+        self.group_listening_layout.addSpacerItem(
+            QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
 
         self.repeat_limit_spinbox.valueChanged.connect(self.update_action_combo_label)
         self.action_combo.currentIndexChanged.connect(self.update_repeat_limit_state)
-        self.text_repeat_spinbox.valueChanged.connect(self.update_action_after_text_combo_label)
-        self.action_after_text_combo.currentIndexChanged.connect(self.update_text_repeat_state)
-
-
+        self.text_repeat_spinbox.valueChanged.connect(
+            self.update_action_after_text_combo_label
+        )
+        self.action_after_text_combo.currentIndexChanged.connect(
+            self.update_text_repeat_state
+        )
 
         self.group_reading = QGroupBox("إعدادات القراءة")
         self.group_reading_layout = QVBoxLayout()
         self.font_type_label = QLabel("نوع الخط:")
         self.font_type_combo = QComboBox()
-        items_with_ids_list = [("الخط الحديث", QuranFontType.DEFAULT), ("الخط العثماني", QuranFontType.UTHMANI)]
-        [self.font_type_combo.addItem(text, font_type) for text, font_type in items_with_ids_list]
+        items_with_ids_list = [
+            ("الخط الحديث", QuranFontType.DEFAULT),
+            ("الخط العثماني", QuranFontType.UTHMANI),
+        ]
+        [
+            self.font_type_combo.addItem(text, font_type)
+            for text, font_type in items_with_ids_list
+        ]
         self.font_type_combo.setAccessibleName(self.font_type_label.text())
 
         self.marks_type_label = QLabel("نوع علامات الوقف:")
         self.marks_type_combo = QComboBox()
-        marks_options = [("الافتراضي", MarksType.DEFAULT), ("النصي", MarksType.TEXT), ("برايل", MarksType.ACCESSIBLE)]
+        marks_options = [
+            ("الافتراضي", MarksType.DEFAULT),
+            ("النصي", MarksType.TEXT),
+            ("برايل", MarksType.ACCESSIBLE),
+        ]
         [self.marks_type_combo.addItem(text, id) for text, id in marks_options]
         self.marks_type_combo.setAccessibleName(self.marks_type_label.text())
 
@@ -307,11 +357,17 @@ class SettingsDialog(QDialog):
 
         self.group_reading_layout.addWidget(self.font_type_label)
         self.group_reading_layout.addWidget(self.font_type_combo)
-        self.group_reading_layout.addSpacerItem(QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))  # مسافة أكبر
+        self.group_reading_layout.addSpacerItem(
+            QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        )  # مسافة أكبر
         self.group_reading_layout.addWidget(self.marks_type_label)
         self.group_reading_layout.addWidget(self.marks_type_combo)
         self.group_reading_layout.addWidget(self.turn_pages_checkbox)
-        self.group_reading_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        self.group_reading_layout.addSpacerItem(
+            QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
         self.group_reading.setLayout(self.group_reading_layout)
 
         self.group_surah_player = QGroupBox("إعدادات مشغل السور")
@@ -322,38 +378,61 @@ class SettingsDialog(QDialog):
         self.repeat_surah_spinbox.setAccessibleName(self.repeat_surah_label.text())
         self.repeat_surah_spinbox.setRange(1, 10)
 
-
         self.action_after_surah_label = QLabel("الإجراء بعد نهاية السورة:")
         self.action_after_surah_combo = QComboBox()
-        items_surah = [("إيقاف", 0), ("تكرار السورة بلا نهاية", 1), ("الانتقال إلى السورة التالية", 2)]
-        for text, id in sorted(items_surah, key=lambda x: x[1]==1): self.action_after_surah_combo.addItem(text, id)
-        self.action_after_surah_combo.setAccessibleName(self.action_after_surah_label.text())
+        items_surah = [
+            ("إيقاف", 0),
+            ("تكرار السورة بلا نهاية", 1),
+            ("الانتقال إلى السورة التالية", 2),
+        ]
+        for text, id in sorted(items_surah, key=lambda x: x[1] == 1):
+            self.action_after_surah_combo.addItem(text, id)
+        self.action_after_surah_combo.setAccessibleName(
+            self.action_after_surah_label.text()
+        )
 
         self.player_in_background_checkbox = QCheckBox("تشغيل السور في الخلفية")
-
 
         self.group_surah_player_layout.addWidget(self.repeat_surah_label)
         self.group_surah_player_layout.addWidget(self.repeat_surah_spinbox)
         self.group_surah_player_layout.addWidget(self.action_after_surah_label)
         self.group_surah_player_layout.addWidget(self.action_after_surah_combo)
         self.group_surah_player_layout.addWidget(self.player_in_background_checkbox)
-        self.group_surah_player_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        self.group_surah_player_layout.addSpacerItem(
+            QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
         self.group_surah_player.setLayout(self.group_surah_player_layout)
 
-
-        self.action_after_surah_combo.currentIndexChanged.connect(self.update_repeat_surah_state)
-        self.repeat_surah_spinbox.valueChanged.connect(self.update_action_after_surah_combo_label)
+        self.action_after_surah_combo.currentIndexChanged.connect(
+            self.update_repeat_surah_state
+        )
+        self.repeat_surah_spinbox.valueChanged.connect(
+            self.update_action_after_surah_combo_label
+        )
 
         self.group_downloading = QGroupBox("إعدادات التنزيل")
         self.group_downloading_layout = QVBoxLayout()
 
-        self.files_to_download_at_the_same_time_label = QLabel("عدد الملفات التي يمكن تنزيلها في نفس الوقت:")
+        self.files_to_download_at_the_same_time_label = QLabel(
+            "عدد الملفات التي يمكن تنزيلها في نفس الوقت:"
+        )
         self.files_to_download_at_the_same_time_combo = QComboBox()
-        items_files = [("ملف 1", 1), ("ملفين", 2), ("3 ملفات", 3), ("4 ملفات", 4), ("5 ملفات", 5)]
-        [self.files_to_download_at_the_same_time_combo.addItem(text, id) for text, id in items_files]
-        self.files_to_download_at_the_same_time_combo.setAccessibleName(self.files_to_download_at_the_same_time_label.text())
-
-
+        items_files = [
+            ("ملف 1", 1),
+            ("ملفين", 2),
+            ("3 ملفات", 3),
+            ("4 ملفات", 4),
+            ("5 ملفات", 5),
+        ]
+        [
+            self.files_to_download_at_the_same_time_combo.addItem(text, id)
+            for text, id in items_files
+        ]
+        self.files_to_download_at_the_same_time_combo.setAccessibleName(
+            self.files_to_download_at_the_same_time_label.text()
+        )
 
         self.download_path_label = QLabel("مسار التنزيل الحالي:")
         self.download_path_edit = QLineEdit()
@@ -361,24 +440,41 @@ class SettingsDialog(QDialog):
         self.download_path_edit.setText(Config.downloading.download_path)
         self.download_path_edit.setAccessibleName(self.download_path_label.text())
 
-
         self.change_download_path_button = QPushButton("تغيير المسار")
 
-        self.offline_playback_checkbox = QCheckBox("تشغيل السور والآيات التي تم تنزيلها دون إنترنت")
+        self.offline_playback_checkbox = QCheckBox(
+            "تشغيل السور والآيات التي تم تنزيلها دون إنترنت"
+        )
 
-        self.show_incomplete_download_warning_checkbox = QCheckBox("إظهار تحذير عند إغلاق البيان  في حال وجود ملفات لم يكتمل تنزيلها")
+        self.show_incomplete_download_warning_checkbox = QCheckBox(
+            "إظهار تحذير عند إغلاق البيان  في حال وجود ملفات لم يكتمل تنزيلها"
+        )
 
-        self.auto_refresh_downloads_lists_checkbox = QCheckBox("تحديث قوائم التنزيلات تلقائيا")
+        self.auto_refresh_downloads_lists_checkbox = QCheckBox(
+            "تحديث قوائم التنزيلات تلقائيا"
+        )
 
-        self.group_downloading_layout.addWidget(self.files_to_download_at_the_same_time_label)  
-        self.group_downloading_layout.addWidget(self.files_to_download_at_the_same_time_combo)
+        self.group_downloading_layout.addWidget(
+            self.files_to_download_at_the_same_time_label
+        )
+        self.group_downloading_layout.addWidget(
+            self.files_to_download_at_the_same_time_combo
+        )
         self.group_downloading_layout.addWidget(self.download_path_label)
         self.group_downloading_layout.addWidget(self.download_path_edit)
         self.group_downloading_layout.addWidget(self.change_download_path_button)
         self.group_downloading_layout.addWidget(self.offline_playback_checkbox)
-        self.group_downloading_layout.addWidget(self.show_incomplete_download_warning_checkbox)
-        self.group_downloading_layout.addWidget(self.auto_refresh_downloads_lists_checkbox)
-        self.group_downloading_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        self.group_downloading_layout.addWidget(
+            self.show_incomplete_download_warning_checkbox
+        )
+        self.group_downloading_layout.addWidget(
+            self.auto_refresh_downloads_lists_checkbox
+        )
+        self.group_downloading_layout.addSpacerItem(
+            QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
         self.group_downloading.setLayout(self.group_downloading_layout)
 
         self.change_download_path_button.clicked.connect(self.change_download_path)
@@ -392,11 +488,14 @@ class SettingsDialog(QDialog):
         self.group_search_layout.addWidget(self.ignore_tashkeel_checkbox)
         self.group_search_layout.addWidget(self.ignore_hamza_checkbox)
         self.group_search_layout.addWidget(self.match_whole_word_checkbox)
-        self.group_search_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        self.group_search_layout.addSpacerItem(
+            QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
         self.group_search.setLayout(self.group_search_layout)
 
-
-        # Adding to the stacked widget        
+        # Adding to the stacked widget
         self.stacked_widget.addWidget(self.group_general)
         self.stacked_widget.addWidget(self.group_audio)
         self.stacked_widget.addWidget(self.group_listening)
@@ -404,8 +503,8 @@ class SettingsDialog(QDialog):
         self.stacked_widget.addWidget(self.group_surah_player)
         self.stacked_widget.addWidget(self.group_downloading)
         self.stacked_widget.addWidget(self.group_search)
-        
-#        self.tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(self.tree_widget.indexOfTopLevelItem(current)))
+
+        #        self.tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(self.tree_widget.indexOfTopLevelItem(current)))
 
         # Linking tree widget with stacked widget
         self.tree_widget.currentItemChanged.connect(
@@ -414,11 +513,10 @@ class SettingsDialog(QDialog):
             )
         )
 
-
         # Layout adjustments
         taps_layout.addWidget(self.tree_widget, stretch=1)
         taps_layout.addWidget(self.stacked_widget, stretch=2)
-        
+
         main_layout.addLayout(taps_layout)
 
         # Buttons at the bottom
@@ -443,8 +541,6 @@ class SettingsDialog(QDialog):
         self.update_action_after_text_combo_label(self.text_repeat_spinbox.value())
         self.update_action_after_surah_combo_label(self.repeat_surah_spinbox.value())
 
-
-
     def update_repeat_surah_state(self):
         """Disable or enable repeat_surah_spinbox based on action_after_surah_combo selection."""
         current_id = self.action_after_surah_combo.currentData()
@@ -457,7 +553,6 @@ class SettingsDialog(QDialog):
         else:
             self.repeat_limit_spinbox.setEnabled(True)
 
-
     def update_text_repeat_state(self):
         current_id = self.action_after_text_combo.currentData()
         if current_id == 1:
@@ -465,14 +560,9 @@ class SettingsDialog(QDialog):
         else:
             self.text_repeat_spinbox.setEnabled(True)
 
-
-
-
-
     def update_action_combo_label(self, value: int):
         forms = {1: "مرة واحدة", 2: "مرتين"}
         times_text = forms.get(value, f"{value} مرات")
-
 
         templates = {
             0: "تشغيل الآية {} ثم إيقاف",
@@ -491,15 +581,15 @@ class SettingsDialog(QDialog):
             2: "تشغيل السورة {} ثم الانتقال إلى السورة التالية",
         }
 
-
         forms = {1: "مرة واحدة", 2: "مرتين"}
         times_text = forms.get(value, f"{value} مرات")
 
         for i in range(self.action_after_surah_combo.count()):
             id = self.action_after_surah_combo.itemData(i)
             if id in templates:
-                self.action_after_surah_combo.setItemText(i, templates[id].format(times_text))
-
+                self.action_after_surah_combo.setItemText(
+                    i, templates[id].format(times_text)
+                )
 
     def update_action_after_text_combo_label(self, value: int):
         forms = {1: "مرة واحدة", 2: "مرتين"}
@@ -514,9 +604,9 @@ class SettingsDialog(QDialog):
         for i in range(self.action_after_text_combo.count()):
             id = self.action_after_text_combo.itemData(i)
             if id in templates:
-                self.action_after_text_combo.setItemText(i, templates[id].format(times_text))
-
-
+                self.action_after_text_combo.setItemText(
+                    i, templates[id].format(times_text)
+                )
 
     def change_download_path(self):
         logger.debug("Changing download path.")
@@ -524,7 +614,6 @@ class SettingsDialog(QDialog):
         if new_path:
             self.download_path_edit.setText(new_path)
             logger.debug(f"Download path changed to: {new_path}")
- 
 
     def OnSurahVolume(self) -> None:
         volume = self.surah_volume.value()
@@ -555,14 +644,18 @@ class SettingsDialog(QDialog):
         if self.start_on_system_start_checkbox.isChecked():
             # If 'start_on_system_start_checkbox' is checked, automatically check 'run_in_background_checkbox'
             self.run_in_background_checkbox.setChecked(True)
-            logger.debug("Enabled 'Run in Background' as 'Start on System Startup' is checked.")
+            logger.debug(
+                "Enabled 'Run in Background' as 'Start on System Startup' is checked."
+            )
 
     def updateStartCheckboxState(self):
 
         # Check if 'run_in_background_checkbox' is unchecked, then uncheck 'start_on_system_start_checkbox'
         if not self.run_in_background_checkbox.isChecked():
             self.start_on_system_start_checkbox.setChecked(False)
-            logger.debug("'Run in Background' is unchecked, disabled 'Start on System Startup'.")
+            logger.debug(
+                "'Run in Background' is unchecked, disabled 'Start on System Startup'."
+            )
 
     def save_settings(self):
         logger.debug("Saving user settings.")
@@ -572,11 +665,14 @@ class SettingsDialog(QDialog):
         AthkarPlayer.apply_new_sound_card(self.athkar_device_combo.currentData())
         SoundEffectPlayer.apply_new_sound_card(self.volume_device_combo.currentData())
 
-        #apply new log level
+        # apply new log level
         log_level = LogLevel.from_name(self.log_levels_combo.currentData())
         LoggerManager.change_log_level(log_level)
 
-        if Config.general.auto_start_enabled != self.start_on_system_start_checkbox.isChecked():
+        if (
+            Config.general.auto_start_enabled
+            != self.start_on_system_start_checkbox.isChecked()
+        ):
             if self.start_on_system_start_checkbox.isChecked():
                 StartupManager.add_to_startup(program_english_name)
             else:
@@ -584,26 +680,46 @@ class SettingsDialog(QDialog):
 
         if Config.reading.font_type != self.font_type_combo.currentData().value:
             new_font_type = self.font_type_combo.currentData()
-            logger.info(f"Font type changed from {QuranFontType.from_int(Config.reading.font_type)} to {new_font_type}. Reloading Quran text.")
+            logger.info(
+                f"Font type changed from {QuranFontType.from_int(Config.reading.font_type)} to {new_font_type}. Reloading Quran text."
+            )
             self.parent.quran_manager.get_surahs.cache_clear()
             self.parent.quran_manager.font_type = new_font_type
-            self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
+            self.parent.quran_view.setText(
+                self.parent.quran_manager.get_current_content()
+            )
             Globals.effects_manager.play("change")
         if Config.reading.marks_type != self.marks_type_combo.currentData().value:
             new_marks_type = self.marks_type_combo.currentData()
             self.parent.quran_manager.formatter_options.marks_type = new_marks_type
-            logger.info(f"Marks type changed from {MarksType.from_int(Config.reading.marks_type)} to {new_marks_type}. Reloading Quran text.")
-            self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
+            logger.info(
+                f"Marks type changed from {MarksType.from_int(Config.reading.marks_type)} to {new_marks_type}. Reloading Quran text."
+            )
+            self.parent.quran_view.setText(
+                self.parent.quran_manager.get_current_content()
+            )
             Globals.effects_manager.play("change")
         if Config.reading.auto_page_turn != self.turn_pages_checkbox.isChecked():
-            self.parent.quran_manager.formatter_options.auto_page_turn = self.turn_pages_checkbox.isChecked()
-            self.parent.quran_view.setText(self.parent.quran_manager.get_current_content())
-                
+            self.parent.quran_manager.formatter_options.auto_page_turn = (
+                self.turn_pages_checkbox.isChecked()
+            )
+            self.parent.quran_view.setText(
+                self.parent.quran_manager.get_current_content()
+            )
+
         # Update settings in Config
-        Config.general.run_in_background_enabled = self.run_in_background_checkbox.isChecked()
-        Config.general.auto_start_enabled = self.start_on_system_start_checkbox.isChecked()
-        Config.general.auto_save_position_enabled = self.auto_save_position_checkbox.isChecked()
-        Config.general.auto_restore_position_enabled = self.auto_restore_position_checkbox.isChecked()
+        Config.general.run_in_background_enabled = (
+            self.run_in_background_checkbox.isChecked()
+        )
+        Config.general.auto_start_enabled = (
+            self.start_on_system_start_checkbox.isChecked()
+        )
+        Config.general.auto_save_position_enabled = (
+            self.auto_save_position_checkbox.isChecked()
+        )
+        Config.general.auto_restore_position_enabled = (
+            self.auto_restore_position_checkbox.isChecked()
+        )
         Config.general.check_update_enabled = self.update_checkbox.isChecked()
         Config.general.log_level = self.log_levels_combo.currentData()
 
@@ -621,30 +737,45 @@ class SettingsDialog(QDialog):
 
         Config.listening.reciter = self.reciters_combo.currentData()
         Config.listening.secondary_reciter = self.secondary_reciter_combo.currentData()
-        Config.listening.use_secondary_reciter_when_moving = self.sswitch_when_moving_checkbox.isChecked()
-        Config.listening.use_secondary_reciter_when_repeating = self.sswitch_when_repeating_checkbox.isChecked()
+        Config.listening.use_secondary_reciter_when_moving = (
+            self.sswitch_when_moving_checkbox.isChecked()
+        )
+        Config.listening.use_secondary_reciter_when_repeating = (
+            self.sswitch_when_repeating_checkbox.isChecked()
+        )
         Config.listening.action_after_listening = self.action_combo.currentData()
         Config.listening.forward_time = self.duration_spinbox.value()
         Config.listening.ayah_repeat_count = self.repeat_limit_spinbox.value()
         Config.listening.action_after_text = self.action_after_text_combo.currentData()
         Config.listening.text_repeat_count = self.text_repeat_spinbox.value()
         Config.listening.auto_move_focus = self.auto_move_focus_checkbox.isChecked()
-        Config.listening.auto_play_ayah_after_go_to = self.auto_play_checkbox.isChecked()
+        Config.listening.auto_play_ayah_after_go_to = (
+            self.auto_play_checkbox.isChecked()
+        )
 
         Config.reading.font_type = self.font_type_combo.currentData().value
         Config.reading.auto_page_turn = self.turn_pages_checkbox.isChecked()
         Config.reading.marks_type = self.marks_type_combo.currentData().value
 
-        Config.surah_player.action_after_surah = self.action_after_surah_combo.currentData()
+        Config.surah_player.action_after_surah = (
+            self.action_after_surah_combo.currentData()
+        )
         Config.surah_player.surah_repeat_count = self.repeat_surah_spinbox.value()
-        Config.surah_player.play_surah_in_background_enabled = self.player_in_background_checkbox.isChecked()
+        Config.surah_player.play_surah_in_background_enabled = (
+            self.player_in_background_checkbox.isChecked()
+        )
 
-        Config.downloading.files_to_download_at_the_same_time = self.files_to_download_at_the_same_time_combo.currentData()
+        Config.downloading.files_to_download_at_the_same_time = (
+            self.files_to_download_at_the_same_time_combo.currentData()
+        )
         Config.downloading.download_path = self.download_path_edit.text()
-        Config.downloading.show_incomplete_download_warning = self.show_incomplete_download_warning_checkbox.isChecked()
+        Config.downloading.show_incomplete_download_warning = (
+            self.show_incomplete_download_warning_checkbox.isChecked()
+        )
         Config.downloading.offline_playback = self.offline_playback_checkbox.isChecked()
-        Config.downloading.auto_refresh_downloads_lists = self.auto_refresh_downloads_lists_checkbox.isChecked()
-
+        Config.downloading.auto_refresh_downloads_lists = (
+            self.auto_refresh_downloads_lists_checkbox.isChecked()
+        )
 
         Config.search.ignore_tashkeel = self.ignore_tashkeel_checkbox.isChecked()
         Config.search.ignore_hamza = self.ignore_hamza_checkbox.isChecked()
@@ -652,7 +783,9 @@ class SettingsDialog(QDialog):
 
         # Save settings to file
         logger.debug("Saving settings to configuration file.")
-        new_settings = "\n".join([str(section_obj) for section_obj in Config.sections().values()])
+        new_settings = "\n".join(
+            [str(section_obj) for section_obj in Config.sections().values()]
+        )
         logger.debug(new_settings)
         Config.save_settings()
 
@@ -663,7 +796,9 @@ class SettingsDialog(QDialog):
         logger.warning("User requested settings reset.")
         msg_box = QMessageBox(self)
         msg_box.setWindowTitle("تحذير")
-        msg_box.setText("هل أنت متأكد من إعادة تعيين الإعدادات إلى الإعدادات الافتراضية؟")
+        msg_box.setText(
+            "هل أنت متأكد من إعادة تعيين الإعدادات إلى الإعدادات الافتراضية؟"
+        )
         msg_box.setIcon(QMessageBox.Icon.Warning)
         yes_button = msg_box.addButton("نعم", QMessageBox.ButtonRole.YesRole)
         no_button = msg_box.addButton("لا", QMessageBox.ButtonRole.NoRole)
@@ -683,25 +818,43 @@ class SettingsDialog(QDialog):
         self.athkar_volume.setValue(Config.audio.athkar_volume_level)
         self.ayah_volume.setValue(Config.audio.ayah_volume_level)
         self.surah_volume.setValue(Config.audio.surah_volume_level)
-        self.run_in_background_checkbox.setChecked(Config.general.run_in_background_enabled)
+        self.run_in_background_checkbox.setChecked(
+            Config.general.run_in_background_enabled
+        )
         self.turn_pages_checkbox.setChecked(Config.reading.auto_page_turn)
-        self.start_on_system_start_checkbox.setChecked(Config.general.auto_start_enabled)
-        self.auto_save_position_checkbox.setChecked(Config.general.auto_save_position_enabled)
-        self.auto_restore_position_checkbox.setChecked(Config.general.auto_restore_position_enabled)
+        self.start_on_system_start_checkbox.setChecked(
+            Config.general.auto_start_enabled
+        )
+        self.auto_save_position_checkbox.setChecked(
+            Config.general.auto_save_position_enabled
+        )
+        self.auto_restore_position_checkbox.setChecked(
+            Config.general.auto_restore_position_enabled
+        )
         self.update_checkbox.setChecked(Config.general.check_update_enabled)
         self.duration_spinbox.setValue(Config.listening.forward_time)
         self.repeat_limit_spinbox.setValue(Config.listening.ayah_repeat_count)
         self.text_repeat_spinbox.setValue(Config.listening.text_repeat_count)
         self.repeat_surah_spinbox.setValue(Config.surah_player.surah_repeat_count)
-        self.player_in_background_checkbox.setChecked(Config.surah_player.play_surah_in_background_enabled)
+        self.player_in_background_checkbox.setChecked(
+            Config.surah_player.play_surah_in_background_enabled
+        )
         self.auto_move_focus_checkbox.setChecked(Config.listening.auto_move_focus)
         self.auto_play_checkbox.setChecked(Config.listening.auto_play_ayah_after_go_to)
-        self.sswitch_when_moving_checkbox.setChecked(Config.listening.use_secondary_reciter_when_moving)
-        self.sswitch_when_repeating_checkbox.setChecked(Config.listening.use_secondary_reciter_when_repeating)
+        self.sswitch_when_moving_checkbox.setChecked(
+            Config.listening.use_secondary_reciter_when_moving
+        )
+        self.sswitch_when_repeating_checkbox.setChecked(
+            Config.listening.use_secondary_reciter_when_repeating
+        )
         self.download_path_edit.setText(Config.downloading.download_path)
-        self.show_incomplete_download_warning_checkbox.setChecked(Config.downloading.show_incomplete_download_warning)
+        self.show_incomplete_download_warning_checkbox.setChecked(
+            Config.downloading.show_incomplete_download_warning
+        )
         self.offline_playback_checkbox.setChecked(Config.downloading.offline_playback)
-        self.auto_refresh_downloads_lists_checkbox.setChecked(Config.downloading.auto_refresh_downloads_lists)
+        self.auto_refresh_downloads_lists_checkbox.setChecked(
+            Config.downloading.auto_refresh_downloads_lists
+        )
         self.ignore_tashkeel_checkbox.setChecked(Config.search.ignore_tashkeel)
         self.ignore_hamza_checkbox.setChecked(Config.search.ignore_hamza)
         self.match_whole_word_checkbox.setChecked(Config.search.match_whole_word)
@@ -711,22 +864,25 @@ class SettingsDialog(QDialog):
             (self.reciters_combo, Config.listening.reciter),
             (self.secondary_reciter_combo, Config.listening.secondary_reciter),
             (self.action_combo, Config.listening.action_after_listening),
-        (self.action_after_text_combo    , Config.listening.action_after_text),
+            (self.action_after_text_combo, Config.listening.action_after_text),
             (self.font_type_combo, QuranFontType.from_int(Config.reading.font_type)),
-    (self.marks_type_combo, MarksType.from_int(Config.reading.marks_type)),
-    (self.files_to_download_at_the_same_time_combo, Config.downloading.files_to_download_at_the_same_time),
-    (self.action_after_surah_combo, Config.surah_player.action_after_surah),
+            (self.marks_type_combo, MarksType.from_int(Config.reading.marks_type)),
+            (
+                self.files_to_download_at_the_same_time_combo,
+                Config.downloading.files_to_download_at_the_same_time,
+            ),
+            (self.action_after_surah_combo, Config.surah_player.action_after_surah),
             (self.ayah_device_combo, Config.audio.ayah_device),
             (self.surah_device_combo, Config.audio.surah_device),
-            (        self.volume_device_combo, Config.audio.volume_device),
-            (self.athkar_device_combo, Config.audio.athkar_device)
+            (self.volume_device_combo, Config.audio.volume_device),
+            (self.athkar_device_combo, Config.audio.athkar_device),
         ]
 
         for combo, value in combo_config:
             index = combo.findData(value)
             if index != -1:
                 combo.setCurrentIndex(index)
-        
+
     def open_listening_tab_and_focus_reciter(self):
         self.tree_widget.setCurrentItem(self.listening_item)
         self.reciters_combo.setFocus()
@@ -736,14 +892,12 @@ class SettingsDialog(QDialog):
         self.action_combo.setFocus()
 
     def open_listening_tab_and_focus_repeat_limit(self):
-        self.tree_widget.setCurrentItem(self.listening_item)    
+        self.tree_widget.setCurrentItem(self.listening_item)
         self.repeat_limit_spinbox.setFocus()
-
 
     def open_listening_tab_and_focus_text_repeat(self):
         self.tree_widget.setCurrentItem(self.listening_item)
         self.text_repeat_spinbox.setFocus()
-
 
     def open_listening_tab_and_focus_action_after_text(self):
         self.tree_widget.setCurrentItem(self.listening_item)
@@ -751,8 +905,7 @@ class SettingsDialog(QDialog):
 
     def reject(self):
         self.deleteLater()
-    
+
     def closeEvent(self, a0):
         logger.debug("Settings dialog closed.")
         return super().closeEvent(a0)
-    

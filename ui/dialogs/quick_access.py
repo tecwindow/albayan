@@ -1,6 +1,6 @@
 import os
 import qtawesome as qta
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QDialog,
     QVBoxLayout,
     QHBoxLayout,
@@ -10,13 +10,14 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QGroupBox,
 )
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QKeySequence, QShortcut
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeySequence, QShortcut
 from core_functions.quran.quran_manager import QuranManager
 from utils.logger import LoggerManager
 from utils.const import Globals
 
 logger = LoggerManager.get_logger(__name__)
+
 
 class QuickAccess(QDialog):
     def __init__(self, parent, title):
@@ -49,7 +50,7 @@ class QuickAccess(QDialog):
         self.choices_label = QLabel("انتقل إلى:")
         self.choices = QComboBox()
         self.choices.setAccessibleName(self.choices_label.text())
-        
+
         button_layout = QHBoxLayout()  # استخدام QHBoxLayout لأزرار الإجراءات
         self.go_button = QPushButton("اذهب")
         self.go_button.setIcon(qta.icon("fa5s.location-arrow"))
@@ -80,7 +81,7 @@ class QuickAccess(QDialog):
         close_shortcut.activated.connect(self.reject)
         logger.debug("QuickAccess dialog initialized successfully.")
 
-    def on_submit(self):    
+    def on_submit(self):
         logger.debug("go button clicked.")
         selected_item = self.choices.currentIndex() + 1
         logger.debug(f"User selected index {selected_item}")
@@ -134,7 +135,7 @@ class QuickAccess(QDialog):
 
     def reject(self):
         self.deleteLater()
-        
+
     def closeEvent(self, a0):
         logger.debug("QuickAccess dialog closed.")
         return super().closeEvent(a0)

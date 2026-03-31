@@ -2,21 +2,28 @@ import shutil
 import sys
 import os
 from cx_Freeze import setup, Executable
-import PyQt6
+import PySide6
+
 
 def rename_main_file(to_name="Albayan.py"):
     if os.path.exists("main.py"):
         os.rename("main.py", to_name)
     return to_name
 
+
 def restore_main_file(from_name="Albayan.py"):
     if os.path.exists(from_name):
         os.rename(from_name, "main.py")
 
+
 def get_pyqt_dll_files():
-    pyqt_path = os.path.dirname(PyQt6.__file__)
+    pyqt_path = os.path.dirname(PySide6.__file__)
     dll_files = ["Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Network.dll"]
-    return [(os.path.join(pyqt_path, "Qt6", "bin", file), os.path.join("lib", file)) for file in dll_files]
+    return [
+        (os.path.join(pyqt_path, "Qt6", "bin", file), os.path.join("lib", file))
+        for file in dll_files
+    ]
+
 
 def get_include_files():
     base_files = [
@@ -24,10 +31,11 @@ def get_include_files():
         ("documentation", "documentation"),
         ("Audio", "Audio"),
         ("bass.dll", "bass.dll"),
-        ("Albayan.ico", "Albayan.ico")
+        ("Albayan.ico", "Albayan.ico"),
     ]
     base_files.extend(get_pyqt_dll_files())
     return base_files
+
 
 def build_setup(script_name="Albayan.py", build_dir="albayan_build", version="5.0.1"):
     include_files = get_include_files()
@@ -37,13 +45,20 @@ def build_setup(script_name="Albayan.py", build_dir="albayan_build", version="5.
         "include_files": include_files,
         "packages": ["core_functions", "theme", "ui", "utils"],
         "includes": [
-            "PyQt6.QtCore", "PyQt6.QtWidgets", "PyQt6.QtGui", "PyQt6.QtMultimedia",
-            "packaging", "requests", "UniversalSpeech", "sqlalchemy",
-            "sqlalchemy.dialects.sqlite", "apscheduler"
+            "PySide6.QtCore",
+            "PySide6.QtWidgets",
+            "PySide6.QtGui",
+            "PySide6.QtMultimedia",
+            "packaging",
+            "requests",
+            "UniversalSpeech",
+            "sqlalchemy",
+            "sqlalchemy.dialects.sqlite",
+            "apscheduler",
         ],
         "excludes": ["tkinter", "test", "setuptools", "pip", "numpy", "unittest"],
         "include_msvcr": False,
-        "replace_paths": ["*="]
+        "replace_paths": ["*="],
     }
 
     setup(
@@ -55,7 +70,16 @@ def build_setup(script_name="Albayan.py", build_dir="albayan_build", version="5.
         author_email="support@tecwindow.net",
         url="https://tecwindow.net",
         download_url="https://github.com/tecwindow/albayan",
-        keywords=["islamic", "islam", "quran", "desktop", "alquran", "tecwindow", "القرآن", "إسلام"],
+        keywords=[
+            "islamic",
+            "islam",
+            "quran",
+            "desktop",
+            "alquran",
+            "tecwindow",
+            "القرآن",
+            "إسلام",
+        ],
         options={"build_exe": build_exe_options},
         executables=[
             Executable(
@@ -63,22 +87,24 @@ def build_setup(script_name="Albayan.py", build_dir="albayan_build", version="5.
                 base="gui",
                 target_name="Albayan.exe",
                 icon="Albayan.ico",
-                copyright="2026 tecwindow"
+                copyright="2026 tecwindow",
             )
-        ]
+        ],
     )
+
 
 def clean_unused_folders(build_dir="albayan_build"):
     folder_paths = [
-        os.path.join(build_dir, "lib/PyQt6/Qt6/bin"),
-        os.path.join(build_dir, "lib/PyQt6/Qt6/translations"),
-        os.path.join(build_dir, "lib/PyQt6/Qt6/plugins/multimedia")
+        os.path.join(build_dir, "lib/PySide6/Qt6/bin"),
+        os.path.join(build_dir, "lib/PySide6/Qt6/translations"),
+        os.path.join(build_dir, "lib/PySide6/Qt6/plugins/multimedia"),
     ]
     for folder in folder_paths:
         try:
             shutil.rmtree(os.path.abspath(folder))
         except Exception as e:
             print(f"Error removing {folder}: {e}")
+
 
 def main():
     build_dir = os.environ.get("ALBAYAN_BUILD_DIR", "albayan_build")
@@ -90,6 +116,7 @@ def main():
         clean_unused_folders(build_dir)
     finally:
         restore_main_file(script_name)
+
 
 if __name__ == "__main__":
     main()

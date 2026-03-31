@@ -2,21 +2,29 @@ from pathlib import Path
 import os
 import subprocess
 from typing import List, Dict, Optional, Union
-from PyQt6.QtGui import QKeySequence, QShortcut
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QComboBox, QMessageBox,
-    QPushButton, QLabel, QLineEdit, QListView,
-    QAbstractItemView, QMenu
+from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtWidgets import (
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QComboBox,
+    QMessageBox,
+    QPushButton,
+    QLabel,
+    QLineEdit,
+    QListView,
+    QAbstractItemView,
+    QMenu,
 )
-from PyQt6.QtCore import Qt, QUrl, QModelIndex
-from PyQt6.QtGui import QDesktopServices
+from PySide6.QtCore import Qt, QUrl, QModelIndex
+from PySide6.QtGui import QDesktopServices
 from ui.dialogs.info_dialog import InfoDialog
 from core_functions.downloader import DownloadManager
 from core_functions.downloader.status import DownloadStatus, DownloadProgress
 from core_functions.Reciters import RecitersManager
 from utils.logger import LoggerManager
 from utils.settings import Config
-from  utils.universal_speech import UniversalSpeech
+from utils.universal_speech import UniversalSpeech
 
 from ui.common.user_message import UserMessageService
 from .models import DownloadMode
@@ -28,35 +36,45 @@ from .proxy_model import DownloadProxyModel
 
 logger = LoggerManager.get_logger(__name__)
 
+
 class DownloadManagerDialog(QDialog):
     """Dialog to manage and monitor Quran downloads."""
 
     def __init__(
-            self, 
-                 parent, 
-                 surah_manager: DownloadManager, 
-                 ayah_manager: DownloadManager,
-                 surah_reciters: RecitersManager,
-                    ayah_reciters: RecitersManager
-                 ):
+        self,
+        parent,
+        surah_manager: DownloadManager,
+        ayah_manager: DownloadManager,
+        surah_reciters: RecitersManager,
+        ayah_reciters: RecitersManager,
+    ):
         super().__init__(parent)
         self.parent = parent
         self.surah_manager = surah_manager
         self.ayah_manager = ayah_manager
         self.surah_reciters = surah_reciters
         self.ayah_reciters = ayah_reciters
-        
+
         # Initialize Models
-        self.surah_model = DownloadListModel(self, self.surah_manager, self.surah_reciters, self.parent.quran_manager.get_surahs())
-        self.ayah_model = DownloadListModel(self, self.ayah_manager, self.ayah_reciters, self.parent.quran_manager.get_surahs())
-        
+        self.surah_model = DownloadListModel(
+            self,
+            self.surah_manager,
+            self.surah_reciters,
+            self.parent.quran_manager.get_surahs(),
+        )
+        self.ayah_model = DownloadListModel(
+            self,
+            self.ayah_manager,
+            self.ayah_reciters,
+            self.parent.quran_manager.get_surahs(),
+        )
+
         self.proxy_model = DownloadProxyModel(self)
-        
+
         # Default to Surah Model
         self.proxy_model.setSourceModel(self.surah_model)
 
         self.user_message_service = UserMessageService(self)
-
 
         self.setWindowTitle("مدير التنزيلات")
         self.setMinimumWidth(620)
@@ -80,12 +98,16 @@ class DownloadManagerDialog(QDialog):
         self.section_label = QLabel("القسم:")
         self.section_combo = QComboBox()
         self.section_combo.setAccessibleName(self.section_label.text())
-        
+
         # Add items with (Model, Manager, RecitersManager) as UserData
         if self.surah_manager:
-            self.section_combo.addItem("السور", (self.surah_model, self.surah_manager, self.surah_reciters))
+            self.section_combo.addItem(
+                "السور", (self.surah_model, self.surah_manager, self.surah_reciters)
+            )
         if self.ayah_manager:
-            self.section_combo.addItem("الآيات", (self.ayah_model, self.ayah_manager, self.ayah_reciters))
+            self.section_combo.addItem(
+                "الآيات", (self.ayah_model, self.ayah_manager, self.ayah_reciters)
+            )
 
         self.filter_label = QLabel("تصفية:")
         self.filter_combo = QComboBox()
@@ -109,7 +131,7 @@ class DownloadManagerDialog(QDialog):
         self.list_view.setUniformItemSizes(True)
         self.list_view.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.list_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        
+
         layout.addWidget(self.list_view)
 
         # === Session Progress ===
@@ -123,7 +145,6 @@ class DownloadManagerDialog(QDialog):
         self.btn_close = QPushButton("إغلاق")
         self.btn_close.setShortcut(QKeySequence("Ctrl+W"))
         QShortcut(QKeySequence("Ctrl+F4"), self).activated.connect(self.close)
-
 
         btn_layout.addWidget(self.btn_download)
         btn_layout.addWidget(self.btn_delete)
@@ -141,18 +162,27 @@ class DownloadManagerDialog(QDialog):
         self.btn_download.clicked.connect(self.show_download_menu)
         self.btn_delete.clicked.connect(self.show_delete_menu)
         self.btn_close.clicked.connect(self.close)
-        
 
+        self.surah_manager.downloads_added.connect(
+            lambda _: self.session_progress.recalculate_totals()
+        )
+        self.ayah_manager.downloads_added.connect(
+            lambda _: self.session_progress.recalculate_totals()
+        )
 
-
-        self.surah_manager.downloads_added.connect(lambda _: self.session_progress.recalculate_totals())
-        self.ayah_manager.downloads_added.connect(lambda _: self.session_progress.recalculate_totals())
-        
         # Ensure session progress updates when downloads are deleted
-        self.surah_manager.download_deleted.connect(lambda _: self.session_progress.recalculate_totals())
-        self.ayah_manager.download_deleted.connect(lambda _: self.session_progress.recalculate_totals())
-        self.surah_manager.downloads_cleared.connect(self.session_progress.recalculate_totals)
-        self.ayah_manager.downloads_cleared.connect(self.session_progress.recalculate_totals)
+        self.surah_manager.download_deleted.connect(
+            lambda _: self.session_progress.recalculate_totals()
+        )
+        self.ayah_manager.download_deleted.connect(
+            lambda _: self.session_progress.recalculate_totals()
+        )
+        self.surah_manager.downloads_cleared.connect(
+            self.session_progress.recalculate_totals
+        )
+        self.ayah_manager.downloads_cleared.connect(
+            self.session_progress.recalculate_totals
+        )
 
     def set_shortcuts(self):
 
@@ -163,22 +193,29 @@ class DownloadManagerDialog(QDialog):
             (QKeySequence("D"), self.say_downloaded_size),
             (QKeySequence("R"), self.say_remaining_time),
             (QKeySequence("E"), self.say_elapsed_time),
-        ("Ctrl+S", self.toggle_start_cancel_current),
-        ("Ctrl+P", self.toggle_pause_resume_current),
-        ("Ctrl+Shift+P", self.toggle_pause_resume_all),
-        ("Ctrl+Shift+S", self.toggle_start_cancel_all),
-                ("Delete", self.delete_selected_item),
-                ("Ctrl+Delete", self.delete_all),
-                        ("Shift+Delete", lambda: self.delete_by_status(DownloadStatus.COMPLETED, "المكتمل")),
-        ("Alt+Delete", lambda: self.delete_by_status("incomplete", "غير المكتمل")),
-        ("Ctrl+N", self.show_download_menu),
-                        ("Ctrl+O", self.open_current_item),
-        ("Ctrl+F", self.open_current_item_folder),
-        ("Ctrl+I", self.show_selected_item_info),
+            ("Ctrl+S", self.toggle_start_cancel_current),
+            ("Ctrl+P", self.toggle_pause_resume_current),
+            ("Ctrl+Shift+P", self.toggle_pause_resume_all),
+            ("Ctrl+Shift+S", self.toggle_start_cancel_all),
+            ("Delete", self.delete_selected_item),
+            ("Ctrl+Delete", self.delete_all),
+            (
+                "Shift+Delete",
+                lambda: self.delete_by_status(DownloadStatus.COMPLETED, "المكتمل"),
+            ),
+            ("Alt+Delete", lambda: self.delete_by_status("incomplete", "غير المكتمل")),
+            ("Ctrl+N", self.show_download_menu),
+            ("Ctrl+O", self.open_current_item),
+            ("Ctrl+F", self.open_current_item_folder),
+            ("Ctrl+I", self.show_selected_item_info),
         )
 
-        QShortcut(QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_Return), self).activated.connect(self.download_surahs)
-        QShortcut(QKeySequence(Qt.KeyboardModifier.ShiftModifier | Qt.Key.Key_Return), self).activated.connect(self.download_ayahs)
+        QShortcut(
+            QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_Return), self
+        ).activated.connect(self.download_surahs)
+        QShortcut(
+            QKeySequence(Qt.KeyboardModifier.ShiftModifier | Qt.Key.Key_Return), self
+        ).activated.connect(self.download_ayahs)
         for seq, func in shortcuts:
             shortcut = QShortcut(seq, self)
             shortcut.activated.connect(func)
@@ -199,7 +236,7 @@ class DownloadManagerDialog(QDialog):
     @property
     def current_manager(self) -> DownloadManager:
         return self.section_combo.currentData()[1]
-    
+
     @property
     def current_reciters_manager(self) -> RecitersManager:
         return self.section_combo.currentData()[2]
@@ -210,14 +247,14 @@ class DownloadManagerDialog(QDialog):
         if not index.isValid():
             return None
         return index
-    
+
     @property
     def current_download_id(self) -> Optional[int]:
         index = self.current_item_index
         if not index:
             return None
         return index.data(DownloadListModel.ItemRole)["id"]
-    
+
     @property
     def current_download_title(self) -> str:
         index = self.current_item_index
@@ -240,34 +277,77 @@ class DownloadManagerDialog(QDialog):
         file_path = Path(item_data["folder_path"]) / item_data["filename"]
 
         menu = QMenu(self)
-        open_file_action = menu.addAction("تشغيل في المشغل الافتراضي", lambda: self.open_in_default_player(file_path))
-        open_folder = menu.addAction("فتح في المجلد", lambda: self.open_containing_folder(file_path))
+        open_file_action = menu.addAction(
+            "تشغيل في المشغل الافتراضي", lambda: self.open_in_default_player(file_path)
+        )
+        open_folder = menu.addAction(
+            "فتح في المجلد", lambda: self.open_containing_folder(file_path)
+        )
         menu.addSeparator()
         pause_action = menu.addAction("إيقاف التنزيل مؤقتًا", self.pause_current_item)
         pause_all_action = menu.addAction("إيقاف تنزيل الكل مؤقتًا", self.pause_all)
-        resume_action = menu.addAction("استئناف", lambda: self.current_manager.resume(download_id))
-        resume_all = menu.addAction("استئناف تنزيل الكل", self.current_manager.resume_all)
-        start_action = menu.addAction("إعادة المحاولة" if current_status == DownloadStatus.ERROR else "بدء التنزيل", self.restart_current_item)
+        resume_action = menu.addAction(
+            "استئناف", lambda: self.current_manager.resume(download_id)
+        )
+        resume_all = menu.addAction(
+            "استئناف تنزيل الكل", self.current_manager.resume_all
+        )
+        start_action = menu.addAction(
+            (
+                "إعادة المحاولة"
+                if current_status == DownloadStatus.ERROR
+                else "بدء التنزيل"
+            ),
+            self.restart_current_item,
+        )
         start_all = menu.addAction("بدء تنزيل الكل", self.restart_all)
         cancel_action = menu.addAction("إلغاء التنزيل", self.cancel_current_item)
         cancel_all_action = menu.addAction("إلغاء تنزيل الكل", self.cancel_all)
         menu.addSeparator()
         delete_action = menu.addAction("حذف الملف المحدد", self.delete_selected_item)
-        info_action = menu.addAction("معلومات الملف المحدد", self.show_selected_item_info)
+        info_action = menu.addAction(
+            "معلومات الملف المحدد", self.show_selected_item_info
+        )
 
         # status of actions based on current status
-        open_file_action.setEnabled(file_path.exists() and current_status == DownloadStatus.COMPLETED)
+        open_file_action.setEnabled(
+            file_path.exists() and current_status == DownloadStatus.COMPLETED
+        )
         open_folder.setEnabled(file_path.exists())
         pause_action.setEnabled(current_status == DownloadStatus.DOWNLOADING)
         pause_all_action.setEnabled(self.current_manager.has_active_downloads())
         resume_action.setEnabled(current_status == DownloadStatus.PAUSED)
-        resume_all.setEnabled(len(self.current_manager.get_downloads([DownloadStatus.PAUSED])) > 0)
-        start_action.setEnabled(current_status in {DownloadStatus.ERROR, DownloadStatus.CANCELLED})
-        start_all.setEnabled(len(self.current_manager.get_downloads([DownloadStatus.CANCELLED, DownloadStatus.ERROR])) > 0)
-        cancel_action.setEnabled(current_status in {DownloadStatus.PENDING, DownloadStatus.DOWNLOADING, DownloadStatus.PAUSED})
-        cancel_all_action.setEnabled(len(self.current_manager.get_downloads([DownloadStatus.PENDING, DownloadStatus.DOWNLOADING])) > 0)
+        resume_all.setEnabled(
+            len(self.current_manager.get_downloads([DownloadStatus.PAUSED])) > 0
+        )
+        start_action.setEnabled(
+            current_status in {DownloadStatus.ERROR, DownloadStatus.CANCELLED}
+        )
+        start_all.setEnabled(
+            len(
+                self.current_manager.get_downloads(
+                    [DownloadStatus.CANCELLED, DownloadStatus.ERROR]
+                )
+            )
+            > 0
+        )
+        cancel_action.setEnabled(
+            current_status
+            in {
+                DownloadStatus.PENDING,
+                DownloadStatus.DOWNLOADING,
+                DownloadStatus.PAUSED,
+            }
+        )
+        cancel_all_action.setEnabled(
+            len(
+                self.current_manager.get_downloads(
+                    [DownloadStatus.PENDING, DownloadStatus.DOWNLOADING]
+                )
+            )
+            > 0
+        )
         delete_action.setEnabled(self.current_download_id is not None)
-
 
         menu.setAccessibleName("الإجراءات")
         menu.setFocus()
@@ -296,21 +376,31 @@ class DownloadManagerDialog(QDialog):
         window_title = f"معلومات ملف {data.get('filename', 'غير معروف')}"
 
         return (
-            "\n".join([
-                f"نوع العنصر: {'آية' if data.get('ayah_number') else 'سورة'}.",
-                f"اسم الملف: {data.get('filename', 'غير معروف')}.",
-                *( [f"حجم الملف: {data.get('size_text')}." ] if data.get('total_bytes')  else [] ),
-                f"مسار الملف: {data.get('folder_path', 'غير معروف')}.",
-                f"تاريخ الإنشاء: {fmt_date(data.get('created_at'))}.",
-                f"تاريخ آخر تعديل: {fmt_date(data.get('updated_at'))}.",
-                f"الحالة: {data.get('status').label if data.get('status') else 'غير معروف'}.",
-                *( [f"رقم الآية: {data.get('ayah_number')}." ] if data.get('ayah_number') else [] ),
-                f"رقم السورة: {data.get('surah_number', 'غير معروف')}.",
-                f"اسم السورة: {surahs[data.get('surah_number') - 1].name if data.get('surah_number') and 0 < data.get('surah_number') <= len(surahs) else 'غير معروف'}.",
-                f"القارئ: {reciter.get('display_text', 'غير معروف') if reciter else 'غير معروف'}.",
-                f"الرابط: {data.get('url', 'غير معروف')}."
-            ]),
-            window_title
+            "\n".join(
+                [
+                    f"نوع العنصر: {'آية' if data.get('ayah_number') else 'سورة'}.",
+                    f"اسم الملف: {data.get('filename', 'غير معروف')}.",
+                    *(
+                        [f"حجم الملف: {data.get('size_text')}."]
+                        if data.get("total_bytes")
+                        else []
+                    ),
+                    f"مسار الملف: {data.get('folder_path', 'غير معروف')}.",
+                    f"تاريخ الإنشاء: {fmt_date(data.get('created_at'))}.",
+                    f"تاريخ آخر تعديل: {fmt_date(data.get('updated_at'))}.",
+                    f"الحالة: {data.get('status').label if data.get('status') else 'غير معروف'}.",
+                    *(
+                        [f"رقم الآية: {data.get('ayah_number')}."]
+                        if data.get("ayah_number")
+                        else []
+                    ),
+                    f"رقم السورة: {data.get('surah_number', 'غير معروف')}.",
+                    f"اسم السورة: {surahs[data.get('surah_number') - 1].name if data.get('surah_number') and 0 < data.get('surah_number') <= len(surahs) else 'غير معروف'}.",
+                    f"القارئ: {reciter.get('display_text', 'غير معروف') if reciter else 'غير معروف'}.",
+                    f"الرابط: {data.get('url', 'غير معروف')}.",
+                ]
+            ),
+            window_title,
         )
 
     def open_in_default_player(self, file_path: Union[str, Path]):
@@ -332,7 +422,7 @@ class DownloadManagerDialog(QDialog):
 
         if self.user_message_service.confirm(
             "تأكيد الحذف",
-            f"هل أنت متأكد أنك تريد حذف الملف التالي؟\n\n{self.current_download_title}"
+            f"هل أنت متأكد أنك تريد حذف الملف التالي؟\n\n{self.current_download_title}",
         ):
             self.current_manager.delete(download_id)
             UniversalSpeech.say("تم حذف الملف المحدد.")
@@ -350,7 +440,7 @@ class DownloadManagerDialog(QDialog):
                 DownloadStatus.DOWNLOADING,
                 DownloadStatus.PAUSED,
                 DownloadStatus.CANCELLED,
-                DownloadStatus.ERROR
+                DownloadStatus.ERROR,
             }
             for st in statuses:
                 self.current_manager.delete_by_status(st)
@@ -358,45 +448,33 @@ class DownloadManagerDialog(QDialog):
             self.current_manager.delete_by_status(status)
         UniversalSpeech.say(f"تم حذف العناصر {status_label}.")
 
-
-
     def cancel_current_item(self):
         if self.user_message_service.confirm(
             "تأكيد إلغاء التنزيل",
-            f"هل أنت متأكد أنك تريد إلغاء تنزيل الملف التالي؟\n\n{self.current_download_title}"
+            f"هل أنت متأكد أنك تريد إلغاء تنزيل الملف التالي؟\n\n{self.current_download_title}",
         ):
             self.current_manager.cancel(self.current_download_id)
             UniversalSpeech.say("تم إلغاء تنزيل الملف.")
-
-
-
-
-
-
 
     def pause_current_item(self):
         self.current_manager.pause(self.current_download_id)
         self.proxy_model.invalidateFilter()
         UniversalSpeech.say("تم إيقاف تنزيل الملف مؤقتًا.")
 
-
     def pause_all(self):
         self.current_manager.pause_all()
         self.proxy_model.invalidateFilter()
         UniversalSpeech.say("تم إيقاف جميع التنزيلات مؤقتًا.")
-
 
     def restart_current_item(self):
         self.current_manager.restart(self.current_download_id)
         self.proxy_model.invalidateFilter()
         UniversalSpeech.say("تتم إعادة محاولة تنزيل الملف.")
 
-
     def restart_all(self):
         self.current_manager.restart_all()
         self.proxy_model.invalidateFilter()
         UniversalSpeech.say("تتم إعادة محاولة تنزيل جميع الملفات.")
-
 
     def cancel_all(self):
         if self.user_message_service.confirm(
@@ -427,13 +505,10 @@ class DownloadManagerDialog(QDialog):
         if status in {
             DownloadStatus.PENDING,
             DownloadStatus.DOWNLOADING,
-            DownloadStatus.PAUSED
+            DownloadStatus.PAUSED,
         }:
             self.cancel_current_item()
-        elif status in {
-            DownloadStatus.ERROR,
-            DownloadStatus.CANCELLED
-        }:
+        elif status in {DownloadStatus.ERROR, DownloadStatus.CANCELLED}:
             self.restart_current_item()
 
     def toggle_pause_resume_current(self):
@@ -458,29 +533,19 @@ class DownloadManagerDialog(QDialog):
         if manager.get_downloads([DownloadStatus.PAUSED]):
             self.resume_all()
 
-
     def toggle_start_cancel_all(self):
         manager = self.current_manager
 
-        active = manager.get_downloads([
-            DownloadStatus.PENDING,
-            DownloadStatus.DOWNLOADING,
-            DownloadStatus.PAUSED
-        ])
+        active = manager.get_downloads(
+            [DownloadStatus.PENDING, DownloadStatus.DOWNLOADING, DownloadStatus.PAUSED]
+        )
 
         if active:
             self.cancel_all()
             return
 
-        if manager.get_downloads([
-            DownloadStatus.ERROR,
-            DownloadStatus.CANCELLED
-        ]):
+        if manager.get_downloads([DownloadStatus.ERROR, DownloadStatus.CANCELLED]):
             self.restart_all()
-
-
-
-
 
     def delete_all(self):
         if self.user_message_service.confirm(
@@ -489,7 +554,6 @@ class DownloadManagerDialog(QDialog):
         ):
             self.current_manager.delete_all()
             UniversalSpeech.say("تم حذف جميع العناصر.")
-
 
     def get_current_file_path(self) -> Optional[Path]:
         index = self.current_item_index
@@ -515,29 +579,29 @@ class DownloadManagerDialog(QDialog):
             return
         self.open_containing_folder(file_path)
 
-
-
     def show_delete_menu(self):
         menu = QMenu(self)
         menu.addAction("حذف الكل", self.delete_all)
-        menu.addAction("حذف المكتمل",
-        lambda: self.delete_by_status(DownloadStatus.COMPLETED, "المكتمل"))
+        menu.addAction(
+            "حذف المكتمل",
+            lambda: self.delete_by_status(DownloadStatus.COMPLETED, "المكتمل"),
+        )
 
-        menu.addAction("حذف غير المكتمل",
-        lambda: self.delete_by_status("incomplete", "غير المكتمل"))
-        
+        menu.addAction(
+            "حذف غير المكتمل",
+            lambda: self.delete_by_status("incomplete", "غير المكتمل"),
+        )
+
         menu.setAccessibleName("قائمة حذف")
         menu.setFocus()
         menu.exec(self.btn_delete.mapToGlobal(self.btn_delete.rect().bottomLeft()))
 
-
-
-
-
     def download_surahs(self):
         surahs = self.parent.quran_manager.get_surahs()
 
-        dialog = NewDownloadDialog(self, DownloadMode.SURAH, surahs, self.surah_reciters)
+        dialog = NewDownloadDialog(
+            self, DownloadMode.SURAH, surahs, self.surah_reciters
+        )
         if dialog.exec() == QDialog.DialogCode.Accepted:
             selection = dialog.get_selection()
             reciter = selection["reciter"]
@@ -554,7 +618,7 @@ class DownloadManagerDialog(QDialog):
                 if num in reciter["available_suras"]
             ]
 
-            path = F"{Config.downloading.download_path}/{reciter['id']}"
+            path = f"{Config.downloading.download_path}/{reciter['id']}"
             self.surah_manager.add_new_downloads(new_downloads, path)
             self.surah_manager.start()
             self.section_combo.setCurrentIndex(0)
@@ -573,30 +637,42 @@ class DownloadManagerDialog(QDialog):
             to_ayah_global = selection["to_ayah"]
 
             new_downloads = []
-            
+
             # Iterate through the range of surahs
             for surah in surahs[from_surah.number - 1 : to_surah.number]:
                 start_ayah = 1
                 end_ayah = surah.ayah_count
 
-                if                 from_ayah_global >= surah.first_ayah_number and                 from_ayah_global <= surah.last_ayah_number:
+                if (
+                    from_ayah_global >= surah.first_ayah_number
+                    and from_ayah_global <= surah.last_ayah_number
+                ):
                     start_ayah = from_ayah_global - surah.first_ayah_number + 1
 
-                if                 to_ayah_global >= surah.first_ayah_number and                 to_ayah_global <= surah.last_ayah_number:
+                if (
+                    to_ayah_global >= surah.first_ayah_number
+                    and to_ayah_global <= surah.last_ayah_number
+                ):
                     end_ayah = to_ayah_global - surah.first_ayah_number + 1
 
-                for ayah_num in range(start_ayah if start_ayah > 1 else 0, end_ayah + 1):
-                    url = self.ayah_reciters.get_url(reciter["id"], surah.number, ayah_num)
+                for ayah_num in range(
+                    start_ayah if start_ayah > 1 else 0, end_ayah + 1
+                ):
+                    url = self.ayah_reciters.get_url(
+                        reciter["id"], surah.number, ayah_num
+                    )
                     if url:
-                        new_downloads.append({
-                            "reciter_id": reciter["id"],
-                            "surah_number": surah.number,
-                            "ayah_number": ayah_num,
-                            "url": url,
-                        })
+                        new_downloads.append(
+                            {
+                                "reciter_id": reciter["id"],
+                                "surah_number": surah.number,
+                                "ayah_number": ayah_num,
+                                "url": url,
+                            }
+                        )
 
             if new_downloads:
-                path = F"{Config.downloading.download_path}/{reciter['id']}"
+                path = f"{Config.downloading.download_path}/{reciter['id']}"
                 self.ayah_manager.add_new_downloads(new_downloads, path)
                 self.ayah_manager.start()
                 self.section_combo.setCurrentIndex(1)
@@ -657,7 +733,10 @@ class DownloadManagerDialog(QDialog):
             key = event.key()
             modifiers = event.modifiers()
 
-            if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter) and modifiers == Qt.KeyboardModifier.NoModifier:
+            if (
+                key in (Qt.Key.Key_Return, Qt.Key.Key_Enter)
+                and modifiers == Qt.KeyboardModifier.NoModifier
+            ):
                 self.open_context_menu_from_keyboard()
                 return True
 

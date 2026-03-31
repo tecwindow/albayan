@@ -1,11 +1,13 @@
-from PyQt6.QtWidgets import QLineEdit, QApplication
-from PyQt6.QtGui import QRegularExpressionValidator
-from PyQt6.QtCore import QRegularExpression
+from PySide6.QtWidgets import QLineEdit, QApplication
+from PySide6.QtGui import QRegularExpressionValidator
+from PySide6.QtCore import QRegularExpression
+
 
 class CustomLineEdit(QLineEdit):
     def focusInEvent(self, event):
         super().focusInEvent(event)
         self.selectAll()
+
 
 class ArabicSearchBox(CustomLineEdit):
     def __init__(self, parent=None):
@@ -16,4 +18,3 @@ class ArabicSearchBox(CustomLineEdit):
         validator = QRegularExpressionValidator(regex, self)
         self.setValidator(validator)
         self.inputRejected.connect(QApplication.beep)
-

@@ -1,13 +1,16 @@
-from PyQt6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox
 from .bass_player import AudioPlayer
 from utils.settings import Config
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
+
 class SurahPlayer(AudioPlayer):
     instances = []
-    
+
     def __init__(self) -> None:
-        super().__init__(Config.audio.surah_volume_level, device=Config.audio.surah_device)
+        super().__init__(
+            Config.audio.surah_volume_level, device=Config.audio.surah_device
+        )
         SurahPlayer.instances.append(self)

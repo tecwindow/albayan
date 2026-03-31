@@ -56,13 +56,18 @@ class LoggerManager:
         :param dev_mode: If True, adds a console handler for development.
         """
         
+        # Force standard output and error streams to use utf-8 encoding
+        if sys.stdout and sys.stdout.encoding != 'utf-8':
+            sys.stdout.reconfigure(encoding='utf-8')
+        if sys.stderr and sys.stderr.encoding != 'utf-8':
+            sys.stderr.reconfigure(encoding='utf-8')
+
         if not isinstance(log_level, LogLevel):
             logging.error("log_level must be an instance of LogLevel")
             raise ValueError("log_level must be an instance of LogLevel")
         
         if not cls._initialized:
             handlers = []
-            # Organize handlers using the dedicated methods
             handlers.append(cls._get_file_handler(log_file, log_level))
             if dev_mode:
                 handlers.append(cls._get_console_handler(log_level))
@@ -73,6 +78,7 @@ class LoggerManager:
             )
             cls._initialized = True
 
+
     @classmethod
     def _get_file_handler(cls, log_file: str, log_level: LogLevel):
         """
@@ -82,7 +88,7 @@ class LoggerManager:
         :param log_level: Logging level for the handler.
         :return: A list containing a configured FileHandler.
         """
-        file_handler = logging.FileHandler(log_file)
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
         file_handler.setLevel(log_level.value)
         # File handler formatter (detailed format)
         file_formatter = logging.Formatter(

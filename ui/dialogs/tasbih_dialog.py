@@ -1,9 +1,16 @@
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QGridLayout, QListWidget, QPushButton, QInputDialog, 
-    QLabel, QMessageBox, QListWidgetItem
+from PySide6.QtWidgets import (
+    QDialog,
+    QVBoxLayout,
+    QGridLayout,
+    QListWidget,
+    QPushButton,
+    QInputDialog,
+    QLabel,
+    QMessageBox,
+    QListWidgetItem,
 )
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QKeySequence, QShortcut, QAction
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeySequence, QShortcut, QAction
 import qtawesome as qta
 from core_functions.tasbih import TasbihController
 from core_functions.tasbih.model import TasbihEntry
@@ -21,59 +28,58 @@ class TasbihDialog(QDialog):
         self.controller = TasbihController(paths.athkar_db)
         self.setWindowTitle("المسبحة")
         self.resize(400, 400)
-        
+
         # Create UI elements.
         self.listWidget = QListWidget()
         self.listWidget.setMinimumHeight(150)  # set list Height
         self.listWidget.setAccessibleName("قائمة التسابيح")
 
-
         self.openButton = QPushButton()
         self.openButton.setIcon(qta.icon("fa5s.folder-open"))
         self.openButton.setToolTip("اختيار التسبيح")
         self.openButton.setAccessibleName("اختيار التسبيح")
-        
+
         self.addButton = QPushButton()
         self.addButton.setIcon(qta.icon("fa5s.plus"))
         self.addButton.setToolTip("إضافة تسبيح")
         self.addButton.setAccessibleName("إضافة تسبيح")
-        
+
         self.delete_button = QPushButton()
         self.delete_button.setIcon(qta.icon("fa5s.trash"))
         self.delete_button.setToolTip("حذف تسبيح")
         self.delete_button.setAccessibleName("حذف تسبيح")
         self.delete_button.setEnabled(False)
-        
+
         self.incrementButton = QPushButton()
         self.incrementButton.setIcon(qta.icon("fa5s.arrow-up"))
         self.incrementButton.setToolTip("زيادة العداد")
         self.incrementButton.setAccessibleName("زيادة العداد")
         self.incrementButton.setEnabled(False)
-        
+
         self.decrementButton = QPushButton()
         self.decrementButton.setIcon(qta.icon("fa5s.arrow-down"))
         self.decrementButton.setToolTip("إنقاص العداد")
         self.decrementButton.setAccessibleName("إنقاص العداد")
         self.decrementButton.setEnabled(False)
-        
+
         self.resetButton = QPushButton()
         self.resetButton.setIcon(qta.icon("fa5s.sync"))
         self.resetButton.setToolTip("مسح العداد")
         self.resetButton.setAccessibleName("مسح العداد")
         self.resetButton.setEnabled(False)
-        
+
         self.resetAllButton = QPushButton()
         self.resetAllButton.setIcon(qta.icon("fa5s.undo"))
         self.resetAllButton.setToolTip("إعادة تعيين الكل")
         self.resetAllButton.setAccessibleName("إعادة تعيين الكل")
         self.resetAllButton.setEnabled(False)
-        
+
         self.deleteAllButton = QPushButton()
         self.deleteAllButton.setIcon(qta.icon("fa5s.trash-alt"))
         self.deleteAllButton.setToolTip("حذف الكل")
         self.deleteAllButton.setAccessibleName("حذف الكل")
         self.deleteAllButton.setEnabled(False)
-        
+
         self.close_button = QPushButton()
         self.close_button.setIcon(qta.icon("fa5s.times"))
         self.close_button.setToolTip("إغلاق")
@@ -98,7 +104,7 @@ class TasbihDialog(QDialog):
 
         mainLayout.addLayout(gridLayout)
         self.setLayout(mainLayout)
-        
+
         # Connect UI button clicks to slots.
         self.openButton.clicked.connect(self.open_tasbih_entry_dialog)
         self.addButton.clicked.connect(self.handle_add_entry)
@@ -114,7 +120,6 @@ class TasbihDialog(QDialog):
 
         close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
         close_shortcut.activated.connect(self.reject)
-
 
         # Connect controller signals to dialog slots.
         self.controller.entrieAdded.connect(self.handle_entry_added)
@@ -136,25 +141,30 @@ class TasbihDialog(QDialog):
             self.addButton: "Ctrl+A",
             self.openButton: "Ctrl+O",
             self.close_button: "Ctrl+W",
-            self.resetButton: "Ctrl+R"
+            self.resetButton: "Ctrl+R",
         }
-        
+
         for widget, shortcut in shortcuts.items():
             widget.setShortcut(QKeySequence(shortcut))
             logger.debug(f"Shortcut {shortcut} set for {widget.toolTip()}")
-            
+
     def open_tasbih_entry_dialog(self):
         """Open the Tasbih entry dialog for the selected item."""
         logger.debug("the user clicked on a tasbih entry.")
         selected_item = self.listWidget.currentItem()
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         tasbih_entry = self.controller.get_entry(entry_id)
-        logger.info(f"Opening Tasbih entry dialog for: {tasbih_entry.name} (ID: {entry_id}, Count: {tasbih_entry.counter})")
+        logger.info(
+            f"Opening Tasbih entry dialog for: {tasbih_entry.name} (ID: {entry_id}, Count: {tasbih_entry.counter})"
+        )
         dialog = TasbihEntryDialog(self, self.controller, tasbih_entry)
-        UniversalSpeech.say(F"مرحبا بك في المِسْبَحَة، التسبيح: {tasbih_entry.name}، العدد: {tasbih_entry.counter}. استخدم المفاتيح التالية لزيادة العداد: Space, Enter, +,أو C. لإنقاص العداد استخدم: D, Ctrl+Space, -, أو Backspace. لإعادة تعيين العداد استخدم: Ctrl+R. للمعلومات استخدم: V للعدد، T للذِكر، I للكل.", force=True)
+        UniversalSpeech.say(
+            f"مرحبا بك في المِسْبَحَة، التسبيح: {tasbih_entry.name}، العدد: {tasbih_entry.counter}. استخدم المفاتيح التالية لزيادة العداد: Space, Enter, +,أو C. لإنقاص العداد استخدم: D, Ctrl+Space, -, أو Backspace. لإعادة تعيين العداد استخدم: Ctrl+R. للمعلومات استخدم: V للعدد، T للذِكر، I للكل.",
+            force=True,
+        )
         dialog.exec()
 
-    def OnItemSelectionChanged(self):    
+    def OnItemSelectionChanged(self):
         status = bool(self.listWidget.selectedItems())
         self.openButton.setEnabled(status)
         self.incrementButton.setEnabled(status)
@@ -163,29 +173,35 @@ class TasbihDialog(QDialog):
         self.delete_button.setEnabled(status)
         self.resetAllButton.setEnabled(status)
         self.deleteAllButton.setEnabled(status)
-        logger.debug(f"List item selection status: {status}. Buttons enabled: {status}.")
-        
+        logger.debug(
+            f"List item selection status: {status}. Buttons enabled: {status}."
+        )
+
     def populate_list(self):
         """Populate the list widget with all current tasbih entries."""
-        logger.debug("Populating Tasbih list widget with entries.")        
+        logger.debug("Populating Tasbih list widget with entries.")
         entries = self.controller.get_all_entries()
         for entry in entries:
             self.add_list_item(entry)
         logger.debug("Tasbih list populated.")
-        
+
     def add_list_item(self, entry):
-        logger.debug(f"Adding Tasbih entry to list: {entry.name} (ID: {entry.id}, Count: {entry.counter})")
+        logger.debug(
+            f"Adding Tasbih entry to list: {entry.name} (ID: {entry.id}, Count: {entry.counter})"
+        )
         """Create and add a QListWidgetItem for the given tasbih entry."""
         item_text = f"{entry.name} | {entry.counter}"
         item = QListWidgetItem(item_text)
         # Store the entry id in the item for later reference.
         item.setData(Qt.ItemDataRole.UserRole, entry.id)
         self.listWidget.addItem(item)
-        logger.debug(f"Added Tasbih entry to list: {entry.name} (ID: {entry.id}, Count: {entry.counter})")
+        logger.debug(
+            f"Added Tasbih entry to list: {entry.name} (ID: {entry.id}, Count: {entry.counter})"
+        )
 
     def handle_add_entry(self):
         """Called when the Add button is clicked.
-        
+
         Opens a QInputDialog to obtain the name for the new tasbih entry.
         If a valid name is entered, it is added to the list and the list is focused.
         """
@@ -196,7 +212,7 @@ class TasbihDialog(QDialog):
         dialog.setOkButtonText("حفظ")
         dialog.setCancelButtonText("إلغاء")
 
-        if dialog.exec() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:        
             new_name = dialog.textValue().strip()
             if new_name:
                 logger.info(f"Adding new Tasbih entry: {new_name}")
@@ -212,19 +228,23 @@ class TasbihDialog(QDialog):
         """
         self.add_list_item(entry)
         self.listWidget.setCurrentRow(self.listWidget.count() - 1)
-            
+
     def handle_entry_updated(self, entry: TasbihEntry):
         """
         Slot called when an entry is updated (via increment or reset).
         Updates the corresponding list item.
         """
-        logger.debug(f"Updating Tasbih entry in list: {entry.name} (ID: {entry.id}, New Count: {entry.counter})")
+        logger.debug(
+            f"Updating Tasbih entry in list: {entry.name} (ID: {entry.id}, New Count: {entry.counter})"
+        )
         for index in range(self.listWidget.count()):
             item = self.listWidget.item(index)
             if item.data(Qt.ItemDataRole.UserRole) == entry.id:
                 item_text = f"{entry.name} | {entry.counter}"
                 item.setText(item_text)
-                logger.debug(f"Updated Tasbih entry: {entry.name} (ID: {entry.id}, New Count: {entry.counter})")
+                logger.debug(
+                    f"Updated Tasbih entry: {entry.name} (ID: {entry.id}, New Count: {entry.counter})"
+                )
                 if self.isActiveWindow():
                     UniversalSpeech.say(item_text)
                 break
@@ -236,7 +256,7 @@ class TasbihDialog(QDialog):
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         logger.debug(f"Incrementing counter for Tasbih entry ID: {entry_id}")
         self.controller.increment_entry_counter(entry_id)
-        
+
     def handle_decrement(self):
         """Decrement the counter for the selected entry."""
         logger.debug("Decrement button has been clicked")
@@ -244,7 +264,7 @@ class TasbihDialog(QDialog):
         entry_id = selected_item.data(Qt.ItemDataRole.UserRole)
         logger.debug(f"Decrementing counter for Tasbih entry ID: {entry_id}")
         self.controller.decrement_entry_counter(entry_id)
-        
+
     def handle_reset(self):
         """Reset the counter for the selected entry."""
         logger.debug("Reset button has been clicked")
@@ -263,7 +283,7 @@ class TasbihDialog(QDialog):
         row = self.listWidget.row(selected_item)
         self.listWidget.takeItem(row)
         self.listWidget.setFocus()
-    
+
     def handle_reset_all(self):
         """
         Reset the counter for all entries.
@@ -273,7 +293,7 @@ class TasbihDialog(QDialog):
         logger.warning("User requested to reset all Tasbih counters.")
         # Save the index of the currently focused item.
         last_focused_index = self.listWidget.currentRow()
-    
+
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setWindowTitle("تأكيد إعادة التعيين")
@@ -289,7 +309,7 @@ class TasbihDialog(QDialog):
             self.controller.reset_all_entries()
             # Refresh the UI: clear and repopulate the list widget.
             self.listWidget.clear()
-            self.populate_list()        
+            self.populate_list()
             if 0 <= last_focused_index < self.listWidget.count():
                 self.listWidget.setCurrentRow(last_focused_index)
             self.listWidget.setFocus()
@@ -304,7 +324,9 @@ class TasbihDialog(QDialog):
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setWindowTitle("تأكيد الحذف")
-        msg_box.setText("هل أنت متأكد من رغبتك في حذف جميع التسابيح؟\nسيتم حذف التسابيح المضافة يدويًا، وإعادة تعيين العدادات للتسابيح الافتراضية.")
+        msg_box.setText(
+            "هل أنت متأكد من رغبتك في حذف جميع التسابيح؟\nسيتم حذف التسابيح المضافة يدويًا، وإعادة تعيين العدادات للتسابيح الافتراضية."
+        )
 
         yes_button = msg_box.addButton("نعم", QMessageBox.ButtonRole.AcceptRole)
         no_button = msg_box.addButton("لا", QMessageBox.ButtonRole.RejectRole)
@@ -331,49 +353,56 @@ class TasbihDialog(QDialog):
 class TasbihEntryDialog(QDialog):
     def __init__(self, parent, controller: TasbihController, tasbih_entry: TasbihEntry):
         """
-        Sub dialog to show and manage details of a specific tasbih entry.        
+        Sub dialog to show and manage details of a specific tasbih entry.
         """
         super().__init__(parent)
         self.controller = controller
         self.tasbih_entry = tasbih_entry
-        logger.debug(f"Opening TasbihEntryDialog for: {tasbih_entry.name} (ID: {tasbih_entry.id}, Count: {tasbih_entry.counter})")
+        logger.debug(
+            f"Opening TasbihEntryDialog for: {tasbih_entry.name} (ID: {tasbih_entry.id}, Count: {tasbih_entry.counter})"
+        )
         self.setWindowTitle(tasbih_entry.name)
         self.resize(300, 200)
-        
+
         # Layout setup.
         self.layout = QVBoxLayout(self)
-        
+
         # Labels for displaying the tasbih details.
         self.name_label = QLabel("Name: ")
         self.counter_label = QLabel("Counter: 0")
         self.layout.addWidget(self.name_label)
         self.layout.addWidget(self.counter_label)
-        
+
         # Buttons for actions.
         self.increment_button = QPushButton("زيادة عداد التسبيح")
         self.decrement_button = QPushButton("إنقاص عداد التسبيح")
         self.reset_button = QPushButton("إعادة تعيين عداد التسبيح")
         self.close_button = QPushButton("إغلاق")
-        
+
         self.layout.addWidget(self.increment_button)
         self.layout.addWidget(self.decrement_button)
         self.layout.addWidget(self.reset_button)
         self.layout.addWidget(self.close_button)
-        
+
         # Disable focus for all widgets.
-        for widget in [self.increment_button, self.decrement_button, self.reset_button, self.close_button]:
+        for widget in [
+            self.increment_button,
+            self.decrement_button,
+            self.reset_button,
+            self.close_button,
+        ]:
             widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        
+
         # Connect button signals to handlers.
         self.increment_button.clicked.connect(self.handle_increment)
         self.decrement_button.clicked.connect(self.handle_decrement)
         self.reset_button.clicked.connect(self.handle_reset)
         self.close_button.clicked.connect(self.reject)
         self.controller.entrieUpdated.connect(self.handle_entry_updated)
-        
+
         # Set keyboard shortcuts.
         self.set_shortcuts()
-        
+
         # Load details for the specified tasbih.
         self.load_details()
 
@@ -381,31 +410,35 @@ class TasbihEntryDialog(QDialog):
         """Load and display details for the specific tasbih entry."""
         if tasbih_entry is None:
             tasbih_entry = self.tasbih_entry
-        
-            logger.debug(f"Loading details for Tasbih entry: {tasbih_entry.name} (ID: {tasbih_entry.id}, Count: {tasbih_entry.counter})")
+
+            logger.debug(
+                f"Loading details for Tasbih entry: {tasbih_entry.name} (ID: {tasbih_entry.id}, Count: {tasbih_entry.counter})"
+            )
         self.name_label.setText(tasbih_entry.name)
         self.counter_label.setText(str(tasbih_entry.counter))
-        
+
     def handle_entry_updated(self, tasbih_entry: TasbihEntry):
         self.load_details(tasbih_entry)
-        logger.debug(f"Tasbih entry updated: {tasbih_entry.name} (ID: {tasbih_entry.id}, New Count: {tasbih_entry.counter})")
+        logger.debug(
+            f"Tasbih entry updated: {tasbih_entry.name} (ID: {tasbih_entry.id}, New Count: {tasbih_entry.counter})"
+        )
         UniversalSpeech.say(str(tasbih_entry.counter))
-                
+
     def handle_increment(self):
         """Handle the increment action."""
         logger.debug(f"Incrementing Tasbih counter (ID: {self.tasbih_entry.id})")
         self.controller.increment_entry_counter(self.tasbih_entry.id)
-        
+
     def handle_decrement(self):
         """Handle the decrement action."""
         logger.debug(f"Decrementing Tasbih counter (ID: {self.tasbih_entry.id})")
         self.controller.decrement_entry_counter(self.tasbih_entry.id)
-        
+
     def handle_reset(self):
         """Handle the reset action."""
         logger.warning(f"Resetting Tasbih counter (ID: {self.tasbih_entry.id})")
         self.controller.reset_entry_counter(self.tasbih_entry.id)
-        
+
     def set_shortcuts(self):
         """Register keyboard shortcuts for actions."""
         logger.debug("Setting keyboard shortcuts for TasbihEntryDialog.")
@@ -414,19 +447,29 @@ class TasbihEntryDialog(QDialog):
             self.increment_button: ["Space", "Return", "Enter", "C", "+", "="],
             self.decrement_button: ["D", "Ctrl+Space", "-", "Backspace"],
             self.reset_button: "Ctrl+R",
-            self.close_button: ["Ctrl+W", "Ctrl+F4"]
+            self.close_button: ["Ctrl+W", "Ctrl+F4"],
         }
 
-        #Info shortcuts
+        # Info shortcuts
         counter_info_shortcut = QShortcut(QKeySequence("V"), self)
-        counter_info_shortcut.activated.connect(lambda: UniversalSpeech.say(str(self.counter_label.text()), force=True))
+        counter_info_shortcut.activated.connect(
+            lambda: UniversalSpeech.say(str(self.counter_label.text()), force=True)
+        )
         name_info_shortcut = QShortcut(QKeySequence("T"), self)
-        name_info_shortcut.activated.connect(lambda: UniversalSpeech.say(str(self.name_label.text()), force=True))
+        name_info_shortcut.activated.connect(
+            lambda: UniversalSpeech.say(str(self.name_label.text()), force=True)
+        )
         all_info_shortcut = QShortcut(QKeySequence("I"), self)
-        all_info_shortcut.activated.connect(lambda: UniversalSpeech.say(f"{self.name_label.text()}، {self.counter_label.text()}", force=True))
+        all_info_shortcut.activated.connect(
+            lambda: UniversalSpeech.say(
+                f"{self.name_label.text()}، {self.counter_label.text()}", force=True
+            )
+        )
 
         for widget, key_sequence in shortcuts.items():
-            key_sequence = [key_sequence] if isinstance(key_sequence, str) else key_sequence
+            key_sequence = (
+                [key_sequence] if isinstance(key_sequence, str) else key_sequence
+            )
             for key in key_sequence:
                 action = QAction(self)  # Create a new action
                 action.setShortcut(QKeySequence(key))  # Set the shortcut

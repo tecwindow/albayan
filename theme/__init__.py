@@ -1,8 +1,9 @@
 import os
-from PyQt6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
+
 
 class ThemeManager:
     def __init__(self, window):
@@ -11,7 +12,6 @@ class ThemeManager:
         self.theme_dir = os.path.dirname(__file__)
         self.themes = {}
         logger.info("ThemeManager initialized.")
-
 
     def get_themes(self):
         logger.debug("Fetching available themes...")
@@ -41,7 +41,7 @@ class ThemeManager:
             return None
 
         try:
-            with open(theme_path, 'r') as theme_file:
+            with open(theme_path, "r") as theme_file:
                 stylesheet = theme_file.read()
                 self.window.setStyleSheet(stylesheet)
                 logger.info(f"Theme '{selected_theme}' applied successfully.")

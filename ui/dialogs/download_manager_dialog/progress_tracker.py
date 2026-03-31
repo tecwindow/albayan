@@ -1,5 +1,5 @@
 from typing import List, Union, Set
-from PyQt6.QtWidgets import QProgressBar
+from PySide6.QtWidgets import QProgressBar
 from core_functions.downloader.status import DownloadStatus
 from core_functions.downloader.manager import DownloadManager
 
@@ -20,9 +20,11 @@ class SessionProgressBar(QProgressBar):
         self.setMinimum(0)
         self.setMaximum(100)
         self.setValue(0)
-        self.setFormat("%p%")       
+        self.setFormat("%p%")
 
-    def set_managers(self, managers: Union[DownloadManager, List[DownloadManager]]) -> None:
+    def set_managers(
+        self, managers: Union[DownloadManager, List[DownloadManager]]
+    ) -> None:
         """Assign one or multiple managers to track."""
         if not isinstance(managers, list):
             managers = [managers]
@@ -39,11 +41,13 @@ class SessionProgressBar(QProgressBar):
         self._total_files = 0
 
         for mgr in self._managers:
-            downloads = mgr.get_downloads([
-                DownloadStatus.PENDING,
-                DownloadStatus.DOWNLOADING,
-                DownloadStatus.PAUSED
-            ])
+            downloads = mgr.get_downloads(
+                [
+                    DownloadStatus.PENDING,
+                    DownloadStatus.DOWNLOADING,
+                    DownloadStatus.PAUSED,
+                ]
+            )
             self._total_files += len(downloads)
 
         self._update_progress()
@@ -55,7 +59,7 @@ class SessionProgressBar(QProgressBar):
             return
 
         percentage = int((self._completed_files / self._total_files) * 100)
-        percentage = max(0, min(100, percentage))  
+        percentage = max(0, min(100, percentage))
 
         self.setValue(percentage)
 
@@ -82,5 +86,9 @@ class SessionProgressBar(QProgressBar):
 
     def _on_status_changed(self, download_id: int, status: DownloadStatus) -> None:
         """Triggered when a download changes state."""
-        if status in (DownloadStatus.PAUSED, DownloadStatus.CANCELLED, DownloadStatus.ERROR):
+        if status in (
+            DownloadStatus.PAUSED,
+            DownloadStatus.CANCELLED,
+            DownloadStatus.ERROR,
+        ):
             self.decrement()

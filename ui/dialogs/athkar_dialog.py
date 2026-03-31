@@ -1,10 +1,20 @@
 from typing import Optional
-from PyQt6.QtWidgets import (
-    QApplication, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
-    QCheckBox, QComboBox, QPushButton, QGroupBox, QMessageBox
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QCheckBox,
+    QComboBox,
+    QPushButton,
+    QGroupBox,
+    QMessageBox,
 )
-from PyQt6.QtGui import QKeySequence, QShortcut
-from PyQt6.QtCore import Qt
+from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtCore import Qt
 from core_functions.athkar.athkar_db_manager import AthkarDBManager
 from core_functions.athkar.models import AthkarCategory
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
@@ -16,7 +26,11 @@ logger = LoggerManager.get_logger(__name__)
 
 
 class AthkarDialog(QDialog):
-    athkar_scheduler = AthkarScheduler(paths.athkar_db, paths.athkar_audio, paths.data_folder/"athkar/text_athkar.json")
+    athkar_scheduler = AthkarScheduler(
+        paths.athkar_db,
+        paths.athkar_audio,
+        paths.data_folder / "athkar/text_athkar.json",
+    )
     athkar_scheduler.start()
 
     def __init__(self, parent):
@@ -31,7 +45,7 @@ class AthkarDialog(QDialog):
             10: "10 دقيقة",
             15: "15 دقيقة",
             30: "30 دقيقة",
-            60: "ساعة"
+            60: "ساعة",
         }
 
         self.init_ui()
@@ -121,7 +135,6 @@ class AthkarDialog(QDialog):
         self.update_ui_based_on_selection()
         logger.debug(f"found {categories}.")
 
-
     def get_selected_category(self) -> Optional[AthkarCategory]:
         selected_item = self.section_list.currentItem()
         if selected_item:
@@ -132,8 +145,12 @@ class AthkarDialog(QDialog):
         selected_category = self.get_selected_category()
         if selected_category:
             logger.debug(f"Selected category: {selected_category.name}")
-            self.audio_athkar_enable_checkbox.setChecked(selected_category.audio_athkar_enabled)
-            self.text_athkar_enable_checkbox.setChecked(selected_category.text_athkar_enabled)
+            self.audio_athkar_enable_checkbox.setChecked(
+                selected_category.audio_athkar_enabled
+            )
+            self.text_athkar_enable_checkbox.setChecked(
+                selected_category.text_athkar_enabled
+            )
             self.from_combobox.setCurrentText(selected_category.from_time)
             self.to_combobox.setCurrentText(selected_category.to_time)
             interval_text = self.interval_options_dict.get(
@@ -143,14 +160,15 @@ class AthkarDialog(QDialog):
         else:
             logger.warning("No category selected.")
 
-
     def reset_settings(self):
         logger.debug("Resetting settings...")
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setWindowTitle("إعادة ضبط الخيارات")
-        msg_box.setText("هل تريد إعادة ضبط جميع الخيارات على الوضع الافتراضي؟\nسيتم تعطيل جميع الأذكار.")
-    
+        msg_box.setText(
+            "هل تريد إعادة ضبط جميع الخيارات على الوضع الافتراضي؟\nسيتم تعطيل جميع الأذكار."
+        )
+
         yes_button = msg_box.addButton("نعم", QMessageBox.ButtonRole.AcceptRole)
         no_button = msg_box.addButton("لا", QMessageBox.ButtonRole.RejectRole)
 
@@ -167,22 +185,28 @@ class AthkarDialog(QDialog):
     def on_save(self) -> None:
         selected_category = self.get_selected_category()
         if not selected_category:
-            logger.error("Attempted to save without selecting a category.", exc_info=True)
+            logger.error(
+                "Attempted to save without selecting a category.", exc_info=True
+            )
             return
-        
+
         play_interval_text = self.interval_combobox.currentText()
         play_interval = next(
-            (key for key, value in self.interval_options_dict.items() if value == play_interval_text), 
-            5
+            (
+                key
+                for key, value in self.interval_options_dict.items()
+                if value == play_interval_text
+            ),
+            5,
         )
-        
+
         self.athkar_db.update_category(
             category_id=selected_category.id,
             from_time=self.from_combobox.currentText(),
             to_time=self.to_combobox.currentText(),
             play_interval=play_interval,
             audio_athkar_enabled=int(self.audio_athkar_enable_checkbox.isChecked()),
-            text_athkar_enabled=int(self.text_athkar_enable_checkbox.isChecked())
+            text_athkar_enabled=int(self.text_athkar_enable_checkbox.isChecked()),
         )
         logger.info(f"Updated settings for category: {selected_category.name}.")
         self.athkar_scheduler.refresh()
@@ -190,8 +214,6 @@ class AthkarDialog(QDialog):
         self.accept()
         self.deleteLater()
 
-
     def reject(self):
         logger.debug("Athkar dialog closed.")
         self.deleteLater()
-        

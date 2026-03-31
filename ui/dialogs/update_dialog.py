@@ -1,7 +1,7 @@
 import requests
 import subprocess
 import os
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QApplication,
     QDialog,
     QVBoxLayout,
@@ -10,10 +10,10 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QProgressDialog,
     QMessageBox,
-    QGroupBox
+    QGroupBox,
 )
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QKeySequence, QShortcut
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QKeySequence, QShortcut
 from core_functions.downloader import DownloadManager
 from core_functions.downloader.status import DownloadProgress
 from ui.widgets.qText_edit import ReadOnlyTextEdit
@@ -25,11 +25,12 @@ import qtawesome as qta
 
 logger = LoggerManager.get_logger(__name__)
 
+
 class UpdateDialog(QDialog):
 
     # Remove the files in temp folder
     for file in os.listdir(paths.temp_folder):
-        file_path = os.path.join(paths.temp_folder,file )
+        file_path = os.path.join(paths.temp_folder, file)
         if os.path.isfile(file_path):
             try:
                 os.remove(file_path)
@@ -118,14 +119,16 @@ class UpdateDialog(QDialog):
         self.progress_dialog.setValue(progress.percentage)
         self.progress_dialog.setLabelText(
             f"تم تنزيل {progress.downloaded_str} من {progress.total_str}\n"
-        f"السرعة: {progress.speed_kbps:.2f} KB/s | الوقت المنقضي: {progress.elapsed_time_str} | الوقت المتبقي: {progress.remaining_time_str}"
-    )
+            f"السرعة: {progress.speed_kbps:.2f} KB/s | الوقت المنقضي: {progress.elapsed_time_str} | الوقت المتبقي: {progress.remaining_time_str}"
+        )
 
     def on_download_finished(self, download_id, file_path: str):
         logger.info(f"Download finished. Starting installation: {file_path}")
         self.progress_dialog.hide()
         try:
-            subprocess.Popen([file_path, "/SILENT", "/NOCANCEL", "/SUPPRESSMSGBOXES", "/NORESTART"])
+            subprocess.Popen(
+                [file_path, "/SILENT", "/NOCANCEL", "/SUPPRESSMSGBOXES", "/NORESTART"]
+            )
             logger.info("Installer started successfully.")
             QApplication.exit()
             logger.info("Application exited after installation.")
@@ -145,24 +148,19 @@ class UpdateDialog(QDialog):
         logger.debug("Close event triggered.")
         return super().closeEvent(event)
 
-
     def copy_update_info(self):
         logger.debug("User requested to copy update information.")
 
         release_notes_text = self.release_notes_edit.toPlainText()
 
         final_text = (
-            f"{self.label1_text}\n"
-            f"{self.label2_text}\n\n"
-            f"{release_notes_text}"
+            f"{self.label1_text}\n" f"{self.label2_text}\n\n" f"{release_notes_text}"
         )
 
         clipboard = QApplication.clipboard()
         clipboard.setText(final_text)
 
-        UniversalSpeech.say(
-            f"تم نسخ معلومات التحديث للإصدار {self.latest_version}."
-        )
+        UniversalSpeech.say(f"تم نسخ معلومات التحديث للإصدار {self.latest_version}.")
 
         Globals.effects_manager.play("copy")
         logger.info("Update information copied successfully.")
