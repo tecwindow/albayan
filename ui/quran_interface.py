@@ -493,7 +493,7 @@ class QuranInterface(QMainWindow):
         logger.debug("Syntax dialog closed.")
 
     @exception_handler(ui_element=QMessageBox)
-    def OnVerseReasons(self, event):
+    def OnVerseReasons(self, event=None):
         logger.debug("Verse reasons action triggered.")
         current_aya = self.get_current_ayah()
         title = "أسباب نزول آية رقم {} من {}".format(
@@ -818,7 +818,7 @@ class QuranInterface(QMainWindow):
                 event.ignore()
 
     @exception_handler(ui_element=QMessageBox)
-    def OnRandomMessages(self, event):
+    def OnRandomMessages(self, event=None):
         logger.debug("Random messages action triggered.")
         info_dialog = InfoDialog(
             self,
