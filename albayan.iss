@@ -227,33 +227,29 @@ end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 var
-  FindRec: TFindRec;
   AppDir: String;
 begin
   if CurStep = ssInstall then
   begin
     if IsPortableInstall then
     begin
-      // Delete all contents of {app} except user_data folder
       AppDir := ExpandConstant('{app}');
-      if FindFirst(AppDir + '\*', FindRec) then
-      begin
-        try
-          repeat
-            if (FindRec.Name <> '.') and (FindRec.Name <> '..') and
-               (CompareText(FindRec.Name, 'user_data') <> 0) and
-(CompareText(FindRec.Name, 'downloads') <> 0) then
-            begin
-              if FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY <> 0 then
-                DelTree(AppDir + '\' + FindRec.Name, True, True, True)
-              else
-                DeleteFile(AppDir + '\' + FindRec.Name);
-            end;
-          until not FindNext(FindRec);
-        finally
-          FindClose(FindRec);
-        end;
-      end;
+
+      // Delete specific folders
+      DelTree(AppDir + '\Audio',         True, True, True);
+      DelTree(AppDir + '\database',      True, True, True);
+      DelTree(AppDir + '\documentation', True, True, True);
+      DelTree(AppDir + '\lib',           True, True, True);
+
+      // Delete specific files
+      DeleteFile(AppDir + '\Albayan.exe');
+      DeleteFile(AppDir + '\Albayan.ico');
+      DeleteFile(AppDir + '\bass.dll');
+      DeleteFile(AppDir + '\frozen_application_license.txt');
+      DeleteFile(AppDir + '\python3.dll');
+      DeleteFile(AppDir + '\python313.dll');
+      DeleteFile(AppDir + '\unins000.dat');
+      DeleteFile(AppDir + '\unins000.exe');
     end;
 
     if FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini')) then
@@ -267,7 +263,7 @@ begin
 
   if CurStep = ssPostInstall then
   begin
-  DelTree(ExpandConstant('{app}\Audio\athkar'), True, True, True);
+    DelTree(ExpandConstant('{app}\Audio\athkar'), True, True, True);
   end;
 end;
 
