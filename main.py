@@ -10,8 +10,6 @@ from utils.paths import paths, is_installed, is_portable
 from utils.settings import Config
 from utils.logger import LogLevel, LoggerManager
 sys.excepthook = LoggerManager.my_excepthook
-current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-os.chdir(current_dir)
 #load the config file
 Config.load_settings()
 #setup the logger
@@ -21,7 +19,15 @@ LoggerManager.setup_logger(
     dev_mode=dev_mode
     )
 logger = LoggerManager.get_logger(__name__)
-logger.info(f"Starting {program_name}, {program_english_name}, version {program_version}...")
+app_type = (
+    "Installed" if getattr(sys, "frozen", False) and is_installed()
+    else "Portable" if getattr(sys, "frozen", False)
+    else "Source"
+)
+
+logger.info(
+    f"Starting {program_name}, {program_english_name}, version {program_version} ({app_type})..."
+)
 
 from multiprocessing import freeze_support
 from PyQt6.QtWidgets import QApplication, QMessageBox
