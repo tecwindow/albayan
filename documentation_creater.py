@@ -433,8 +433,8 @@ def main():
 
     -v / --version
         Version number string embedded in HTML page titles.
-        Default: '6.0.0'
-        Example: -v 6.0.0
+        Default: '6.1.0'
+        Example: -v 6.1.0
 
     --no-toc
         Disable table of contents for all documents that normally include one
@@ -462,7 +462,7 @@ def main():
         python md_to_html.py
 
     # Custom input/output folders and version:
-        python md_to_html.py -i ./docs -o ./dist -v 6.0.0
+        python md_to_html.py -i ./docs -o ./dist -v 6.1.0
 
     # Skip shortcuts and marks:
         python md_to_html.py --no-shortcuts --no-marks
@@ -481,8 +481,8 @@ def main():
                         help="Input folder containing Markdown files. Default: script directory.")
     parser.add_argument("-o", "--output",
                         help="Output folder for generated files. Default: same as input.")
-    parser.add_argument("-v", "--version", default="6.0.0",
-                        help="Version number for page titles. Default: 6.0.0")
+    parser.add_argument("-v", "--version", default="6.1.0",
+                        help="Version number for page titles. Default: 6.1.0")
     parser.add_argument("--no-toc", action="store_true",
                         help="Disable table of contents in all output HTML files.")
     parser.add_argument("--no-shortcuts", action="store_true",
