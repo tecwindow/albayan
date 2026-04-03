@@ -194,7 +194,7 @@ class MenuBar(QMenuBar):
         self.athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).open())
         self.bookmark_manager_action = QAction("مدير العلامات", self)
         self.bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
-        self.sura_player_action = QAction("مشغل القرآن", self)
+        self.sura_player_action = QAction("مشغل سور القرآن", self)
         self.sura_player_action.triggered.connect(self.OnSuraPlayer)
         self.tasbih_action = QAction("المسبحة", self)
         self.tasbih_action.triggered.connect(self.OnTasbihAction)

@@ -157,7 +157,7 @@ class QuranInterface(QMainWindow):
         self.quran_player = EnterButton()
         self.quran_player.setIcon(qta.icon("fa5s.play-circle"))
         #self.quran_player.setToolTip("مشغل القرآن")
-        self.quran_player.setAccessibleName("مشغل القرآن")
+        self.quran_player.setAccessibleName("مشغل سور القرآن")
         self.quran_player.clicked.connect(self.menu_bar.OnSuraPlayer)
 
     def create_layout(self):
