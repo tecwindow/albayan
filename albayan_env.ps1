@@ -6,7 +6,7 @@ $choice = Read-Host "Do you want to Create or Activate the environment? (C/A)"
 
 if ($choice -ieq "C") {
     Write-Host "Creating virtual environment..."
-    Start-Process -Wait "py" -ArgumentList "-3.13", "-m", "venv", "albayan_env"
+    Start-Process -Wait "py" -ArgumentList "-3.14", "-m", "venv", "albayan_env"
 
     Write-Host "Activating environment, updating pip, and installing requirements..."
     Start-Process "powershell.exe" -ArgumentList "-NoExit", "-Command",

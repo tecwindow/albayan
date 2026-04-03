@@ -4,7 +4,7 @@ set VENV_DIR=albayan_env
 
 if not exist %VENV_DIR% (
     echo Creating virtual environment...
-    py -3.13 -m venv %VENV_DIR%
+    py -3.14 -m venv %VENV_DIR%
 )
 
 call %VENV_DIR%\Scripts\activate
@@ -20,11 +20,6 @@ if exist requirements.txt (
     exit /b 1
 )
 
-pip show cx-freeze >nul 2>&1
-if %errorlevel% neq 0 (
-    echo Installing cx-Freeze...
-    pip install cx-freeze
-)
 
 if exist setup.py (
     echo Building the program with cx-Freeze...
