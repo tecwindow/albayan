@@ -358,7 +358,7 @@ class SettingsDialog(QDialog):
         self.download_path_label = QLabel("مسار التنزيل الحالي:")
         self.download_path_edit = QLineEdit()
         self.download_path_edit.setReadOnly(True)
-        self.download_path_edit.setText(Config.downloading.download_path)
+        self.download_path_edit.setText(str(Config.downloading.download_path))
         self.download_path_edit.setAccessibleName(self.download_path_label.text())
 
 

@@ -144,6 +144,7 @@ class SurahReciter(RecitersManager):
             
         base_url = self._get_base_url(reciter_id)
         if base_url:
+            base_url = base_url.rstrip('/')
             url = f"{base_url}/{surah_number:03}.mp3"
             logger.debug(f"Generated URL: {url}")
             return url
