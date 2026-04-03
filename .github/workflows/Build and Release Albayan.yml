@@ -49,16 +49,15 @@ jobs:
       run: |
         python setup.py build
 
+
     - name: Remove markdown documentation files
       shell: pwsh
       run: |
         $docPath = "albayan_build\documentation"
         if (Test-Path $docPath) {
-            Remove-Item "$docPath\UserGuide.md" -ErrorAction SilentlyContinue
-            Remove-Item "$docPath\WhatsNew.md" -ErrorAction SilentlyContinue
-            Remove-Item "$docPath\Marks.md" -ErrorAction SilentlyContinue
-            Remove-Item "$docPath\Shortcuts.md" -ErrorAction SilentlyContinue
+            Remove-Item "$docPath\*.md" -ErrorAction SilentlyContinue
         }
+
 
     - name: Download and install latest Inno Setup
       shell: pwsh

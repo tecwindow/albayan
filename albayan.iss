@@ -248,6 +248,7 @@ begin
       DeleteFile(AppDir + '\frozen_application_license.txt');
       DeleteFile(AppDir + '\python3.dll');
       DeleteFile(AppDir + '\python313.dll');
+      DeleteFile(AppDir + '\python314.dll');
       DeleteFile(AppDir + '\unins000.dat');
       DeleteFile(AppDir + '\unins000.exe');
     end;
