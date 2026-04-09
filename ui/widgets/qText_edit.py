@@ -3,6 +3,7 @@ from PyQt6.QtCore import QEvent, Qt, QLocale
 from PyQt6.QtGui import QKeyEvent, QTextCursor
 from PyQt6.QtWidgets import QTextEdit
 from core_functions.quran.types import NavigationMode
+from core_functions.info import TanzilAyah
 from utils.settings import Config
 from utils.const import Globals
 from utils.logger import LoggerManager
@@ -52,9 +53,28 @@ class QuranViewer(ReadOnlyTextEdit):
         self.parent.menu_bar.copy_verse_action.setEnabled(status)
         #logger.debug(f"Control state set to: {status}.")
 
+    def _announce_nuzul_if_available(self):
+        """After moving to a new verse, announce if it has a reason of revelation."""
+        try:
+            current_line_text = self.textCursor().block().text()
+            # Only check actual verse lines (they end with a verse number like (5))
+            if not re.search(r"\(\d+\)$", current_line_text):
+                return
+            ayah = self.parent.quran_manager.view_content.get_by_position(
+                self.textCursor().block().position()
+            )
+            if TanzilAyah(ayah.number).text:
+                Globals.effects_manager.play("nuzool")
+                logger.debug(f"Nuzul sound played for ayah {ayah.number}.")
+        except Exception:
+            pass  # Never crash the viewer over an announcement
+
     def keyPressEvent(self, e): 
         super().keyPressEvent(e)
         self.set_ctrl()
+
+        if e.key() in (Qt.Key.Key_Up, Qt.Key.Key_Down):
+            self._announce_nuzul_if_available()
 
         if e.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter) and self.parent.menu_bar.verse_tafsir_action.isEnabled():
             self.parent.OnInterpretation(event=e)
