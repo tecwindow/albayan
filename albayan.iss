@@ -64,6 +64,20 @@ arabic.InstallModeNormal=تثبيت عادي (مستحسن)
 english.InstallModePortable=Portable Version
 arabic.InstallModePortable=نسخة محمولة
 
+
+english.OpenUserGuide=Open User Guide
+arabic.OpenUserGuide=فتح دليل المستخدم
+english.OpenWhatsNew=Open What's New
+arabic.OpenWhatsNew=فتح المستجدات
+english.TelegramBtn=Follow TecWindow on Telegram
+arabic.TelegramBtn=تابع نافذة التقنية على Telegram
+english.WebsiteBtn=Visit TecWindow Website
+arabic.WebsiteBtn=زيارة موقع نافذة التقنية
+english.BlogBtn=Visit TecWindow Blog
+arabic.BlogBtn=زيارة مدونة نافذة التقنية
+english.FollowUsBtn=TecWindow Accounts
+arabic.FollowUsBtn=حسابات نافذة التقنية
+
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Check: IsNormalInstall
 Name: "autorun"; Description: "{cm:autorun}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; Check: IsNormalInstall
@@ -94,15 +108,18 @@ Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
 [InstallDelete]
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\documentation\UserGuide.html"; Description: "{cm:OpenUserGuide}"; Flags: shellexec nowait postinstall unchecked skipifsilent
+Filename: "{app}\documentation\WhatsNew.html"; Description: "{cm:OpenWhatsNew}"; Flags: shellexec nowait postinstall unchecked skipifsilent
+Filename: "{app}\{#MyAppExeName}"; Flags: nowait; Check: WizardSilent
 
 [Code]
 var
   InstallModePage: TInputOptionWizardPage;
   IsPortableMode: Boolean;
   UserProvidedDir: String;
+  TelegramBtn, WebsiteBtn, BlogBtn, FollowUsBtn: TNewButton;
 
-// Helper: Check if a specific parameter (like /PORTABLE) was passed to Setup.exe
 function HasCmdLineParam(const ParamName: String): Boolean;
 var
   I: Integer;
@@ -118,21 +135,13 @@ begin
   end;
 end;
 
-// InitializeSetup fires before the UI even loads. 
-// Perfect place to capture our command-line arguments.
 function InitializeSetup(): Boolean;
 begin
-  // Check for the custom /PORTABLE switch
   IsPortableMode := HasCmdLineParam('/PORTABLE');
-
-  // Check if user utilized Inno's native /DIR="X:\Path" argument
   UserProvidedDir := ExpandConstant('{param:DIR}');
-
   Result := True;
 end;
 
-// Provides the initial dynamic default directory for the engine.
-// This guarantees that /SILENT installs work flawlessly without UI interaction.
 function GetDefaultDirName(Param: String): String;
 begin
   if IsPortableMode then
@@ -141,7 +150,6 @@ begin
     Result := ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}');
 end;
 
-// Used by Check: parameters in [Tasks], [Icons], [Setup]
 function IsNormalInstall: Boolean;
 begin
   Result := not IsPortableMode;
@@ -158,11 +166,37 @@ begin
 end;
 
 
+procedure OpenURL(URL: string);
+var
+  ErrorCode: Integer;
+begin
+  ShellExec('open', URL, '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
+end;
+
+procedure TelegramClick(Sender: TObject);
+begin
+  OpenURL('https://t.me/tecwindow');
+end;
+
+procedure WebsiteClick(Sender: TObject);
+begin
+  OpenURL('https://tecwindow.net');
+end;
+
+procedure BlogClick(Sender: TObject);
+begin
+  OpenURL('https://blog.tecwindow.net');
+end;
+
+procedure FollowUsClick(Sender: TObject);
+begin
+  OpenURL('https://tecwindow.net/follow-us/');
+end;
+
 procedure InitializeWizard;
 begin
-  // Create our custom mode selection page
   InstallModePage := CreateInputOptionPage(wpWelcome,
-    CustomMessage('InstallModeTitle'), 
+    CustomMessage('InstallModeTitle'),
     CustomMessage('InstallModeDesc'),
     CustomMessage('InstallModeText'),
     True, False);
@@ -170,7 +204,6 @@ begin
   InstallModePage.Add(CustomMessage('InstallModeNormal'));
   InstallModePage.Add(CustomMessage('InstallModePortable'));
 
-  // Pre-select radio button based on command-line argument
   if IsPortableMode then
   begin
     InstallModePage.Values[0] := False;
@@ -181,9 +214,76 @@ begin
     InstallModePage.Values[0] := True;
     InstallModePage.Values[1] := False;
   end;
+
+  
+  TelegramBtn := TNewButton.Create(WizardForm);
+  TelegramBtn.Parent := WizardForm.FinishedPage;
+  TelegramBtn.Caption := CustomMessage('TelegramBtn');
+  TelegramBtn.OnClick := @TelegramClick;
+  TelegramBtn.Width := ScaleX(150);
+  TelegramBtn.Height := ScaleY(25);
+
+
+  WebsiteBtn := TNewButton.Create(WizardForm);
+  WebsiteBtn.Parent := WizardForm.FinishedPage;
+  WebsiteBtn.Caption := CustomMessage('WebsiteBtn');
+  WebsiteBtn.OnClick := @WebsiteClick;
+  WebsiteBtn.Width := ScaleX(150);
+  WebsiteBtn.Height := ScaleY(25);
+
+
+  BlogBtn := TNewButton.Create(WizardForm);
+  BlogBtn.Parent := WizardForm.FinishedPage;
+  BlogBtn.Caption := CustomMessage('BlogBtn');
+  BlogBtn.OnClick := @BlogClick;
+  BlogBtn.Width := ScaleX(150);
+  BlogBtn.Height := ScaleY(25);
+
+
+  FollowUsBtn := TNewButton.Create(WizardForm);
+  FollowUsBtn.Parent := WizardForm.FinishedPage;
+  FollowUsBtn.Caption := CustomMessage('FollowUsBtn');
+  FollowUsBtn.OnClick := @FollowUsClick;
+  FollowUsBtn.Width := ScaleX(150);
+  FollowUsBtn.Height := ScaleY(25);
 end;
 
-// Intercept "Next" button click to change the target directory dynamically
+
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if CurPageID = wpFinished then
+  begin
+
+    if TelegramBtn.Top = 0 then
+    begin
+
+      WizardForm.RunList.Height := WizardForm.RunList.Height - (TelegramBtn.Height * 2 + ScaleY(20));
+      
+
+      TelegramBtn.Left := WizardForm.RunList.Left;
+      TelegramBtn.Top := WizardForm.RunList.Top + WizardForm.RunList.Height + ScaleY(10);
+      
+      WebsiteBtn.Left := TelegramBtn.Left + TelegramBtn.Width + ScaleX(10);
+      WebsiteBtn.Top := TelegramBtn.Top;
+      
+
+      BlogBtn.Left := WizardForm.RunList.Left;
+      BlogBtn.Top := TelegramBtn.Top + TelegramBtn.Height + ScaleY(10);
+      
+      FollowUsBtn.Left := BlogBtn.Left + BlogBtn.Width + ScaleX(10);
+      FollowUsBtn.Top := BlogBtn.Top;
+      
+
+      WizardForm.RunList.TabOrder := 0;
+      TelegramBtn.TabOrder := 1;
+      WebsiteBtn.TabOrder := 2;
+      BlogBtn.TabOrder := 3;
+      FollowUsBtn.TabOrder := 4;
+
+    end;
+  end;
+end;
+
 function NextButtonClick(CurPageID: Integer): Boolean;
 var
   ExpectedNormalDir, ExpectedPortableDir: String;
@@ -193,14 +293,11 @@ begin
     ExpectedNormalDir := ExpandConstant('{sd}\program files\tecwindow\{#MyAppName}');
     ExpectedPortableDir := ExpandConstant('{src}\{#MyAppName}');
 
-    // Smart Directory Override Logic:
-    // Only auto-switch the target path if the user hasn't specified /DIR via command line
-    // AND hasn't manually clicked "Browse" to set a custom path yet.
     if (UserProvidedDir = '') and
        ((CompareText(WizardForm.DirEdit.Text, ExpectedNormalDir) = 0) or
         (CompareText(WizardForm.DirEdit.Text, ExpectedPortableDir) = 0)) then
     begin
-      IsPortableMode := InstallModePage.Values[1]; // Get UI state
+      IsPortableMode := InstallModePage.Values[1];
       if IsPortableMode then
         WizardForm.DirEdit.Text := ExpectedPortableDir
       else
@@ -208,14 +305,12 @@ begin
     end
     else
     begin
-      // If they have a custom browsed path or used /DIR, respect it and just update internal state
       IsPortableMode := InstallModePage.Values[1];
     end;
   end;
   Result := True;
 end;
 
-// Skip the Start Menu program group and Task selection pages if Portable mode is active
 function ShouldSkipPage(PageID: Integer): Boolean;
 begin
   if ((PageID = wpSelectProgramGroup) or (PageID = wpSelectTasks)) and IsPortableMode then
@@ -224,34 +319,26 @@ begin
     Result := False;
 end;
 
-
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   AppDir: String;
 begin
   if CurStep = ssInstall then
   begin
-    if IsPortableInstall then
-    begin
-      AppDir := ExpandConstant('{app}');
+    AppDir := ExpandConstant('{app}');
 
-      // Delete specific folders
-      DelTree(AppDir + '\Audio',         True, True, True);
-      DelTree(AppDir + '\database',      True, True, True);
-      DelTree(AppDir + '\documentation', True, True, True);
-      DelTree(AppDir + '\lib',           True, True, True);
+    DelTree(AppDir + '\Audio',         True, True, True);
+    DelTree(AppDir + '\database',      True, True, True);
+    DelTree(AppDir + '\documentation', True, True, True);
+    DelTree(AppDir + '\lib',           True, True, True);
 
-      // Delete specific files
-      DeleteFile(AppDir + '\Albayan.exe');
-      DeleteFile(AppDir + '\Albayan.ico');
-      DeleteFile(AppDir + '\bass.dll');
-      DeleteFile(AppDir + '\frozen_application_license.txt');
-      DeleteFile(AppDir + '\python3.dll');
-      DeleteFile(AppDir + '\python313.dll');
-      DeleteFile(AppDir + '\python314.dll');
-      DeleteFile(AppDir + '\unins000.dat');
-      DeleteFile(AppDir + '\unins000.exe');
-    end;
+    DeleteFile(AppDir + '\Albayan.exe');
+    DeleteFile(AppDir + '\Albayan.ico');
+    DeleteFile(AppDir + '\bass.dll');
+    DeleteFile(AppDir + '\frozen_application_license.txt');
+    DeleteFile(AppDir + '\python3.dll');
+    DeleteFile(AppDir + '\python313.dll');
+    DeleteFile(AppDir + '\python314.dll');
 
     if FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini')) then
     begin
@@ -268,7 +355,6 @@ begin
   end;
 end;
 
-
 procedure DeinitializeUninstall();
 begin
   if MsgBox(
@@ -279,4 +365,3 @@ begin
     DeleteSettingsFolder();
   end;
 end;
-
