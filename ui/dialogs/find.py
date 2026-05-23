@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
     QApplication,
     QDialog,
     QVBoxLayout,
+    QMenu,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -17,7 +18,7 @@ QListWidgetItem,
 QMessageBox,
 )
 from PyQt6.QtCore import Qt, QRegularExpression, pyqtSignal
-from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator, QShortcut
+from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator, QShortcut, QAction
 from core_functions.search import SearchCriteria, QuranSearchManager
 from core_functions.quran.quran_manager import QuranManager
 from ui.widgets.search_box import ArabicSearchBox
@@ -243,66 +244,304 @@ _to=search_to
 class SearchResultsDialog(QDialog):
     def __init__(self, parent=None, search_result=[]):
         super().__init__(parent)
+
         self.search_result = search_result
+
         self.setWindowTitle("نتائج البحث")
-        logger.debug(f"SearchResultsDialog opened with {len(search_result)} results.")
-        self.total_label = QLabel("عدد النتائج: {}.".format(len(search_result)))
+
+        logger.debug(
+            f"SearchResultsDialog opened with {len(search_result)} results."
+        )
+
+        self.total_label = QLabel(
+            "عدد النتائج: {}.".format(len(search_result))
+        )
+
         self.label = QLabel("النتائج:")
+
         self.list_widget = QListWidget(self)
-        self.list_widget.setAccessibleDescription(self.label.text())
+
+        self.list_widget.setAccessibleDescription(
+            self.label.text()
+        )
+
+        self.list_widget.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu
+        )
+
+        self.list_widget.customContextMenuRequested.connect(
+            self.show_context_menu
+        )
 
         for i, row in enumerate(search_result):
-            item = QListWidgetItem(self.format_result(row))
-            item.setData(Qt.ItemDataRole.AccessibleDescriptionRole, f"{i+1} من {len(search_result)}")
+
+            item = QListWidgetItem(
+                self.format_result(row)
+            )
+
+            item.setData(
+                Qt.ItemDataRole.AccessibleDescriptionRole,
+                f"{i+1} من {len(search_result)}"
+            )
+
             item.setToolTip(row["text"])
+
             self.list_widget.addItem(item)
-            
+
         self.go_to_button = QPushButton("الذهاب للنتيجة")
-        self.go_to_button.clicked.connect(self.accept)
-        self.go_to_button.clicked.connect(lambda: Globals.effects_manager.play("move"))
+
+        self.go_to_button.clicked.connect(
+            self.go_to_current_result
+        )
+
         self.cancel_button = QPushButton("إلغاء")
-        self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
+
+        self.cancel_button.setShortcut(
+            QKeySequence("Ctrl+W")
+        )
+
         self.cancel_button.clicked.connect(self.reject)
-        close_shortcut = QShortcut(QKeySequence("Ctrl+F4"), self)
+
+        close_shortcut = QShortcut(
+            QKeySequence("Ctrl+F4"),
+            self
+        )
+
         close_shortcut.activated.connect(self.reject)
 
+        copy_shortcut = QShortcut(
+            QKeySequence("Shift+C"),
+            self
+        )
+
+        copy_shortcut.activated.connect(
+            self.copy_current_result
+        )
 
         layout = QVBoxLayout()
-        layout.addWidget(self.total_label)
-        layout.addWidget(self.label)
-        layout.addWidget(self.list_widget)
-        layout.addWidget(self.go_to_button)
-        layout.addWidget(self.cancel_button)
-        
-        self.setLayout(layout)
-        self.list_widget.setCurrentRow(0)
-        logger.debug("SearchResultsDialog initialized successfully.")
 
-    def format_result(self, row:dict) -> str:
+        layout.addWidget(self.total_label)
+
+        layout.addWidget(self.label)
+
+        layout.addWidget(self.list_widget)
+
+        layout.addWidget(self.go_to_button)
+
+        layout.addWidget(self.cancel_button)
+
+        self.setLayout(layout)
+
+        self.list_widget.setCurrentRow(0)
+
+        logger.debug(
+            "SearchResultsDialog initialized successfully."
+        )
+
+    def format_result(self, row: dict) -> str:
+
         text = row["text"]
-        # take first 5 words from text
+
         words = text.split()
+
         text = " ".join(words[:5])
+
         text += "..." if len(words) > 5 else ""
 
-        return "{} | الآية {} من {}".format(text, row["numberInSurah"], row["sura_name"])
+        return "{} | الآية {} من {}".format(
+            text,
+            row["numberInSurah"],
+            row["sura_name"]
+        )
 
-    def keyPressEvent(self, event: QKeyEvent | None) -> None:
+    def get_current_result(self):
 
-        if event.key() == Qt.Key.Key_I and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
-            UniversalSpeech.say(self.total_label.text(), force=True)
-            logger.debug("Ctrl+I pressed: Announcing total results count.")
-        elif event.key() == Qt.Key.Key_R and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
-            current_row = self.list_widget.currentRow()
-            text = self.search_result[current_row]["text"]
-            UniversalSpeech.say(text, force=True)
-            logger.debug(f"Ctrl+R pressed: Reading search result at index {current_row}.")
+        current_row = self.list_widget.currentRow()
+
+        if current_row < 0:
+            return None
+
+        if current_row >= len(self.search_result):
+            return None
+
+        return self.search_result[current_row]
+
+    def read_current_result(self):
+
+        result = self.get_current_result()
+
+        if not result:
+            return
+
+        UniversalSpeech.say(result["text"], interrupt=False, force=True)
+
+        logger.debug(
+            f"Reading result: "
+            f"{result['numberInSurah']} "
+            f"from {result['sura_name']}"
+        )
+
+    def copy_current_result(self):
+
+        result = self.get_current_result()
+
+        if not result:
+            return
+
+        text = result["text"]
+
+        sura_name = result["sura_name"]
+
+        ayah_number = result["numberInSurah"]
+
+        final_text = (
+            f"الآية {ayah_number} "
+            f"من {sura_name}:\n{text}"
+        )
+
+        QApplication.clipboard().setText(
+            final_text
+        )
+
+        UniversalSpeech.say(f"تم نسخ الآية {ayah_number} من {sura_name}.", interrupt=False, force=True)
+
+        Globals.effects_manager.play("copy")
+
+        logger.debug(
+            f"Copied search result: "
+            f"Ayah {ayah_number} "
+            f"from {sura_name}"
+        )
+
+    def go_to_current_result(self):
+
+        result = self.get_current_result()
+
+        if not result:
+            return
+
+        Globals.effects_manager.play("move")
+
+        self.accept()
+
+    def show_context_menu(self, position):
+
+        logger.debug(
+            "User opened search result context menu."
+        )
+
+        current_item = self.list_widget.currentItem()
+
+        if not current_item:
+            return
+
+        menu = QMenu(self)
+
+        actions = {}
+
+        go_action = QAction(
+            "الذهاب للنتيجة",
+            self
+        )
+
+        go_action.triggered.connect(
+            self.go_to_current_result
+        )
+
+        actions["go"] = go_action
+
+        menu.addAction(go_action)
+
+        copy_action = QAction(
+            "نسخ النتيجة",
+            self
+        )
+
+        copy_action.triggered.connect(
+            self.copy_current_result
+        )
+
+        actions["copy"] = copy_action
+
+        menu.addAction(copy_action)
+
+        read_action = QAction(
+            "قراءة النتيجة",
+            self
+        )
+
+        read_action.triggered.connect(
+            self.read_current_result
+        )
+
+        actions["read"] = read_action
+
+        menu.addAction(read_action)
+
+
+
+
+        menu.setAccessibleName(
+            "خيارات النتيجة"
+        )
+
+        menu.setFocus()
+
+        logger.debug(
+            "Search result context menu displayed."
+        )
+
+        menu.exec(
+            self.list_widget.viewport().mapToGlobal(
+                position
+            )
+        )
+
+
+    def keyPressEvent(
+        self,
+        event: QKeyEvent | None
+    ) -> None:
+
+        if (
+            event.key() == Qt.Key.Key_I
+            and event.modifiers()
+            == Qt.KeyboardModifier.ControlModifier
+        ):
+
+            UniversalSpeech.say(
+                self.total_label.text(),
+                force=True
+            )
+
+            logger.debug(
+                "Ctrl+I pressed: "
+                "Announcing total results count."
+            )
+
+        elif (
+            event.key() == Qt.Key.Key_R
+            and event.modifiers()
+            == Qt.KeyboardModifier.ControlModifier
+        ):
+
+            self.read_current_result()
+
+            logger.debug(
+                "Ctrl+R pressed: "
+                "Reading current result."
+            )
+
         return super().keyPressEvent(event)
 
     def reject(self):
+
         self.deleteLater()
-        
+
     def closeEvent(self, a0):
-        logger.debug("SearchResultsDialog closed.")
+
+        logger.debug(
+            "SearchResultsDialog closed."
+        )
+
         return super().closeEvent(a0)
-    
