@@ -256,9 +256,24 @@ class MenuBar(QMenuBar):
 
         self.help_menu = self.addMenu("المساعدة(&H)")
 
+        self.repository_menu = QMenu("مستودع البرنامج", self)
+        REPO_URL = "https://github.com/tecwindow/albayan"
+        self.open_repo_action = QAction("فتح المستودع", self)
+        self.open_repo_action.triggered.connect(
+        lambda: QDesktopServices.openUrl(QUrl(REPO_URL))
+        )
+        self.copy_repo_action = QAction("نسخ رابط المستودع", self)
+        self.copy_repo_action.triggered.connect(
+        lambda: QApplication.clipboard().setText(REPO_URL)
+        )
+        self.repository_menu.addActions([
+        self.open_repo_action,
+        self.copy_repo_action
+        ])
+
         self.download_links_menu = QMenu("نسخ رابط تنزيل البيان", self)
-        installed_link = "https://github.com/tecwindow/albayan/releases/download/6.1.2/AlbayanV6.1.2.exe"
-        portable_link = "https://github.com/tecwindow/albayan/releases/download/6.1.2/AlbayanV6.1.2_Portable.zip"
+        installed_link = "https://github.com/tecwindow/albayan/releases/download/6.2.0/AlbayanV6.2.0.exe"
+        portable_link = "https://github.com/tecwindow/albayan/releases/download/6.2.0/AlbayanV6.2.0_Portable.zip"
 
         self.copy_installed_link_action = QAction("نسخ رابط النسخة المثبتة", self)
         self.copy_installed_link_action.triggered.connect(
@@ -357,6 +372,8 @@ class MenuBar(QMenuBar):
         self.help_menu.insertMenu(self.open_log_action, self.contact_us_menu)
         self.help_menu.insertMenu(self.open_log_action, self.tecwindow_menu)
         self.help_menu.insertMenu(self.open_log_action, self.download_links_menu)
+        self.help_menu.insertMenu(self.open_log_action, self.repository_menu)
+
 
         self.setup_shortcuts()
 
