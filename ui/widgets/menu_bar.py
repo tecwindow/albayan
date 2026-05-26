@@ -255,6 +255,68 @@ class MenuBar(QMenuBar):
 
 
         self.help_menu = self.addMenu("المساعدة(&H)")
+
+        self.download_links_menu = QMenu("نسخ رابط تنزيل البيان", self)
+        installed_link = "https://github.com/tecwindow/albayan/releases/download/6.1.2/AlbayanV6.1.2.exe"
+        portable_link = "https://github.com/tecwindow/albayan/releases/download/6.1.2/AlbayanV6.1.2_Portable.zip"
+
+        self.copy_installed_link_action = QAction("نسخ رابط النسخة المثبتة", self)
+        self.copy_installed_link_action.triggered.connect(
+            lambda: QApplication.clipboard().setText(installed_link)
+        )
+
+        self.copy_portable_link_action = QAction("نسخ رابط النسخة المحمولة", self)
+        self.copy_portable_link_action.triggered.connect(
+            lambda: QApplication.clipboard().setText(portable_link)
+        )
+
+        self.download_links_menu.addActions([
+            self.copy_installed_link_action,
+            self.copy_portable_link_action
+        ])
+
+        self.tecwindow_menu = QMenu("تابع نافذة التقنية", self)
+
+        self.tecwindow_main_site_action = QAction("موقع نافذة التقنية", self)
+        self.tecwindow_main_site_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://tecwindow.net"))
+        )
+
+        self.tecwindow_blog_action = QAction("مدونة نافذة التقنية", self)
+        self.tecwindow_blog_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://blog.tecwindow.net"))
+        )
+
+        self.tecwindow_telegram_action = QAction("نافذة التقنية على Telegram", self)
+        self.tecwindow_telegram_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://t.me/TecWindow"))
+        )
+
+        self.tecwindow_whatsapp_action = QAction("نافذة التقنية على WhatsApp", self)
+        self.tecwindow_whatsapp_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://whatsapp.com/channel/0029Va0tWYNICVfmctXiCt3V"))
+        )
+
+        self.tecwindow_x_action = QAction("نافذة التقنية على X", self)
+        self.tecwindow_x_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://x.com/tecwindow21"))
+        )
+
+        self.tecwindow_facebook_action = QAction("نافذة التقنية على Facebook", self)
+        self.tecwindow_facebook_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://facebook.com/tecwindow21"))
+        )
+
+        self.tecwindow_menu.addActions([
+            self.tecwindow_main_site_action,
+            self.tecwindow_blog_action,
+            self.tecwindow_telegram_action,
+            self.tecwindow_whatsapp_action,
+            self.tecwindow_x_action,
+            self.tecwindow_facebook_action
+        ])
+
+
         self.user_guide_action = QAction("دليل البرنامج", self)
         self.user_guide_action.triggered.connect(lambda: self.open_documentation("user_guide"))
         self.whats_new_action = QAction("المستجدات", self)
@@ -263,11 +325,27 @@ class MenuBar(QMenuBar):
         self.shortcuts_action.triggered.connect(lambda: self.open_documentation("Shortcuts"))
         self.marks_action = QAction("علامات الوقف", self)
         self.marks_action.triggered.connect(lambda: self.open_documentation("Marks"))
+
+
         self.contact_us_menu = QMenu("اتصل بنا", self)
-        for name in self.our_emails:
-            name_action = QAction(name, self)
-            name_action.triggered.connect(self.OnContact)
-            self.contact_us_menu.addAction(name_action)
+
+        for name, email in self.our_emails.items():
+            user_menu = QMenu(name, self)
+
+            open_email_action = QAction("فتح البريد", self)
+            open_email_action.triggered.connect(
+                lambda checked=False, e=email: QDesktopServices.openUrl(QUrl(f"mailto:{e}"))
+            )
+
+            copy_email_action = QAction("نسخ البريد", self)
+            copy_email_action.triggered.connect(
+                lambda checked=False, e=email: QApplication.clipboard().setText(e)
+            )
+
+            user_menu.addAction(open_email_action)
+            user_menu.addAction(copy_email_action)
+
+            self.contact_us_menu.addMenu(user_menu)
         self.update_program_action = QAction("تحديث البرنامج", self)
         self.update_program_action.triggered.connect(self.OnUpdate)
         self.open_log_action = QAction("فتح ملف السجل", self)
@@ -277,8 +355,8 @@ class MenuBar(QMenuBar):
 
         self.help_menu.addActions([self.user_guide_action, self.whats_new_action, self.shortcuts_action, self.marks_action, self.update_program_action, self.open_log_action, self.about_program_action])
         self.help_menu.insertMenu(self.open_log_action, self.contact_us_menu)
-
-
+        self.help_menu.insertMenu(self.open_log_action, self.tecwindow_menu)
+        self.help_menu.insertMenu(self.open_log_action, self.download_links_menu)
 
         self.setup_shortcuts()
 
