@@ -698,7 +698,7 @@ class SettingsDialog(QDialog):
         self.auto_play_checkbox.setChecked(Config.listening.auto_play_ayah_after_go_to)
         self.sswitch_when_moving_checkbox.setChecked(Config.listening.use_secondary_reciter_when_moving)
         self.sswitch_when_repeating_checkbox.setChecked(Config.listening.use_secondary_reciter_when_repeating)
-        self.download_path_edit.setText(Config.downloading.download_path)
+        self.download_path_edit.setText(str(Config.downloading.download_path))
         self.show_incomplete_download_warning_checkbox.setChecked(Config.downloading.show_incomplete_download_warning)
         self.offline_playback_checkbox.setChecked(Config.downloading.offline_playback)
         self.auto_refresh_downloads_lists_checkbox.setChecked(Config.downloading.auto_refresh_downloads_lists)
