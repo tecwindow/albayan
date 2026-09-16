@@ -272,8 +272,8 @@ class MenuBar(QMenuBar):
         ])
 
         self.download_links_menu = QMenu("نسخ رابط تنزيل البيان", self)
-        installed_link = "https://github.com/tecwindow/albayan/releases/download/6.2.0/AlbayanV6.2.0.exe"
-        portable_link = "https://github.com/tecwindow/albayan/releases/download/6.2.0/AlbayanV6.2.0_Portable.zip"
+        installed_link = f"https://github.com/tecwindow/albayan/releases/download/{program_version}/AlbayanV{program_version}.exe"
+        portable_link = f"https://github.com/tecwindow/albayan/releases/download/{program_version}/AlbayanV{program_version}_Portable.zip"
 
         self.copy_installed_link_action = QAction("نسخ رابط النسخة المثبتة", self)
         self.copy_installed_link_action.triggered.connect(
