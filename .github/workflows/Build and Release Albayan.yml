@@ -32,6 +32,40 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v6
 
+    - name: Show repository state
+      shell: pwsh
+      run: |
+        Write-Host "===== GITHUB REF ====="
+        Write-Host "${{ github.ref }}"
+
+        Write-Host "===== GITHUB REF NAME ====="
+        Write-Host "${{ github.ref_name }}"
+
+        Write-Host "===== COMMIT SHA ====="
+        git rev-parse HEAD
+
+        Write-Host "===== COMMIT ====="
+        git log -1 --oneline
+
+        Write-Host "===== STATUS ====="
+        git status --short
+
+        Write-Host "===== SETUP.PY HASH ====="
+        if (Test-Path "setup.py") {
+            Get-FileHash "setup.py" -Algorithm SHA256
+        }
+        else {
+            Write-Host "setup.py not found."
+        }
+
+        Write-Host "===== REQUIREMENTS HASH ====="
+        if (Test-Path "requirements.txt") {
+            Get-FileHash "requirements.txt" -Algorithm SHA256
+        }
+        else {
+            Write-Host "requirements.txt not found."
+        }
+
     - name: Set up Python 3.14 (latest patch)
       uses: actions/setup-python@v6
       with:
@@ -41,19 +75,135 @@ jobs:
       shell: pwsh
       run: |
         python -m pip install --upgrade pip
+
         if (Test-Path "requirements.txt") {
             pip install -r requirements.txt
         }
 
+    - name: Show build environment
+      shell: pwsh
+      run: |
+        Write-Host "===== PYTHON ====="
+        python --version
+        python -c "import sys; print('Executable:'); print(sys.executable); print('Version:'); print(sys.version)"
+
+        Write-Host "===== PIP ====="
+        python -m pip --version
+
+        Write-Host "===== PyQt6 ====="
+        python -m pip show PyQt6
+
+        Write-Host "===== PyQt6-Qt6 ====="
+        python -m pip show PyQt6-Qt6
+
+        Write-Host "===== cx-Freeze ====="
+        python -m pip show cx-Freeze
+
+        Write-Host "===== PACKAGE LIST ====="
+        python -m pip list
+
+    - name: Inspect PyQt6 Qt files before build
+      shell: pwsh
+      run: |
+        python -c "import PyQt6, os; p=os.path.dirname(PyQt6.__file__); print('PyQt6 path:'); print(p); qt=os.path.join(p, 'Qt6'); print('Qt6 path:'); print(qt); print('Qt6 exists:', os.path.isdir(qt)); plugins=os.path.join(qt, 'plugins'); print('Plugins path:'); print(plugins); print('Plugins exists:', os.path.isdir(plugins)); print('Plugin folders:'); print('\n'.join(sorted([x for x in os.listdir(plugins) if os.path.isdir(os.path.join(plugins, x))])) if os.path.isdir(plugins) else 'NONE'); qml=os.path.join(qt, 'qml'); print('QML path:'); print(qml); print('QML exists:', os.path.isdir(qml)); print('QML contents:'); print('\n'.join(sorted(os.listdir(qml))) if os.path.isdir(qml) else 'NONE')"
+
+    - name: Inspect Qt plugin files before build
+      shell: pwsh
+      run: |
+        python -c "import PyQt6, os; p=os.path.dirname(PyQt6.__file__); plugins=os.path.join(p, 'Qt6', 'plugins'); print('===== ALL PLUGIN DIRECTORIES ====='); print('\n'.join([x for x in sorted([os.path.join(root, d) for root, dirs, files in os.walk(plugins) for d in dirs])]) if os.path.isdir(plugins) else 'NONE'); print('===== PLUGIN FILE COUNT ====='); print('Plugin files:', sum(len(files) for root, dirs, files in os.walk(plugins)) if os.path.isdir(plugins) else 0)"
+
     - name: Build with cx-Freeze
       shell: pwsh
       run: |
+        Write-Host "===== BUILDING WITH CX-FREEZE ====="
+
         python setup.py build
+
+        Write-Host ""
+        Write-Host "===== BUILD RESULT: PLUGIN DIRECTORIES ====="
+
+        $pluginPath = "albayan_build\lib\PyQt6\Qt6\plugins"
+
+        if (Test-Path $pluginPath) {
+            Get-ChildItem $pluginPath -Directory |
+                Select-Object -ExpandProperty Name
+        }
+        else {
+            Write-Host "Plugins directory does not exist."
+        }
+
+        Write-Host ""
+        Write-Host "===== BUILD RESULT: QML ====="
+
+        $qmlPath = "albayan_build\lib\PyQt6\Qt6\qml"
+
+        if (Test-Path $qmlPath) {
+            Write-Host "QML directory exists."
+
+            Get-ChildItem $qmlPath -Directory |
+                Select-Object -ExpandProperty Name
+        }
+        else {
+            Write-Host "QML directory does not exist."
+        }
+
+    - name: Inspect built Qt files
+      shell: pwsh
+      run: |
+        Write-Host "===== ALL BUILT PLUGIN DIRECTORIES ====="
+
+        $pluginPath = "albayan_build\lib\PyQt6\Qt6\plugins"
+
+        if (Test-Path $pluginPath) {
+            Get-ChildItem $pluginPath -Directory -Recurse |
+                ForEach-Object {
+                    $_.FullName
+                }
+
+            Write-Host ""
+            Write-Host "===== BUILT PLUGIN FILE COUNT ====="
+
+            $count = (
+                Get-ChildItem $pluginPath -File -Recurse |
+                Measure-Object
+            ).Count
+
+            Write-Host "Plugin files: $count"
+        }
+        else {
+            Write-Host "Plugins directory does not exist."
+        }
+
+        Write-Host ""
+        Write-Host "===== ALL BUILT QML DIRECTORIES ====="
+
+        $qmlPath = "albayan_build\lib\PyQt6\Qt6\qml"
+
+        if (Test-Path $qmlPath) {
+            Get-ChildItem $qmlPath -Directory -Recurse |
+                ForEach-Object {
+                    $_.FullName
+                }
+
+            Write-Host ""
+            Write-Host "===== BUILT QML FILE COUNT ====="
+
+            $count = (
+                Get-ChildItem $qmlPath -File -Recurse |
+                Measure-Object
+            ).Count
+
+            Write-Host "QML files: $count"
+        }
+        else {
+            Write-Host "QML directory does not exist."
+        }
 
     - name: Remove markdown documentation files
       shell: pwsh
       run: |
         $docPath = "albayan_build\documentation"
+
         if (Test-Path $docPath) {
             Remove-Item "$docPath\*.md" -ErrorAction SilentlyContinue
         }
@@ -72,6 +222,7 @@ jobs:
         }
 
         $version = (Get-Item $isccPath).VersionInfo.ProductVersion
+
         Write-Host "Using Inno Setup version: $version"
         Write-Host "ISCC path: $isccPath"
 
@@ -133,9 +284,15 @@ jobs:
 
         # Copy build contents into an Albayan subfolder, then zip that folder
         New-Item -ItemType Directory -Path "portable_output\Albayan" -Force | Out-Null
-        Copy-Item -Path "albayan_build\*" -Destination "portable_output\Albayan" -Recurse -Force
 
-        Compress-Archive -Path "portable_output\Albayan" -DestinationPath $zipName
+        Copy-Item -Path "albayan_build\*" `
+                  -Destination "portable_output\Albayan" `
+                  -Recurse `
+                  -Force
+
+        Compress-Archive `
+            -Path "portable_output\Albayan" `
+            -DestinationPath $zipName
 
         # Save the zip file name to environment variables for the release step
         echo "PORTABLE_NAME=$zipName" >> $env:GITHUB_ENV
