@@ -47,20 +47,39 @@ jobs:
             Remove-Item "$docPath\WhatsNew.md" -ErrorAction SilentlyContinue
         }
 
-    - name: Download and install latest Inno Setup
+    - name: Find Inno Setup
       shell: pwsh
       run: |
-        Invoke-WebRequest -Uri https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe -OutFile is.exe
-        Start-Process -Wait -FilePath .\is.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP'
+        $isccPaths = @(
+            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+            "C:\Program Files\Inno Setup 6\ISCC.exe"
+        )
+
+        $isccPath = $isccPaths | Where-Object {
+            Test-Path $_
+        } | Select-Object -First 1
+
+        if (-not $isccPath) {
+            Write-Host "Inno Setup was not found in the expected locations."
+            exit 1
+        }
+
+        $version = (Get-Item $isccPath).VersionInfo.ProductVersion
+
+        Write-Host "Inno Setup found:"
+        Write-Host "Path: $isccPath"
+        Write-Host "Version: $version"
+
+        echo "ISCC_PATH=$isccPath" >> $env:GITHUB_ENV
 
     - name: Package with Inno Setup
       shell: pwsh
       run: |
-        $isccPath = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-        if (!(Test-Path $isccPath)) {
-            $isccPath = "C:\Program Files\Inno Setup 6\ISCC.exe"
+        & "$env:ISCC_PATH" "albayan.iss"
+
+        if ($LASTEXITCODE -ne 0) {
+            throw "Inno Setup compilation failed with exit code $LASTEXITCODE."
         }
-        Start-Process -Wait -FilePath $isccPath -ArgumentList "albayan.iss"
 
     - name: Upload installer artifact
       uses: actions/upload-artifact@v4
