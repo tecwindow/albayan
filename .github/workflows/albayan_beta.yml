@@ -50,7 +50,7 @@ jobs:
     - name: Download and install latest Inno Setup
       shell: pwsh
       run: |
-        Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile is.exe
+        Invoke-WebRequest -Uri https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe -OutFile is.exe
         Start-Process -Wait -FilePath .\is.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP'
 
     - name: Package with Inno Setup
