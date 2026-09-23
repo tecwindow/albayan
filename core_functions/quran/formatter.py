@@ -2,14 +2,16 @@
 
 import re
 from typing import List
-from pydantic import BaseModel
+from dataclasses import dataclass
 from .types import MarksType, Ayah
 from .view_content import ViewContent
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
-class FormatterOptions(BaseModel):
+
+@dataclass
+class FormatterOptions:
     """
     Formatter options for the Quran text.
     """
