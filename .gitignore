@@ -11,3 +11,5 @@ albayan_env/
 
 # Ignore build folder directory
 albayan_build
+
+Albayan.egg-info
