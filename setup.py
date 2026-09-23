@@ -16,15 +16,6 @@ def restore_main_file(from_name="Albayan.py"):
         os.rename(from_name, "main.py")
 
 
-def get_pyside_dll_files():
-    pyside_path = os.path.dirname(PySide6.__file__)
-    dll_files = ["Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Network.dll"]
-    return [
-        (os.path.join(pyside_path, file), os.path.join("lib", file))
-        for file in dll_files
-    ]
-
-
 def get_include_files():
     base_files = [
         ("database", "database"),
@@ -33,7 +24,6 @@ def get_include_files():
         ("bass.dll", "bass.dll"),
         ("Albayan.ico", "Albayan.ico"),
     ]
-    base_files.extend(get_pyside_dll_files())
     return base_files
 
 
@@ -69,6 +59,10 @@ def build_setup(script_name="Albayan.py", build_dir="albayan_build", version="6.
             "typing_inspection",
             "striprtf",
             "PySide6.QtMultimedia",
+            "PySide6.QtSql",
+            "PyQt5",
+            "PyQt6",
+            "PySide2",
             "PySide6.Qt3DCore",
             "PySide6.Qt3DAnimation",
             "PySide6.Qt3DExtras",
@@ -165,6 +159,7 @@ def clean_unused_folders(build_dir="albayan_build"):
         "lib/PySide6/plugins/webview",
         "lib/PySide6/plugins/position",
         "lib/PySide6/plugins/geometryloaders",
+        "lib/PySide6/plugins/sqldrivers",
     ]
     for rel_path in folders_to_remove:
         full_path = os.path.join(build_dir, rel_path)
@@ -185,6 +180,16 @@ def clean_unused_folders(build_dir="albayan_build"):
         "Qt6Multimedia",
         "Qt6SpatialAudio",
     ]
+    # Retain only required Qt6 DLLs; remove all unneeded ones (Qt6WebEngineCore, Qt6Quick, Qt6Qml, etc.)
+    needed_qt_dlls = {
+        "Qt6Core.dll",
+        "Qt6Gui.dll",
+        "Qt6Widgets.dll",
+        "Qt6Network.dll",
+        "Qt6Svg.dll",
+        "Qt6OpenGL.dll",
+        "Qt6OpenGLWidgets.dll",
+    }
     lib_dir = os.path.join(build_dir, "lib")
     if os.path.exists(lib_dir):
         for root, _, files in os.walk(lib_dir):
@@ -194,6 +199,13 @@ def clean_unused_folders(build_dir="albayan_build"):
                     try:
                         os.remove(file_path)
                         print(f"Removed unused DLL: {file}")
+                    except Exception as e:
+                        print(f"Error removing {file_path}: {e}")
+                elif file.startswith("Qt6") and file.endswith(".dll") and file not in needed_qt_dlls:
+                    file_path = os.path.join(root, file)
+                    try:
+                        os.remove(file_path)
+                        print(f"Removed unused Qt6 DLL: {file}")
                     except Exception as e:
                         print(f"Error removing {file_path}: {e}")
 
