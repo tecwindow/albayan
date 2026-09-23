@@ -5,17 +5,11 @@ import os
 # set PYTHONPATH to the current directory
 current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 os.chdir(current_dir)
-from utils.const import (
-    program_name,
-    program_english_name,
-    program_version,
-    program_icon,
-    dev_mode,
-)
-from utils.paths import paths
+from utils.const import program_name, program_english_name, program_version, program_icon, dev_mode
+from utils.paths import paths, is_installed, is_portable
 from utils.settings import Config
 from utils.logger import LogLevel, LoggerManager
-
+sys.excepthook = LoggerManager.my_excepthook
 # load the config file
 Config.load_settings()
 # setup the logger
@@ -25,8 +19,14 @@ LoggerManager.setup_logger(
     dev_mode=dev_mode,
 )
 logger = LoggerManager.get_logger(__name__)
+app_type = (
+    "Installed" if getattr(sys, "frozen", False) and is_installed()
+    else "Portable" if getattr(sys, "frozen", False)
+    else "Source"
+)
+
 logger.info(
-    f"Starting {program_name}, {program_english_name}, version {program_version}..."
+    f"Starting {program_name}, {program_english_name}, version {program_version} ({app_type})..."
 )
 
 from multiprocessing import freeze_support
@@ -42,12 +42,14 @@ from utils.audio_player import StartupSoundEffectPlayer, VolumeController
 class SingleInstanceApplication(QApplication):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        app_id = "Albayan" if sys.argv[0].endswith(".exe") else "Albayan_Source"
-        logger.debug(
-            "running from source."
-            if app_id == "Albayan_Source"
-            else "running from exe file."
-        )
+        if getattr(sys, "frozen", False):
+            if is_installed():
+                app_id = "Albayan_Installed"
+            else:
+                app_id = "Albayan_Portable"
+        else:
+            app_id = "Albayan_Source"
+        logger.debug("running from source." if app_id == "Albayan_Source" else "running from exe file.")
         self.setApplicationName(program_name)
         self.server_name = app_id
         logger.debug(f"Application ID: {app_id}")
@@ -188,7 +190,13 @@ def main():
         logger.info("QApplication initialized successfully.")
         app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         logger.info("Layout direction set to RightToLeft.")
-        main_window = QuranInterface(program_name)
+        display_name = (
+        program_name if getattr(sys, "frozen", False) and is_installed()
+        else f"{program_name} (Portable)" if getattr(sys, "frozen", False)
+        else f"{program_name} (Source)"
+        )
+
+        main_window = QuranInterface(display_name)
         logger.info("Main window initialized successfully.")
         app.set_main_window(main_window)
         if "--minimized" not in sys.argv:

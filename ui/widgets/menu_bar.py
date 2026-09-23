@@ -28,7 +28,7 @@ from utils.update import UpdateManager
 from utils.settings import Config
 from utils.logger import LoggerManager
 from utils.const import program_name, program_version, website, Globals
-from utils.paths import paths
+from utils.paths import paths, is_installed, is_portable
 from utils.audio_player import bass
 from theme import ThemeManager
 
@@ -250,7 +250,7 @@ class MenuBar(QMenuBar):
         self.athkar_action.triggered.connect(lambda: AthkarDialog(self.parent).open())
         self.bookmark_manager_action = QAction("مدير العلامات", self)
         self.bookmark_manager_action.triggered.connect(self.OnBookmarkManager)
-        self.sura_player_action = QAction("مشغل القرآن", self)
+        self.sura_player_action = QAction("مشغل سور القرآن", self)
         self.sura_player_action.triggered.connect(self.OnSuraPlayer)
         self.tasbih_action = QAction("المسبحة", self)
         self.tasbih_action.triggered.connect(self.OnTasbihAction)
@@ -319,6 +319,83 @@ class MenuBar(QMenuBar):
         self.preferences_menu.addAction(self.settings_action)
 
         self.help_menu = self.addMenu("المساعدة(&H)")
+
+        self.repository_menu = QMenu("مستودع البرنامج", self)
+        REPO_URL = "https://github.com/tecwindow/albayan"
+        self.open_repo_action = QAction("فتح المستودع", self)
+        self.open_repo_action.triggered.connect(
+        lambda: QDesktopServices.openUrl(QUrl(REPO_URL))
+        )
+        self.copy_repo_action = QAction("نسخ رابط المستودع", self)
+        self.copy_repo_action.triggered.connect(
+        lambda: QApplication.clipboard().setText(REPO_URL)
+        )
+        self.repository_menu.addActions([
+        self.open_repo_action,
+        self.copy_repo_action
+        ])
+
+        self.download_links_menu = QMenu("نسخ رابط تنزيل البيان", self)
+        installed_link = f"https://github.com/tecwindow/albayan/releases/download/{program_version}/AlbayanV{program_version}.exe"
+        portable_link = f"https://github.com/tecwindow/albayan/releases/download/{program_version}/AlbayanV{program_version}_Portable.zip"
+
+        self.copy_installed_link_action = QAction("نسخ رابط النسخة المثبتة", self)
+        self.copy_installed_link_action.triggered.connect(
+            lambda: QApplication.clipboard().setText(installed_link)
+        )
+
+        self.copy_portable_link_action = QAction("نسخ رابط النسخة المحمولة", self)
+        self.copy_portable_link_action.triggered.connect(
+            lambda: QApplication.clipboard().setText(portable_link)
+        )
+
+        self.download_links_menu.addActions([
+            self.copy_installed_link_action,
+            self.copy_portable_link_action
+        ])
+
+        self.tecwindow_menu = QMenu("تابع نافذة التقنية", self)
+
+        self.tecwindow_main_site_action = QAction("موقع نافذة التقنية", self)
+        self.tecwindow_main_site_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://tecwindow.net"))
+        )
+
+        self.tecwindow_blog_action = QAction("مدونة نافذة التقنية", self)
+        self.tecwindow_blog_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://blog.tecwindow.net"))
+        )
+
+        self.tecwindow_telegram_action = QAction("نافذة التقنية على Telegram", self)
+        self.tecwindow_telegram_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://t.me/TecWindow"))
+        )
+
+        self.tecwindow_whatsapp_action = QAction("نافذة التقنية على WhatsApp", self)
+        self.tecwindow_whatsapp_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://whatsapp.com/channel/0029Va0tWYNICVfmctXiCt3V"))
+        )
+
+        self.tecwindow_x_action = QAction("نافذة التقنية على X", self)
+        self.tecwindow_x_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://x.com/tecwindow21"))
+        )
+
+        self.tecwindow_facebook_action = QAction("نافذة التقنية على Facebook", self)
+        self.tecwindow_facebook_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://facebook.com/tecwindow21"))
+        )
+
+        self.tecwindow_menu.addActions([
+            self.tecwindow_main_site_action,
+            self.tecwindow_blog_action,
+            self.tecwindow_telegram_action,
+            self.tecwindow_whatsapp_action,
+            self.tecwindow_x_action,
+            self.tecwindow_facebook_action
+        ])
+
+
         self.user_guide_action = QAction("دليل البرنامج", self)
         self.user_guide_action.triggered.connect(
             lambda: self.open_documentation("user_guide")
@@ -333,11 +410,27 @@ class MenuBar(QMenuBar):
         )
         self.marks_action = QAction("علامات الوقف", self)
         self.marks_action.triggered.connect(lambda: self.open_documentation("Marks"))
+
+
         self.contact_us_menu = QMenu("اتصل بنا", self)
-        for name in self.our_emails:
-            name_action = QAction(name, self)
-            name_action.triggered.connect(self.OnContact)
-            self.contact_us_menu.addAction(name_action)
+
+        for name, email in self.our_emails.items():
+            user_menu = QMenu(name, self)
+
+            open_email_action = QAction("فتح البريد", self)
+            open_email_action.triggered.connect(
+                lambda checked=False, e=email: QDesktopServices.openUrl(QUrl(f"mailto:{e}"))
+            )
+
+            copy_email_action = QAction("نسخ البريد", self)
+            copy_email_action.triggered.connect(
+                lambda checked=False, e=email: QApplication.clipboard().setText(e)
+            )
+
+            user_menu.addAction(open_email_action)
+            user_menu.addAction(copy_email_action)
+
+            self.contact_us_menu.addMenu(user_menu)
         self.update_program_action = QAction("تحديث البرنامج", self)
         self.update_program_action.triggered.connect(self.OnUpdate)
         self.open_log_action = QAction("فتح ملف السجل", self)
@@ -357,6 +450,9 @@ class MenuBar(QMenuBar):
             ]
         )
         self.help_menu.insertMenu(self.open_log_action, self.contact_us_menu)
+        self.help_menu.insertMenu(self.open_log_action, self.tecwindow_menu)
+        self.help_menu.insertMenu(self.open_log_action, self.download_links_menu)
+        self.help_menu.insertMenu(self.open_log_action, self.repository_menu)
 
         self.setup_shortcuts()
 
@@ -470,8 +566,14 @@ class MenuBar(QMenuBar):
 
     def OnAbout(self):
         logger.debug("Opening about dialog.")
+        version_type = (
+        "نسخة مثبتة" if getattr(sys, "frozen", False) and is_installed()
+        else "نسخة محمولة" if getattr(sys, "frozen", False)
+        else "نسخة المصدر"
+        )
+
         about_text = (
-            f"{program_name} - الإصدار {program_version}.\n"
+            f"{program_name} - الإصدار {program_version} ({version_type}).\n"
             f"{program_name}، هو برنامج يهدف إلى مساعدة المسلم على قراءة القرآن بشكل سهل وبسيط مع العديد من المميزات.\n"
             "تم تصميم البرنامج من فريق نافذة التقنية: محمود عاطف، أحمد بكر وقيس الرفاعي.\n"
             f"الموقع الرسمي للبرنامج: {website}\n"

@@ -685,14 +685,14 @@ class SuraPlayerWindow(QMainWindow):
         """
         Repeat the current Surah without announcing the time.
         """
-        self.replay()
+        self.set_position(0)
         self.play_current_surah()
 
     def _replay_current_surah(self):
         """
         Replay the current Surah and optionally announce the time.
         """
-        self.replay()
+        self.set_position(0)
         self.play_current_surah()
         UniversalSpeech.say(
             f"تكرار سورة {self.surah_combo.currentText()}.",

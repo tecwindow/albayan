@@ -27,20 +27,20 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
-    - name: Set up Python 3.13 (latest patch)
-      uses: actions/setup-python@v5
+    - name: Set up Python 3.14 (latest patch)
+      uses: actions/setup-python@v6
       with:
-        python-version: "3.13"
+        python-version: "3.14"
 
     - name: Upgrade pip and install dependencies
       shell: pwsh
       run: |
         python -m pip install --upgrade pip
-        pip install --upgrade cx-Freeze
         if (Test-Path "requirements.txt") {
             pip install -r requirements.txt
         }
@@ -55,40 +55,90 @@ jobs:
       run: |
         $docPath = "albayan_build\documentation"
         if (Test-Path $docPath) {
-            Remove-Item "$docPath\UserGuide.md" -ErrorAction SilentlyContinue
-            Remove-Item "$docPath\WhatsNew.md" -ErrorAction SilentlyContinue
-            Remove-Item "$docPath\Marks.md" -ErrorAction SilentlyContinue
-            Remove-Item "$docPath\Shortcuts.md" -ErrorAction SilentlyContinue
+            Remove-Item "$docPath\*.md" -ErrorAction SilentlyContinue
         }
-
-    - name: Download and install latest Inno Setup
-      shell: pwsh
-      run: |
-        Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile is.exe
-        Start-Process -Wait -FilePath .\is.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP'
 
     - name: Package with Inno Setup
       shell: pwsh
       run: |
         $isccPath = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+
         if (!(Test-Path $isccPath)) {
             $isccPath = "C:\Program Files\Inno Setup 6\ISCC.exe"
         }
-        Start-Process -Wait -FilePath $isccPath -ArgumentList "albayan.iss"
+
+        if (!(Test-Path $isccPath)) {
+            throw "Inno Setup ISCC.exe was not found."
+        }
+
+        $version = (Get-Item $isccPath).VersionInfo.ProductVersion
+        Write-Host "Using Inno Setup version: $version"
+        Write-Host "ISCC path: $isccPath"
+
+        & $isccPath "albayan.iss"
+
+        if ($LASTEXITCODE -ne 0) {
+            throw "Inno Setup compilation failed with exit code $LASTEXITCODE."
+        }
 
     - name: Rename installer
       shell: pwsh
       run: |
         $input = "${{ github.event.inputs.file_name }}"
+
         if (-not $input.ToLower().EndsWith(".exe")) {
             $input = "$input.exe"
         }
+
         $source = "albayan_build\AlbayanSetup.exe"
         $dest   = "albayan_build\$input"
+
+        if (!(Test-Path $source)) {
+            throw "Installer was not created: $source"
+        }
+
         if ($source -ne $dest) {
             Rename-Item -Path $source -NewName $input
         }
+
+        # Copy installer outside albayan_build so it won't be included in the portable ZIP
+        Copy-Item -Path "albayan_build\$input" -Destination "$input"
+
         echo "INSTALLER_NAME=$input" >> $env:GITHUB_ENV
+
+    - name: Create Portable ZIP
+      shell: pwsh
+      run: |
+        # Move athkar folder to User Data\audio\athkar (portable structure)
+        $source = "albayan_build\Audio\athkar"
+        $dest   = "albayan_build\user_data\audio\athkar"
+
+        if (Test-Path $source) {
+            New-Item -ItemType Directory -Path $dest -Force | Out-Null
+            Move-Item -Path "$source\*" -Destination $dest -Force
+            Remove-Item $source -Recurse -Force
+        }
+
+        # Remove installer from build folder before zipping
+        Remove-Item "albayan_build\$env:INSTALLER_NAME" -ErrorAction SilentlyContinue
+
+        # Strip .exe if provided to format the zip name nicely
+        $baseName = "${{ github.event.inputs.file_name }}"
+
+        if ($baseName.ToLower().EndsWith(".exe")) {
+            $baseName = $baseName.Substring(0, $baseName.Length - 4)
+        }
+
+        $zipName = "$baseName`_Portable.zip"
+
+        # Copy build contents into an Albayan subfolder, then zip that folder
+        New-Item -ItemType Directory -Path "portable_output\Albayan" -Force | Out-Null
+        Copy-Item -Path "albayan_build\*" -Destination "portable_output\Albayan" -Recurse -Force
+
+        Compress-Archive -Path "portable_output\Albayan" -DestinationPath $zipName
+
+        # Save the zip file name to environment variables for the release step
+        echo "PORTABLE_NAME=$zipName" >> $env:GITHUB_ENV
 
     - name: Create tag and release
       uses: softprops/action-gh-release@v2
@@ -96,7 +146,9 @@ jobs:
         tag_name: ${{ github.event.inputs.tag_name }}
         name: ${{ github.event.inputs.release_name }}
         body: ${{ github.event.inputs.release_body }}
-        files: albayan_build/${{ env.INSTALLER_NAME }}
+        files: |
+          ${{ env.INSTALLER_NAME }}
+          ${{ env.PORTABLE_NAME }}
         target_commitish: ${{ github.ref_name }}
         prerelease: false
         draft: false

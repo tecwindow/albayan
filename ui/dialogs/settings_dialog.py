@@ -437,7 +437,7 @@ class SettingsDialog(QDialog):
         self.download_path_label = QLabel("مسار التنزيل الحالي:")
         self.download_path_edit = QLineEdit()
         self.download_path_edit.setReadOnly(True)
-        self.download_path_edit.setText(Config.downloading.download_path)
+        self.download_path_edit.setText(str(Config.downloading.download_path))
         self.download_path_edit.setAccessibleName(self.download_path_label.text())
 
         self.change_download_path_button = QPushButton("تغيير المسار")
@@ -847,7 +847,7 @@ class SettingsDialog(QDialog):
         self.sswitch_when_repeating_checkbox.setChecked(
             Config.listening.use_secondary_reciter_when_repeating
         )
-        self.download_path_edit.setText(Config.downloading.download_path)
+        self.download_path_edit.setText(str(Config.downloading.download_path))
         self.show_incomplete_download_warning_checkbox.setChecked(
             Config.downloading.show_incomplete_download_warning
         )

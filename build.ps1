@@ -2,7 +2,7 @@ $VENV_DIR = "albayan_env"
 
 if (-not (Test-Path $VENV_DIR)) {
     Write-Host "Creating virtual environment..."
-    py -3.13 -m venv $VENV_DIR
+    py -3.14 -m venv $VENV_DIR
 }
 
 
@@ -24,13 +24,6 @@ else {
     exit 1
 }
 
-
-$cxFreezeInstalled = pip show cx-freeze 2>$null
-
-if (-not $cxFreezeInstalled) {
-    Write-Host "Installing cx-Freeze..."
-    pip install cx-freeze
-}
 
 
 if (Test-Path "setup.py") {
