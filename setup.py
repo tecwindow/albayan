@@ -16,11 +16,11 @@ def restore_main_file(from_name="Albayan.py"):
         os.rename(from_name, "main.py")
 
 
-def get_pyqt_dll_files():
-    pyqt_path = os.path.dirname(PySide6.__file__)
+def get_pyside_dll_files():
+    pyside_path = os.path.dirname(PySide6.__file__)
     dll_files = ["Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Network.dll"]
     return [
-        (os.path.join(pyqt_path, "Qt6", "bin", file), os.path.join("lib", file))
+        (os.path.join(pyside_path, file), os.path.join("lib", file))
         for file in dll_files
     ]
 
@@ -33,7 +33,7 @@ def get_include_files():
         ("bass.dll", "bass.dll"),
         ("Albayan.ico", "Albayan.ico"),
     ]
-    base_files.extend(get_pyqt_dll_files())
+    base_files.extend(get_pyside_dll_files())
     return base_files
 
 

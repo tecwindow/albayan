@@ -193,7 +193,11 @@ class SearchDialog(QDialog):
             self.deleteLater()
 
     def on_radio_toggled(self):
-        logger.debug(f"Radio button toggled. Selected: {self.sender().text()}")
+        sender = self.sender()
+        if sender:
+            logger.debug(f"Radio button toggled. Selected: {sender.text()}")
+        else:
+            logger.debug("Radio button toggled (initial setup).")
 
         # clear
         self.search_from_combobox.clear()
