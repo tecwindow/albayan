@@ -1,25 +1,38 @@
-APScheduler==3.11.3
-cabarchive==0.2.5
-certifi==2026.7.22
-charset-normalizer==3.5.1
-cx_Freeze==8.7.0
-filelock==3.32.6
-freeze-core==0.7.5
-greenlet==3.5.6
-idna==3.19
-lief==1.0.0
-packaging==26.3
+# ==========================================
+# Al-Bayan Dependencies (PySide6 Edition)
+# Python 3.14 Compatible
+# ==========================================
+
+# --- Core UI & Accessibility ---
 PySide6==6.11.2
-PySide6_Essentials==6.11.2
-python-msilib==0.7.0
+shiboken6==6.11.2
 QtAwesome==1.4.2
 QtPy==2.4.3
-requests==2.34.2
-setuptools==84.0.0
-shiboken6==6.11.2
-SQLAlchemy==2.0.53
-typing_extensions==4.16.0
+UniversalSpeech==2.0.0
+
+# --- Data & Scheduling ---
+SQLAlchemy==2.0.54
+greenlet==3.5.6
+APScheduler==3.11.3
 tzdata==2026.4
 tzlocal==5.4.4
-UniversalSpeech==1.0.2.1
+
+# --- Networking & Updates ---
+requests==2.34.2
 urllib3==2.8.0
+certifi==2026.7.22
+charset-normalizer==3.5.1
+idna==3.20
+packaging==26.3
+
+# --- Typing & Core Utilities ---
+typing_extensions==4.16.0
+
+# --- Build & Packaging (cx_Freeze) ---
+cx_Freeze==8.7.1
+freeze-core==0.7.5
+lief==1.0.0
+filelock==4.0.1
+cabarchive==0.2.5
+python-msilib==0.7.0
+setuptools==84.0.0
