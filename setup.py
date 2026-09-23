@@ -197,6 +197,27 @@ def clean_unused_folders(build_dir="albayan_build"):
                     except Exception as e:
                         print(f"Error removing {file_path}: {e}")
 
+    # Clean any local runtime data or leftover artifacts in build_dir
+    extra_cleanup = ["user_data", "Downloads"]
+    for rel_path in extra_cleanup:
+        full_path = os.path.join(build_dir, rel_path)
+        if os.path.exists(full_path):
+            try:
+                shutil.rmtree(full_path)
+                print(f"Cleaned build-time data folder: {rel_path}")
+            except Exception as e:
+                print(f"Error removing {full_path}: {e}")
+
+    if os.path.exists(build_dir):
+        for item in os.listdir(build_dir):
+            if item.endswith(".log") or item == "AlbayanSetup.exe":
+                file_path = os.path.join(build_dir, item)
+                try:
+                    os.remove(file_path)
+                    print(f"Cleaned leftover build artifact: {item}")
+                except Exception as e:
+                    print(f"Error removing {file_path}: {e}")
+
 
 def main():
     build_dir = os.environ.get("ALBAYAN_BUILD_DIR", "albayan_build")

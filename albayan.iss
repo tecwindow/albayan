@@ -1,4 +1,4 @@
-﻿#define MyAppName "Albayan"
+#define MyAppName "Albayan"
 #define MyAppVersion "6.2.1"
 #define AppVersion "6.2.1"
 #define MyAppPublisher "Tecwindow"
@@ -47,6 +47,7 @@ Name: "arabic"; MessagesFile: "compiler:Languages\Arabic.isl"
 
 [CustomMessages]
 arabic.AppLNGfile=Arabic
+english.AppLNGfile=English
 english.DeleteSettingsPrompt=Do you want to delete the settings folder?
 arabic.DeleteSettingsPrompt=هل تريد حذف مجلد الإعدادات؟
 english.autorun=auto start albayan with windows?
@@ -84,7 +85,7 @@ Name: "autorun"; Description: "{cm:autorun}"; GroupDescription: "{cm:AdditionalI
 
 [Files]
 Source: "albayan_build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "albayan_build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "albayan_build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "user_data,user_data\*,Downloads,Downloads\*,*.log,AlbayanSetup.exe"
 Source: "albayan_build\Audio\athkar\*"; DestDir: "{userappdata}\tecwindow\albayan\Audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsNormalInstall
 Source: "albayan_build\Audio\athkar\*"; DestDir: "{app}\user_data\audio\athkar"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsPortableInstall
 
@@ -97,13 +98,13 @@ Filename: "{userappdata}\tecwindow\{#MyAppName}\config.ini"; Section: "general";
 Filename: "{userappdata}\tecwindow\{#MyAppName}\config.ini"; Section: "general"; Key: "auto_start_enabled"; String: "true"; Tasks: autorun;  Check: IsNormalInstall
 
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "albayan"; ValueData: "{app}\albayan.exe --minimized"; Flags: uninsdeletevalue; Tasks: autorun;  Check: IsNormalInstall
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "albayan"; ValueData: "{app}\{#MyAppExeName} --minimized"; Flags: uninsdeletevalue; Tasks: autorun;  Check: IsNormalInstall
 
 [UninstallRun]
-Filename: "taskkill"; Parameters: "/F /IM Albayan.exe"; Flags: runhidden
+Filename: "taskkill"; Parameters: "/F /IM Albayan.exe"; Flags: runhidden; RunOnceId: "KillAlbayan"
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{pf}\tecwindow\Albayan"
+Type: filesandordirs; Name: "{app}"
 
 [InstallDelete]
 
