@@ -1,4 +1,3 @@
-
 import time
 from enum import Enum
 from dataclasses import dataclass, field
@@ -15,13 +14,13 @@ class DownloadStatus(Enum):
 
     @property
     def _labels_ar(self) -> Dict[str, str]:
-            return {
+        return {
             self.PENDING: "قيد الانتظار",
             self.DOWNLOADING: "يجري التنزيل",
             self.PAUSED: "متوقف مؤقتًا",
             self.CANCELLED: "تم الإلغاء",
             self.COMPLETED: "مكتمل",
-            self.ERROR: "خطأ"
+            self.ERROR: "خطأ",
         }
 
     @property
@@ -64,9 +63,9 @@ class DownloadProgress:
         Returns:
             int: Percentage of the download completed.
         """
-        if self.total_bytes == 0:
+        if self.total_bytes <= 0:
             return 0
-        return int((self.downloaded_bytes / self.total_bytes) * 100)
+        return max(0, min(100, int((self.downloaded_bytes / self.total_bytes) * 100)))
 
     @property
     def downloaded_mb(self) -> float:
@@ -147,9 +146,11 @@ class DownloadProgress:
         Returns:
             int: Estimated remaining time in seconds, or -1 if unknown.
         """
+        if self.total_bytes <= 0 or self.downloaded_bytes >= self.total_bytes:
+            return 0
         remaining_bytes = self.total_bytes - self.downloaded_bytes
         speed_bps = self.downloaded_bytes / self.elapsed_seconds if self.elapsed_seconds > 0 else 0
-        return int(remaining_bytes / speed_bps) if speed_bps > 0 else -1
+        return max(0, int(remaining_bytes / speed_bps)) if speed_bps > 0 else -1
 
     @property
     def remaining_time_str(self) -> str:
