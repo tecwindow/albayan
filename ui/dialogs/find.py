@@ -75,7 +75,7 @@ class SearchDialog(QDialog):
         self.search_type_label = QLabel("نوع البحث:")
         self.search_type_radio_page = QRadioButton("صفحة")
         self.search_type_radio_page.setChecked(True)
-        self.search_type_radio_sura = QRadioButton("صورة")
+        self.search_type_radio_sura = QRadioButton("سورة")
         self.search_type_radio_juz = QRadioButton("جزء")
         self.search_type_radio_hizb = QRadioButton("حزب")
         self.search_type_radio_quarter = QRadioButton("ربع")
