@@ -1,0 +1,37 @@
+
+name: VirusTotal API Connection Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-api:
+    name: Test VirusTotal API
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check API connection
+        env:
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        run: |
+          if [ -z "$VT_API_KEY" ]; then
+            echo "::error::VT_API_KEY secret is missing."
+            exit 1
+          fi
+
+          response=$(curl -sS \
+            -o response.json \
+            -w "%{http_code}" \
+            -H "x-apikey: $VT_API_KEY" \
+            "https://www.virustotal.com/api/v3/users/me")
+
+          if [ "$response" = "200" ]; then
+            echo "VirusTotal API connection successful."
+            echo "The API key was accepted."
+          else
+            echo "::error::VirusTotal API request failed with HTTP status $response"
+            exit 1
+          fi
