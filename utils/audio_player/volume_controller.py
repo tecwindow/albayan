@@ -9,7 +9,11 @@ class VolumeController:
     """Handles volume control for different categories with custom handling."""
     def __init__(self) -> None:
         self.categories = self._load_categories()
-        self.current_category_index = Config.audio.current_volume_category
+        raw_index = Config.audio.current_volume_category
+        try:
+            self.current_category_index = int(raw_index) % len(self.categories)
+        except (ValueError, TypeError, ZeroDivisionError):
+            self.current_category_index = 0
         logger.debug(f"Initialized VolumeController. Current category index: {self.current_category_index}")
 
     def _load_categories(self) -> dict:
@@ -82,4 +86,6 @@ class VolumeController:
     def get_current_category(self) -> str:
         """Return the name of the current category based on the index."""
         categories = list(self.categories.keys())
-        return categories[self.current_category_index]
+        if not categories:
+            return ""
+        return categories[self.current_category_index % len(categories)]
