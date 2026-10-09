@@ -108,10 +108,39 @@ class BassInitializer:
             logger.error("BASS library is not set up. Call `setup()` first.")
             raise PlaybackInitializationError("BASS library is not set up. Call `setup()` first.")
 
-        for card in self.get_sound_cards():
+        initialized_any = False
+        sound_cards = self.get_sound_cards()
+
+        for card in sound_cards:
+            if not card.is_enabled:
+                logger.debug(f"Skipping disabled sound card {card.name} (index {card.index}).")
+                continue
+
             if not self.bass.BASS_Init(card.index, 44100, 0, 0, 0):
-                logger.error(f"Failed to initialize BASS with device {card.name}: {self.bass.BASS_ErrorGetCode()}")
-                raise PlaybackInitializationError(f"Failed to initialize BASS with device {card.name}: {self.bass.BASS_ErrorGetCode()}")
+                error_code = self.bass.BASS_ErrorGetCode()
+                # Error code 14 is BASS_ERROR_ALREADY (device already initialized)
+                if error_code == 14:
+                    logger.debug(f"Sound card {card.name} (index {card.index}) already initialized.")
+                    initialized_any = True
+                else:
+                    logger.warning(
+                        f"Failed to initialize sound card {card.name} (index {card.index}): error code {error_code}."
+                    )
+            else:
+                logger.info(f"Initialized sound card {card.name} (index {card.index}).")
+                initialized_any = True
+
+        # Fallback to default device (-1) if no sound cards could be initialized
+        if not initialized_any:
+            logger.warning("No enabled sound cards could be initialized. Trying default device (-1)...")
+            if self.bass.BASS_Init(-1, 44100, 0, 0, 0) or self.bass.BASS_ErrorGetCode() == 14:
+                initialized_any = True
+                logger.info("Initialized default BASS sound device (-1).")
+
+        if not initialized_any:
+            error_code = self.bass.BASS_ErrorGetCode()
+            logger.error(f"Failed to initialize any sound device in BASS: error code {error_code}")
+            raise PlaybackInitializationError(f"Failed to initialize any audio playback device (code {error_code}).")
 
         logger.info("BASS initialized successfully.")
         return self.bass
@@ -169,4 +198,3 @@ class BassInitializer:
         if self.bass:
             self.bass.BASS_Free()
         logger.info("BASS closed successfully.")
-        
