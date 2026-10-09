@@ -119,6 +119,8 @@ class SurahReciter(RecitersManager):
 
     def check_local_file(self, reciter_id: int, surah_number: int, ayah_number: Optional[int] = None) -> Optional[str]:
         """Checks for a local file for the given reciter and surah number."""
+        if reciter_id is None or surah_number is None:
+            return None
         logger.debug(f"Checking local file for reciter ID: {reciter_id}, surah number: {surah_number}")
         try:
             local_file = self.download_db.find_one(reciter_id=reciter_id, surah_number=surah_number, status=DownloadStatus.COMPLETED)
@@ -134,6 +136,9 @@ class SurahReciter(RecitersManager):
     
     def get_url(self, reciter_id: int, surah_number: int, offline_playback: bool = False) -> Optional[str]:
         """Fetches the URL for a specific reciter and surah number."""
+        if reciter_id is None or surah_number is None:
+            logger.warning(f"Cannot get URL: reciter_id ({reciter_id}) or surah_number ({surah_number}) is None.")
+            return None
         logger.debug(f"Getting URL for reciter ID: {reciter_id}, surah number: {surah_number}")
 
         if offline_playback:
@@ -189,4 +194,3 @@ class AyahReciter(RecitersManager):
             return url
         logger.warning(f"Base URL for reciter ID: {reciter_id} is not available.")
         return None
-    

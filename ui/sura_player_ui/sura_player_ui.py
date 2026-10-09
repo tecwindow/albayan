@@ -288,6 +288,8 @@ class SuraPlayerWindow(QMainWindow):
     def update_current_reciter(self):
         logger.debug(f"Updating current reciter to {self.reciter_combo.currentText()}")
         reciter_id = self.reciter_combo.currentData()
+        if reciter_id is None:
+            return
         reciter_data = self.reciters.get_reciter(reciter_id)
 
         if not reciter_data or not reciter_data["available_suras"]:
@@ -341,6 +343,10 @@ class SuraPlayerWindow(QMainWindow):
         reciter_id = self.reciter_combo.currentData()
         surah_number = self.surah_combo.currentData()
 
+        if reciter_id is None or surah_number is None:
+            logger.warning("Cannot play: reciter or surah is not selected.")
+            return
+
         if self.last_played_surah != (reciter_id, surah_number):
             logger.debug("New Surah or Reciter detected, resetting repeat counter.")
             self.current_surah_repeat_count = 0
@@ -350,17 +356,19 @@ class SuraPlayerWindow(QMainWindow):
             surah_number,
             offline_playback=Config.downloading.offline_playback,
         )
+        if not url:
+            logger.warning(
+                f"Cannot play: audio URL not available for reciter {reciter_id}, surah {surah_number}."
+            )
+            return
+
         self.audio_player_thread.set_audio_url(url)
         self.audio_player_thread.start()
         logger.info(
             f"Playing Surah {surah_number} by reciter {reciter_id}, {self.surah_combo.currentText()}, {self.reciter_combo.currentText()}"
         )
-        self.preferences_manager.set_preference(
-            "reciter_id", self.reciter_combo.currentData()
-        )
-        self.preferences_manager.set_preference(
-            "sura_number", self.surah_combo.currentData()
-        )
+        self.preferences_manager.set_preference("reciter_id", reciter_id)
+        self.preferences_manager.set_preference("sura_number", surah_number)
 
     def stop(self):
         logger.debug("Stopping playback.")
