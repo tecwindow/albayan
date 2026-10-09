@@ -341,7 +341,15 @@ begin
     DeleteFile(AppDir + '\python313.dll');
     DeleteFile(AppDir + '\python314.dll');
 
-    if FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini')) then
+    if FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settings.ini')) and (not FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\config.ini'))) then
+    begin
+      RenameFile(
+        ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settings.ini'),
+        ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\config.ini')
+      );
+    end;
+
+    if FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini')) and (not FileExists(ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\config.ini'))) then
     begin
       RenameFile(
         ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\Settingss.ini'),
