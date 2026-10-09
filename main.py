@@ -59,6 +59,7 @@ class SingleInstanceApplication(QApplication):
         self.is_running = self.shared_memory.attach()
         self.volume_controller = VolumeController()
         self.installEventFilter(self)
+        self.aboutToQuit.connect(self.clean_up)
 
         if not self.is_running:
             logger.debug("No previous instance detected, creating shared memory...")
@@ -70,9 +71,21 @@ class SingleInstanceApplication(QApplication):
                 sys.exit(1)
             self.setup_local_server()
         else:
-            logger.warning("An existing instance is already running. Notifying it...")
-            self.notify_existing_instance()
-            sys.exit(0)
+            logger.warning("An existing instance was detected in shared memory. Notifying it...")
+            if self.notify_existing_instance():
+                logger.info("Existing instance notified successfully. Exiting this process.")
+                sys.exit(0)
+            else:
+                logger.warning(
+                    "Existing instance did not respond. Recovering from stale instance or previous crash..."
+                )
+                self.shared_memory.detach()
+                QLocalServer.removeServer(self.server_name)
+                if not self.shared_memory.create(1):
+                    logger.warning(
+                        f"Could not recreate shared memory after recovery: {self.shared_memory.errorString()}"
+                    )
+                self.setup_local_server()
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.KeyPress:
@@ -116,15 +129,15 @@ class SingleInstanceApplication(QApplication):
 
     def setup_local_server(self) -> None:
         logger.debug(f"Starting local server with name: {self.server_name}")
+        QLocalServer.removeServer(self.server_name)
         if not self.local_server.listen(self.server_name):
-            logger.error(
-                f"Failed to start local server: {self.local_server.errorString()}",
-                exc_info=True,
+            logger.warning(
+                f"Failed to start local server: {self.local_server.errorString()}"
             )
-            sys.exit(1)
+            return
         self.local_server.newConnection.connect(self.handle_new_connection)
 
-    def notify_existing_instance(self) -> None:
+    def notify_existing_instance(self) -> bool:
         socket = QLocalSocket()
         socket.connectToServer(self.server_name)
         if socket.waitForConnected(1000):
@@ -133,8 +146,21 @@ class SingleInstanceApplication(QApplication):
             socket.flush()
             socket.waitForBytesWritten(1000)
             socket.disconnectFromServer()
+            return True
         else:
-            logger.error("Failed to connect to existing instance.", exc_info=True)
+            logger.warning("Failed to connect to existing instance.")
+            return False
+
+    def clean_up(self) -> None:
+        logger.debug("Cleaning up SingleInstanceApplication resources...")
+        try:
+            if hasattr(self, "shared_memory") and self.shared_memory.isAttached():
+                self.shared_memory.detach()
+            if hasattr(self, "local_server"):
+                self.local_server.close()
+                QLocalServer.removeServer(self.server_name)
+        except Exception as e:
+            logger.warning(f"Error during cleanup: {e}")
 
     def handle_new_connection(self) -> None:
         socket = self.local_server.nextPendingConnection()
