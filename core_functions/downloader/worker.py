@@ -190,8 +190,9 @@ class DownloadWorker(QRunnable):
         self._cancelled = True
         self._pause_condition.wakeAll()
         self._pause_mutex.unlock()
-        self.delete_temp_file()
-        self.callbacks["status"](self.download_id, DownloadStatus.CANCELLED)
+        if not self.is_running():
+            self.delete_temp_file()
+            self.callbacks["status"](self.download_id, DownloadStatus.CANCELLED)
 
     def shutdown(self) -> None:
         logger.debug(f"[Shutdown Requested] ID={self.download_id}")
@@ -201,12 +202,21 @@ class DownloadWorker(QRunnable):
             self._pause_condition.wakeAll()
             self._pause_mutex.unlock()
 
-    def delete_temp_file(self) -> None:
+    def delete_temp_file(self, max_retries: int = 5) -> None:
         if os.path.exists(self.temp_path):
-            while True:
+            for attempt in range(max_retries):
                 try:
                     os.unlink(self.temp_path)
-                    break
+                    logger.debug(f"[Temp File Deleted] ID={self.download_id}")
+                    return
                 except PermissionError:
+                    logger.debug(
+                        f"Temp file locked (attempt {attempt + 1}/{max_retries}), retrying..."
+                    )
                     QThread.msleep(100)
-            logger.debug(f"[Temp File Deleted] ID={self.download_id}")
+                except Exception as e:
+                    logger.warning(f"Error deleting temp file {self.temp_path}: {e}")
+                    return
+            logger.warning(
+                f"Failed to delete temp file after {max_retries} attempts: {self.temp_path}"
+            )
