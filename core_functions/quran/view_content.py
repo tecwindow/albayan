@@ -175,10 +175,17 @@ class ViewContent:
     def __repr__(self) -> str:
         return f"ViewContent(number={self.number}, label={self.label}, mode={self.mode})"
     
+    def close(self):
+        """Explicitly close the session and dispose of the engine."""
+        try:
+            if hasattr(self, "session") and self.session:
+                self.session.close()
+            if hasattr(self, "engine") and self.engine:
+                self.engine.dispose()
+        except Exception:
+            pass
+
     def __del__(self):
         """Close the session and dispose of the engine when the object is deleted."""
-        if self.session:
-            self.session.close()
-        if self.engine:
-            self.engine.dispose()
+        self.close()
         logger.debug(f"ViewContent {self.label} closed.")
