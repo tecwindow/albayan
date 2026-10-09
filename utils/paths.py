@@ -84,8 +84,9 @@ class PathManager:
                 self._base_dir = self._detect_base_dir()
 
         # main app folder
+        app_dir = Path(get_current_app_dir())
         if self.is_portable_mode:
-            self._app_folder = Path("user_data")
+            self._app_folder = app_dir / "user_data"
         else:
             self._app_folder = self._base_dir / self.author / app_name
             
@@ -93,7 +94,7 @@ class PathManager:
         logger.debug(f"App folder created/existing: {self._app_folder}")
 
         # bundled data folder
-        self._data_folder = Path("database")  # bundled data
+        self._data_folder = app_dir / "database"  # bundled data
 
         # create athkar audio folder
         self._athkar_audio = self._app_folder / "audio" / "athkar"
@@ -111,7 +112,7 @@ class PathManager:
         logger.debug(f"Documents folder created/existing: {self._documents_dir}")
 
         if self.is_portable_mode:
-            self.download_folder = Path("Downloads")
+            self.download_folder = app_dir / "Downloads"
         else:
             self.download_folder = self.documents_dir / "Downloads"
 
