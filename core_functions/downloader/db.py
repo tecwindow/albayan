@@ -1,5 +1,4 @@
-
-from sqlalchemy import create_engine, update
+from sqlalchemy import create_engine, update, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from .models import Base, DownloadTableBase
@@ -12,7 +11,21 @@ class DownloadDB:
     def __init__(self, db_url: str, download_table: DownloadTableBase):
         logger.debug(f"Initializing DownloadDB with db_url: {db_url}")
         self.download_table = download_table
-        self.engine = create_engine(db_url, echo=False)
+
+        connect_args = {}
+        if "sqlite" in db_url:
+            connect_args = {"timeout": 30, "check_same_thread": False}
+
+        self.engine = create_engine(db_url, echo=False, connect_args=connect_args)
+
+        if "sqlite" in db_url:
+            @event.listens_for(self.engine, "connect")
+            def set_sqlite_pragma(dbapi_connection, connection_record):
+                cursor = dbapi_connection.cursor()
+                cursor.execute("PRAGMA journal_mode=WAL")
+                cursor.execute("PRAGMA synchronous=NORMAL")
+                cursor.close()
+
         self.Session = sessionmaker(bind=self.engine)
         download_table.metadata.create_all(self.engine)
         logger.info("DownloadDB initialized successfully with %s table.", download_table.__tablename__)
