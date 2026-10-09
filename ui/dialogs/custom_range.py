@@ -1,9 +1,14 @@
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QComboBox,
-    QPushButton, QGroupBox, QLabel
+from PySide6.QtWidgets import (
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QComboBox,
+    QPushButton,
+    QGroupBox,
+    QLabel,
 )
-from PyQt6.QtGui import QIcon, QKeySequence, QShortcut
-from PyQt6.QtCore import Qt
+from PySide6.QtGui import QIcon, QKeySequence, QShortcut
+from PySide6.QtCore import Qt
 from typing import List, Dict, Optional
 from core_functions.quran.types import Surah
 from utils.const import Globals
@@ -11,8 +16,11 @@ from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
+
 class CustomRangeDialog(QDialog):
-    def __init__(self, parent, surahs: List[Surah], saved_range: Optional[Dict[str, int]] = None):
+    def __init__(
+        self, parent, surahs: List[Surah], saved_range: Optional[Dict[str, int]] = None
+    ):
         super().__init__(parent)
         self.surahs = surahs
         self.saved_range = saved_range
@@ -62,7 +70,6 @@ class CustomRangeDialog(QDialog):
         self.btn_close.setIcon(QIcon.fromTheme("window-close"))
         self.btn_close.setShortcut("Ctrl+W")
 
-
         button_layout.addWidget(self.btn_go)
         button_layout.addWidget(self.btn_close)
 
@@ -73,7 +80,6 @@ class CustomRangeDialog(QDialog):
 
     def connect_events(self):
         """Connect signals to their respective slots."""
-
 
         self.combo_surah_from.currentIndexChanged.connect(
             lambda: self.update_ayahs(self.combo_surah_from, self.combo_ayah_from)
@@ -106,9 +112,9 @@ class CustomRangeDialog(QDialog):
             logger.debug("Restoring saved range in CustomRangeDialog")
             widgets = (
                 (self.combo_surah_from, self.saved_range.get("from_surah")),
-                       (self.combo_ayah_from, self.saved_range.get("from_ayah")),
+                (self.combo_ayah_from, self.saved_range.get("from_ayah")),
                 (self.combo_surah_to, self.saved_range.get("to_surah")),
-                (self.combo_ayah_to, self.saved_range.get("to_ayah"))
+                (self.combo_ayah_to, self.saved_range.get("to_ayah")),
             )
             for combo, value in widgets:
                 if value is not None:
@@ -116,9 +122,13 @@ class CustomRangeDialog(QDialog):
                     if index != -1:
                         combo.setCurrentIndex(index)
                     else:
-                        logger.warning(f"Value {value} not found in {combo.accessibleName()}")
+                        logger.warning(
+                            f"Value {value} not found in {combo.accessibleName()}"
+                        )
                 else:
-                    logger.warning(f"Value for {combo.accessibleName()} is None, skipping selection.")
+                    logger.warning(
+                        f"Value for {combo.accessibleName()} is None, skipping selection."
+                    )
 
     def update_ayahs(self, combo_surah: QComboBox, combo_ayah: QComboBox):
         """Update the ayah combo box based on the currently selected surah."""
@@ -147,10 +157,8 @@ class CustomRangeDialog(QDialog):
             "from_surah": self.combo_surah_from.currentData(),
             "from_ayah": self.combo_ayah_from.currentData(),
             "to_surah": self.combo_surah_to.currentData(),
-            "to_ayah": self.combo_ayah_to.currentData()
+            "to_ayah": self.combo_ayah_to.currentData(),
         }
-
-
 
     def reject(self):
         self.deleteLater()

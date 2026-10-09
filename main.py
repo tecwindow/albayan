@@ -2,7 +2,7 @@
 import sys
 import os
 
-#set PYTHONPATH to the current directory
+# set PYTHONPATH to the current directory
 current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 os.chdir(current_dir)
 from utils.const import program_name, program_english_name, program_version, program_icon, dev_mode
@@ -10,14 +10,14 @@ from utils.paths import paths, is_installed, is_portable
 from utils.settings import Config
 from utils.logger import LogLevel, LoggerManager
 sys.excepthook = LoggerManager.my_excepthook
-#load the config file
+# load the config file
 Config.load_settings()
-#setup the logger
+# setup the logger
 LoggerManager.setup_logger(
-    log_file = paths.log_file, 
+    log_file=paths.log_file,
     log_level=LogLevel.from_name(Config.general.log_level),
-    dev_mode=dev_mode
-    )
+    dev_mode=dev_mode,
+)
 logger = LoggerManager.get_logger(__name__)
 app_type = (
     "Installed" if getattr(sys, "frozen", False) and is_installed()
@@ -30,9 +30,9 @@ logger.info(
 )
 
 from multiprocessing import freeze_support
-from PyQt6.QtWidgets import QApplication, QMessageBox
-from PyQt6.QtCore import QTimer, Qt, QSharedMemory, QEvent
-from PyQt6.QtNetwork import QLocalServer, QLocalSocket
+from PySide6.QtWidgets import QApplication, QMessageBox
+from PySide6.QtCore import QTimer, Qt, QSharedMemory, QEvent
+from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from ui.quran_interface import QuranInterface
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
 from utils.update import UpdateManager
@@ -58,12 +58,15 @@ class SingleInstanceApplication(QApplication):
         self.shared_memory = QSharedMemory(app_id)
         self.is_running = self.shared_memory.attach()
         self.volume_controller = VolumeController()
-        self.installEventFilter(self) 
+        self.installEventFilter(self)
 
         if not self.is_running:
             logger.debug("No previous instance detected, creating shared memory...")
             if not self.shared_memory.create(1):
-                logger.error(f"Failed to create shared memory segment: {self.shared_memory.errorString()}", exc_info=True)
+                logger.error(
+                    f"Failed to create shared memory segment: {self.shared_memory.errorString()}",
+                    exc_info=True,
+                )
                 sys.exit(1)
             self.setup_local_server()
         else:
@@ -92,7 +95,7 @@ class SingleInstanceApplication(QApplication):
                     volume_change = -5
                 elif modifiers & Qt.KeyboardModifier.AltModifier:
                     volume_change = -100
-                
+
                 logger.debug(f"F7 pressed: Decreasing volume by {abs(volume_change)}.")
                 self.volume_controller.adjust_volume(volume_change)
                 return True
@@ -104,7 +107,7 @@ class SingleInstanceApplication(QApplication):
                     volume_change = 5
                 elif modifiers & Qt.KeyboardModifier.AltModifier:
                     volume_change = 100
-                
+
                 logger.debug(f"F8 pressed: Increasing volume by {volume_change}.")
                 self.volume_controller.adjust_volume(volume_change)
                 return True
@@ -114,7 +117,10 @@ class SingleInstanceApplication(QApplication):
     def setup_local_server(self) -> None:
         logger.debug(f"Starting local server with name: {self.server_name}")
         if not self.local_server.listen(self.server_name):
-            logger.error(f"Failed to start local server: {self.local_server.errorString()}", exc_info=True)
+            logger.error(
+                f"Failed to start local server: {self.local_server.errorString()}",
+                exc_info=True,
+            )
             sys.exit(1)
         self.local_server.newConnection.connect(self.handle_new_connection)
 
@@ -139,17 +145,18 @@ class SingleInstanceApplication(QApplication):
     def read_message(self, socket) -> None:
         message = socket.readAll().data().decode()
         logger.debug(f"Received message: {message}")
-        if message == "SHOW" and hasattr(self, 'main_window'):
-                logger.debug("Activating main window.")
-                self.main_window.show()
-                self.main_window.raise_()
-                self.main_window.activateWindow()
-                logger.debug("Main window activated.")
-                socket.disconnectFromServer()
+        if message == "SHOW" and hasattr(self, "main_window"):
+            logger.debug("Activating main window.")
+            self.main_window.show()
+            self.main_window.raise_()
+            self.main_window.activateWindow()
+            logger.debug("Main window activated.")
+            socket.disconnectFromServer()
 
     def set_main_window(self, main_window) -> None:
         self.main_window = main_window
         logger.debug("Main window set in SingleInstanceApplication.")
+
 
 def call_after_starting(parent: QuranInterface) -> None:
     try:
@@ -175,6 +182,7 @@ def call_after_starting(parent: QuranInterface) -> None:
 
     except Exception as e:
         logger.error(f"Error in call_after_starting: {str(e)}", exc_info=True)
+
 
 def main():
     try:
@@ -204,12 +212,14 @@ def main():
         msg_box = QMessageBox(None)
         msg_box.setIcon(QMessageBox.Icon.Critical)
         msg_box.setWindowTitle("خطأ")
-        msg_box.setText("حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين.")
+        msg_box.setText(
+            "حدث خطأ، إذا استمرت المشكلة، يرجى تفعيل السجل وتكرار الإجراء الذي تسبب بالخطأ ومشاركة رمز الخطأ والسجل مع المطورين."
+        )
 
         ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
         msg_box.exec()
 
-        
-if __name__ == "__main__":    
+
+if __name__ == "__main__":
     freeze_support()
     main()

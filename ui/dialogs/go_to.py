@@ -1,10 +1,16 @@
 from enum import IntFlag
 from typing import Optional, Union, Tuple
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
-    QSpinBox, QComboBox, QPushButton, QCheckBox
+from PySide6.QtWidgets import (
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QSpinBox,
+    QComboBox,
+    QPushButton,
+    QCheckBox,
 )
-from PyQt6.QtGui import QKeySequence, QShortcut
+from PySide6.QtGui import QKeySequence, QShortcut
 import qtawesome as qta
 from ui.widgets.spin_box import SpinBox
 from utils.settings import Config
@@ -30,7 +36,7 @@ class GoToDialog(QDialog):
         min_value: int = 1,
         max_value: int = 1,
         style: GoToStyle = GoToStyle.NUMERIC_FIELD,
-        combo_data: Optional[dict] = None
+        combo_data: Optional[dict] = None,
     ):
         super().__init__(parent)
 
@@ -75,7 +81,9 @@ class GoToDialog(QDialog):
             main_layout.addWidget(self.checkbox_field)
 
             if self.has_both_fields:
-                self.combo_box.currentIndexChanged.connect(self._update_spinbox_range_from_combo)
+                self.combo_box.currentIndexChanged.connect(
+                    self._update_spinbox_range_from_combo
+                )
                 self._update_spinbox_range_from_combo()
 
         button_layout = QHBoxLayout()
@@ -97,7 +105,9 @@ class GoToDialog(QDialog):
 
         QShortcut(QKeySequence("Ctrl+F4"), self).activated.connect(self.reject)
 
-        QShortcut(QKeySequence("Ctrl+I"), self).activated.connect(lambda: UniversalSpeech.say(self.info_label.text(), force=True))
+        QShortcut(QKeySequence("Ctrl+I"), self).activated.connect(
+            lambda: UniversalSpeech.say(self.info_label.text(), force=True)
+        )
 
         main_layout.addLayout(button_layout)
         self.setLayout(main_layout)
@@ -141,8 +151,10 @@ class GoToDialog(QDialog):
         self.spin_box.setMinimum(min_val)
         self.spin_box.setMaximum(max_val)
         self.spin_box.setValue(initial_value)
-        
-        logger.debug(f"Spinbox range updated: min={min_val}, max={max_val} for item_id={item_id}")
+
+        logger.debug(
+            f"Spinbox range updated: min={min_val}, max={max_val} for item_id={item_id}"
+        )
 
     def _validate_input(self):
         is_valid = True

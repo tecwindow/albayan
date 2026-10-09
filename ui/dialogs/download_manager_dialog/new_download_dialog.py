@@ -1,25 +1,31 @@
 from typing import List, Dict, Optional
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QComboBox,
-    QPushButton, QLabel, QGridLayout
+from PySide6.QtWidgets import (
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QComboBox,
+    QPushButton,
+    QLabel,
+    QGridLayout,
 )
-from PyQt6.QtGui import QKeySequence, QShortcut
-from PyQt6.QtCore import QTimer
+from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtCore import QTimer
 
 from core_functions.quran.types import Surah
 from core_functions.Reciters import RecitersManager
 from .models import DownloadMode
 
+
 class NewDownloadDialog(QDialog):
     """Dialog for downloading Surahs or Ayahs."""
 
     def __init__(
-            self, 
-            parent, 
-            mode:  DownloadMode, 
-            surahs: List[Surah],
-            reciters_manager: RecitersManager
-            ) -> None:
+        self,
+        parent,
+        mode: DownloadMode,
+        surahs: List[Surah],
+        reciters_manager: RecitersManager,
+    ) -> None:
         super().__init__(parent)
         self.mode = mode
         self.surahs = surahs
@@ -61,7 +67,9 @@ class NewDownloadDialog(QDialog):
             row += 1
 
             self.from_surah_combo.currentIndexChanged.connect(
-                lambda _: self._populate_ayahs(self.from_surah_combo, self.from_ayah_combo)
+                lambda _: self._populate_ayahs(
+                    self.from_surah_combo, self.from_ayah_combo
+                )
             )
 
         # To Surah
@@ -97,7 +105,6 @@ class NewDownloadDialog(QDialog):
         btn_close.setShortcut(QKeySequence("Ctrl+W"))
         QShortcut(QKeySequence("Ctrl+F4"), self).activated.connect(self.close)
 
-
         btn_layout.addWidget(btn_download)
         btn_layout.addWidget(btn_close)
         layout.addLayout(btn_layout)
@@ -112,7 +119,7 @@ class NewDownloadDialog(QDialog):
         self.setFocus()
         QTimer.singleShot(200, self.reciter_combo.setFocus)
 
-        #for qais to test it
+        # for qais to test it
         self.reciter_combo.setAccessibleIdentifier("RECITERCOMBO")
 
     def _on_reciter_changed(self):
@@ -120,7 +127,7 @@ class NewDownloadDialog(QDialog):
         reciter = self.reciter_combo.currentData()
         if not reciter:
             return
-        
+
         self._populate_surahs(reciter, self.from_surah_combo)
         self._populate_surahs(reciter, self.to_surah_combo)
 
@@ -131,7 +138,11 @@ class NewDownloadDialog(QDialog):
     def _populate_surahs(self, reciter, combo: QComboBox):
         """Fill Surah combo with only available Surahs for the selected reciter."""
         combo.clear()
-        available = set(reciter.get("available_suras", [])) if self.mode == DownloadMode.SURAH else set([surah.number for surah in self.surahs])
+        available = (
+            set(reciter.get("available_suras", []))
+            if self.mode == DownloadMode.SURAH
+            else set([surah.number for surah in self.surahs])
+        )
 
         for sura in self.surahs:
             if sura.number in available:

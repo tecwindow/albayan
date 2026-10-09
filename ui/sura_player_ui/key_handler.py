@@ -1,9 +1,10 @@
-from PyQt6.QtGui import QKeyEvent
-from PyQt6.QtCore import Qt
+from PySide6.QtGui import QKeyEvent
+from PySide6.QtCore import Qt
 from utils.universal_speech import UniversalSpeech
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
+
 
 class KeyHandler:
     """
@@ -22,10 +23,7 @@ class KeyHandler:
         self.parent = parent
 
         # Mapping arrow keys to their respective functions
-        self.arrow_actions = {
-            Qt.Key_Left: parent.rewind,
-            Qt.Key_Right: parent.forward
-        }
+        self.arrow_actions = {Qt.Key_Left: parent.rewind, Qt.Key_Right: parent.forward}
         logger.debug(f"Arrow key actions mapped: {self.arrow_actions}")
 
         # Mapping modifier keys to the corresponding time values for rewinding/forwarding
@@ -38,14 +36,26 @@ class KeyHandler:
 
         # Mapping shortcut keys to their corresponding actions
         self.shortcuts = {
-            ord("E"): lambda: UniversalSpeech.say(f"{parent.elapsed_time_label.text()}، الوقت المنقَضي.", force=True),
-            ord("R"): lambda: UniversalSpeech.say(f"{parent.remaining_time_label.text()}، الوقت المتبقي.", force=True),
-            ord("T"): lambda: UniversalSpeech.say(f"{parent.total_time.text()}، الوقت الإجمالي.", force=True),
-            ord("C"): lambda: UniversalSpeech.say(f"{parent.reciter_combo.currentText().split(' - ')[0]}، القارئ الحالي.", force=True),
-            ord("V"): lambda: UniversalSpeech.say(f"{parent.surah_combo.currentText()}، السورة الحالية.", force=True),
+            ord("E"): lambda: UniversalSpeech.say(
+                f"{parent.elapsed_time_label.text()}، الوقت المنقَضي.", force=True
+            ),
+            ord("R"): lambda: UniversalSpeech.say(
+                f"{parent.remaining_time_label.text()}، الوقت المتبقي.", force=True
+            ),
+            ord("T"): lambda: UniversalSpeech.say(
+                f"{parent.total_time.text()}، الوقت الإجمالي.", force=True
+            ),
+            ord("C"): lambda: UniversalSpeech.say(
+                f"{parent.reciter_combo.currentText().split(' - ')[0]}، القارئ الحالي.",
+                force=True,
+            ),
+            ord("V"): lambda: UniversalSpeech.say(
+                f"{parent.surah_combo.currentText()}، السورة الحالية.", force=True
+            ),
             ord("B"): parent.say_surah_repeat_status,
             ord("I"): lambda: UniversalSpeech.say(
-                f"{parent.surah_combo.currentText()}، للقارئ، {parent.reciter_combo.currentText()}.", force=True
+                f"{parent.surah_combo.currentText()}، للقارئ، {parent.reciter_combo.currentText()}.",
+                force=True,
             ),
             Qt.Key_MediaTogglePlayPause: parent.toggle_play_pause,
             Qt.Key_MediaStop: parent.stop,
@@ -61,19 +71,19 @@ class KeyHandler:
         :param event: The key press event (QKeyEvent).
         :return: True if the event was handled, False otherwise.
         """
-        #logger.debug(f"Key pressed: {event.text()} (KeyCode: {event.key()}, Native KeyCode: {event.nativeVirtualKey()})")
+        # logger.debug(f"Key pressed: {event.text()} (KeyCode: {event.key()}, Native KeyCode: {event.nativeVirtualKey()})")
         if self.process_arrows(event):
-            #logger.debug("Arrow key processed successfully.")
+            # logger.debug("Arrow key processed successfully.")
             return True
 
         if event.modifiers() & (Qt.ControlModifier | Qt.AltModifier):
-            #logger.debug("Control or Alt key detected. Ignoring key event.")
+            # logger.debug("Control or Alt key detected. Ignoring key event.")
             return True
 
-        if  self.process_shortcuts(event):
-            #logger.debug("Shortcut key processed successfully.")
+        if self.process_shortcuts(event):
+            # logger.debug("Shortcut key processed successfully.")
             return True
-        #logger.debug("Key event did not match any conditions, returning False.")
+        # logger.debug("Key event did not match any conditions, returning False.")
         return False
 
     def process_arrows(self, event: QKeyEvent) -> bool:
@@ -88,7 +98,9 @@ class KeyHandler:
             for modifier, value in self.arrow_modifiers.items():
                 if event.modifiers() == modifier:
                     action(value)
-                    logger.debug(f"Executing action with modifier {modifier}: {value} seconds")
+                    logger.debug(
+                        f"Executing action with modifier {modifier}: {value} seconds"
+                    )
                     action(value)
                     return True
         return False
@@ -107,7 +119,9 @@ class KeyHandler:
         if modifiers & Qt.ShiftModifier:
             if Qt.Key_0 <= key_code <= Qt.Key_9:  # Shift + 0 to Shift + 9
                 number = key_code - Qt.Key_0  # Convert key_code to 0-9
-                logger.debug(f"Shift + {number} detected, setting position to {number * 10}%")
+                logger.debug(
+                    f"Shift + {number} detected, setting position to {number * 10}%"
+                )
                 self.parent.set_position(number * 10, by_percent=True)
                 return True
 

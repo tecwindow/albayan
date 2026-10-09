@@ -1,6 +1,6 @@
 import os
 import json
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QApplication,
     QDialog,
     QVBoxLayout,
@@ -13,12 +13,18 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QLineEdit,
     QCheckBox,
-QListWidget,
-QListWidgetItem,
-QMessageBox,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
 )
-from PyQt6.QtCore import Qt, QRegularExpression, pyqtSignal
-from PyQt6.QtGui import QKeyEvent, QKeySequence,  QRegularExpressionValidator, QShortcut, QAction
+from PySide6.QtCore import Qt, QRegularExpression, Signal
+from PySide6.QtGui import (
+    QAction,
+    QKeyEvent,
+    QKeySequence,
+    QRegularExpressionValidator,
+    QShortcut,
+)
 from core_functions.search import SearchCriteria, QuranSearchManager
 from core_functions.quran.quran_manager import QuranManager
 from ui.widgets.search_box import ArabicSearchBox
@@ -29,9 +35,10 @@ from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
+
 class SearchDialog(QDialog):
-    search_submitted = pyqtSignal(str)
-    
+    search_submitted = Signal(str)
+
     def __init__(self, parent, title, default_search_phrase: str = ""):
         super().__init__(parent)
         self.parent = parent
@@ -45,43 +52,45 @@ class SearchDialog(QDialog):
         logger.debug(f"SearchDialog initialized with title: {title}.")
 
     def initUI(self):
-        self.search_label = QLabel('اكتب ما تريد البحث عنه:')
+        self.search_label = QLabel("اكتب ما تريد البحث عنه:")
         self.search_box = ArabicSearchBox(self)
         self.search_box.setText(self.default_search_phrase)
-        regex = QRegularExpression("[\u0621-\u0652\u0670\u0671[:space:]]+")  # Arabic letters, hamzas, diacritics, and spaces.
+        regex = QRegularExpression(
+            "[\u0621-\u0652\u0670\u0671[:space:]]+"
+        )  # Arabic letters, hamzas, diacritics, and spaces.
         validator = QRegularExpressionValidator(regex)
         self.search_box.setValidator(validator)
         self.search_box.inputRejected.connect(QApplication.beep)
         self.search_box.textChanged.connect(self.OnEdit)
         self.search_box.setAccessibleName(self.search_label.text())
-        self.advanced_search_checkbox = QCheckBox('البحث المتقدم')
+        self.advanced_search_checkbox = QCheckBox("البحث المتقدم")
         self.advanced_search_checkbox.toggled.connect(self.show_advanced_options)
-        self.search_button = QPushButton('بحث')
+        self.search_button = QPushButton("بحث")
         self.search_button.setEnabled(False)
-        self.cancel_button = QPushButton('إلغاء')
+        self.cancel_button = QPushButton("إلغاء")
         self.cancel_button.setShortcut(QKeySequence("Ctrl+W"))
 
-        self.advanced_search_groupbox = QGroupBox('البحث المتقدم')
+        self.advanced_search_groupbox = QGroupBox("البحث المتقدم")
         self.advanced_search_groupbox.setEnabled(False)
-        self.search_type_label = QLabel('نوع البحث:')
-        self.search_type_radio_page = QRadioButton('صفحة')
+        self.search_type_label = QLabel("نوع البحث:")
+        self.search_type_radio_page = QRadioButton("صفحة")
         self.search_type_radio_page.setChecked(True)
-        self.search_type_radio_sura = QRadioButton('صورة')
-        self.search_type_radio_juz = QRadioButton('جزء')
-        self.search_type_radio_hizb = QRadioButton('حزب')
-        self.search_type_radio_quarter = QRadioButton('ربع')
+        self.search_type_radio_sura = QRadioButton("صورة")
+        self.search_type_radio_juz = QRadioButton("جزء")
+        self.search_type_radio_hizb = QRadioButton("حزب")
+        self.search_type_radio_quarter = QRadioButton("ربع")
 
-        self.search_from_label = QLabel('من:')
+        self.search_from_label = QLabel("من:")
         self.search_from_combobox = QComboBox()
         self.search_from_combobox.setAccessibleName(self.search_from_label.text())
-        self.search_to_label = QLabel('إلى:')
+        self.search_to_label = QLabel("إلى:")
         self.search_to_combobox = QComboBox()
         self.search_to_combobox.setAccessibleName(self.search_to_label.text())
-        self.ignore_diacritics_checkbox = QCheckBox('تجاهل التشكيل')
+        self.ignore_diacritics_checkbox = QCheckBox("تجاهل التشكيل")
         self.ignore_diacritics_checkbox.setChecked(Config.search.ignore_tashkeel)
-        self.ignore_hamza_checkbox = QCheckBox('تجاهل الهمزات')
+        self.ignore_hamza_checkbox = QCheckBox("تجاهل الهمزات")
         self.ignore_hamza_checkbox.setChecked(Config.search.ignore_hamza)
-        self.match_whole_word_checkbox = QCheckBox('تطابق الكلمة بأكملها')
+        self.match_whole_word_checkbox = QCheckBox("تطابق الكلمة بأكملها")
         self.match_whole_word_checkbox.setChecked(Config.search.match_whole_word)
 
         self.search_type_layout = QVBoxLayout()
@@ -146,11 +155,11 @@ class SearchDialog(QDialog):
         logger.debug(f"Advanced search {'enabled' if enabled else 'disabled'}.")
         if not enabled:
             self.reset_search_options()
-            
+
     def on_submit(self):
         logger.debug("Search button clicked.")
         self.set_options_search()
-        search_text = self.search_box. text()
+        search_text = self.search_box.text()
         self.search_submitted.emit(search_text)
         logger.debug(f"Searching for: {search_text}")
         search_result = self.search_manager.search(search_text)
@@ -171,24 +180,32 @@ class SearchDialog(QDialog):
             selected_result = result_dialog.list_widget.currentRow()
             selected_result = search_result[selected_result]
             ayah_number = selected_result["number"]
-            self.parent.quran_manager.navigation_mode = self.parent.get_valid_navigation_mode()
+            self.parent.quran_manager.navigation_mode = (
+                self.parent.get_valid_navigation_mode()
+            )
             ayah_result = self.parent.quran_manager.get_by_ayah_number(ayah_number)
             logger.info(f"User selected result {selected_result}")
             self.parent.quran_view.setText(ayah_result)
             self.parent.set_focus_to_ayah(ayah_number)
             self.parent.quran_view.setFocus()
-            logger.info(f"Moved to Ayah: {selected_result['numberInSurah']} in Surah: {selected_result['sura_name']}")
+            logger.info(
+                f"Moved to Ayah: {selected_result['numberInSurah']} in Surah: {selected_result['sura_name']}"
+            )
             self.accept()
             self.deleteLater()
 
     def on_radio_toggled(self):
-        logger.debug(f"Radio button toggled. Selected: {self.sender().text()}")
-        
-        #clear
+        sender = self.sender()
+        if sender:
+            logger.debug(f"Radio button toggled. Selected: {sender.text()}")
+        else:
+            logger.debug("Radio button toggled (initial setup).")
+
+        # clear
         self.search_from_combobox.clear()
         self.search_to_combobox.clear()
 
-        if self.search_type_radio_page.isChecked():    
+        if self.search_type_radio_page.isChecked():
             self.criteria = SearchCriteria.page
             self.search_from_combobox.addItems([str(i) for i in range(1, 605)])
             self.search_to_combobox.addItems([str(i) for i in range(1, 605)])
@@ -216,7 +233,7 @@ class SearchDialog(QDialog):
         if not self.advanced_search_checkbox.isChecked():
             logger.debug("Advanced search is not enabled, skipping setting options.")
             return
-        
+
         search_from = self.search_from_combobox.currentIndex() + 1
         search_to = self.search_to_combobox.currentIndex() + 1
         self.search_manager.set(
@@ -225,22 +242,24 @@ class SearchDialog(QDialog):
             match_whole_word=self.match_whole_word_checkbox.isChecked(),
             criteria=self.criteria,
             _from=search_from,
-_to=search_to
+            _to=search_to,
         )
-        logger.debug(f"Search options set: from {search_from} to {search_to}, criteria {self.criteria}, no_tashkil {self.ignore_diacritics_checkbox.isChecked()}, no_hamza {self.ignore_hamza_checkbox.isChecked()}, match_whole_word {self.match_whole_word_checkbox.isChecked()}.")
+        logger.debug(
+            f"Search options set: from {search_from} to {search_to}, criteria {self.criteria}, no_tashkil {self.ignore_diacritics_checkbox.isChecked()}, no_hamza {self.ignore_hamza_checkbox.isChecked()}, match_whole_word {self.match_whole_word_checkbox.isChecked()}."
+        )
 
     def reset_search_options(self):
-            self.search_manager.set(
-                no_tashkil=Config.search.ignore_tashkeel,
-                                   no_hamza=Config.search.ignore_hamza,
-                                   match_whole_word=Config.search.match_whole_word,
-            )
+        self.search_manager.set(
+            no_tashkil=Config.search.ignore_tashkeel,
+            no_hamza=Config.search.ignore_hamza,
+            match_whole_word=Config.search.match_whole_word,
+        )
 
     def closeEvent(self, a0):
         logger.debug("SearchDialog closed.")
         return super().closeEvent(a0)
-    
-    
+
+
 class SearchResultsDialog(QDialog):
     def __init__(self, parent=None, search_result=[]):
         super().__init__(parent)
@@ -274,7 +293,6 @@ class SearchResultsDialog(QDialog):
         )
 
         for i, row in enumerate(search_result):
-
             item = QListWidgetItem(
                 self.format_result(row)
             )
@@ -339,7 +357,6 @@ class SearchResultsDialog(QDialog):
         )
 
     def format_result(self, row: dict) -> str:
-
         text = row["text"]
 
         words = text.split()
@@ -355,7 +372,6 @@ class SearchResultsDialog(QDialog):
         )
 
     def get_current_result(self):
-
         current_row = self.list_widget.currentRow()
 
         if current_row < 0:
@@ -367,7 +383,6 @@ class SearchResultsDialog(QDialog):
         return self.search_result[current_row]
 
     def read_current_result(self):
-
         result = self.get_current_result()
 
         if not result:
@@ -382,7 +397,6 @@ class SearchResultsDialog(QDialog):
         )
 
     def copy_current_result(self):
-
         result = self.get_current_result()
 
         if not result:
@@ -414,7 +428,6 @@ class SearchResultsDialog(QDialog):
         )
 
     def go_to_current_result(self):
-
         result = self.get_current_result()
 
         if not result:
@@ -425,7 +438,6 @@ class SearchResultsDialog(QDialog):
         self.accept()
 
     def show_context_menu(self, position):
-
         logger.debug(
             "User opened search result context menu."
         )
@@ -478,9 +490,6 @@ class SearchResultsDialog(QDialog):
 
         menu.addAction(read_action)
 
-
-
-
         menu.setAccessibleName(
             "خيارات النتيجة"
         )
@@ -497,18 +506,15 @@ class SearchResultsDialog(QDialog):
             )
         )
 
-
     def keyPressEvent(
         self,
         event: QKeyEvent | None
     ) -> None:
-
         if (
             event.key() == Qt.Key.Key_I
             and event.modifiers()
             == Qt.KeyboardModifier.ControlModifier
         ):
-
             UniversalSpeech.say(
                 self.total_label.text(),
                 force=True
@@ -524,7 +530,6 @@ class SearchResultsDialog(QDialog):
             and event.modifiers()
             == Qt.KeyboardModifier.ControlModifier
         ):
-
             self.read_current_result()
 
             logger.debug(
@@ -535,11 +540,9 @@ class SearchResultsDialog(QDialog):
         return super().keyPressEvent(event)
 
     def reject(self):
-
         self.deleteLater()
 
     def closeEvent(self, a0):
-
         logger.debug(
             "SearchResultsDialog closed."
         )

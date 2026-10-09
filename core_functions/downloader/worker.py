@@ -1,11 +1,7 @@
-
 import os
 import requests
 from typing import Callable, Dict
-from PyQt6.QtCore import (
-QRunnable, pyqtSlot, QThread,
-QMutex, QWaitCondition
-)
+from PySide6.QtCore import QRunnable, Slot, QThread, QMutex, QWaitCondition
 from .status import DownloadStatus, DownloadProgress
 from .db import DownloadDB
 from utils.func import calculate_sha256
@@ -40,7 +36,7 @@ class DownloadWorker(QRunnable):
 
         logger.debug(f"[Worker Init] ID={self.download_id}, URL={self.url}")
 
-    @pyqtSlot()
+    @Slot()
     def run(self) -> None:
         logger.debug(f"[Download Start] ID={self.download_id}")
         try:
@@ -57,13 +53,17 @@ class DownloadWorker(QRunnable):
         os.makedirs(self.folder_path, exist_ok=True)
 
         resume_header = {}
-        downloaded_bytes = os.path.getsize(self.temp_path) if os.path.exists(self.temp_path) else 0
+        downloaded_bytes = (
+            os.path.getsize(self.temp_path) if os.path.exists(self.temp_path) else 0
+        )
         file_mode = "ab" if downloaded_bytes > 0 else "wb"
 
         if downloaded_bytes > 0:
             resume_header["Range"] = f"bytes={downloaded_bytes}-"
 
-        with requests.get(self.url, stream=True, headers=resume_header, timeout=10) as r:
+        with requests.get(
+            self.url, stream=True, headers=resume_header, timeout=10
+        ) as r:
             r.raise_for_status()
             content_length = int(r.headers.get("content-length", 0))
             total_bytes = downloaded_bytes + content_length
@@ -72,7 +72,7 @@ class DownloadWorker(QRunnable):
             progress = DownloadProgress(
                 download_id=self.download_id,
                 downloaded_bytes=downloaded_bytes,
-                total_bytes=total_bytes
+                total_bytes=total_bytes,
             )
             last_percentage = progress.percentage
 
@@ -80,29 +80,39 @@ class DownloadWorker(QRunnable):
                 self.callbacks["status"](self.download_id, DownloadStatus.DOWNLOADING)
 
             with open(self.temp_path, file_mode) as f:
-                for chunk in r.iter_content(chunk_size=256     * 1024):
+                for chunk in r.iter_content(chunk_size=256 * 1024):
 
                     if self._cancelled or self.manager._cancel_all:
                         logger.info(f"[Cancelled] ID={self.download_id}")
-                        self.callbacks["status"](self.download_id, DownloadStatus.CANCELLED)
+                        self.callbacks["status"](
+                            self.download_id, DownloadStatus.CANCELLED
+                        )
                         return
 
                     self._pause_mutex.lock()
                     try:
                         while self._paused or self.manager._pause_all:
-                            if self.manager.is_shutdown or self._cancelled or self.manager._cancel_all:
+                            if (
+                                self.manager.is_shutdown
+                                or self._cancelled
+                                or self.manager._cancel_all
+                            ):
                                 return
-                            
-                            self.callbacks["status"](self.download_id, DownloadStatus.PAUSED)
+
+                            self.callbacks["status"](
+                                self.download_id, DownloadStatus.PAUSED
+                            )
                             self._pause_condition.wait(self._pause_mutex)
 
                         if self._resume_requested:
                             progress.reset_start_time()  # Reset timer when resumed
                             if self.can_report_download():
-                                self.callbacks["status"](self.download_id, DownloadStatus.DOWNLOADING)
+                                self.callbacks["status"](
+                                    self.download_id, DownloadStatus.DOWNLOADING
+                                )
                             self._resume_requested = False
 
-                    finally:                        
+                    finally:
                         self._pause_mutex.unlock()
 
                     if chunk:
@@ -111,16 +121,21 @@ class DownloadWorker(QRunnable):
                         last_percentage = progress.percentage
                         progress.update(downloaded_bytes)
 
-                        if progress.percentage - last_percentage >= 1 or downloaded_bytes == total_bytes:
+                        if (
+                            progress.percentage - last_percentage >= 1
+                            or downloaded_bytes == total_bytes
+                        ):
                             self.callbacks["progress"](progress)
-                            
+
                             if self.db:
-                                self.db.upsert({
-                                    **self.item,
-                                    "downloaded_bytes": downloaded_bytes,
-                                    "total_bytes": total_bytes,
-                                    "status": DownloadStatus.DOWNLOADING
-                                })
+                                self.db.upsert(
+                                    {
+                                        **self.item,
+                                        "downloaded_bytes": downloaded_bytes,
+                                        "total_bytes": total_bytes,
+                                        "status": DownloadStatus.DOWNLOADING,
+                                    }
+                                )
 
         if not self._cancelled and not self.manager._cancel_all:
             os.replace(self.temp_path, self.final_path)
@@ -129,21 +144,29 @@ class DownloadWorker(QRunnable):
             self.callbacks["finished"](self.download_id, self.final_path)
 
             if self.db:
-                #file_hash = calculate_sha256(self.final_path)
-                self.db.upsert({
-                    **self.item,
-                    "downloaded_bytes": downloaded_bytes,
-                    "total_bytes": total_bytes,
-                    #"file_hash": file_hash,
-                    "status": DownloadStatus.COMPLETED
-                })
+                # file_hash = calculate_sha256(self.final_path)
+                self.db.upsert(
+                    {
+                        **self.item,
+                        "downloaded_bytes": downloaded_bytes,
+                        "total_bytes": total_bytes,
+                        # "file_hash": file_hash,
+                        "status": DownloadStatus.COMPLETED,
+                    }
+                )
 
     def is_running(self) -> bool:
         return self._running
 
     def can_report_download(self) -> bool:
-        return not self._paused and not self._cancelled and not self.manager._pause_all and not self.manager._cancel_all and not self.manager.is_shutdown
-    
+        return (
+            not self._paused
+            and not self._cancelled
+            and not self.manager._pause_all
+            and not self.manager._cancel_all
+            and not self.manager.is_shutdown
+        )
+
     def pause(self) -> None:
         logger.debug(f"[Paused] ID={self.download_id}")
         self._pause_mutex.lock()

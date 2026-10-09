@@ -9,6 +9,7 @@ class Category:
     baghawy = "baghawy"
     jalalayn = "jalalayn"
     katheer = "katheer"
+    mukhtasar = "mukhtasar"
     muyassar = "muyassar"
     qortoby = "qortoby"
     sa3dy = "sa3dy"
@@ -18,6 +19,7 @@ class Category:
         "البغوي": baghawy,
         "الجلالين": jalalayn,
         "ابن كثير": katheer,
+        "المختصر في التفسير": mukhtasar,
         "الميسر": muyassar,
         "القرطبي": qortoby,
         "السعدي": sa3dy,

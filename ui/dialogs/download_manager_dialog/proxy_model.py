@@ -1,7 +1,8 @@
 from utils.settings import Config
-from PyQt6.QtCore import QSortFilterProxyModel, Qt, QModelIndex
+from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex
 from core_functions.downloader.status import DownloadStatus
 from .download_model import DownloadListModel
+
 
 class DownloadProxyModel(QSortFilterProxyModel):
     def __init__(self, parent=None):
@@ -25,7 +26,7 @@ class DownloadProxyModel(QSortFilterProxyModel):
             return True
 
         index = source_model.index(source_row, 0, source_parent)
-        
+
         # 1. Check Status
         if self.filter_status is not None:
             item_status = index.data(DownloadListModel.StatusRole)

@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMessageBox, QWidget
+from PySide6.QtWidgets import QMessageBox, QWidget
 from typing import Optional
 
 
