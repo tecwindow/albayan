@@ -1,0 +1,67 @@
+
+name: VirusTotal API and Hash Lookup Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha256:
+        description: "SHA-256 hash (64 hexadecimal characters)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  lookup-hash:
+    name: Look up file hash in VirusTotal
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Query VirusTotal report
+        env:
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+          FILE_SHA256: ${{ inputs.sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$VT_API_KEY" ]]; then
+            echo "::error::VT_API_KEY secret is missing."
+            exit 1
+          fi
+
+          if [[ ! "$FILE_SHA256" =~ ^[A-Fa-f0-9]{64}$ ]]; then
+            echo "::error::Invalid SHA-256 hash."
+            exit 1
+          fi
+
+          status=$(curl --silent --show-error \
+            --output response.json \
+            --write-out "%{http_code}" \
+            --header "x-apikey: $VT_API_KEY" \
+            "https://www.virustotal.com/api/v3/files/$FILE_SHA256")
+
+          if [[ "$status" == "200" ]]; then
+            echo "VirusTotal report found."
+            echo "SHA-256: $FILE_SHA256"
+
+            jq -r '
+              .data.attributes.last_analysis_stats
+              | "Malicious: \(.malicious // 0)",
+                "Suspicious: \(.suspicious // 0)",
+                "Harmless: \(.harmless // 0)",
+                "Undetected: \(.undetected // 0)",
+                "Timeout: \(."timeout" // 0)"
+            ' response.json
+
+            echo "Report: https://www.virustotal.com/gui/file/$FILE_SHA256"
+
+          elif [[ "$status" == "404" ]]; then
+            echo "No existing VirusTotal report found."
+            echo "No file was uploaded."
+
+          else
+            echo "::error::VirusTotal API returned HTTP $status"
+            exit 1
+          fi
