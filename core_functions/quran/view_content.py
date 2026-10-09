@@ -93,13 +93,28 @@ class ViewContent:
         self.session.commit()
 
     def get_by_position(self, position: int) -> Optional[Ayah]:
+        if position <= 0:
+            return self.start_ayah
+
         ayah_row = (
             self.session.query(AyahViewMap)
             .filter(AyahViewMap.first_position <= position, AyahViewMap.last_position >= position)
             .first()
         )
-        ayah = self._row_to_ayah(ayah_row) if ayah_row else None
-        return ayah or self.get_by_position(position - 1)
+        if ayah_row:
+            return self._row_to_ayah(ayah_row)
+
+        # Fallback for gap/whitespace between ayahs: find nearest preceding ayah
+        prev_row = (
+            self.session.query(AyahViewMap)
+            .filter(AyahViewMap.last_position < position)
+            .order_by(AyahViewMap.last_position.desc())
+            .first()
+        )
+        if prev_row:
+            return self._row_to_ayah(prev_row)
+
+        return self.start_ayah
 
     def get_by_ayah_number(self, ayah_number: int) -> Optional[Ayah]:
         logger.debug(f"Fetching Ayah by number: {ayah_number}")
@@ -167,4 +182,3 @@ class ViewContent:
         if self.engine:
             self.engine.dispose()
         logger.debug(f"ViewContent {self.label} closed.")
-    
