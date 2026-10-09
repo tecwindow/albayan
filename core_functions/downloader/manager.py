@@ -78,11 +78,9 @@ class DownloadManager(QObject):
             self.set_size_text(item.id, item.total_bytes)
 
             # Include any additional fields that might exist in the DB model
-            other_keys = set(item.__dict__.keys()) - set(
-                self.db.download_table.__table__.c
-            )
-            for key in other_keys:
-                self._downloads[item.id][key] = getattr(item, key)
+            for key, value in item.__dict__.items():
+                if not key.startswith("_") and key not in self._downloads[item.id]:
+                    self._downloads[item.id][key] = value
 
         logger.info("Loaded %d download items from history", len(self._downloads))
 
