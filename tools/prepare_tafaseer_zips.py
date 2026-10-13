@@ -1,7 +1,7 @@
 """
 Utility script to create compressed .zip archives for all non-bundled Tafaseer databases.
 Run this script to generate zip archives ready to upload to:
-- Primary: https://tecwindow.net/albayan/tafaseer/
+- Primary: https://albayan.tecwindow.net/tafaseer/
 - Backup: https://github.com/tecwindow/albayan-data/
 """
 

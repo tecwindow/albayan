@@ -11,6 +11,10 @@ logger = LoggerManager.get_logger(__name__)
 
 DEFAULT_BUNDLED_TAFSIR_ID = "muyassar"
 
+PRIMARY_TAFASEER_BASE_URL = "https://albayan.tecwindow.net/tafaseer"
+BACKUP_GITHUB_RAW_BASE_URL = "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer"
+BACKUP_GITHUB_RELEASE_BASE_URL = "https://github.com/tecwindow/albayan-data/releases/download/v1.0"
+
 TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
     "muyassar": {
         "id": "muyassar",
@@ -24,9 +28,9 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
         "download_size_mb": 0.63,
         "is_bundled_default": True,
         "mirrors": [
-            "https://tecwindow.net/albayan/tafaseer/muyassar.zip",
-            "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer/muyassar.zip",
-            "https://github.com/tecwindow/albayan-data/releases/download/v1.0/muyassar.zip",
+            f"{PRIMARY_TAFASEER_BASE_URL}/muyassar.zip",
+            f"{BACKUP_GITHUB_RAW_BASE_URL}/muyassar.zip",
+            f"{BACKUP_GITHUB_RELEASE_BASE_URL}/muyassar.zip",
         ],
     },
     "mukhtasar": {
@@ -41,9 +45,9 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
         "download_size_mb": 0.61,
         "is_bundled_default": False,
         "mirrors": [
-            "https://tecwindow.net/albayan/tafaseer/mukhtasar.zip",
-            "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer/mukhtasar.zip",
-            "https://github.com/tecwindow/albayan-data/releases/download/v1.0/mukhtasar.zip",
+            f"{PRIMARY_TAFASEER_BASE_URL}/mukhtasar.zip",
+            f"{BACKUP_GITHUB_RAW_BASE_URL}/mukhtasar.zip",
+            f"{BACKUP_GITHUB_RELEASE_BASE_URL}/mukhtasar.zip",
         ],
     },
     "sa3dy": {
@@ -58,9 +62,9 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
         "download_size_mb": 1.75,
         "is_bundled_default": False,
         "mirrors": [
-            "https://tecwindow.net/albayan/tafaseer/sa3dy.zip",
-            "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer/sa3dy.zip",
-            "https://github.com/tecwindow/albayan-data/releases/download/v1.0/sa3dy.zip",
+            f"{PRIMARY_TAFASEER_BASE_URL}/sa3dy.zip",
+            f"{BACKUP_GITHUB_RAW_BASE_URL}/sa3dy.zip",
+            f"{BACKUP_GITHUB_RELEASE_BASE_URL}/sa3dy.zip",
         ],
     },
     "baghawy": {
@@ -75,9 +79,9 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
         "download_size_mb": 2.03,
         "is_bundled_default": False,
         "mirrors": [
-            "https://tecwindow.net/albayan/tafaseer/baghawy.zip",
-            "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer/baghawy.zip",
-            "https://github.com/tecwindow/albayan-data/releases/download/v1.0/baghawy.zip",
+            f"{PRIMARY_TAFASEER_BASE_URL}/baghawy.zip",
+            f"{BACKUP_GITHUB_RAW_BASE_URL}/baghawy.zip",
+            f"{BACKUP_GITHUB_RELEASE_BASE_URL}/baghawy.zip",
         ],
     },
     "katheer": {
@@ -92,9 +96,9 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
         "download_size_mb": 3.34,
         "is_bundled_default": False,
         "mirrors": [
-            "https://tecwindow.net/albayan/tafaseer/katheer.zip",
-            "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer/katheer.zip",
-            "https://github.com/tecwindow/albayan-data/releases/download/v1.0/katheer.zip",
+            f"{PRIMARY_TAFASEER_BASE_URL}/katheer.zip",
+            f"{BACKUP_GITHUB_RAW_BASE_URL}/katheer.zip",
+            f"{BACKUP_GITHUB_RELEASE_BASE_URL}/katheer.zip",
         ],
     },
     "qortoby": {
@@ -109,9 +113,9 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
         "download_size_mb": 5.38,
         "is_bundled_default": False,
         "mirrors": [
-            "https://tecwindow.net/albayan/tafaseer/qortoby.zip",
-            "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer/qortoby.zip",
-            "https://github.com/tecwindow/albayan-data/releases/download/v1.0/qortoby.zip",
+            f"{PRIMARY_TAFASEER_BASE_URL}/qortoby.zip",
+            f"{BACKUP_GITHUB_RAW_BASE_URL}/qortoby.zip",
+            f"{BACKUP_GITHUB_RELEASE_BASE_URL}/qortoby.zip",
         ],
     },
     "tabary": {
@@ -126,9 +130,9 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
         "download_size_mb": 7.69,
         "is_bundled_default": False,
         "mirrors": [
-            "https://tecwindow.net/albayan/tafaseer/tabary.zip",
-            "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer/tabary.zip",
-            "https://github.com/tecwindow/albayan-data/releases/download/v1.0/tabary.zip",
+            f"{PRIMARY_TAFASEER_BASE_URL}/tabary.zip",
+            f"{BACKUP_GITHUB_RAW_BASE_URL}/tabary.zip",
+            f"{BACKUP_GITHUB_RELEASE_BASE_URL}/tabary.zip",
         ],
     },
     "jalalayn": {
@@ -143,9 +147,9 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
         "download_size_mb": 0.63,
         "is_bundled_default": False,
         "mirrors": [
-            "https://tecwindow.net/albayan/tafaseer/jalalayn.zip",
-            "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer/jalalayn.zip",
-            "https://github.com/tecwindow/albayan-data/releases/download/v1.0/jalalayn.zip",
+            f"{PRIMARY_TAFASEER_BASE_URL}/jalalayn.zip",
+            f"{BACKUP_GITHUB_RAW_BASE_URL}/jalalayn.zip",
+            f"{BACKUP_GITHUB_RELEASE_BASE_URL}/jalalayn.zip",
         ],
     },
 }
