@@ -149,18 +149,22 @@ class TafaseerDownloadThread(QThread):
             downloaded_bytes = self.temp_zip_path.stat().st_size
             if downloaded_bytes > 0:
                 headers["Range"] = f"bytes={downloaded_bytes}-"
+                logger.debug(f"Resuming download from byte {downloaded_bytes} for {self.tafsir_id}.")
 
+        logger.debug(f"Connecting to {url} with headers {headers}...")
         response = self._session.get(url, stream=True, headers=headers, timeout=20)
+        logger.debug(f"Received HTTP {response.status_code} from {url}.")
 
         # Handle 416 Range Not Satisfiable (retry fresh)
         if response.status_code == 416:
-            logger.warning("HTTP 416: Range invalid, restarting fresh download.")
+            logger.warning(f"HTTP 416: Range invalid ({downloaded_bytes} bytes). Restarting fresh download from {url}.")
             response.close()
             if self.temp_zip_path.exists():
                 self.temp_zip_path.unlink()
             downloaded_bytes = 0
             headers.pop("Range", None)
             response = self._session.get(url, stream=True, headers=headers, timeout=20)
+            logger.debug(f"Fresh connection received HTTP {response.status_code}.")
 
         response.raise_for_status()
 
@@ -168,10 +172,14 @@ class TafaseerDownloadThread(QThread):
             file_mode = "ab"
             content_length = int(response.headers.get("Content-Length", 0))
             total_bytes = downloaded_bytes + content_length
+            logger.info(
+                f"Resuming download for {self.tafsir_id}: {downloaded_bytes}/{total_bytes} bytes already on disk."
+            )
         else:
             file_mode = "wb"
             downloaded_bytes = 0
             total_bytes = int(response.headers.get("Content-Length", 0))
+            logger.info(f"Starting complete download for {self.tafsir_id}: total {total_bytes} bytes.")
 
         chunk_size = 64 * 1024  # 64 KB
         start_time = time.time()
@@ -181,6 +189,7 @@ class TafaseerDownloadThread(QThread):
         with open(self.temp_zip_path, file_mode) as f:
             for chunk in response.iter_content(chunk_size=chunk_size):
                 if self._cancelled:
+                    logger.info(f"Download loop aborted due to cancellation for {self.tafsir_id}.")
                     response.close()
                     break
 
@@ -211,19 +220,24 @@ class TafaseerDownloadThread(QThread):
 
         if not self._cancelled:
             # Rename .part to final zip
+            logger.debug(f"Download stream finished. Renaming {self.temp_zip_path} to {self.final_zip_path}...")
             if self.final_zip_path.exists():
                 self.final_zip_path.unlink()
             self.temp_zip_path.rename(self.final_zip_path)
+            logger.info(f"Archive saved to {self.final_zip_path} ({downloaded_bytes} bytes).")
 
     def _extract_and_verify(self):
         """Extracts the sqlite db from the zip file and verifies its schema."""
+        logger.info(f"Extracting and verifying downloaded archive: {self.final_zip_path}...")
         if not self.final_zip_path.exists():
+            logger.error(f"Archive file not found for extraction: {self.final_zip_path}")
             raise FileNotFoundError(f"ملف الأرشيف غير موجود: {self.final_zip_path}")
 
         extracted_file = None
         with zipfile.ZipFile(self.final_zip_path, "r") as zf:
             for member in zf.namelist():
                 if member.lower().endswith(".db"):
+                    logger.debug(f"Found database member in zip archive: '{member}'")
                     # Extract directly to destination
                     target_extracted = self.dest_dir / self.db_filename
                     with zf.open(member) as source, open(target_extracted, "wb") as target:
@@ -232,23 +246,29 @@ class TafaseerDownloadThread(QThread):
                             target.write(chunk)
                             chunk = source.read(1024 * 1024)
                     extracted_file = target_extracted
+                    logger.debug(f"Extracted database to: {extracted_file}")
                     break
 
         if not extracted_file or not extracted_file.exists():
+            logger.error("Archive extraction failed: no .db file found in zip.")
             raise ValueError("الأرشيف لا يحتوي على قاعدة بيانات صالحة بصيغة SQLite (.db).")
 
         # Verify SQLite integrity
+        logger.debug(f"Verifying SQLite database integrity for: {extracted_file}...")
         conn = sqlite3.connect(str(extracted_file))
         try:
             cursor = conn.cursor()
             cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table';")
             count = cursor.fetchone()[0]
             if count == 0:
+                logger.error("Extracted database contains zero tables.")
                 raise ValueError("قاعدة البيانات المستخرجة فارغة ولا تحتوي على جداول.")
             # Check tafsir_1 exists
             cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='tafsir_1';")
             if cursor.fetchone()[0] == 0:
+                logger.error("Extracted database does not contain table 'tafsir_1'.")
                 raise ValueError("بنية قاعدة البيانات غير متوافقة مع جداول التفسير.")
+            logger.info(f"SQLite verification successful for {self.tafsir_id}: {count} tables found.")
         finally:
             conn.close()
 
@@ -260,9 +280,11 @@ class TafaseerDownloadThread(QThread):
             logger.warning(f"Could not remove temp zip: {e}")
 
     def _cleanup_temp_files(self):
+        logger.debug(f"Cleaning up temporary files for tafsir: {self.tafsir_id}...")
         for p in [self.temp_zip_path, self.final_zip_path]:
             if p.exists():
                 try:
                     p.unlink()
-                except Exception:
-                    pass
+                    logger.debug(f"Removed temporary file: {p}")
+                except Exception as e:
+                    logger.warning(f"Failed to remove temporary file {p}: {e}")

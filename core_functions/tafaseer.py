@@ -202,7 +202,9 @@ class Category:
         2. Application's bundled folder: paths.data_folder / 'tafaseer'
         Returns a Path object if found, or None if not installed.
         """
+        logger.debug(f"Locating tafsir database for category: '{category}'...")
         if not cls.is_valid(category):
+            logger.warning(f"Invalid tafsir category requested: '{category}'")
             return None
 
         # Check user data folder first
@@ -212,6 +214,7 @@ class Category:
         ]
         for p in candidates_user:
             if p.is_file():
+                logger.debug(f"Found tafsir database in user folder: {p}")
                 return p
 
         # Check bundled folder
@@ -224,8 +227,10 @@ class Category:
         ]
         for p in candidates_bundled:
             if p.is_file():
+                logger.debug(f"Found tafsir database in bundled folder: {p}")
                 return p
 
+        logger.debug(f"Tafsir database not found locally for category: '{category}'")
         return None
 
     @classmethod
@@ -281,13 +286,17 @@ class Category:
         Deletes a downloaded tafsir from the user folder.
         Safely closes any active database connections first.
         """
+        logger.info(f"Attempting to delete tafsir category: '{category}' from user storage...")
         if not cls.is_valid(category):
+            logger.error(f"Cannot delete invalid tafsir category: '{category}'")
             raise ValueError(f"فئة تفسير غير صالحة: {category}")
 
         if category == DEFAULT_BUNDLED_TAFSIR_ID:
+            logger.warning("Attempted to delete the default bundled tafsir (forbidden).")
             raise ValueError("لا يمكن حذف التفسير الأساسي المضمن مع البرنامج.")
 
         # Close all active connections to prevent Windows file locking
+        logger.debug(f"Closing any active connections for tafsir '{category}' prior to file deletion.")
         TafaseerManager.close_all_instances_for(category)
 
         deleted = False
@@ -305,8 +314,13 @@ class Category:
                     deleted = True
                     logger.info(f"Deleted tafsir file: {p}")
                 except Exception as e:
-                    logger.error(f"Failed to delete {p}: {e}")
+                    logger.error(f"Failed to delete tafsir file {p}: {e}", exc_info=True)
                     raise
+
+        if deleted:
+            logger.info(f"Successfully deleted tafsir category: '{category}'.")
+        else:
+            logger.warning(f"No files found to delete for tafsir category: '{category}'.")
 
         return deleted
 

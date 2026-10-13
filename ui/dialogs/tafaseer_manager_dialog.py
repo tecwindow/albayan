@@ -45,6 +45,7 @@ class TafaseerManagerDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        logger.debug("Initializing TafaseerManagerDialog...")
         self.parent = parent
         self.setWindowTitle("إدارة وتنزيل التفاسير")
         self.resize(650, 480)
@@ -57,7 +58,7 @@ class TafaseerManagerDialog(QDialog):
         self.refresh_list()
 
         _play_sound("open")
-        logger.debug("TafaseerManagerDialog opened.")
+        logger.info("TafaseerManagerDialog opened successfully.")
 
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
@@ -149,6 +150,7 @@ class TafaseerManagerDialog(QDialog):
     def refresh_list(self, select_category_id: Optional[str] = None):
         """Populates the list of tafaseer with current status and sizes."""
         current_id = select_category_id or self.get_selected_category_id()
+        logger.debug(f"Refreshing tafaseer list. Target selection: '{current_id}'")
         self.tafaseer_list.clear()
 
         selected_row = 0
@@ -195,6 +197,7 @@ class TafaseerManagerDialog(QDialog):
         if self.tafaseer_list.count() > 0:
             self.tafaseer_list.setCurrentRow(selected_row)
             self._update_buttons_and_info()
+        logger.debug(f"Tafaseer list refreshed. Total items: {self.tafaseer_list.count()}")
 
     def get_selected_category_id(self) -> Optional[str]:
         item = self.tafaseer_list.currentItem()
@@ -203,10 +206,13 @@ class TafaseerManagerDialog(QDialog):
         return None
 
     def _on_selection_changed(self):
+        cat_id = self.get_selected_category_id()
+        logger.debug(f"Tafaseer selection changed to: {cat_id}")
         self._update_buttons_and_info()
 
     def _on_item_double_clicked(self, item: QListWidgetItem):
         cat_id = item.data(Qt.ItemDataRole.UserRole)
+        logger.debug(f"Tafaseer item double-clicked: {cat_id}")
         if not Category.is_installed(cat_id) and self._current_downloading_id != cat_id:
             self.start_download_selected()
 
@@ -247,10 +253,12 @@ class TafaseerManagerDialog(QDialog):
             return
 
         if Category.is_installed(cat_id):
+            logger.debug(f"Download requested for already installed tafsir: {cat_id}")
             UniversalSpeech.say("هذا التفسير مثبت بالفعل وجاهز للاستخدام.")
             return
 
         if self._active_worker and self._active_worker.isRunning():
+            logger.warning(f"Download attempted for {cat_id} while worker is already busy with {self._current_downloading_id}")
             UniversalSpeech.say("هناك عملية تنزيل جارية بالفعل، يرجى الانتظار حتى تكتمل.")
             QMessageBox.information(
                 self,
@@ -261,10 +269,13 @@ class TafaseerManagerDialog(QDialog):
 
         info = Category.get_tafsir_info(cat_id)
         if not info:
+            logger.error(f"No catalog information found for category: {cat_id}")
             return
 
+        logger.info(f"User started download for tafsir: {cat_id} ({info['full_name']})")
         self._current_downloading_id = cat_id
         mirrors = info.get("mirrors", [])
+        logger.debug(f"Configured mirrors for {cat_id}: {mirrors}")
 
         # Start thread
         self._active_worker = TafaseerDownloadThread(cat_id, mirrors, parent=self)
@@ -289,10 +300,11 @@ class TafaseerManagerDialog(QDialog):
 
         self.refresh_list(cat_id)
         self._active_worker.start()
-        logger.info(f"Started downloading tafsir: {cat_id}")
+        logger.info(f"Worker thread launched for tafsir: {cat_id}")
 
     def cancel_download(self):
         if self._active_worker and self._active_worker.isRunning():
+            logger.info(f"User requested cancellation of download for tafsir: {self._current_downloading_id}")
             self.status_label.setText("جارٍ إلغاء التنزيل...")
             UniversalSpeech.say("جارٍ إلغاء التنزيل...")
             self._active_worker.cancel()
@@ -310,15 +322,18 @@ class TafaseerManagerDialog(QDialog):
         self.status_label.setText(progress_text)
 
     def _on_status_changed(self, tafsir_id: str, message: str):
+        logger.debug(f"Download status for {tafsir_id}: {message}")
         self.status_label.setText(message)
 
     def _on_mirror_switched(self, tafsir_id: str, mirror_url: str, mirror_index: int):
+        logger.info(f"Mirror switched for {tafsir_id}: mirror #{mirror_index} ({mirror_url})")
         if mirror_index > 1:
             UniversalSpeech.say(f"جارٍ المحاولة من الرابط البديل رقم {mirror_index}...")
 
     def _on_download_finished(self, tafsir_id: str, final_db_path: str):
         info = Category.get_tafsir_info(tafsir_id)
         full_name = info["full_name"] if info else tafsir_id
+        logger.info(f"Tafsir download completed successfully: {tafsir_id} ({full_name}) at {final_db_path}")
 
         self._active_worker = None
         self._current_downloading_id = None
@@ -340,6 +355,7 @@ class TafaseerManagerDialog(QDialog):
     def _on_download_error(self, tafsir_id: str, error_message: str):
         info = Category.get_tafsir_info(tafsir_id)
         name = info["arabic_name"] if info else tafsir_id
+        logger.error(f"Tafsir download failed for {tafsir_id}: {error_message}")
 
         self._active_worker = None
         self._current_downloading_id = None
@@ -358,6 +374,7 @@ class TafaseerManagerDialog(QDialog):
     def _on_download_cancelled(self, tafsir_id: str):
         info = Category.get_tafsir_info(tafsir_id)
         name = info["arabic_name"] if info else tafsir_id
+        logger.info(f"Tafsir download cancelled notification received for: {tafsir_id}")
 
         self._active_worker = None
         self._current_downloading_id = None
@@ -372,7 +389,9 @@ class TafaseerManagerDialog(QDialog):
         if not cat_id:
             return
 
+        logger.debug(f"User requested delete for tafsir: {cat_id}")
         if cat_id == DEFAULT_BUNDLED_TAFSIR_ID:
+            logger.warning(f"Delete requested for bundled default tafsir '{cat_id}' (rejected)")
             UniversalSpeech.say("لا يمكن حذف التفسير الأساسي المضمن مع البرنامج.")
             QMessageBox.warning(
                 self,
@@ -382,6 +401,7 @@ class TafaseerManagerDialog(QDialog):
             return
 
         if not Category.is_installed(cat_id):
+            logger.warning(f"Delete requested for uninstalled tafsir: '{cat_id}'")
             UniversalSpeech.say("هذا التفسير غير مثبت أصلاً.")
             return
 
@@ -397,6 +417,7 @@ class TafaseerManagerDialog(QDialog):
         )
 
         if confirm == QMessageBox.StandardButton.Yes:
+            logger.info(f"User confirmed deletion of tafsir: {cat_id} ({name})")
             try:
                 Category.delete_tafsir(cat_id)
                 _play_sound("change")
@@ -412,7 +433,9 @@ class TafaseerManagerDialog(QDialog):
                 )
 
     def reject(self):
+        logger.debug("User requested to close TafaseerManagerDialog.")
         if self._active_worker and self._active_worker.isRunning():
+            logger.info("Active download detected while attempting to close dialog, asking confirmation.")
             confirm = QMessageBox.question(
                 self,
                 "إلغاء التنزيل",
@@ -421,8 +444,10 @@ class TafaseerManagerDialog(QDialog):
                 QMessageBox.StandardButton.No,
             )
             if confirm != QMessageBox.StandardButton.Yes:
+                logger.debug("Close dialog aborted by user to keep active download running.")
                 return
             self.cancel_download()
 
         _play_sound("clos")
+        logger.debug("TafaseerManagerDialog closed.")
         super().reject()

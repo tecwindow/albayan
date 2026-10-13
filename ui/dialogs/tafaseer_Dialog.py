@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 import qtawesome as qta
 from PySide6.QtWidgets import (
     QWidget,
@@ -204,6 +205,7 @@ class TafaseerDialog(QDialog):
 
         arabic_category = sender.data() or sender.text().replace(" (تنزيل)", "").strip()
         cat_id = Category.get_category_by_arabic_name(arabic_category)
+        logger.info(f"User selected uninstalled tafsir '{arabic_category}' ({cat_id}) in TafaseerDialog.")
 
         confirm = QMessageBox.question(
             self,
@@ -214,10 +216,13 @@ class TafaseerDialog(QDialog):
         )
 
         if confirm == QMessageBox.StandardButton.Yes:
+            logger.info(f"User confirmed opening TafaseerManagerDialog for '{arabic_category}'.")
             self.open_tafaseer_manager(target_category_id=cat_id)
+        else:
+            logger.debug(f"User cancelled downloading '{arabic_category}'.")
 
     def open_tafaseer_manager(self, target_category_id: Optional[str] = None):
-        logger.debug("Opening TafaseerManagerDialog from TafaseerDialog...")
+        logger.info(f"Opening TafaseerManagerDialog from TafaseerDialog (target: {target_category_id})...")
         dialog = TafaseerManagerDialog(self)
         if target_category_id:
             dialog.refresh_list(select_category_id=target_category_id)
@@ -226,10 +231,14 @@ class TafaseerDialog(QDialog):
         logger.debug("TafaseerManagerDialog closed.")
 
     def _on_tafaseer_collection_changed(self):
+        logger.debug("Tafaseer collection changed signal received; checking current active category.")
         current_cat_name = self.category_button.text().strip()
         current_cat_id = Category.get_category_by_arabic_name(current_cat_name)
 
         if not current_cat_id or not Category.is_installed(current_cat_id):
+            logger.warning(
+                f"Active tafsir '{current_cat_name}' ({current_cat_id}) is no longer installed; resetting to default."
+            )
             # The active tafsir was deleted; switch back to bundled default
             default_arabic = Category.get_arabic_name_by_category(DEFAULT_BUNDLED_TAFSIR_ID) or "الميسر"
             self.category_button.setText(default_arabic)
@@ -240,6 +249,7 @@ class TafaseerDialog(QDialog):
                 self.tafaseer_manager.get_tafaseer(self.ayah.sura_number, self.ayah.number)
             )
             self.setWindowTitle(f"{self.title} - {default_arabic}")
+            logger.info(f"Active tafsir successfully reset to default: {default_arabic}")
 
     def copy_content(self):
         logger.debug("User requested to copy Tafaseer content.")
