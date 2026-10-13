@@ -13,3 +13,5 @@ albayan_env/
 albayan_build
 
 Albayan.egg-info
+dist_tafaseer_zips/
+tools/tafaseer_zips/

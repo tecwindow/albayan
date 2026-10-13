@@ -385,6 +385,25 @@ class QuranInterface(QMainWindow):
             selected_category = self.preferences_manager.get(
                 "last_tafaseer_category", "الميسر"
             )
+        selected_cat_id = Category.get_category_by_arabic_name(selected_category)
+        if selected_cat_id and not Category.is_installed(selected_cat_id):
+            confirm = QMessageBox.question(
+                self,
+                "تنزيل التفسير",
+                f"تفسير ({selected_category}) غير مُنزّل على جهازك.\nهل تريد فتح نافذة إدارة التفاسير لتنزيله الآن؟",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.Yes,
+            )
+            if confirm == QMessageBox.StandardButton.Yes:
+                from ui.dialogs.tafaseer_manager_dialog import TafaseerManagerDialog
+                m_dlg = TafaseerManagerDialog(self)
+                m_dlg.refresh_list(select_category_id=selected_cat_id)
+                m_dlg.exec()
+                if not Category.is_installed(selected_cat_id):
+                    selected_category = "الميسر"
+            else:
+                selected_category = "الميسر"
+
         logger.debug(f"set the default category: {selected_category}")
 
         current_ayah = self.get_current_ayah()

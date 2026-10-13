@@ -100,6 +100,11 @@ class PathManager:
         self._athkar_audio.mkdir(parents=True, exist_ok=True)
         logger.debug(f"Athkar audio folder created/existing: {self._athkar_audio}")
 
+        # tafaseer folder in user data (for downloaded/installed tafaseer)
+        self._tafaseer_folder = self._app_folder / "tafaseer"
+        self._tafaseer_folder.mkdir(parents=True, exist_ok=True)
+        logger.debug(f"Tafaseer folder created/existing: {self._tafaseer_folder}")
+
         # temp folder
         self._temp_folder = Path(os.getenv("TEMP", "/tmp")) / app_name            
         self._temp_folder.mkdir(parents=True, exist_ok=True)
@@ -224,11 +229,17 @@ class PathManager:
         logger.debug(f"Accessed documents_dir: {self._documents_dir}")
         return self._documents_dir
 
+    @property
+    def tafaseer_folder(self):
+        logger.debug(f"Accessed tafaseer_folder: {self._tafaseer_folder}")
+        return self._tafaseer_folder
+
     def __repr__(self):
         paths = {
             "PortableMode": self.is_portable_mode,
             "BaseDir": self.base_dir,
             "AppFolder": self.app_folder,
+            "TafaseerFolder": self.tafaseer_folder,
             "UserDB": self.user_db,
             "Config": self.config_file,
             "Log": self.log_file,

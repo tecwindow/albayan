@@ -220,6 +220,19 @@ def clean_unused_folders(build_dir="albayan_build"):
             except Exception as e:
                 print(f"Error removing {full_path}: {e}")
 
+    # Retain only the default bundled tafsir (muyassar) in the installer build
+    build_tafaseer_dir = os.path.join(build_dir, "database", "tafaseer")
+    if os.path.exists(build_tafaseer_dir):
+        keep_prefixes = ["muyassar."]
+        for item in os.listdir(build_tafaseer_dir):
+            if item.lower().endswith((".db", ".zip", ".part")):
+                if not any(item.lower().startswith(prefix) for prefix in keep_prefixes):
+                    try:
+                        os.remove(os.path.join(build_tafaseer_dir, item))
+                        print(f"Pruned non-bundled tafsir from build: {item}")
+                    except Exception as e:
+                        print(f"Error pruning non-bundled tafsir {item}: {e}")
+
     if os.path.exists(build_dir):
         for item in os.listdir(build_dir):
             if item.endswith(".log") or item == "AlbayanSetup.exe":
