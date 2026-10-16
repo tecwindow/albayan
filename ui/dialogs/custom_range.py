@@ -71,7 +71,7 @@ class CustomRangeDialog(QDialog):
         type_layout.addWidget(self.combo_range_type)
         main_layout.addLayout(type_layout)
 
-        # 2. Group 'From' (من)
+        # 2. Group 'From'
         self.group_from = QGroupBox("من")
         group_from_layout = QVBoxLayout(self.group_from)
         self.stack_from = QStackedWidget(self.group_from)
@@ -141,7 +141,7 @@ class CustomRangeDialog(QDialog):
         group_from_layout.addWidget(self.stack_from)
         main_layout.addWidget(self.group_from)
 
-        # 3. Group 'To' (إلى)
+        # 3. Group 'To'
         self.group_to = QGroupBox("إلى")
         group_to_layout = QVBoxLayout(self.group_to)
         self.stack_to = QStackedWidget(self.group_to)
