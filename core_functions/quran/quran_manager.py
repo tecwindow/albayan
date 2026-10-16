@@ -9,6 +9,9 @@ from .models import Quran, QuranBase
 from .types import QuranFontType, NavigationMode, Surah, Ayah
 from .view_content import ViewContent
 from .formatter import FormatterOptions, QuranFormatter
+from utils.logger import LoggerManager
+
+logger = LoggerManager.get_logger(__name__)
 
 
 class QuranManager:
@@ -195,42 +198,128 @@ class QuranManager:
 
     def get_range(
         self,
+        range_type: str = "surah",
         from_surah: Optional[int] = None,
-        from_ayah:  Optional[int] = None,
-        to_surah:   Optional[int] = None,
-        to_ayah:    Optional[int] = None
-    ) -> List[Ayah]:
+        from_ayah: Optional[int] = None,
+        to_surah: Optional[int] = None,
+        to_ayah: Optional[int] = None,
+        from_page: Optional[int] = None,
+        to_page: Optional[int] = None,
+        from_juz: Optional[int] = None,
+        to_juz: Optional[int] = None,
+        from_hizb: Optional[int] = None,
+        to_hizb: Optional[int] = None,
+        from_quarter: Optional[int] = None,
+        to_quarter: Optional[int] = None,
+        **kwargs,
+    ) -> str:
         """
-        Fetch Ayahs between two points:
-          - (from_surah, from_ayah) up to (to_surah, to_ayah)
-        If one end is omitted, it defaults to start=1 or end=last Ayah.
+        Fetch Ayahs between two points depending on range_type:
+          - 'surah': (from_surah, from_ayah) up to (to_surah, to_ayah)
+          - 'page': from_page up to to_page (1..604)
+          - 'juz': from_juz up to to_juz (1..30)
+          - 'hizb': from_hizb up to to_hizb (1..60)
+          - 'quarter': from_quarter up to to_quarter (1..240)
         """
         self.navigation_mode = NavigationMode.CUSTOM_RANGE
-        # Determine global numbering for start
-        start_num = None
-        if from_surah is not None:
-            sura_ayahs = (
-                self.session.query(Quran)
-                .filter(Quran.sura_number == from_surah)
-                .order_by(Quran.number)
-                .all()
-            )
-            if sura_ayahs:
-                idx = max(1, min(len(sura_ayahs), from_ayah or 1)) - 1
-                start_num = sura_ayahs[idx].number
+        start_num: Optional[int] = None
+        end_num: Optional[int] = None
 
-        # Determine global numbering for end
-        end_num = None
-        if to_surah is not None:
-            sura_ayahs = (
-                self.session.query(Quran)
-                .filter(Quran.sura_number == to_surah)
-                .order_by(Quran.number)
-                .all()
+        logger.debug(
+            f"Fetching custom range: type='{range_type}', "
+            f"surah=({from_surah}:{from_ayah} -> {to_surah}:{to_ayah}), "
+            f"page=({from_page} -> {to_page}), "
+            f"juz=({from_juz} -> {to_juz}), "
+            f"hizb=({from_hizb} -> {to_hizb}), "
+            f"quarter=({from_quarter} -> {to_quarter})"
+        )
+
+        if range_type == "page":
+            fp = max(1, min(self.MAX_PAGE, from_page or 1))
+            tp = max(1, min(self.MAX_PAGE, to_page or fp))
+            if fp > tp:
+                fp, tp = tp, fp
+            start_num = (
+                self.session.query(func.min(Quran.number))
+                .filter(Quran.page == fp)
+                .scalar()
             )
-            if sura_ayahs:
-                idx = max(1, min(len(sura_ayahs), to_ayah or len(sura_ayahs))) - 1
-                end_num = sura_ayahs[idx].number
+            end_num = (
+                self.session.query(func.max(Quran.number))
+                .filter(Quran.page == tp)
+                .scalar()
+            )
+
+        elif range_type == "juz":
+            fj = max(1, min(self.MAX_JUZ, from_juz or 1))
+            tj = max(1, min(self.MAX_JUZ, to_juz or fj))
+            if fj > tj:
+                fj, tj = tj, fj
+            start_num = (
+                self.session.query(func.min(Quran.number))
+                .filter(Quran.juz == fj)
+                .scalar()
+            )
+            end_num = (
+                self.session.query(func.max(Quran.number))
+                .filter(Quran.juz == tj)
+                .scalar()
+            )
+
+        elif range_type == "hizb":
+            fh = max(1, min(self.MAX_HIZB, from_hizb or 1))
+            th = max(1, min(self.MAX_HIZB, to_hizb or fh))
+            if fh > th:
+                fh, th = th, fh
+            start_num = (
+                self.session.query(func.min(Quran.number))
+                .filter(Quran.hizb == fh)
+                .scalar()
+            )
+            end_num = (
+                self.session.query(func.max(Quran.number))
+                .filter(Quran.hizb == th)
+                .scalar()
+            )
+
+        elif range_type == "quarter":
+            fq = max(1, min(self.MAX_QUARTER, from_quarter or 1))
+            tq = max(1, min(self.MAX_QUARTER, to_quarter or fq))
+            if fq > tq:
+                fq, tq = tq, fq
+            start_num = (
+                self.session.query(func.min(Quran.number))
+                .filter(Quran.hizbQuarter == fq)
+                .scalar()
+            )
+            end_num = (
+                self.session.query(func.max(Quran.number))
+                .filter(Quran.hizbQuarter == tq)
+                .scalar()
+            )
+
+        else:  # 'surah' or default fallback
+            if from_surah is not None:
+                sura_ayahs = (
+                    self.session.query(Quran)
+                    .filter(Quran.sura_number == from_surah)
+                    .order_by(Quran.number)
+                    .all()
+                )
+                if sura_ayahs:
+                    idx = max(1, min(len(sura_ayahs), from_ayah or 1)) - 1
+                    start_num = sura_ayahs[idx].number
+
+            if to_surah is not None:
+                sura_ayahs = (
+                    self.session.query(Quran)
+                    .filter(Quran.sura_number == to_surah)
+                    .order_by(Quran.number)
+                    .all()
+                )
+                if sura_ayahs:
+                    idx = max(1, min(len(sura_ayahs), to_ayah or len(sura_ayahs))) - 1
+                    end_num = sura_ayahs[idx].number
 
         # Build final query
         query = self.session.query(Quran).order_by(Quran.number)
@@ -241,9 +330,13 @@ class QuranManager:
         elif start_num is not None:
             query = query.filter(Quran.number >= start_num)
         else:
-            query = query.filter(Quran.number > 1)
+            query = query.filter(Quran.number >= 1)
 
         ayahs = [self._row_to_ayah(r) for r in query.all()]
+        logger.info(
+            f"Custom range resolved: type='{range_type}', start_ayah={start_num}, "
+            f"end_ayah={end_num}, count={len(ayahs)}"
+        )
         view_content = self.get_view_content(number=None, label="نطاق", mode=self.navigation_mode, ayahs=ayahs)
 
         return view_content

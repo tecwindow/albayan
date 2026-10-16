@@ -226,12 +226,23 @@ class QuranInterface(QMainWindow):
         self.menu_bar.browse_mode_actions[mode].setChecked(True)
 
         if self.quran_manager.navigation_mode == NavigationMode.CUSTOM_RANGE:
-            range = {
-                key: self.preferences_manager.get_int(key, 1)
-                for key in ("from_surah", "from_ayah", "to_surah", "to_ayah")
+            saved_range = {
+                "range_type": self.preferences_manager.get("range_type", "surah"),
+                "from_surah": self.preferences_manager.get_int("from_surah", 1),
+                "from_ayah": self.preferences_manager.get_int("from_ayah", 1),
+                "to_surah": self.preferences_manager.get_int("to_surah", 1),
+                "to_ayah": self.preferences_manager.get_int("to_ayah", 7),
+                "from_page": self.preferences_manager.get_int("from_page", 1),
+                "to_page": self.preferences_manager.get_int("to_page", 1),
+                "from_juz": self.preferences_manager.get_int("from_juz", 1),
+                "to_juz": self.preferences_manager.get_int("to_juz", 1),
+                "from_hizb": self.preferences_manager.get_int("from_hizb", 1),
+                "to_hizb": self.preferences_manager.get_int("to_hizb", 1),
+                "from_quarter": self.preferences_manager.get_int("from_quarter", 1),
+                "to_quarter": self.preferences_manager.get_int("to_quarter", 1),
             }
-            logger.debug(f"Custom range detected: {range}")
-            text = self.quran_manager.get_range(**range)
+            logger.debug(f"Custom range detected on startup: {saved_range}")
+            text = self.quran_manager.get_range(**saved_range)
         else:
             text = self.quran_manager.go_to(current_position)
 
@@ -748,20 +759,34 @@ class QuranInterface(QMainWindow):
         logger.debug("Save alert played.")
 
     def OnCustomRange(self):
-        range = {
-            key: self.preferences_manager.get_int(key, 1)
-            for key in ("from_surah", "from_ayah", "to_surah", "to_ayah")
+        logger.debug("Custom range action triggered.")
+        saved_range = {
+            "range_type": self.preferences_manager.get("range_type", "surah"),
+            "from_surah": self.preferences_manager.get_int("from_surah", 1),
+            "from_ayah": self.preferences_manager.get_int("from_ayah", 1),
+            "to_surah": self.preferences_manager.get_int("to_surah", 1),
+            "to_ayah": self.preferences_manager.get_int("to_ayah", 7),
+            "from_page": self.preferences_manager.get_int("from_page", 1),
+            "to_page": self.preferences_manager.get_int("to_page", 1),
+            "from_juz": self.preferences_manager.get_int("from_juz", 1),
+            "to_juz": self.preferences_manager.get_int("to_juz", 1),
+            "from_hizb": self.preferences_manager.get_int("from_hizb", 1),
+            "to_hizb": self.preferences_manager.get_int("to_hizb", 1),
+            "from_quarter": self.preferences_manager.get_int("from_quarter", 1),
+            "to_quarter": self.preferences_manager.get_int("to_quarter", 1),
         }
-        ccustom_range_dialog = CustomRangeDialog(
-            self, self.quran_manager.get_surahs(), range
+        custom_range_dialog = CustomRangeDialog(
+            self, self.quran_manager.get_surahs(), saved_range
         )
-        if ccustom_range_dialog.exec():
-            range = ccustom_range_dialog.get_range()
-            self.preferences_manager.set_preferences(range)
-            text = self.quran_manager.get_range(**range)
+        if custom_range_dialog.exec():
+            selected_range = custom_range_dialog.get_range()
+            logger.info(f"Applying custom range: {selected_range}")
+            self.preferences_manager.set_preferences(selected_range)
+            text = self.quran_manager.get_range(**selected_range)
             self.quran_view.setText(text)
             self.set_text_ctrl_label()
         else:
+            logger.debug("Custom range dialog cancelled.")
             self.quran_manager.navigation_mode = self.get_valid_navigation_mode()
 
     def get_valid_navigation_mode(self) -> NavigationMode:
