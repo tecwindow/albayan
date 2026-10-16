@@ -18,6 +18,7 @@ from PySide6.QtGui import QKeySequence, QShortcut
 from utils.universal_speech import UniversalSpeech
 from utils.const import Globals
 from utils.logger import LoggerManager
+from ui.widgets.qText_edit import ReadOnlyTextEdit
 from core_functions.tafaseer import Category, TAFASEER_CATALOG, DEFAULT_BUNDLED_TAFSIR_ID
 from core_functions.tafaseer_downloader import TafaseerDownloadThread, format_bytes
 
@@ -48,7 +49,7 @@ class TafaseerManagerDialog(QDialog):
         logger.debug("Initializing TafaseerManagerDialog...")
         self.parent = parent
         self.setWindowTitle("إدارة وتنزيل التفاسير")
-        self.resize(650, 480)
+        self.resize(680, 520)
 
         self._active_worker: Optional[TafaseerDownloadThread] = None
         self._current_downloading_id: Optional[str] = None
@@ -76,14 +77,14 @@ class TafaseerManagerDialog(QDialog):
         main_layout.addWidget(self.tafaseer_list)
 
         # 3. Tafsir Information Label
-        self.info_label = QLabel("معلومات التفسير:")
-        self.info_label.setAccessibleName("معلومات التفسير المحدد")
+        self.info_label = QLabel("وصف ومعلومات التفسير:")
+        self.info_label.setAccessibleName("وصف ومعلومات التفسير")
         main_layout.addWidget(self.info_label)
 
-        self.info_text = QTextEdit()
-        self.info_text.setReadOnly(True)
-        self.info_text.setMaximumHeight(85)
-        self.info_text.setAccessibleName("تفاصيل التفسير")
+        self.info_text = ReadOnlyTextEdit(self)
+        self.info_text.setMaximumHeight(110)
+        self.info_text.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
+        self.info_text.setAccessibleName("وصف ومعلومات التفسير")
         main_layout.addWidget(self.info_text)
 
         # 4. Progress Section (Hidden by default)
@@ -240,7 +241,7 @@ class TafaseerManagerDialog(QDialog):
             f"الوصف: {info['description']}\n"
             f"الحجم عند التثبيت: {info['approx_size_mb']} م.ب | حجم التنزيل: {info['download_size_mb']} م.ب"
         )
-        self.info_text.setPlainText(details)
+        self.info_text.setText(details)
 
         # Update Buttons
         self.btn_download.setEnabled(not is_installed and not is_any_downloading)
