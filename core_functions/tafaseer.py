@@ -19,7 +19,7 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
     "muyassar": {
         "id": "muyassar",
         "arabic_name": "الميسر",
-        "full_name": "التفسير الميسر",
+        "full_name": "التفسير الميسر لنخبة من العلماء",
         "author": "نخبة من العلماء - مجمع الملك فهد لطباعة المصحف الشريف",
         "description": "تفسير ميسر وسلس وموثوق تم إعداده بإشراف مجمع الملك فهد لطباعة المصحف الشريف.",
         "db_filename": "muyassar.db",
@@ -36,7 +36,7 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
     "mukhtasar": {
         "id": "mukhtasar",
         "arabic_name": "المختصر في التفسير",
-        "full_name": "المختصر في تفسير القرآن الكريم",
+        "full_name": "المختصر في تفسير القرآن الكريم لمركز تفسير للدراسات القرآنية",
         "author": "مركز تفسير للدراسات القرآنية",
         "description": "كتاب متميز ومحرر أصدره مركز تفسير للدراسات القرآنية، يتميز بوضوح العبارة وذكر مقاصد السور.",
         "db_filename": "mukhtasar.db",
@@ -53,7 +53,7 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
     "sa3dy": {
         "id": "sa3dy",
         "arabic_name": "السعدي",
-        "full_name": "تيسير الكريم الرحمن في تفسير كلام المنان",
+        "full_name": "تيسير الكريم الرحمن في تفسير كلام المنان للإمام السعدي",
         "author": "الشيخ عبد الرحمن بن ناصر السعدي",
         "description": "من أسهل التفاسير وأكثرها تركيزاً على المعنى الإجمالي وتهذيب الأخلاق والتدبر الإيماني.",
         "db_filename": "sa3dy.db",
@@ -70,7 +70,7 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
     "baghawy": {
         "id": "baghawy",
         "arabic_name": "البغوي",
-        "full_name": "معالم التنزيل في تفسير القرآن",
+        "full_name": "معالم التنزيل في تفسير القرآن للإمام البغوي",
         "author": "الإمام الحسين بن مسعود البغوي",
         "description": "تفسير أثري جليل ينقل الآثار عن السلف مع اعتناء خاص بصحة الروايات وتجنب الإسرائيليات الضعيفة.",
         "db_filename": "baghawy.db",
@@ -87,7 +87,7 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
     "katheer": {
         "id": "katheer",
         "arabic_name": "ابن كثير",
-        "full_name": "تفسير القرآن العظيم",
+        "full_name": "تفسير القرآن العظيم للإمام ابن كثير",
         "author": "الإمام الحافظ إسماعيل بن عمر بن كثير",
         "description": "من أشهر التفاسير بالمأثور، يفسر القرآن بالقرآن ثم بالسنة النبوية وأقوال الصحابة والتابعين.",
         "db_filename": "katheer.db",
@@ -104,7 +104,7 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
     "qortoby": {
         "id": "qortoby",
         "arabic_name": "القرطبي",
-        "full_name": "الجامع لأحكام القرآن",
+        "full_name": "الجامع لأحكام القرآن للإمام القرطبي",
         "author": "الإمام أبو عبد الله محمد بن أحمد القرطبي",
         "description": "موسوعة جامعة في التفسير واستنباط الأحكام الفقهية مع الاستشهاد بمسائل اللغة والقراءات.",
         "db_filename": "qortoby.db",
@@ -121,7 +121,7 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
     "tabary": {
         "id": "tabary",
         "arabic_name": "الطبري",
-        "full_name": "جامع البيان عن تأويل آي القرآن",
+        "full_name": "جامع البيان عن تأويل آي القرآن للإمام الطبري",
         "author": "الإمام أبو جعفر محمد بن جرير الطبري",
         "description": "إمام المفسرين وأعظم كتب التفسير بالمأثور وأقدمها، يجمع الروايات بأسانيدها ويوجه الأقوال.",
         "db_filename": "tabary.db",
@@ -138,7 +138,7 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
     "jalalayn": {
         "id": "jalalayn",
         "arabic_name": "الجلالين",
-        "full_name": "تفسير الجلالين",
+        "full_name": "تفسير الجلالين للإمامين المحلي والسيوطي",
         "author": "جلال الدين المحلي وجلال الدين السيوطي",
         "description": "تفسير مختصر جداً يركز على إيضاح معاني المفردات بأسلوب موجز ودقيق.",
         "db_filename": "jalalayn.db",
