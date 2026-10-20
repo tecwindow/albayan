@@ -1,5 +1,5 @@
 import os
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox, QApplication
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
@@ -25,12 +25,31 @@ class ThemeManager:
 
     def apply_theme(self, selected_theme):
         logger.info(f"Applying theme: {selected_theme}")
-        if selected_theme == "default":
+        app = QApplication.instance()
+        if selected_theme in ("default", "الافتراضي"):
             self.window.setStyleSheet("")
+            if app:
+                app.setStyleSheet("")
             logger.debug("Default theme applied.")
             return
 
+        if not self.themes:
+            self.get_themes()
+
         theme_file = self.themes.get(selected_theme)
+        if not theme_file and selected_theme:
+            base = selected_theme.replace(".qss", "")
+            theme_file = self.themes.get(base)
+            if not theme_file and os.path.isfile(os.path.join(self.theme_dir, f"{base}.qss")):
+                theme_file = f"{base}.qss"
+
+        if theme_file == "default":
+            self.window.setStyleSheet("")
+            if app:
+                app.setStyleSheet("")
+            logger.debug("Default theme applied.")
+            return
+
         if not theme_file:
             logger.error(f"Theme not found: {selected_theme}.")
             return None
@@ -41,9 +60,11 @@ class ThemeManager:
             return None
 
         try:
-            with open(theme_path, "r") as theme_file:
-                stylesheet = theme_file.read()
+            with open(theme_path, "r", encoding="utf-8") as f:
+                stylesheet = f.read()
                 self.window.setStyleSheet(stylesheet)
+                if app:
+                    app.setStyleSheet(stylesheet)
                 logger.info(f"Theme '{selected_theme}' applied successfully.")
         except Exception as e:
             logger.error(f"Error applying theme '{selected_theme}': {e}", exc_info=True)
