@@ -30,6 +30,8 @@ class ThemeManager:
             self.window.setStyleSheet("")
             if app:
                 app.setStyleSheet("")
+            if hasattr(self.window, "apply_reading_font"):
+                self.window.apply_reading_font()
             logger.debug("Default theme applied.")
             return
 
@@ -65,6 +67,8 @@ class ThemeManager:
                 self.window.setStyleSheet(stylesheet)
                 if app:
                     app.setStyleSheet(stylesheet)
+                if hasattr(self.window, "apply_reading_font"):
+                    self.window.apply_reading_font()
                 logger.info(f"Theme '{selected_theme}' applied successfully.")
         except Exception as e:
             logger.error(f"Error applying theme '{selected_theme}': {e}", exc_info=True)

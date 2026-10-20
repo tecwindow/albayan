@@ -88,6 +88,11 @@ class ReadingSettings(BaseSection):
     font_type: int = 0
     auto_page_turn: bool = False
     marks_type: int = 0
+    font_family: str = ""
+    font_size: int = 0
+    font_color: str = ""
+    font_bold: bool = False
+    font_italic: bool = False
 
 @dataclass
 class SurahPlayerSettings(BaseSection):

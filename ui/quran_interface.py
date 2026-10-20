@@ -28,6 +28,8 @@ from PySide6.QtGui import (
     QTextCursor,
     QKeySequence,
     QShortcut,
+    QFont,
+    QColor,
 )
 from core_functions.quran.quran_manager import QuranManager
 from core_functions.quran.formatter import FormatterOptions
@@ -98,6 +100,7 @@ class QuranInterface(QMainWindow):
         self.tray_manager = SystemTrayManager(self, program_name, program_icon)
         self.create_widgets()
         self.create_layout()
+        self.apply_reading_font()
 
         self.set_text(Config.general.auto_restore_position_enabled)
         logger.debug(
@@ -106,6 +109,42 @@ class QuranInterface(QMainWindow):
         self.set_shortcut()
         self.current_text_repeat = 0
         logger.debug("QuranInterface initialized successfully.")
+
+    def apply_reading_font(self):
+        """Applies configured font family, size, weight, italic, and color to the reading view."""
+        family = getattr(Config.reading, "font_family", "")
+        size = getattr(Config.reading, "font_size", 0)
+        color = getattr(Config.reading, "font_color", "")
+        bold = getattr(Config.reading, "font_bold", False)
+        italic = getattr(Config.reading, "font_italic", False)
+
+        font = self.quran_view.font()
+        if family:
+            font.setFamily(family)
+        if size and size > 0:
+            font.setPointSize(size)
+        font.setBold(bold)
+        font.setItalic(italic)
+        self.quran_view.setFont(font)
+
+        style_parts = []
+        if family:
+            style_parts.append(f"font-family: '{family}';")
+        if size and size > 0:
+            style_parts.append(f"font-size: {size}pt;")
+        if bold:
+            style_parts.append("font-weight: bold;")
+        if italic:
+            style_parts.append("font-style: italic;")
+        if color:
+            style_parts.append(f"color: {color};")
+
+        if style_parts:
+            self.quran_view.setStyleSheet(
+                f"QuranViewer, QTextEdit#quran_view {{ {' '.join(style_parts)} }}"
+            )
+        else:
+            self.quran_view.setStyleSheet("")
 
     def center_window(self):
         screen_geometry = QApplication.primaryScreen().availableGeometry()

@@ -18,8 +18,10 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLineEdit,
     QStackedWidget,
+    QFontDialog,
+    QColorDialog,
 )
-from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtGui import QKeySequence, QShortcut, QFont, QColor
 from PySide6.QtCore import Qt
 from ui.widgets.spin_box import SpinBox
 from core_functions.quran.types import QuranFontType, MarksType
@@ -364,8 +366,30 @@ class SettingsDialog(QDialog):
         self.group_reading_layout.addWidget(self.marks_type_combo)
         self.group_reading_layout.addWidget(self.turn_pages_checkbox)
         self.group_reading_layout.addSpacerItem(
+            QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        )
+        self.font_appearance_label = QLabel("مظهر الخط المخصص ولونه:")
+        font_btn_layout = QHBoxLayout()
+        self.btn_select_font = QPushButton("اختيار نوع وحجم الخط...")
+        self.btn_select_font.clicked.connect(self.choose_font)
+        self.btn_select_color = QPushButton("اختيار لون الخط...")
+        self.btn_select_color.clicked.connect(self.choose_color)
+        self.btn_reset_font = QPushButton("استعادة الافتراضي")
+        self.btn_reset_font.clicked.connect(self.reset_font_settings)
+        font_btn_layout.addWidget(self.btn_select_font)
+        font_btn_layout.addWidget(self.btn_select_color)
+        font_btn_layout.addWidget(self.btn_reset_font)
+
+        self.font_preview_label = QLabel()
+        self.font_preview_label.setWordWrap(True)
+
+        self.group_reading_layout.addWidget(self.font_appearance_label)
+        self.group_reading_layout.addLayout(font_btn_layout)
+        self.group_reading_layout.addWidget(self.font_preview_label)
+
+        self.group_reading_layout.addSpacerItem(
             QSpacerItem(
-                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+                20, 30, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
             )
         )
         self.group_reading.setLayout(self.group_reading_layout)
@@ -757,6 +781,19 @@ class SettingsDialog(QDialog):
         Config.reading.auto_page_turn = self.turn_pages_checkbox.isChecked()
         Config.reading.marks_type = self.marks_type_combo.currentData().value
 
+        if hasattr(self, "_temp_font_family"):
+            Config.reading.font_family = self._temp_font_family
+        if hasattr(self, "_temp_font_size"):
+            Config.reading.font_size = self._temp_font_size
+        if hasattr(self, "_temp_font_color"):
+            Config.reading.font_color = self._temp_font_color
+        if hasattr(self, "_temp_font_bold"):
+            Config.reading.font_bold = self._temp_font_bold
+        if hasattr(self, "_temp_font_italic"):
+            Config.reading.font_italic = self._temp_font_italic
+        if hasattr(self.parent, "apply_reading_font"):
+            self.parent.apply_reading_font()
+
         Config.surah_player.action_after_surah = (
             self.action_after_surah_combo.currentData()
         )
@@ -822,6 +859,12 @@ class SettingsDialog(QDialog):
             Config.general.run_in_background_enabled
         )
         self.turn_pages_checkbox.setChecked(Config.reading.auto_page_turn)
+        self._temp_font_family = getattr(Config.reading, "font_family", "")
+        self._temp_font_size = getattr(Config.reading, "font_size", 0)
+        self._temp_font_color = getattr(Config.reading, "font_color", "")
+        self._temp_font_bold = getattr(Config.reading, "font_bold", False)
+        self._temp_font_italic = getattr(Config.reading, "font_italic", False)
+        self.update_font_preview_label()
         self.start_on_system_start_checkbox.setChecked(
             Config.general.auto_start_enabled
         )
@@ -882,6 +925,52 @@ class SettingsDialog(QDialog):
             index = combo.findData(value)
             if index != -1:
                 combo.setCurrentIndex(index)
+
+    def choose_font(self):
+        current_font = self.parent.quran_view.font()
+        dialog = QFontDialog(current_font, self)
+        dialog.setWindowTitle("اختيار نوع وحجم الخط")
+        if dialog.exec():
+            selected_font = dialog.selectedFont()
+            self._temp_font_family = selected_font.family()
+            self._temp_font_size = selected_font.pointSize()
+            self._temp_font_bold = selected_font.bold()
+            self._temp_font_italic = selected_font.italic()
+            self.update_font_preview_label()
+
+    def choose_color(self):
+        current_color_str = getattr(self, "_temp_font_color", Config.reading.font_color) or "#f8fafc"
+        dialog = QColorDialog(QColor(current_color_str), self)
+        dialog.setWindowTitle("اختيار لون الخط")
+        if dialog.exec():
+            color = dialog.selectedColor()
+            if color.isValid():
+                self._temp_font_color = color.name()
+                self.update_font_preview_label()
+
+    def reset_font_settings(self):
+        self._temp_font_family = ""
+        self._temp_font_size = 0
+        self._temp_font_color = ""
+        self._temp_font_bold = False
+        self._temp_font_italic = False
+        self.update_font_preview_label()
+
+    def update_font_preview_label(self):
+        family = getattr(self, "_temp_font_family", Config.reading.font_family) or "الافتراضي"
+        size_val = getattr(self, "_temp_font_size", Config.reading.font_size)
+        size_str = f"{size_val}pt" if size_val and size_val > 0 else "الافتراضي"
+        color = getattr(self, "_temp_font_color", Config.reading.font_color) or "الافتراضي"
+        bold = getattr(self, "_temp_font_bold", Config.reading.font_bold)
+        italic = getattr(self, "_temp_font_italic", Config.reading.font_italic)
+        details = f"النوع: {family} | الحجم: {size_str}"
+        if bold:
+            details += " | عريض"
+        if italic:
+            details += " | مائل"
+        details += f" | اللون: {color}"
+        if hasattr(self, "font_preview_label"):
+            self.font_preview_label.setText(f"معاينة الخط الحالي: {details}")
 
     def open_listening_tab_and_focus_reciter(self):
         self.tree_widget.setCurrentItem(self.listening_item)
