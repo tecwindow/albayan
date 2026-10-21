@@ -543,6 +543,11 @@ QPushButton:pressed {
 	background-color: #1c1c1c;
 }
 
+QPushButton:disabled {
+	background-color: #242424;
+	color: #666666;
+}
+
 QPushButton:checked#recordButton,
 QPushButton:checked#streamButton {
 	background-color: #6a1313;
@@ -680,51 +685,7 @@ LockedCheckBox {
     padding: 0px;
 }
 
-VisibilityCheckBox::indicator,
-LockedCheckBox::indicator {
-    width: 16px;
-    height: 16px;
-}
-
-LockedCheckBox::indicator:checked {
-    image: url(./Dark/locked.svg);
-}
-
-LockedCheckBox::indicator:unchecked {
-    image: url(:res/images/unlocked.svg);
-}
-
-LockedCheckBox::indicator:checked:hover {
-    image: url(./Dark/locked.svg);
-}
-
-LockedCheckBox::indicator:unchecked:hover {
-    image: url(:res/images/unlocked.svg);
-}
-
-VisibilityCheckBox::indicator:checked {
-    image: url(./Dark/visible.svg);
-}
-
-VisibilityCheckBox::indicator:unchecked {
-    image: url(:res/images/invisible.svg);
-}
-
-VisibilityCheckBox::indicator:checked:hover {
-    image: url(./Dark/visible.svg);
-}
-
-VisibilityCheckBox::indicator:unchecked:hover {
-    image: url(:res/images/invisible.svg);
-}
-
-* [themeID="trashIcon"] {
-    qproperty-icon: url(./Dark/trash.svg);
-}
-
-* [themeID="revertIcon"] {
-    qproperty-icon: url(./Dark/revert.svg);
-}
+/* Checkbox indicators cleaned */
 
 /* Mute CheckBox */
 
@@ -821,32 +782,7 @@ QToolButton:pressed {
 	qproperty-icon: url(./theme/Flat Dark/down_arrow.png);
 }
 
-* [themeID="pauseIconSmall"] {
-    qproperty-icon: url(./Dark/media-pause.svg);
-}
-
-/* Pause */
-PauseCheckBox {
-    outline: none;
-}
-
-PauseCheckBox::indicator:checked {
-    image: url(:/res/images/media-pause.svg);
-}
-
-PauseCheckBox::indicator:unchecked {
-    image: url(:/res/images/media-play.svg);
-}
-
-/* Volume Control */
-
-/* Old Meters */
-VolumeMeter {
-	qproperty-bkColor: rgb(8,8,11);
-	qproperty-magColor:;
-	qproperty-peakColor:;
-	qproperty-peakHoldColor: rgb(225,224,225);
-}
+/* Media pause cleaned */
 
 VolumeMeter {
 	qproperty-backgroundNominalColor: #42740c;
@@ -942,24 +878,6 @@ FocusList::item {
     background: #131313;
 }
 
-/* Settings Icons */
-
-OBSBasicSettings {
-    qproperty-generalIcon: url(./Dark/settings/general.svg);
-    qproperty-streamIcon: url(./Dark/settings/stream.svg);
-    qproperty-outputIcon: url(./Dark/settings/output.svg);
-    qproperty-audioIcon: url(./Dark/settings/audio.svg);
-    qproperty-videoIcon: url(./Dark/settings/video.svg);
-    qproperty-hotkeysIcon: url(./Dark/settings/hotkeys.svg);
-    qproperty-advancedIcon: url(./Dark/settings/advanced.svg);
-}
-
-/* Preview background color */
-
-OBSQTDisplay {
-	qproperty-displayBackgroundColor: #131313;
-}
-
 /* Table View */
 
 QTableView {
@@ -972,39 +890,6 @@ QHeaderView::section {
     background-color: rgb(58,57,58);
     color: rgb(225,224,225);
 	border: none;
-}
-
-/* Source Icons */
-
-OBSBasic {
-    qproperty-imageIcon: url(./Dark/sources/image.svg);
-    qproperty-colorIcon: url(./Dark/sources/brush.svg);
-    qproperty-slideshowIcon: url(./Dark/sources/slideshow.svg);
-    qproperty-audioInputIcon: url(./Dark/sources/microphone.svg);
-    qproperty-audioOutputIcon: url(./Dark/settings/audio.svg);
-    qproperty-desktopCapIcon: url(./Dark/settings/video.svg);
-    qproperty-windowCapIcon: url(./Dark/sources/window.svg);
-    qproperty-gameCapIcon: url(./Dark/sources/gamepad.svg);
-    qproperty-cameraIcon: url(./Dark/sources/camera.svg);
-    qproperty-textIcon: url(./Dark/sources/text.svg);
-    qproperty-mediaIcon: url(./Dark/sources/media.svg);
-    qproperty-browserIcon: url(./Dark/sources/globe.svg);
-    qproperty-groupIcon: url(./Dark/sources/group.svg);
-    qproperty-sceneIcon: url(./Dark/sources/scene.svg);
-    qproperty-defaultIcon: url(./Dark/sources/default.svg);
-}
-
-/* Scene Tree */
-
-SceneTree {
-    qproperty-gridItemWidth: 150;
-	qproperty-gridItemHeight: 27;
-}
-
-/* Save icon */
-
-* [themeID="replayIconSmall"] {
-    qproperty-icon: url(./Dark/save.svg);
 }
 
 /* Studio Mode T-Bar */

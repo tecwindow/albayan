@@ -64,7 +64,7 @@ QWidget {
     alternate-background-color: rgb(21,21,21); /* MLveryDark */
     color: rgb(225,225,225); /* MLveryLight */
     selection-background-color: rgb(42,130,218); /* blue */
-    selection-color: black;
+    selection-color: rgb(255,255,255);
     font-size: 12px;
 }
 
@@ -76,7 +76,7 @@ QWidget {
 /* Misc */
 
 QWidget::disabled {
-    color: 2px solid rgb(200,200,200); /* MLlighter */
+    color: rgb(120,120,120); /* MLdisabled */
 }
 
 QAbstractItemView, QStackedWidget#stackedMixerArea QWidget {
@@ -117,7 +117,7 @@ QDockWidget {
   border: 1px solid white;
   text-transform: uppercase;
   font-weight: bold;
-  font-size: 10px;
+  font-size: 12px;
 
 }
 
@@ -151,7 +151,7 @@ QGroupBox {
     padding-top: 24px;
     font-weight: bold;
     text-transform: uppercase;
-    font-size: 10px;
+    font-size: 12px;
 
 }
 
@@ -304,7 +304,7 @@ QTabBar::tab {
     margin: 1px;
     font-weight: bold;
     text-transform: uppercase;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 QTabBar::tab:top {
@@ -633,11 +633,11 @@ PauseCheckBox {
 }
 
 PauseCheckBox::indicator:checked {
-    image: url(:/res/images/media-pause.svg);
+    image: url(./theme/Moonlight/media/media_pause.svg);
 }
 
 PauseCheckBox::indicator:unchecked {
-    image: url(:/res/images/media-play.svg);
+    image: url(./theme/Moonlight/media/media_play.svg);
 }
 
 /* Group Collapse Checkbox */
@@ -756,7 +756,7 @@ LockedCheckBox::indicator:checked {
 }
 
 LockedCheckBox::indicator:unchecked {
-    image: url(:res/images/unlocked.svg);
+    image: url(./theme/Moonlight/unlocked.svg);
 }
 
 /* Visibility CheckBox */
@@ -867,7 +867,7 @@ QSlider::groove:horizontal[themeID="tBarSlider"] {
 }
 
 QSlider::sub-page:horizontal[themeID="tBarSlider"] {
-	background: rgb(31,30,31);;
+	background: rgb(31,30,31);
 	border: 1px solid #4c4c4c;
 }
 

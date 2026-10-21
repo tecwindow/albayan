@@ -112,6 +112,10 @@ class QuranInterface(QMainWindow):
 
     def apply_reading_font(self):
         """Applies configured font family, size, weight, italic, and color to the reading view."""
+        if not hasattr(self, "quran_view") or self.quran_view is None:
+            logger.debug("quran_view is not initialized yet; skipping apply_reading_font.")
+            return
+
         family = getattr(Config.reading, "font_family", "")
         size = getattr(Config.reading, "font_size", 0)
         color = getattr(Config.reading, "font_color", "")
