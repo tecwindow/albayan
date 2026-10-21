@@ -117,6 +117,9 @@ class QuranInterface(QMainWindow):
         color = getattr(Config.reading, "font_color", "")
         bold = getattr(Config.reading, "font_bold", False)
         italic = getattr(Config.reading, "font_italic", False)
+        logger.debug(
+            f"Applying reading font: family='{family}', size={size}, color='{color}', bold={bold}, italic={italic}"
+        )
 
         font = self.quran_view.font()
         if family:
@@ -145,6 +148,7 @@ class QuranInterface(QMainWindow):
             )
         else:
             self.quran_view.setStyleSheet("")
+        logger.debug("Reading font applied successfully.")
 
     def center_window(self):
         screen_geometry = QApplication.primaryScreen().availableGeometry()
@@ -191,26 +195,26 @@ class QuranInterface(QMainWindow):
 
         self.interpretation_verse = EnterButton()
         self.interpretation_verse.setIcon(qta.icon("fa5s.book"))
-        # self.interpretation_verse.setToolTip("تفسير الآية")
+        # self.interpretation_verse.setToolTip("Verse interpretation")
         self.interpretation_verse.setAccessibleName("تفسير الآية")
         self.interpretation_verse.setEnabled(False)
         self.interpretation_verse.clicked.connect(self.OnInterpretation)
 
         self.quick_access = EnterButton()
         self.quick_access.setIcon(qta.icon("fa5s.bolt"))
-        # self.quick_access.setToolTip("الوصول السريع")
+        # self.quick_access.setToolTip("Quick access")
         self.quick_access.setAccessibleName("الوصول السريع")
         self.quick_access.clicked.connect(self.OnQuickAccess)
 
         self.search_in_quran = EnterButton()
         self.search_in_quran.setIcon(qta.icon("fa5s.search"))
-        # self.search_in_quran.setToolTip("البحث في القرآن")
+        # self.search_in_quran.setToolTip("Search in Quran")
         self.search_in_quran.setAccessibleName("البحث في القرآن")
         self.search_in_quran.clicked.connect(self.OnSearch)
 
         self.save_current_position = EnterButton()
         self.save_current_position.setIcon(qta.icon("fa5s.save"))
-        # self.save_current_position.setToolTip("حفظ الموضع الحالي")
+        # self.save_current_position.setToolTip("Save current position")
         self.save_current_position.setAccessibleName("حفظ الموضع الحالي")
         self.save_current_position.setEnabled(False)
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
@@ -218,13 +222,13 @@ class QuranInterface(QMainWindow):
 
         self.tasbih = EnterButton()
         self.tasbih.setIcon(qta.icon("fa5s.circle"))
-        # self.tasbih.setToolTip("المسبحة")
+        # self.tasbih.setToolTip("Tasbih")
         self.tasbih.setAccessibleName("المسبحة")
         self.tasbih.clicked.connect(self.menu_bar.OnTasbihAction)
 
         self.quran_player = EnterButton()
         self.quran_player.setIcon(qta.icon("fa5s.play-circle"))
-        # self.quran_player.setToolTip("مشغل القرآن")
+        # self.quran_player.setToolTip("Quran player")
         self.quran_player.setAccessibleName("مشغل سور القرآن")
         self.quran_player.clicked.connect(self.menu_bar.OnSuraPlayer)
 

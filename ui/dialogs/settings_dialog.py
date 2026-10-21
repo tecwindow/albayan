@@ -302,7 +302,7 @@ class SettingsDialog(QDialog):
         self.group_listening_layout.addWidget(self.sswitch_when_repeating_checkbox)
         self.group_listening_layout.addSpacerItem(
             QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        )  # مسافة نتوسطة
+        )  # Medium spacer
         self.group_listening_layout.addWidget(self.repeat_limit_label)
         self.group_listening_layout.addWidget(self.repeat_limit_spinbox)
         self.group_listening_layout.addWidget(self.action_label)
@@ -361,7 +361,7 @@ class SettingsDialog(QDialog):
         self.group_reading_layout.addWidget(self.font_type_combo)
         self.group_reading_layout.addSpacerItem(
             QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        )  # مسافة أكبر
+        )  # Larger spacer
         self.group_reading_layout.addWidget(self.marks_type_label)
         self.group_reading_layout.addWidget(self.marks_type_combo)
         self.group_reading_layout.addWidget(self.turn_pages_checkbox)
@@ -927,6 +927,7 @@ class SettingsDialog(QDialog):
                 combo.setCurrentIndex(index)
 
     def choose_font(self):
+        logger.debug("Opening font dialog in SettingsDialog...")
         current_font = self.parent.quran_view.font()
         dialog = QFontDialog(current_font, self)
         dialog.setWindowTitle("اختيار نوع وحجم الخط")
@@ -937,8 +938,15 @@ class SettingsDialog(QDialog):
             self._temp_font_bold = selected_font.bold()
             self._temp_font_italic = selected_font.italic()
             self.update_font_preview_label()
+            logger.info(
+                f"Selected font in SettingsDialog: family='{selected_font.family()}', "
+                f"size={selected_font.pointSize()}, bold={selected_font.bold()}, italic={selected_font.italic()}"
+            )
+        else:
+            logger.debug("Font selection cancelled in SettingsDialog.")
 
     def choose_color(self):
+        logger.debug("Opening color dialog in SettingsDialog...")
         current_color_str = getattr(self, "_temp_font_color", Config.reading.font_color) or "#f8fafc"
         dialog = QColorDialog(QColor(current_color_str), self)
         dialog.setWindowTitle("اختيار لون الخط")
@@ -947,14 +955,19 @@ class SettingsDialog(QDialog):
             if color.isValid():
                 self._temp_font_color = color.name()
                 self.update_font_preview_label()
+                logger.info(f"Selected font color in SettingsDialog: {color.name()}")
+        else:
+            logger.debug("Color selection cancelled in SettingsDialog.")
 
     def reset_font_settings(self):
+        logger.debug("Resetting font settings in SettingsDialog to defaults.")
         self._temp_font_family = ""
         self._temp_font_size = 0
         self._temp_font_color = ""
         self._temp_font_bold = False
         self._temp_font_italic = False
         self.update_font_preview_label()
+        logger.info("Font settings reset to defaults in SettingsDialog.")
 
     def update_font_preview_label(self):
         family = getattr(self, "_temp_font_family", Config.reading.font_family) or "الافتراضي"
@@ -971,6 +984,7 @@ class SettingsDialog(QDialog):
         details += f" | اللون: {color}"
         if hasattr(self, "font_preview_label"):
             self.font_preview_label.setText(f"معاينة الخط الحالي: {details}")
+        logger.debug(f"Updated font preview label: {details}")
 
     def open_listening_tab_and_focus_reciter(self):
         self.tree_widget.setCurrentItem(self.listening_item)

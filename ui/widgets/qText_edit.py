@@ -36,7 +36,7 @@ class ReadOnlyTextEdit(QTextEdit):
         document = self.document()
         document.setDefaultCursorMoveStyle(Qt.CursorMoveStyle.VisualMoveStyle)
         logger.debug(
-            f"ReadOnlyTextEdit initialized, with font size: {font.pointSize()}"
+            f"ReadOnlyTextEdit initialized with font: family='{font.family()}', size={font.pointSize()}, bold={font.bold()}, italic={font.italic()}"
         )
 
 

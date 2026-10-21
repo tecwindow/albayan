@@ -556,6 +556,8 @@ class MenuBar(QMenuBar):
             logger.info(
                 f"Font updated to: {selected_font.family()}, size: {selected_font.pointSize()}"
             )
+        else:
+            logger.debug("Font selection cancelled by user.")
 
     def OnChooseFontColor(self):
         logger.debug("Opening native font color dialog...")
@@ -570,6 +572,8 @@ class MenuBar(QMenuBar):
                 if hasattr(self.parent, "apply_reading_font"):
                     self.parent.apply_reading_font()
                 logger.info(f"Font color updated to: {selected_color.name()}")
+        else:
+            logger.debug("Font color selection cancelled by user.")
 
     def OnResetFont(self):
         logger.debug("Resetting font and color to default...")
