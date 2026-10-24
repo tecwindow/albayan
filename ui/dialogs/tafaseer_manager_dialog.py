@@ -19,8 +19,14 @@ from utils.universal_speech import UniversalSpeech
 from utils.const import Globals
 from utils.logger import LoggerManager
 from ui.widgets.qText_edit import ReadOnlyTextEdit
-from core_functions.tafaseer import Category, TAFASEER_CATALOG, DEFAULT_BUNDLED_TAFSIR_ID
-from core_functions.tafaseer_downloader import TafaseerDownloadThread, format_bytes
+from core_functions.tafaseer import (
+    Category,
+    TAFASEER_CATALOG,
+    DEFAULT_BUNDLED_TAFSIR_ID,
+    TafsirInstaller,
+)
+from core_functions.downloader.manager import DownloadManager
+from core_functions.downloader.status import DownloadStatus, DownloadProgress
 
 logger = LoggerManager.get_logger(__name__)
 
@@ -51,8 +57,13 @@ class TafaseerManagerDialog(QDialog):
         self.setWindowTitle("إدارة وتنزيل التفاسير")
         self.resize(680, 520)
 
-        self._active_worker: Optional[TafaseerDownloadThread] = None
+        self._current_download_id: Optional[int] = None
         self._current_downloading_id: Optional[str] = None
+        self.download_manager = DownloadManager(parent=self)
+        self.download_manager.download_progress.connect(self._on_download_progress)
+        self.download_manager.status_changed.connect(self._on_status_changed)
+        self.download_manager.download_finished.connect(self._on_download_finished)
+        self.download_manager.error.connect(self._on_download_error)
 
         self._setup_ui()
         self._setup_shortcuts()
@@ -275,17 +286,6 @@ class TafaseerManagerDialog(QDialog):
 
         logger.info(f"User started download for tafsir: {cat_id} ({info['full_name']})")
         self._current_downloading_id = cat_id
-        mirrors = info.get("mirrors", [])
-        logger.debug(f"Configured mirrors for {cat_id}: {mirrors}")
-
-        # Start thread
-        self._active_worker = TafaseerDownloadThread(cat_id, mirrors, parent=self)
-        self._active_worker.download_progress.connect(self._on_download_progress)
-        self._active_worker.status_changed.connect(self._on_status_changed)
-        self._active_worker.mirror_switched.connect(self._on_mirror_switched)
-        self._active_worker.download_finished.connect(self._on_download_finished)
-        self._active_worker.download_error.connect(self._on_download_error)
-        self._active_worker.download_cancelled.connect(self._on_download_cancelled)
 
         self.status_label.setVisible(True)
         self.progress_bar.setVisible(True)
@@ -300,65 +300,87 @@ class TafaseerManagerDialog(QDialog):
         self.btn_delete.setEnabled(False)
 
         self.refresh_list(cat_id)
-        self._active_worker.start()
-        logger.info(f"Worker thread launched for tafsir: {cat_id}")
+        self._current_download_id = TafsirInstaller.start_download(self.download_manager, cat_id)
+        logger.info(f"Download started for tafsir: {cat_id} (download_id={self._current_download_id})")
 
     def cancel_download(self):
-        if self._active_worker and self._active_worker.isRunning():
+        if self._current_download_id is not None:
             logger.info(f"User requested cancellation of download for tafsir: {self._current_downloading_id}")
             self.status_label.setText("جارٍ إلغاء التنزيل...")
             UniversalSpeech.say("جارٍ إلغاء التنزيل...")
-            self._active_worker.cancel()
+            self.download_manager.cancel(self._current_download_id)
             self.btn_cancel.setEnabled(False)
 
-    def _on_download_progress(
-        self, tafsir_id: str, downloaded_bytes: int, total_bytes: int, percent: float, speed_str: str
-    ):
-        self.progress_bar.setValue(int(percent))
+    def _on_download_progress(self, progress: DownloadProgress):
+        if progress.download_id != self._current_download_id:
+            return
+
+        self.progress_bar.setValue(progress.percentage)
+        tafsir_id = self._current_downloading_id
         info = Category.get_tafsir_info(tafsir_id)
         name = info["arabic_name"] if info else tafsir_id
         progress_text = (
-            f"تنزيل {name}: {percent:.1f}% ({format_bytes(downloaded_bytes)} من {format_bytes(total_bytes)}) - السرعة: {speed_str}"
+            f"تنزيل {name}: {progress.percentage}% ({progress.downloaded_str} من {progress.total_str}) - السرعة: {progress.speed_str}"
         )
         self.status_label.setText(progress_text)
 
-    def _on_status_changed(self, tafsir_id: str, message: str):
-        logger.debug(f"Download status for {tafsir_id}: {message}")
-        self.status_label.setText(message)
+    def _on_status_changed(self, download_id: int, status: DownloadStatus):
+        if download_id != self._current_download_id:
+            return
 
-    def _on_mirror_switched(self, tafsir_id: str, mirror_url: str, mirror_index: int):
-        logger.info(f"Mirror switched for {tafsir_id}: mirror #{mirror_index} ({mirror_url})")
-        if mirror_index > 1:
-            UniversalSpeech.say(f"جارٍ المحاولة من الرابط البديل رقم {mirror_index}...")
+        logger.debug(f"Download status for {self._current_downloading_id}: {status.name}")
+        if status == DownloadStatus.CANCELLED:
+            self._on_download_cancelled(self._current_downloading_id)
+        elif status == DownloadStatus.DOWNLOADING:
+            pass
+        else:
+            self.status_label.setText(status.label)
 
-    def _on_download_finished(self, tafsir_id: str, final_db_path: str):
+    def _on_download_finished(self, download_id: int, zip_path: str):
+        if download_id != self._current_download_id:
+            return
+
+        tafsir_id = self._current_downloading_id
         info = Category.get_tafsir_info(tafsir_id)
         full_name = info["full_name"] if info else tafsir_id
-        logger.info(f"Tafsir download completed successfully: {tafsir_id} ({full_name}) at {final_db_path}")
+        self.status_label.setText(f"جارٍ تثبيت {full_name}...")
 
-        self._active_worker = None
-        self._current_downloading_id = None
-        self.progress_bar.setVisible(False)
-        self.status_label.setVisible(False)
+        try:
+            final_db_path = TafsirInstaller.install(tafsir_id, zip_path)
+            logger.info(
+                f"Tafsir download and installation completed: {tafsir_id} ({full_name}) at {final_db_path}"
+            )
 
-        _play_sound("open")
-        UniversalSpeech.say(f"اكتمل تنزيل {full_name} بنجاح، وأصبح جاهزاً للاستخدام.")
+            self._current_download_id = None
+            self._current_downloading_id = None
+            self.progress_bar.setVisible(False)
+            self.status_label.setVisible(False)
 
-        self.refresh_list(tafsir_id)
-        self.tafaseer_changed.emit()
+            _play_sound("open")
+            UniversalSpeech.say(f"اكتمل تنزيل {full_name} بنجاح، وأصبح جاهزاً للاستخدام.")
 
-        QMessageBox.information(
-            self,
-            "اكتمل التنزيل",
-            f"تم تنزيل وتثبيت ({full_name}) بنجاح، يمكنك الآن مطالعته من قائمة التفسير.",
-        )
+            self.refresh_list(tafsir_id)
+            self.tafaseer_changed.emit()
 
-    def _on_download_error(self, tafsir_id: str, error_message: str):
+            QMessageBox.information(
+                self,
+                "اكتمل التنزيل",
+                f"تم تنزيل وتثبيت ({full_name}) بنجاح، يمكنك الآن مطالعته من قائمة التفسير.",
+            )
+        except Exception as e:
+            logger.error(f"Failed to install downloaded tafsir {tafsir_id}: {e}", exc_info=True)
+            self._on_download_error(download_id, f"فشل تثبيت التفسير بعد التنزيل: {str(e)}")
+
+    def _on_download_error(self, download_id: int, error_message: str):
+        if download_id != self._current_download_id:
+            return
+
+        tafsir_id = self._current_downloading_id
         info = Category.get_tafsir_info(tafsir_id)
         name = info["arabic_name"] if info else tafsir_id
         logger.error(f"Tafsir download failed for {tafsir_id}: {error_message}")
 
-        self._active_worker = None
+        self._current_download_id = None
         self._current_downloading_id = None
         self.progress_bar.setVisible(False)
         self.status_label.setVisible(False)
@@ -377,7 +399,7 @@ class TafaseerManagerDialog(QDialog):
         name = info["arabic_name"] if info else tafsir_id
         logger.info(f"Tafsir download cancelled notification received for: {tafsir_id}")
 
-        self._active_worker = None
+        self._current_download_id = None
         self._current_downloading_id = None
         self.progress_bar.setVisible(False)
         self.status_label.setVisible(False)
@@ -435,8 +457,10 @@ class TafaseerManagerDialog(QDialog):
 
     def reject(self):
         logger.debug("User requested to close TafaseerManagerDialog.")
-        if self._active_worker and self._active_worker.isRunning():
-            logger.info("Active download detected while attempting to close dialog, asking confirmation.")
+        if self._current_downloading_id:
+            logger.info(
+                "Active download detected while attempting to close dialog, asking confirmation."
+            )
             confirm = QMessageBox.question(
                 self,
                 "إلغاء التنزيل",
@@ -445,7 +469,9 @@ class TafaseerManagerDialog(QDialog):
                 QMessageBox.StandardButton.No,
             )
             if confirm != QMessageBox.StandardButton.Yes:
-                logger.debug("Close dialog aborted by user to keep active download running.")
+                logger.debug(
+                    "Close dialog aborted by user to keep active download running."
+                )
                 return
             self.cancel_download()
 
