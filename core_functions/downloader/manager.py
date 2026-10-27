@@ -29,8 +29,9 @@ class DownloadManager(QObject):
         load_history: bool = False,
         save_history: bool = False,
         download_db: Optional[DownloadDB] = None,
+        parent: Optional[QObject] = None,
     ):
-        super().__init__()
+        super().__init__(parent)
         logger.debug("Initializing DownloaderManager")
         self.save_history = save_history
         self.pool = QThreadPool.globalInstance()
@@ -128,17 +129,22 @@ class DownloadManager(QObject):
             self.downloads_added.emit(new_items)
 
         logger.info("Added %d new download items", len(download_items))
+        return new_items
 
-    def add_download(self, url: str, download_folder: str, **extra_data):
+    def add_download(
+        self, url: str, download_folder: str, **extra_data
+    ) -> Optional[int]:
         """
         Add a single download item.
         Optionally accepts extra_data like metadata to be stored with the download.
+        Returns the assigned download_id.
         """
         logger.debug("Adding single download item: %s", url)
         item = {"url": url}
         item.update(extra_data)
-        self.add_new_downloads([item], download_folder)
+        items = self.add_new_downloads([item], download_folder)
         logger.info("Added download item: %s", url)
+        return items[0]["id"] if items else None
 
     def start(self):
         """Start processing the download queue (PENDING items only)."""

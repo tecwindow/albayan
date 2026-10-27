@@ -51,7 +51,40 @@ class DownloadWorker(QRunnable):
 
     def _download_file(self) -> None:
         os.makedirs(self.folder_path, exist_ok=True)
+        mirrors = self.item.get("mirrors") or [self.url]
+        last_error = None
 
+        for index, mirror_url in enumerate(mirrors):
+            if self._cancelled or self.manager._cancel_all:
+                return
+
+            if len(mirrors) > 1:
+                logger.debug(
+                    f"[Mirror Attempt] ID={self.download_id}, mirror={mirror_url} ({index + 1}/{len(mirrors)})"
+                )
+
+            try:
+                self._download_from_url(mirror_url)
+                return
+            except requests.RequestException as e:
+                logger.warning(
+                    f"[Mirror Failed] ID={self.download_id}, mirror={mirror_url}: {e}"
+                )
+                last_error = e
+                self.delete_temp_file()
+                continue
+            except Exception as e:
+                logger.exception(
+                    f"[Unexpected Error] ID={self.download_id}, mirror={mirror_url}: {e}"
+                )
+                last_error = e
+                self.delete_temp_file()
+                continue
+
+        if last_error:
+            raise last_error
+
+    def _download_from_url(self, url: str) -> None:
         resume_header = {}
         downloaded_bytes = (
             os.path.getsize(self.temp_path) if os.path.exists(self.temp_path) else 0
@@ -61,7 +94,7 @@ class DownloadWorker(QRunnable):
             resume_header["Range"] = f"bytes={downloaded_bytes}-"
 
         r = requests.get(
-            self.url, stream=True, headers=resume_header, timeout=10
+            url, stream=True, headers=resume_header, timeout=15
         )
 
         # Handle 416 Range Not Satisfiable (e.g. invalid offset or completed)
@@ -72,7 +105,7 @@ class DownloadWorker(QRunnable):
             r.close()
             downloaded_bytes = 0
             self.delete_temp_file()
-            r = requests.get(self.url, stream=True, timeout=10)
+            r = requests.get(url, stream=True, timeout=15)
 
         with r:
             r.raise_for_status()

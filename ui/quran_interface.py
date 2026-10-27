@@ -430,26 +430,58 @@ class QuranInterface(QMainWindow):
 
     @exception_handler(ui_element=QMessageBox)
     def OnInterpretation(self, event=None):
-        logger.debug("Interpretation clicked.")
+        logger.debug("Interpretation action triggered.")
 
         sender = self.sender()
-        if sender is not None and sender.text() in Category.get_categories_in_arabic():
-            selected_category = sender.text()
-            self.preferences_manager.set_preference(
-                "last_tafaseer_category", selected_category
-            )
-            logger.debug(f"Selected category: {selected_category}")
+        if sender is not None:
+            raw_text = sender.data() if hasattr(sender, "data") and sender.data() else sender.text()
+            clean_text = raw_text.replace(" (تنزيل)", "").strip()
+            if clean_text in Category.get_categories_in_arabic():
+                selected_category = clean_text
+                self.preferences_manager.set_preference(
+                    "last_tafaseer_category", selected_category
+                )
+                logger.debug(f"Selected category from sender: {selected_category}")
+            else:
+                selected_category = self.preferences_manager.get(
+                    "last_tafaseer_category", "الميسر"
+                )
         else:
             selected_category = self.preferences_manager.get(
                 "last_tafaseer_category", "الميسر"
             )
-        logger.debug(f"set the default category: {selected_category}")
+
+        selected_cat_id = Category.get_category_by_arabic_name(selected_category)
+        if selected_cat_id and not Category.is_installed(selected_cat_id):
+            logger.info(
+                f"Requested tafsir '{selected_category}' ({selected_cat_id}) is not installed; prompting user."
+            )
+            confirm = QMessageBox.question(
+                self,
+                "تنزيل التفسير",
+                f"تفسير ({selected_category}) غير مُنزّل على جهازك.\nهل تريد فتح نافذة إدارة التفاسير لتنزيله الآن؟",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.Yes,
+            )
+            if confirm == QMessageBox.StandardButton.Yes:
+                logger.info(f"User accepted prompt to download '{selected_category}'.")
+                self.open_tafaseer_manager_dialog(target_category_id=selected_cat_id)
+                if not Category.is_installed(selected_cat_id):
+                    logger.info(
+                        f"Tafsir '{selected_cat_id}' was not downloaded. Reverting to default bundled tafsir."
+                    )
+                    selected_category = "الميسر"
+            else:
+                logger.debug(f"User declined downloading '{selected_category}'. Reverting to default.")
+                selected_category = "الميسر"
+
+        logger.debug(f"Opening TafaseerDialog with default category: {selected_category}")
 
         current_ayah = self.get_current_ayah()
         title = "تفسير آية {} من {}".format(
             current_ayah.number_in_surah, current_ayah.sura_name
         )
-        logger.debug(f"Opening TafaseerDialog with title: {title}")
+        logger.info(f"Opening TafaseerDialog for Ayah {current_ayah.number} ({title}) - Category: {selected_category}")
         dialog = TafaseerDialog(self, title, current_ayah, selected_category)
         dialog.tafaseer_updated.connect(
             lambda category: self.preferences_manager.set_preference(
@@ -458,6 +490,15 @@ class QuranInterface(QMainWindow):
         )
         dialog.exec()
         logger.debug("TafaseerDialog closed.")
+
+    def open_tafaseer_manager_dialog(self, target_category_id=None):
+        logger.info(f"Opening TafaseerManagerDialog from QuranInterface (target: {target_category_id})...")
+        from ui.dialogs.tafaseer_manager_dialog import TafaseerManagerDialog
+        dialog = TafaseerManagerDialog(self)
+        if target_category_id:
+            dialog.refresh_list(select_category_id=target_category_id)
+        dialog.exec()
+        logger.debug("TafaseerManagerDialog closed.")
 
     def onContextMenu(self):
         logger.debug("Context menu requested.")
@@ -487,11 +528,29 @@ class QuranInterface(QMainWindow):
         get_interpretation_verse.triggered.connect(self.OnInterpretation)
 
         submenu = menu.addMenu("التفسير")
-        arabic_categories = Category.get_categories_in_arabic()
-        for arabic_category in arabic_categories:
+        submenu.setAccessibleName("قائمة المفسرين")
+        installed_arabic = Category.get_installed_categories_arabic()
+        for arabic_category in installed_arabic:
             action = QAction(arabic_category, self)
             action.triggered.connect(self.OnInterpretation)
             submenu.addAction(action)
+
+        all_arabic = Category.get_categories_in_arabic()
+        uninstalled = [name for name in all_arabic if name not in installed_arabic]
+        if uninstalled:
+            submenu.addSeparator()
+            uninstalled_sub = submenu.addMenu("تفاسير غير مُنزّلة")
+            uninstalled_sub.setAccessibleName("قائمة تفاسير غير منزلة")
+            for arabic_category in uninstalled:
+                action = QAction(f"{arabic_category} (تنزيل)", self)
+                action.setData(arabic_category)
+                action.triggered.connect(self.OnInterpretation)
+                uninstalled_sub.addAction(action)
+
+        submenu.addSeparator()
+        manage_action = QAction("إدارة وتنزيل التفاسير...", self)
+        manage_action.triggered.connect(lambda: self.open_tafaseer_manager_dialog())
+        submenu.addAction(manage_action)
 
         save_current_position.triggered.connect(self.OnSaveCurrentPosition)
         save_current_position.triggered.connect(self.OnSave_alert)

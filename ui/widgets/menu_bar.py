@@ -166,11 +166,8 @@ class MenuBar(QMenuBar):
         self.tafaseer_menu.setAccessibleName("قائمة المفسرين")
         tafaseershortcut = QShortcut(QKeySequence("Shift+T"), self)
         tafaseershortcut.activated.connect(self.OnTafaseerMenu)
-        arabic_categories = Category.get_categories_in_arabic()
-        for arabic_category in arabic_categories:
-            action = QAction(arabic_category, self)
-            action.triggered.connect(self.parent.OnInterpretation)
-            self.tafaseer_menu.addAction(action)
+        self.tafaseer_menu.aboutToShow.connect(self.update_tafaseer_menu)
+        self.update_tafaseer_menu()
         self.verse_info_action = QAction("أسباب نزول الآية", self)
         self.verse_info_action.triggered.connect(self.parent.OnVerseReasons)
         self.verse_grammar_action = QAction("إعراب الآية", self)
@@ -258,6 +255,8 @@ class MenuBar(QMenuBar):
         self.tasbih_action.triggered.connect(self.OnTasbihAction)
         self.download_manager_action = QAction("مدير التنزيلات", self)
         self.download_manager_action.triggered.connect(self.open_download_manager)
+        self.tafaseer_manager_action = QAction("إدارة وتنزيل التفاسير", self)
+        self.tafaseer_manager_action.triggered.connect(self.open_tafaseer_manager_dialog)
         self.message_for_you_action = QAction("رسالة لك", self)
         self.message_for_you_action.triggered.connect(self.parent.OnRandomMessages)
 
@@ -269,6 +268,7 @@ class MenuBar(QMenuBar):
                 self.tasbih_action,
                 self.message_for_you_action,
                 self.download_manager_action,
+                self.tafaseer_manager_action,
             ]
         )
 
@@ -742,9 +742,67 @@ class MenuBar(QMenuBar):
                 self.parent.toolbar.toggle_play_pause()
             self.parent.quran_view.setFocus()
 
+    def update_tafaseer_menu(self):
+        logger.debug("Updating Tafaseer menu items...")
+        self.tafaseer_menu.clear()
+        installed_arabic = Category.get_installed_categories_arabic()
+        for arabic_category in installed_arabic:
+            action = QAction(arabic_category, self)
+            action.triggered.connect(self.parent.OnInterpretation)
+            self.tafaseer_menu.addAction(action)
+
+        all_arabic = Category.get_categories_in_arabic()
+        uninstalled = [name for name in all_arabic if name not in installed_arabic]
+        if uninstalled:
+            self.tafaseer_menu.addSeparator()
+            uninstalled_sub = self.tafaseer_menu.addMenu("تفاسير غير مُنزّلة")
+            uninstalled_sub.setAccessibleName("قائمة تفاسير غير منزلة")
+            for arabic_category in uninstalled:
+                action = QAction(f"{arabic_category} (تنزيل)", self)
+                action.setData(arabic_category)
+                action.triggered.connect(self.on_uninstalled_tafsir_clicked)
+                uninstalled_sub.addAction(action)
+
+        self.tafaseer_menu.addSeparator()
+        manage_action = QAction("إدارة وتنزيل التفاسير...", self)
+        manage_action.triggered.connect(self.open_tafaseer_manager_dialog)
+        self.tafaseer_menu.addAction(manage_action)
+        logger.debug(f"Tafaseer menu updated: {len(installed_arabic)} installed, {len(uninstalled)} uninstalled.")
+
+    def on_uninstalled_tafsir_clicked(self):
+        sender = self.sender()
+        if not sender:
+            return
+        arabic_name = sender.data() or sender.text().replace(" (تنزيل)", "").strip()
+        cat_id = Category.get_category_by_arabic_name(arabic_name)
+        logger.info(f"User clicked uninstalled tafsir from MenuBar: '{arabic_name}' ({cat_id})")
+        confirm = QMessageBox.question(
+            self.parent,
+            "تنزيل التفسير",
+            f"تفسير ({arabic_name}) غير مُنزّل على جهازك.\nهل تريد فتح نافذة إدارة التفاسير لتنزيله الآن؟",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes,
+        )
+        if confirm == QMessageBox.StandardButton.Yes:
+            logger.info(f"User confirmed opening TafaseerManagerDialog for '{arabic_name}'.")
+            self.open_tafaseer_manager_dialog(target_category_id=cat_id)
+        else:
+            logger.debug(f"User cancelled downloading '{arabic_name}'.")
+
+    def open_tafaseer_manager_dialog(self, target_category_id=None):
+        logger.info(f"Opening TafaseerManagerDialog from MenuBar (target: {target_category_id})...")
+        from ui.dialogs.tafaseer_manager_dialog import TafaseerManagerDialog
+        dialog = TafaseerManagerDialog(self.parent)
+        if target_category_id:
+            dialog.refresh_list(select_category_id=target_category_id)
+        dialog.tafaseer_changed.connect(self.update_tafaseer_menu)
+        dialog.exec()
+        logger.debug("TafaseerManagerDialog closed.")
+
     def OnTafaseerMenu(self):
         if self.tafaseer_menu.isEnabled():
             logger.debug("Opening tafaseer menu.")
+            self.update_tafaseer_menu()
             self.tafaseer_menu.exec()
             logger.debug("Tafaseer menu closed.")
 
