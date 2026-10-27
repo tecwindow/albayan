@@ -148,7 +148,8 @@ class TafaseerDialog(QDialog):
 
         # Uninstalled tafaseer
         all_arabic = Category.get_categories_in_arabic()
-        uninstalled_arabic = [name for name in all_arabic if name not in installed_arabic]
+        bundled_arabic = Category.get_arabic_name_by_category(DEFAULT_BUNDLED_TAFSIR_ID)
+        uninstalled_arabic = [name for name in all_arabic if name not in installed_arabic and name != bundled_arabic]
 
         if uninstalled_arabic:
             menu.addSeparator()

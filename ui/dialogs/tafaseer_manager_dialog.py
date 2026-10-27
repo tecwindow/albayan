@@ -255,13 +255,18 @@ class TafaseerManagerDialog(QDialog):
         self.info_text.setText(details)
 
         # Update Buttons
-        self.btn_download.setEnabled(not is_installed and not is_any_downloading)
+        self.btn_download.setEnabled(not is_installed and not is_bundled and not is_any_downloading)
         self.btn_delete.setEnabled(is_installed and not is_bundled and not is_downloading)
         self.btn_cancel.setEnabled(is_downloading)
 
     def start_download_selected(self):
         cat_id = self.get_selected_category_id()
         if not cat_id:
+            return
+
+        if cat_id == DEFAULT_BUNDLED_TAFSIR_ID or Category.is_bundled(cat_id):
+            logger.debug(f"Download requested for bundled default tafsir: {cat_id}")
+            UniversalSpeech.say("هذا التفسير مضمن مع البرنامج بشكل أساسي وجاهز للاستخدام دائماً.")
             return
 
         if Category.is_installed(cat_id):

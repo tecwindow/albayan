@@ -99,7 +99,13 @@ class LegacyTafaseerMigrator:
 
                 # Always preserve the bundled default tafsir (e.g. muyassar) in installation folder
                 if stem_lower == DEFAULT_BUNDLED_TAFSIR_ID.lower():
-                    logger.debug(f"Skipping bundled default tafsir from migration: {file_path.name}")
+                    dest_file = target_dir / f"{DEFAULT_BUNDLED_TAFSIR_ID}.db"
+                    if not dest_file.is_file():
+                        try:
+                            logger.info(f"Copying bundled default tafsir '{stem_lower}' to user folder: {dest_file}")
+                            shutil.copy2(str(file_path), str(dest_file))
+                        except Exception as e:
+                            logger.debug(f"Could not copy bundled default tafsir to user data: {e}")
                     continue
 
                 # Match against catalog metadata

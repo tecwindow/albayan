@@ -21,7 +21,7 @@ from ui.sura_player_ui import SuraPlayerWindow
 from ui.dialogs.tasbih_dialog import TasbihDialog
 
 from core_functions.quran.types import NavigationMode
-from core_functions.tafaseer import Category
+from core_functions.tafaseer import Category, DEFAULT_BUNDLED_TAFSIR_ID
 from core_functions.downloader import DownloadDB, DownloadManager
 from core_functions.downloader.models import DownloadAyahs, DownloadSurahs
 from core_functions.Reciters import SurahReciter, AyahReciter
@@ -752,7 +752,8 @@ class MenuBar(QMenuBar):
             self.tafaseer_menu.addAction(action)
 
         all_arabic = Category.get_categories_in_arabic()
-        uninstalled = [name for name in all_arabic if name not in installed_arabic]
+        bundled_arabic = Category.get_arabic_name_by_category(DEFAULT_BUNDLED_TAFSIR_ID)
+        uninstalled = [name for name in all_arabic if name not in installed_arabic and name != bundled_arabic]
         if uninstalled:
             self.tafaseer_menu.addSeparator()
             uninstalled_sub = self.tafaseer_menu.addMenu("تفاسير غير مُنزّلة")

@@ -34,7 +34,7 @@ from PySide6.QtGui import (
 from core_functions.quran.quran_manager import QuranManager
 from core_functions.quran.formatter import FormatterOptions
 from core_functions.quran.types import QuranFontType, NavigationMode, Ayah, MarksType
-from core_functions.tafaseer import Category
+from core_functions.tafaseer import Category, DEFAULT_BUNDLED_TAFSIR_ID
 from core_functions.info import (
     MoshafInfo,
     E3rab,
@@ -536,7 +536,8 @@ class QuranInterface(QMainWindow):
             submenu.addAction(action)
 
         all_arabic = Category.get_categories_in_arabic()
-        uninstalled = [name for name in all_arabic if name not in installed_arabic]
+        bundled_arabic = Category.get_arabic_name_by_category(DEFAULT_BUNDLED_TAFSIR_ID)
+        uninstalled = [name for name in all_arabic if name not in installed_arabic and name != bundled_arabic]
         if uninstalled:
             submenu.addSeparator()
             uninstalled_sub = submenu.addMenu("تفاسير غير مُنزّلة")

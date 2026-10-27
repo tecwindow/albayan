@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -71,9 +72,10 @@ class Category:
     @classmethod
     def find_tafsir_db_path(cls, category: str) -> Optional[Path]:
         """
-        Locates the tafsir SQLite database using dual-path lookup:
+        Locates the tafsir SQLite database using comprehensive path lookup:
         1. User's writable folder: paths.tafaseer_folder
         2. Application's bundled folder: paths.data_folder / 'tafaseer'
+        3. Main application installation folder fallbacks
         Returns a Path object if found, or None if not installed.
         """
         logger.debug(f"Locating tafsir database for category: '{category}'...")
@@ -81,7 +83,7 @@ class Category:
             logger.warning(f"Invalid tafsir category requested: '{category}'")
             return None
 
-        # Check user data folder first
+        # 1. Check user data folder first
         candidates_user = [
             paths.tafaseer_folder / f"{category}.db",
             paths.tafaseer_folder / f"{category}.DB",
@@ -91,17 +93,34 @@ class Category:
                 logger.debug(f"Found tafsir database in user folder: {p}")
                 return p
 
-        # Check bundled folder
+        # 2. Check bundled folder and main application directory candidates
+        if getattr(sys, "frozen", False):
+            main_dir = Path(sys.executable).resolve().parent
+        else:
+            main_dir = Path(__file__).resolve().parents[2]
+
         bundled_folder = paths.data_folder / "tafaseer"
         candidates_bundled = [
             bundled_folder / f"{category}.db",
             bundled_folder / f"{category}.DB",
+            paths.data_folder / f"{category}.db",
+            paths.data_folder / f"{category}.DB",
+            main_dir / "database" / "tafaseer" / f"{category}.db",
+            main_dir / "database" / "tafaseer" / f"{category}.DB",
+            main_dir / "database" / f"{category}.db",
+            main_dir / "database" / f"{category}.DB",
+            main_dir / "tafaseer" / f"{category}.db",
+            main_dir / "tafaseer" / f"{category}.DB",
+            main_dir / f"{category}.db",
+            main_dir / f"{category}.DB",
             Path("database") / "tafaseer" / f"{category}.db",
             Path("database") / "tafaseer" / f"{category}.DB",
+            Path("database") / f"{category}.db",
+            Path("database") / f"{category}.DB",
         ]
         for p in candidates_bundled:
             if p.is_file():
-                logger.debug(f"Found tafsir database in bundled folder: {p}")
+                logger.debug(f"Found tafsir database in bundled/main folder: {p}")
                 return p
 
         logger.debug(f"Tafsir database not found locally for category: '{category}'")
@@ -109,7 +128,12 @@ class Category:
 
     @classmethod
     def is_installed(cls, category: str) -> bool:
-        """Checks if a tafsir database exists locally either bundled or downloaded."""
+        """
+        Checks if a tafsir database exists locally either bundled or downloaded.
+        The default bundled tafsir is always considered installed.
+        """
+        if category == DEFAULT_BUNDLED_TAFSIR_ID:
+            return True
         return cls.find_tafsir_db_path(category) is not None
 
     @classmethod
@@ -133,11 +157,19 @@ class Category:
 
     @classmethod
     def get_installed_categories_arabic(cls) -> List[str]:
-        """Returns a list of Arabic names for currently installed/available tafaseer."""
+        """
+        Returns a list of Arabic names for currently installed/available tafaseer.
+        Always guarantees that the default bundled tafsir is included.
+        """
         installed = []
+        bundled_arabic = cls.get_arabic_name_by_category(DEFAULT_BUNDLED_TAFSIR_ID)
+        if bundled_arabic:
+            installed.append(bundled_arabic)
+
         for arabic_name, cat_id in cls._category_in_arabic.items():
-            if cls.is_installed(cat_id):
-                installed.append(arabic_name)
+            if cat_id != DEFAULT_BUNDLED_TAFSIR_ID and cls.is_installed(cat_id):
+                if arabic_name not in installed:
+                    installed.append(arabic_name)
         return installed
 
     @classmethod
