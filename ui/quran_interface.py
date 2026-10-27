@@ -28,6 +28,8 @@ from PySide6.QtGui import (
     QTextCursor,
     QKeySequence,
     QShortcut,
+    QFont,
+    QColor,
 )
 from core_functions.quran.quran_manager import QuranManager
 from core_functions.quran.formatter import FormatterOptions
@@ -98,6 +100,7 @@ class QuranInterface(QMainWindow):
         self.tray_manager = SystemTrayManager(self, program_name, program_icon)
         self.create_widgets()
         self.create_layout()
+        self.apply_reading_font()
 
         self.set_text(Config.general.auto_restore_position_enabled)
         logger.debug(
@@ -106,6 +109,50 @@ class QuranInterface(QMainWindow):
         self.set_shortcut()
         self.current_text_repeat = 0
         logger.debug("QuranInterface initialized successfully.")
+
+    def apply_reading_font(self):
+        """Applies configured font family, size, weight, italic, and color to the reading view."""
+        if not hasattr(self, "quran_view") or self.quran_view is None:
+            logger.debug("quran_view is not initialized yet; skipping apply_reading_font.")
+            return
+
+        family = getattr(Config.reading, "font_family", "")
+        size = getattr(Config.reading, "font_size", 0)
+        color = getattr(Config.reading, "font_color", "")
+        bold = getattr(Config.reading, "font_bold", False)
+        italic = getattr(Config.reading, "font_italic", False)
+        logger.debug(
+            f"Applying reading font: family='{family}', size={size}, color='{color}', bold={bold}, italic={italic}"
+        )
+
+        font = self.quran_view.font()
+        if family:
+            font.setFamily(family)
+        if size and size > 0:
+            font.setPointSize(size)
+        font.setBold(bold)
+        font.setItalic(italic)
+        self.quran_view.setFont(font)
+
+        style_parts = []
+        if family:
+            style_parts.append(f"font-family: '{family}';")
+        if size and size > 0:
+            style_parts.append(f"font-size: {size}pt;")
+        if bold:
+            style_parts.append("font-weight: bold;")
+        if italic:
+            style_parts.append("font-style: italic;")
+        if color:
+            style_parts.append(f"color: {color};")
+
+        if style_parts:
+            self.quran_view.setStyleSheet(
+                f"QuranViewer, QTextEdit#quran_view {{ {' '.join(style_parts)} }}"
+            )
+        else:
+            self.quran_view.setStyleSheet("")
+        logger.debug("Reading font applied successfully.")
 
     def center_window(self):
         screen_geometry = QApplication.primaryScreen().availableGeometry()
@@ -152,26 +199,26 @@ class QuranInterface(QMainWindow):
 
         self.interpretation_verse = EnterButton()
         self.interpretation_verse.setIcon(qta.icon("fa5s.book"))
-        # self.interpretation_verse.setToolTip("تفسير الآية")
+        # self.interpretation_verse.setToolTip("Verse interpretation")
         self.interpretation_verse.setAccessibleName("تفسير الآية")
         self.interpretation_verse.setEnabled(False)
         self.interpretation_verse.clicked.connect(self.OnInterpretation)
 
         self.quick_access = EnterButton()
         self.quick_access.setIcon(qta.icon("fa5s.bolt"))
-        # self.quick_access.setToolTip("الوصول السريع")
+        # self.quick_access.setToolTip("Quick access")
         self.quick_access.setAccessibleName("الوصول السريع")
         self.quick_access.clicked.connect(self.OnQuickAccess)
 
         self.search_in_quran = EnterButton()
         self.search_in_quran.setIcon(qta.icon("fa5s.search"))
-        # self.search_in_quran.setToolTip("البحث في القرآن")
+        # self.search_in_quran.setToolTip("Search in Quran")
         self.search_in_quran.setAccessibleName("البحث في القرآن")
         self.search_in_quran.clicked.connect(self.OnSearch)
 
         self.save_current_position = EnterButton()
         self.save_current_position.setIcon(qta.icon("fa5s.save"))
-        # self.save_current_position.setToolTip("حفظ الموضع الحالي")
+        # self.save_current_position.setToolTip("Save current position")
         self.save_current_position.setAccessibleName("حفظ الموضع الحالي")
         self.save_current_position.setEnabled(False)
         self.save_current_position.clicked.connect(self.OnSaveCurrentPosition)
@@ -179,13 +226,13 @@ class QuranInterface(QMainWindow):
 
         self.tasbih = EnterButton()
         self.tasbih.setIcon(qta.icon("fa5s.circle"))
-        # self.tasbih.setToolTip("المسبحة")
+        # self.tasbih.setToolTip("Tasbih")
         self.tasbih.setAccessibleName("المسبحة")
         self.tasbih.clicked.connect(self.menu_bar.OnTasbihAction)
 
         self.quran_player = EnterButton()
         self.quran_player.setIcon(qta.icon("fa5s.play-circle"))
-        # self.quran_player.setToolTip("مشغل القرآن")
+        # self.quran_player.setToolTip("Quran player")
         self.quran_player.setAccessibleName("مشغل سور القرآن")
         self.quran_player.clicked.connect(self.menu_bar.OnSuraPlayer)
 

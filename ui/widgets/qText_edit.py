@@ -23,13 +23,20 @@ class ReadOnlyTextEdit(QTextEdit):
         #        self.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
         self.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
         font = self.font()
-        font.setPointSize(16)
+        if getattr(Config.reading, "font_family", ""):
+            font.setFamily(Config.reading.font_family)
+        if getattr(Config.reading, "font_size", 0) > 0:
+            font.setPointSize(Config.reading.font_size)
+        else:
+            font.setPointSize(16)
+        font.setBold(getattr(Config.reading, "font_bold", False))
+        font.setItalic(getattr(Config.reading, "font_italic", False))
         self.setFont(font)
         self.setAcceptRichText(True)
         document = self.document()
         document.setDefaultCursorMoveStyle(Qt.CursorMoveStyle.VisualMoveStyle)
         logger.debug(
-            f"ReadOnlyTextEdit initialized, with font size: {font.pointSize()}"
+            f"ReadOnlyTextEdit initialized with font: family='{font.family()}', size={font.pointSize()}, bold={font.bold()}, italic={font.italic()}"
         )
 
 

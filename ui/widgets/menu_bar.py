@@ -1,6 +1,6 @@
 import os
 import sys
-from PySide6.QtWidgets import QApplication, QMenuBar, QMenu, QMessageBox
+from PySide6.QtWidgets import QApplication, QMenuBar, QMenu, QMessageBox, QFontDialog, QColorDialog
 from PySide6.QtGui import (
     QIcon,
     QAction,
@@ -8,6 +8,8 @@ from PySide6.QtGui import (
     QShortcut,
     QDesktopServices,
     QActionGroup,
+    QFont,
+    QColor,
 )
 from PySide6.QtCore import Qt, QUrl
 from ui.dialogs.settings_dialog import SettingsDialog
@@ -316,6 +318,21 @@ class MenuBar(QMenuBar):
         self.preferences_menu.addAction(self.change_after_text_action)
         self.preferences_menu.addMenu(self.theme_menu)
         self.preferences_menu.addMenu(self.text_direction_action)
+
+        self.font_menu = QMenu("تخصيص الخط واللون", self)
+        self.choose_font_action = QAction("تغيير نوع وحجم الخط...", self)
+        self.choose_font_action.triggered.connect(self.OnChooseFont)
+        self.font_menu.addAction(self.choose_font_action)
+
+        self.choose_color_action = QAction("تغيير لون الخط...", self)
+        self.choose_color_action.triggered.connect(self.OnChooseFontColor)
+        self.font_menu.addAction(self.choose_color_action)
+
+        self.reset_font_action = QAction("استعادة الخط ولونه الافتراضي", self)
+        self.reset_font_action.triggered.connect(self.OnResetFont)
+        self.font_menu.addAction(self.reset_font_action)
+
+        self.preferences_menu.addMenu(self.font_menu)
         self.preferences_menu.addAction(self.settings_action)
 
         self.help_menu = self.addMenu("المساعدة(&H)")
@@ -521,6 +538,54 @@ class MenuBar(QMenuBar):
         tasbih_dialog = TasbihDialog(self.parent)
         tasbih_dialog.open()
         logger.debug("Tasbih dialog opened.")
+
+    def OnChooseFont(self):
+        logger.debug("Opening native font dialog...")
+        current_font = self.parent.quran_view.font()
+        dialog = QFontDialog(current_font, self.parent)
+        dialog.setWindowTitle("اختيار نوع وحجم الخط")
+        if dialog.exec():
+            selected_font = dialog.selectedFont()
+            Config.reading.font_family = selected_font.family()
+            Config.reading.font_size = selected_font.pointSize()
+            Config.reading.font_bold = selected_font.bold()
+            Config.reading.font_italic = selected_font.italic()
+            Config.save_settings()
+            if hasattr(self.parent, "apply_reading_font"):
+                self.parent.apply_reading_font()
+            logger.info(
+                f"Font updated to: {selected_font.family()}, size: {selected_font.pointSize()}"
+            )
+        else:
+            logger.debug("Font selection cancelled by user.")
+
+    def OnChooseFontColor(self):
+        logger.debug("Opening native font color dialog...")
+        current_color_str = getattr(Config.reading, "font_color", "") or "#f8fafc"
+        dialog = QColorDialog(QColor(current_color_str), self.parent)
+        dialog.setWindowTitle("اختيار لون الخط")
+        if dialog.exec():
+            selected_color = dialog.selectedColor()
+            if selected_color.isValid():
+                Config.reading.font_color = selected_color.name()
+                Config.save_settings()
+                if hasattr(self.parent, "apply_reading_font"):
+                    self.parent.apply_reading_font()
+                logger.info(f"Font color updated to: {selected_color.name()}")
+        else:
+            logger.debug("Font color selection cancelled by user.")
+
+    def OnResetFont(self):
+        logger.debug("Resetting font and color to default...")
+        Config.reading.font_family = ""
+        Config.reading.font_size = 0
+        Config.reading.font_color = ""
+        Config.reading.font_bold = False
+        Config.reading.font_italic = False
+        Config.save_settings()
+        if hasattr(self.parent, "apply_reading_font"):
+            self.parent.apply_reading_font()
+        logger.info("Font settings reset to default.")
 
     def OnTheme(self):
 
