@@ -13,6 +13,7 @@ from .installer import (
     install_tafsir_archive,
     verify_tafsir_database,
 )
+from .migrator import LegacyTafaseerMigrator
 
 __all__ = [
     "DEFAULT_BUNDLED_TAFSIR_ID",
@@ -24,6 +25,7 @@ __all__ = [
     "TafsirInfo",
     "TafaseerManager",
     "TafsirInstaller",
+    "LegacyTafaseerMigrator",
     "start_tafsir_download",
     "install_tafsir_archive",
     "verify_tafsir_database",

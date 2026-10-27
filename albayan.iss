@@ -320,6 +320,42 @@ begin
     Result := False;
 end;
 
+procedure MigrateOldTafaseer(AppDir: String);
+var
+  SourceFolder, DestFolder: String;
+  FindRec: TFindRec;
+  SrcFile, DestFile: String;
+begin
+  SourceFolder := AppDir + '\database\tafaseer';
+  if not DirExists(SourceFolder) then Exit;
+
+  if IsPortableMode then
+    DestFolder := AppDir + '\user_data\tafaseer'
+  else
+    DestFolder := ExpandConstant('{userappdata}\tecwindow\{#MyAppName}\tafaseer');
+
+  ForceDirectories(DestFolder);
+
+  if FindFirst(SourceFolder + '\*.db*', FindRec) then
+  begin
+    try
+      repeat
+        if (FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY) = 0 then
+        begin
+          SrcFile := SourceFolder + '\' + FindRec.Name;
+          DestFile := DestFolder + '\' + Lowercase(FindRec.Name);
+          if not FileExists(DestFile) then
+          begin
+            FileCopy(SrcFile, DestFile, False);
+          end;
+        end;
+      until not FindNext(FindRec);
+    finally
+      FindClose(FindRec);
+    end;
+  end;
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   AppDir: String;
@@ -327,6 +363,8 @@ begin
   if CurStep = ssInstall then
   begin
     AppDir := ExpandConstant('{app}');
+
+    MigrateOldTafaseer(AppDir);
 
     DelTree(AppDir + '\Audio',         True, True, True);
     DelTree(AppDir + '\database',      True, True, True);

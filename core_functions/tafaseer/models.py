@@ -115,35 +115,21 @@ class Category:
     @classmethod
     def is_bundled(cls, category: str) -> bool:
         """
-        Returns True if the tafsir exists in the bundled read-only database folder.
-        Bundled default tafsir cannot be deleted by the user.
+        Returns True if the tafsir is the primary bundled default tafsir
+        which cannot be deleted by the user.
         """
-        bundled_folder = paths.data_folder / "tafaseer"
-        candidates = [
-            bundled_folder / f"{category}.db",
-            bundled_folder / f"{category}.DB",
-            Path("database") / "tafaseer" / f"{category}.db",
-            Path("database") / "tafaseer" / f"{category}.DB",
-        ]
-        for p in candidates:
-            if p.is_file():
-                return True
-        return False
+        return category == DEFAULT_BUNDLED_TAFSIR_ID
 
     @classmethod
     def is_deletable(cls, category: str) -> bool:
         """
-        A tafsir is deletable only if it is installed in the user folder
+        A tafsir is deletable only if it is installed
         and is NOT the primary bundled default tafsir.
         """
         if category == DEFAULT_BUNDLED_TAFSIR_ID:
             return False
 
-        user_candidates = [
-            paths.tafaseer_folder / f"{category}.db",
-            paths.tafaseer_folder / f"{category}.DB",
-        ]
-        return any(p.is_file() for p in user_candidates)
+        return cls.is_installed(category)
 
     @classmethod
     def get_installed_categories_arabic(cls) -> List[str]:
@@ -157,10 +143,10 @@ class Category:
     @classmethod
     def delete_tafsir(cls, category: str) -> bool:
         """
-        Deletes a downloaded tafsir from the user folder.
+        Deletes an installed tafsir from the user folder (and bundled folder if writable).
         Safely closes any active database connections first.
         """
-        logger.info(f"Attempting to delete tafsir category: '{category}' from user storage...")
+        logger.info(f"Attempting to delete tafsir category: '{category}' from storage...")
         if not cls.is_valid(category):
             logger.error(f"Cannot delete invalid tafsir category: '{category}'")
             raise ValueError(f"Invalid tafsir category: {category}")
@@ -175,6 +161,8 @@ class Category:
         TafaseerManager.close_all_instances_for(category)
 
         deleted = False
+
+        # 1. Clean user candidates
         user_candidates = [
             paths.tafaseer_folder / f"{category}.db",
             paths.tafaseer_folder / f"{category}.DB",
@@ -191,6 +179,22 @@ class Category:
                 except Exception as e:
                     logger.error(f"Failed to delete tafsir file {p}: {e}", exc_info=True)
                     raise
+
+        # 2. Clean legacy / bundled candidates if writable
+        bundled_candidates = [
+            paths.data_folder / "tafaseer" / f"{category}.db",
+            paths.data_folder / "tafaseer" / f"{category}.DB",
+            Path("database") / "tafaseer" / f"{category}.db",
+            Path("database") / "tafaseer" / f"{category}.DB",
+        ]
+        for p in bundled_candidates:
+            if p.exists():
+                try:
+                    p.unlink()
+                    deleted = True
+                    logger.info(f"Deleted legacy tafsir file from bundled directory: {p}")
+                except (PermissionError, OSError) as e:
+                    logger.debug(f"Could not delete legacy file {p} (read-only directory): {e}")
 
         if deleted:
             logger.info(f"Successfully deleted tafsir category: '{category}'.")

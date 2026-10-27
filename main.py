@@ -222,6 +222,13 @@ def main():
         else f"{program_name} (Source)"
         )
 
+        # Check and migrate legacy tafaseer if present
+        try:
+            from core_functions.tafaseer.migrator import LegacyTafaseerMigrator
+            LegacyTafaseerMigrator.migrate_if_needed()
+        except Exception as e:
+            logger.error(f'Failed to check/migrate legacy tafaseer: {e}', exc_info=True)
+
         main_window = QuranInterface(display_name)
         logger.info("Main window initialized successfully.")
         app.set_main_window(main_window)

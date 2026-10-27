@@ -243,7 +243,7 @@ class TafaseerManagerDialog(QDialog):
         is_installed = Category.is_installed(cat_id)
         is_bundled = (cat_id == DEFAULT_BUNDLED_TAFSIR_ID)
         is_downloading = (self._current_downloading_id == cat_id)
-        is_any_downloading = (self._active_worker is not None and self._active_worker.isRunning())
+        is_any_downloading = (self._current_downloading_id is not None)
 
         # Update Info text
         details = (
@@ -269,7 +269,7 @@ class TafaseerManagerDialog(QDialog):
             UniversalSpeech.say("هذا التفسير مثبت بالفعل وجاهز للاستخدام.")
             return
 
-        if self._active_worker and self._active_worker.isRunning():
+        if self._current_downloading_id is not None:
             logger.warning(f"Download attempted for {cat_id} while worker is already busy with {self._current_downloading_id}")
             UniversalSpeech.say("هناك عملية تنزيل جارية بالفعل، يرجى الانتظار حتى تكتمل.")
             QMessageBox.information(

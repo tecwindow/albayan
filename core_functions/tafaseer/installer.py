@@ -103,20 +103,25 @@ class TafsirInstaller:
     def verify(db_path: Union[Path, str]) -> None:
         """
         Validates that the SQLite database file exists and contains the required 'tafsir_1' table.
+        Ensures the SQLite connection is closed immediately to prevent file locking on Windows.
         """
         path = Path(db_path)
         if not path.is_file():
             logger.error(f"Database file does not exist: {path}")
             raise FileNotFoundError(f"Database file not found: {path}")
 
-        with sqlite3.connect(str(path)) as conn:
+        conn = sqlite3.connect(str(path))
+        try:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='tafsir_1';"
             )
-            if cursor.fetchone()[0] == 0:
+            row = cursor.fetchone()
+            if not row or row[0] == 0:
                 logger.error(f"Database schema mismatch: missing required table 'tafsir_1' in {path}")
                 raise ValueError("Database schema incompatible: missing 'tafsir_1' table.")
+        finally:
+            conn.close()
 
 
 # Functional aliases for backwards-compatibility
