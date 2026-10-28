@@ -46,7 +46,7 @@ class CustomRangeDialog(QDialog):
         self.set_surahs()
         self.restore_saved_range()
 
-        _play_sound("open")
+
         logger.info("CustomRangeDialog opened successfully.")
 
     def init_ui(self):
@@ -383,7 +383,7 @@ class CustomRangeDialog(QDialog):
 
     def reject(self):
         logger.debug("CustomRangeDialog cancelled by user.")
-        _play_sound("clos")
+
         super().reject()
         self.deleteLater()
 

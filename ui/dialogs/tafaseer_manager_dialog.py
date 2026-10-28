@@ -31,12 +31,6 @@ from core_functions.downloader.status import DownloadStatus, DownloadProgress
 logger = LoggerManager.get_logger(__name__)
 
 
-def _play_sound(effect_name: str):
-    if hasattr(Globals, "effects_manager") and Globals.effects_manager:
-        try:
-            Globals.effects_manager.play(effect_name)
-        except Exception:
-            pass
 
 
 class TafaseerManagerDialog(QDialog):
@@ -69,7 +63,7 @@ class TafaseerManagerDialog(QDialog):
         self._setup_shortcuts()
         self.refresh_list()
 
-        _play_sound("open")
+
         logger.info("TafaseerManagerDialog opened successfully.")
 
     def _setup_ui(self):
@@ -298,7 +292,7 @@ class TafaseerManagerDialog(QDialog):
         self.status_label.setText(f"بدأ تنزيل {info['full_name']}...")
 
         UniversalSpeech.say(f"بدأ تنزيل {info['full_name']}.")
-        _play_sound("change")
+
 
         self.btn_download.setEnabled(False)
         self.btn_cancel.setEnabled(True)
@@ -361,7 +355,7 @@ class TafaseerManagerDialog(QDialog):
             self.progress_bar.setVisible(False)
             self.status_label.setVisible(False)
 
-            _play_sound("open")
+
             UniversalSpeech.say(f"اكتمل تنزيل {full_name} بنجاح، وأصبح جاهزاً للاستخدام.")
 
             self.refresh_list(tafsir_id)
@@ -448,7 +442,7 @@ class TafaseerManagerDialog(QDialog):
             logger.info(f"User confirmed deletion of tafsir: {cat_id} ({name})")
             try:
                 Category.delete_tafsir(cat_id)
-                _play_sound("change")
+
                 UniversalSpeech.say(f"تم حذف {name} بنجاح.")
                 self.refresh_list(cat_id)
                 self.tafaseer_changed.emit()
@@ -480,6 +474,6 @@ class TafaseerManagerDialog(QDialog):
                 return
             self.cancel_download()
 
-        _play_sound("clos")
+
         logger.debug("TafaseerManagerDialog closed.")
         super().reject()
