@@ -11,7 +11,6 @@ from PySide6.QtWidgets import (
     QPushButton,
     QGroupBox,
     QButtonGroup,
-    QMessageBox,
     QSlider,
     QSpacerItem,
     QSizePolicy,
@@ -24,6 +23,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QKeySequence, QShortcut, QFont, QColor
 from PySide6.QtCore import Qt
 from ui.widgets.spin_box import SpinBox
+from ui.common.user_message import UserMessageService
 from core_functions.quran.types import QuranFontType, MarksType
 from core_functions.Reciters import AyahReciter
 from utils.const import program_english_name, Globals
@@ -47,6 +47,7 @@ class SettingsDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
+        self.user_message = UserMessageService(self)
         self.setWindowTitle("الإعدادات")
         self.resize(750, 650)
         self.reciters_manager = AyahReciter(paths.data_folder / "quran" / "reciters.db")
@@ -829,22 +830,20 @@ class SettingsDialog(QDialog):
         self.accept()
         self.deleteLater()
 
+
     def OnReset(self):
         logger.warning("User requested settings reset.")
-        msg_box = QMessageBox(self)
-        msg_box.setWindowTitle("تحذير")
-        msg_box.setText(
-            "هل أنت متأكد من إعادة تعيين الإعدادات إلى الإعدادات الافتراضية؟"
-        )
-        msg_box.setIcon(QMessageBox.Icon.Warning)
-        yes_button = msg_box.addButton("نعم", QMessageBox.ButtonRole.YesRole)
-        no_button = msg_box.addButton("لا", QMessageBox.ButtonRole.NoRole)
-        msg_box.exec()
 
-        if msg_box.clickedButton() == yes_button:
+        confirmed = self.user_message.confirm(
+            title="تحذير",
+            message="هل أنت متأكد من إعادة تعيين الإعدادات إلى الإعدادات الافتراضية؟",
+        )
+
+        if confirmed:
             logger.debug("Resetting settings to default values.")
             Config.reset_settings()
             self.set_current_settings()
+
 
     def set_current_settings(self):
         logger.debug("Applying current settings to UI elements.")

@@ -2,7 +2,6 @@ import os
 import re
 import json
 import random
-
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QWidget,
@@ -49,6 +48,7 @@ from core_functions.info import (
 from core_functions.bookmark import BookmarkManager
 from ui.dialogs.quick_access import QuickAccess
 from ui.dialogs.find import SearchDialog
+from ui.common.user_message import UserMessageService
 from ui.widgets.button import EnterButton
 from ui.widgets.menu_bar import MenuBar
 from ui.widgets.qText_edit import QuranViewer
@@ -78,6 +78,7 @@ class QuranInterface(QMainWindow):
         self.resize(800, 600)
         self.center_window()
         self.setWindowIcon(QIcon("Albayan.ico"))
+        self.user_message = UserMessageService(self)
         self.quran_manager = QuranManager(
             QuranFontType.from_int(Config.reading.font_type)
         )
@@ -456,14 +457,17 @@ class QuranInterface(QMainWindow):
             logger.info(
                 f"Requested tafsir '{selected_category}' ({selected_cat_id}) is not installed; prompting user."
             )
-            confirm = QMessageBox.question(
-                self,
-                "تنزيل التفسير",
-                f"تفسير ({selected_category}) غير مُنزّل على جهازك.\nهل تريد فتح نافذة إدارة التفاسير لتنزيله الآن؟",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.Yes,
+            confirm = self.user_message.confirm(
+            title="تنزيل التفسير",
+            message=(
+            f"تفسير ({selected_category}) غير مُنزّل على جهازك.\n"
+            "هل تريد فتح نافذة إدارة التفاسير لتنزيله الآن؟"
+            ),
+            yes_text="نعم",
+            no_text="لا",
             )
-            if confirm == QMessageBox.StandardButton.Yes:
+
+            if confirm:
                 logger.info(f"User accepted prompt to download '{selected_category}'.")
                 self.open_tafaseer_manager_dialog(target_category_id=selected_cat_id)
                 if not Category.is_installed(selected_cat_id):
@@ -472,9 +476,10 @@ class QuranInterface(QMainWindow):
                     )
                     selected_category = "الميسر"
             else:
-                logger.debug(f"User declined downloading '{selected_category}'. Reverting to default.")
+                logger.debug(
+                    f"User declined downloading '{selected_category}'. Reverting to default."
+                )
                 selected_category = "الميسر"
-
         logger.debug(f"Opening TafaseerDialog with default category: {selected_category}")
 
         current_ayah = self.get_current_ayah()
@@ -628,13 +633,10 @@ class QuranInterface(QMainWindow):
             logger.debug("Verse reasons dialog closed.")
         else:
             logger.warning("No reasons available for this ayah.")
-            msg_box = QMessageBox(self)
-            msg_box.setIcon(QMessageBox.Icon.Information)
-            msg_box.setWindowTitle("لا يتوفر معلومات للآية")
-            msg_box.setText("للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.")
-
-            ok_button = msg_box.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
-            msg_box.exec()
+            self.user_message.info(
+            title="لا يتوفر معلومات للآية",
+            message="للأسف لا يتوفر في الوقت الحالي معلومات لهذه الآية.",
+            )
 
     @exception_handler(ui_element=QMessageBox)
     def OnMoshafInfo(self, event=None):
@@ -801,13 +803,12 @@ class QuranInterface(QMainWindow):
         )
         if bookmark_manager.is_exist(current_aya.number):
             logger.warning("Bookmark already exists for this ayah.")
-            msgBox = QMessageBox(self)
-            msgBox.setIcon(QMessageBox.Critical)
-            msgBox.setWindowTitle("خطأ")
-            msgBox.setText("تم حفظ العلامة المرجعية مسبقًا.")
-            msgBox.addButton("موافق", QMessageBox.AcceptRole)
-            msgBox.exec()
+            self.user_message.error(
+            title="خطأ",
+            message="تم حفظ العلامة المرجعية مسبقًا.",
+            )
             return
+
 
         logger.debug("Bookmark does not exist, proceeding to save.")
         dialog = QInputDialog(self)
@@ -834,12 +835,10 @@ class QuranInterface(QMainWindow):
                 self.quran_view.setFocus()
             else:
                 logger.warning("Bookmark name is empty.")
-                msgBox = QMessageBox(self)
-                msgBox.setIcon(QMessageBox.Warning)
-                msgBox.setWindowTitle("علامة بلا اسم")
-                msgBox.setText("لا يمكن حفظ علامة بدون اسم.")
-                msgBox.addButton("موافق", QMessageBox.ButtonRole.AcceptRole)
-                msgBox.exec()
+                self.user_message.error(
+                    title="علامة بلا اسم",
+                    message="لا يمكن حفظ علامة بدون اسم.",
+                )
                 return
         else:
             logger.debug("Bookmark dialog canceled.")
