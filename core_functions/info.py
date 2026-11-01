@@ -122,6 +122,8 @@ class AyaInfo(Base):
           hizb, 
           page,
           hizbQuarter,
+          (SELECT COUNT(*) FROM quran q2 WHERE q2.juz = quran.juz AND q2.number <= quran.number) AS ayahNumberInJuz,
+          (SELECT COUNT(*) FROM quran q3 WHERE q3.juz = quran.juz) AS totalAyahsInJuz,
           CASE
           WHEN hizbQuarter % 4 = 1 THEN 'الأول'
           WHEN hizbQuarter % 4 = 2 THEN 'الثاني'
@@ -161,7 +163,9 @@ class AyaInfo(Base):
         text = f"""
 رقم الآية: {result['numberInSurah']}.
 رقم الآية في المصحف: {result['number']}.
-موضع الآية في المصحف:  في الربع {result['hizbQuarterOrder']} في الحزب {result['HizbOrderInJuz']} في الجزء {result['juz']}.
+رقم الآية في الجزء: {result['ayahNumberInJuz']} من {result['totalAyahsInJuz']}.
+موضع الآية في المصحف:  في الربع {result['hizbQuarterOrder']} من الحزب {result['hizb']} في الجزء {result['juz']}.
+موضع الآية ضمن الجزء:  في الربع {result['hizbQuarterOrder']} في الحزب {result['hizbOrderInJuz']} في الجزء {result['juz']}.
 السورة: {result['sura_name']}.
 رقم السورة: {result['sura_number']}.
 رقم الصفحة: {result['page']}.
