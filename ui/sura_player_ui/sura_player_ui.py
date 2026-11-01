@@ -17,7 +17,9 @@ from PySide6.QtWidgets import (
     QWidget,
     QMainWindow,
     QLineEdit,
+    QMessageBox,
 )
+from ui.dialogs.go_to import GoToDialog, GoToStyle
 from core_functions.Reciters import SurahReciter
 from .FilterManager import Item, FilterManager
 from core_functions.audio_player.audio_player_thread import AudioPlayerThread
@@ -131,6 +133,9 @@ class SuraPlayerWindow(QMainWindow):
         self.previous_surah_button.setAccessibleName("السورة السابقة")
         self.next_surah_button = QPushButton(qta.icon("fa5s.step-forward"), "")
         self.next_surah_button.setAccessibleName("السورة التالية")
+        self.go_to_surah_button = QPushButton(qta.icon("fa5s.location-arrow"), "")
+        self.go_to_surah_button.setAccessibleName("الذهاب إلى سورة برقمها")
+        self.go_to_surah_button.setToolTip("الذهاب إلى سورة برقمها (Ctrl+G)")
         self.volume_down_button = QPushButton(qta.icon("fa5s.volume-down"), "")
         self.volume_down_button.setAccessibleName("خفض الصوت")
         self.volume_up_button = QPushButton(qta.icon("fa5s.volume-up"), "")
@@ -146,6 +151,7 @@ class SuraPlayerWindow(QMainWindow):
             self.stop_button,
             self.forward_button,
             self.next_surah_button,
+            self.go_to_surah_button,
             self.volume_up_button,
             self.close_button,
         ]
@@ -200,8 +206,11 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.down_volume_action.triggered.connect(self.decrease_volume)
         self.next_surah_button.clicked.connect(self.next_surah)
         self.previous_surah_button.clicked.connect(self.previous_surah)
+        self.go_to_surah_button.clicked.connect(self.go_to_surah_by_number)
         self.menubar.next_surah_action.triggered.connect(self.next_surah)
         self.menubar.previous_surah_action.triggered.connect(self.previous_surah)
+        self.menubar.go_to_surah_action.triggered.connect(self.go_to_surah_by_number)
+        QShortcut(QKeySequence("Ctrl+G"), self).activated.connect(self.go_to_surah_by_number)
         self.menubar.previous_reciter_action.triggered.connect(self.previous_reciter)
         self.menubar.next_reciter_action.triggered.connect(self.next_reciter)
         self.menubar.set_start_action.triggered.connect(
@@ -264,6 +273,7 @@ class SuraPlayerWindow(QMainWindow):
             self.menubar.down_volume_action: ["Down"],
             self.menubar.previous_surah_action: ["Alt+Left"],
             self.menubar.next_surah_action: ["Alt+Right"],
+            self.menubar.go_to_surah_action: ["Ctrl+G"],
             self.menubar.next_reciter_action: ["Alt+Down"],
             self.menubar.previous_reciter_action: ["Alt+Up"],
             self.menubar.stop_action: ["S", "Ctrl+Space"],
@@ -436,6 +446,46 @@ class SuraPlayerWindow(QMainWindow):
             )
             logger.info(f"Moved to surah {self.surah_combo.currentText()}.")
             self.play_current_surah()
+
+    def go_to_surah_by_number(self):
+        """Open a dialog to navigate to a surah by its number."""
+        logger.debug("Opening GoTo Surah dialog in SuraPlayer.")
+        current_surah_number = self.surah_combo.currentData() or 1
+        max_surahs = 114
+        go_to_dialog = GoToDialog(
+            self,
+            title="الذهاب إلى سورة",
+            initial_value=current_surah_number,
+            min_value=1,
+            max_value=max_surahs,
+            style=GoToStyle.NUMERIC_FIELD,
+        )
+        go_to_dialog.set_spin_label("أدخل رقم السورة:")
+        go_to_dialog.set_info_label(f"أدخل رقماً بين 1 و {max_surahs}:")
+        if go_to_dialog.exec():
+            target_surah_number = go_to_dialog.get_input_value()
+            self.go_to_surah(target_surah_number)
+
+    def go_to_surah(self, surah_number: int):
+        """Navigate to and play a specific surah by its number."""
+        logger.debug(f"Navigating to surah number: {surah_number}")
+        index = self.surah_combo.findData(surah_number)
+        if index != -1:
+            self.surah_combo.setCurrentIndex(index)
+            UniversalSpeech.say(
+                self.surah_combo.currentText(), interrupt=self.isActiveWindow()
+            )
+            logger.info(f"Moved to surah {self.surah_combo.currentText()}.")
+            self.play_current_surah()
+        else:
+            surah_name = ""
+            if hasattr(self.parent, "quran_manager") and self.parent.quran_manager:
+                surahs = self.parent.quran_manager.get_surahs()
+                if 1 <= surah_number <= len(surahs):
+                    surah_name = f" ({surahs[surah_number - 1].name})"
+            msg = f"سورة رقم {surah_number}{surah_name} غير متوفرة لهذا القارئ."
+            UniversalSpeech.say(msg, interrupt=self.isActiveWindow())
+            QMessageBox.information(self, "تنبيه", msg)
 
     def next_reciter(self):
         logger.debug("Switching to next reciter.")

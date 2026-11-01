@@ -38,6 +38,7 @@ class MenuBar(QMenuBar):
         self.down_volume_action = QAction("خفض الصوت", self)
         self.next_surah_action = QAction("السورة التالية", self)
         self.previous_surah_action = QAction("السورة السابقة", self)
+        self.go_to_surah_action = QAction("الذهاب إلى سورة برقمها", self)
         self.next_reciter_action = QAction("القارئ التالي", self)
         self.previous_reciter_action = QAction("القارئ السابق", self)
 
@@ -51,6 +52,7 @@ class MenuBar(QMenuBar):
         player_menu.addAction(self.down_volume_action)
         player_menu.addAction(self.next_surah_action)
         player_menu.addAction(self.previous_surah_action)
+        player_menu.addAction(self.go_to_surah_action)
         player_menu.addAction(self.next_reciter_action)
         player_menu.addAction(self.previous_reciter_action)
 
@@ -82,6 +84,7 @@ class MenuBar(QMenuBar):
             self.down_volume_action,
             self.next_surah_action,
             self.previous_surah_action,
+            self.go_to_surah_action,
             self.next_reciter_action,
             self.previous_reciter_action,
             self.set_start_action,
