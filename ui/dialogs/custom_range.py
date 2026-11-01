@@ -82,12 +82,14 @@ class CustomRangeDialog(QDialog):
         layout_surah_from.setContentsMargins(0, 0, 0, 0)
         self.combo_surah_from = QComboBox(page_surah_from)
         self.combo_surah_from.setAccessibleName("من سورة")
-        self.combo_ayah_from = QComboBox(page_surah_from)
-        self.combo_ayah_from.setAccessibleName("من آية")
+        self.spin_ayah_from = SpinBox(page_surah_from)
+        self.spin_ayah_from.setAccessibleName("من آية")
+        self.spin_ayah_from.setRange(1, 286)
+        self.spin_ayah_from.setValue(1)
         layout_surah_from.addWidget(QLabel("السورة:"))
         layout_surah_from.addWidget(self.combo_surah_from)
         layout_surah_from.addWidget(QLabel("الآية:"))
-        layout_surah_from.addWidget(self.combo_ayah_from)
+        layout_surah_from.addWidget(self.spin_ayah_from)
         self.stack_from.addWidget(page_surah_from)
 
         # Page 1: Pages
@@ -152,12 +154,14 @@ class CustomRangeDialog(QDialog):
         layout_surah_to.setContentsMargins(0, 0, 0, 0)
         self.combo_surah_to = QComboBox(page_surah_to)
         self.combo_surah_to.setAccessibleName("إلى سورة")
-        self.combo_ayah_to = QComboBox(page_surah_to)
-        self.combo_ayah_to.setAccessibleName("إلى آية")
+        self.spin_ayah_to = SpinBox(page_surah_to)
+        self.spin_ayah_to.setAccessibleName("إلى آية")
+        self.spin_ayah_to.setRange(1, 286)
+        self.spin_ayah_to.setValue(7)
         layout_surah_to.addWidget(QLabel("السورة:"))
         layout_surah_to.addWidget(self.combo_surah_to)
         layout_surah_to.addWidget(QLabel("الآية:"))
-        layout_surah_to.addWidget(self.combo_ayah_to)
+        layout_surah_to.addWidget(self.spin_ayah_to)
         self.stack_to.addWidget(page_surah_to)
 
         # Page 1: Pages
@@ -234,10 +238,10 @@ class CustomRangeDialog(QDialog):
         self.combo_range_type.currentIndexChanged.connect(self._on_range_type_changed)
 
         self.combo_surah_from.currentIndexChanged.connect(
-            lambda: self.update_ayahs(self.combo_surah_from, self.combo_ayah_from)
+            lambda: self.update_ayahs(self.combo_surah_from, self.spin_ayah_from, is_to=False)
         )
         self.combo_surah_to.currentIndexChanged.connect(
-            lambda: self.update_ayahs(self.combo_surah_to, self.combo_ayah_to)
+            lambda: self.update_ayahs(self.combo_surah_to, self.spin_ayah_to, is_to=True)
         )
 
         self.btn_go.clicked.connect(self._on_submit)
@@ -261,8 +265,8 @@ class CustomRangeDialog(QDialog):
             self.combo_surah_to.addItem(surah.name, surah.number)
 
         if self.surahs:
-            self.update_ayahs(self.combo_surah_from, self.combo_ayah_from)
-            self.update_ayahs(self.combo_surah_to, self.combo_ayah_to)
+            self.update_ayahs(self.combo_surah_from, self.spin_ayah_from, is_to=False)
+            self.update_ayahs(self.combo_surah_to, self.spin_ayah_to, is_to=True)
         else:
             logger.warning("No surahs available to populate the combo boxes.")
 
@@ -288,9 +292,10 @@ class CustomRangeDialog(QDialog):
 
         from_ayah = self.saved_range.get("from_ayah")
         if from_ayah is not None:
-            idx = self.combo_ayah_from.findData(from_ayah)
-            if idx != -1:
-                self.combo_ayah_from.setCurrentIndex(idx)
+            try:
+                self.spin_ayah_from.setValue(int(from_ayah))
+            except (ValueError, TypeError):
+                pass
 
         to_surah = self.saved_range.get("to_surah")
         if to_surah is not None:
@@ -300,9 +305,10 @@ class CustomRangeDialog(QDialog):
 
         to_ayah = self.saved_range.get("to_ayah")
         if to_ayah is not None:
-            idx = self.combo_ayah_to.findData(to_ayah)
-            if idx != -1:
-                self.combo_ayah_to.setCurrentIndex(idx)
+            try:
+                self.spin_ayah_to.setValue(int(to_ayah))
+            except (ValueError, TypeError):
+                pass
 
         # 3. Restore page
         if "from_page" in self.saved_range and self.saved_range["from_page"] is not None:
@@ -328,15 +334,21 @@ class CustomRangeDialog(QDialog):
         if "to_quarter" in self.saved_range and self.saved_range["to_quarter"] is not None:
             self.spin_quarter_to.setValue(int(self.saved_range["to_quarter"]))
 
-    def update_ayahs(self, combo_surah: QComboBox, combo_ayah: QComboBox):
-        """Update the ayah combo box based on the currently selected surah."""
+    def update_ayahs(self, combo_surah: QComboBox, spin_ayah: SpinBox, is_to: bool = False):
+        """Update the ayah spin box range and value based on the currently selected surah."""
         logger.debug("Updating ayahs for surah selection")
-        combo_ayah.clear()
         surah_number = combo_surah.currentData()
         if surah_number is not None and 1 <= surah_number <= len(self.surahs):
             surah = self.surahs[surah_number - 1]
-            for ayah_number in range(1, surah.ayah_count + 1):
-                combo_ayah.addItem(str(ayah_number), ayah_number)
+            spin_ayah.setRange(1, surah.ayah_count)
+            if is_to:
+                spin_ayah.setValue(surah.ayah_count)
+            else:
+                current_val = spin_ayah.value()
+                if current_val > surah.ayah_count:
+                    spin_ayah.setValue(surah.ayah_count)
+                elif current_val < 1:
+                    spin_ayah.setValue(1)
         else:
             logger.warning("Invalid surah number for updating ayahs.")
 
@@ -363,9 +375,9 @@ class CustomRangeDialog(QDialog):
         return {
             "range_type": range_type,
             "from_surah": self.combo_surah_from.currentData() or 1,
-            "from_ayah": self.combo_ayah_from.currentData() or 1,
+            "from_ayah": self.spin_ayah_from.value(),
             "to_surah": self.combo_surah_to.currentData() or 1,
-            "to_ayah": self.combo_ayah_to.currentData() or 1,
+            "to_ayah": self.spin_ayah_to.value(),
             "from_page": self.spin_page_from.value(),
             "to_page": self.spin_page_to.value(),
             "from_juz": self.spin_juz_from.value(),
