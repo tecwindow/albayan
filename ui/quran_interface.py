@@ -211,6 +211,12 @@ class QuranInterface(QMainWindow):
         self.quick_access.setAccessibleName("الوصول السريع")
         self.quick_access.clicked.connect(self.OnQuickAccess)
 
+        self.custom_range = EnterButton()
+        self.custom_range.setIcon(qta.icon("fa5s.sliders-h"))
+        # self.custom_range.setToolTip("العرض المخصص")
+        self.custom_range.setAccessibleName("العرض المخصص")
+        self.custom_range.clicked.connect(self.OnCustomRange)
+
         self.search_in_quran = EnterButton()
         self.search_in_quran.setIcon(qta.icon("fa5s.search"))
         # self.search_in_quran.setToolTip("Search in Quran")
@@ -247,6 +253,7 @@ class QuranInterface(QMainWindow):
         buttons_layout.addWidget(self.back_to)
         buttons_layout.addWidget(self.interpretation_verse)
         buttons_layout.addWidget(self.quick_access)
+        buttons_layout.addWidget(self.custom_range)
         buttons_layout.addWidget(self.search_in_quran)
         buttons_layout.addWidget(self.save_current_position)
         buttons_layout.addWidget(self.tasbih)
