@@ -18,11 +18,13 @@ from utils.universal_speech import UniversalSpeech
 from utils.logger import LoggerManager
 from ui.widgets.qText_edit import ReadOnlyTextEdit
 from ui.common.user_message import UserMessageService
+import threading
 from core_functions.tafaseer import (
     Category,
     TAFASEER_CATALOG,
     DEFAULT_BUNDLED_TAFSIR_ID,
     TafsirInstaller,
+    fetch_remote_catalog,
 )
 from core_functions.downloader.manager import DownloadManager
 from core_functions.downloader.status import DownloadStatus, DownloadProgress
@@ -68,6 +70,7 @@ class TafaseerManagerDialog(QDialog):
         self._setup_ui()
         self._setup_shortcuts()
         self.refresh_list()
+        self._sync_catalog_in_background()
 
         logger.info("TafaseerManagerDialog opened successfully.")
 
@@ -171,6 +174,30 @@ class TafaseerManagerDialog(QDialog):
         )
         ret_shortcut.activated.connect(self.start_download_selected)
 
+        refresh_shortcut = QShortcut(QKeySequence("F5"), self)
+        refresh_shortcut.activated.connect(self._manual_refresh_catalog)
+
+    def _sync_catalog_in_background(self):
+        """Fetch remote tafaseer catalog from albayan.tecwindow.net or GitHub in background."""
+        def run():
+            try:
+                new_data = fetch_remote_catalog(timeout=6)
+                if new_data:
+                    QTimer.singleShot(0, self._on_catalog_synced)
+            except Exception as e:
+                logger.debug(f"Background tafaseer catalog sync failed: {e}")
+
+        sync_thread = threading.Thread(target=run, daemon=True)
+        sync_thread.start()
+
+    def _manual_refresh_catalog(self):
+        logger.info("Manual refresh of tafaseer catalog triggered by user (F5).")
+        self._sync_catalog_in_background()
+
+    def _on_catalog_synced(self):
+        logger.info("Remote tafaseer catalog synced successfully, refreshing list.")
+        self.refresh_list()
+
     def refresh_list(self, select_category_id: Optional[str] = None):
         """Populate the list of tafaseer with their current status and sizes."""
         current_id = select_category_id or self.get_selected_category_id()
@@ -183,7 +210,7 @@ class TafaseerManagerDialog(QDialog):
         selected_row = 0
         row_index = 0
 
-        for cat_id, info in TAFASEER_CATALOG.items():
+        for cat_id, info in Category.get_all_catalog().items():
             full_name = info["full_name"]
             is_installed = Category.is_installed(cat_id)
             is_bundled = cat_id == DEFAULT_BUNDLED_TAFSIR_ID

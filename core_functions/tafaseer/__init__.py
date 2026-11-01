@@ -4,6 +4,10 @@ from .data import (
     BACKUP_GITHUB_RAW_BASE_URL,
     BACKUP_GITHUB_RELEASE_BASE_URL,
     TAFASEER_CATALOG,
+    TAFASEER_JSON_REMOTE_URLS,
+    fetch_remote_catalog,
+    load_local_catalog,
+    update_catalog,
 )
 from .models import Category, TafsirInfo
 from .manager import TafaseerManager
@@ -21,6 +25,10 @@ __all__ = [
     "BACKUP_GITHUB_RAW_BASE_URL",
     "BACKUP_GITHUB_RELEASE_BASE_URL",
     "TAFASEER_CATALOG",
+    "TAFASEER_JSON_REMOTE_URLS",
+    "fetch_remote_catalog",
+    "load_local_catalog",
+    "update_catalog",
     "Category",
     "TafsirInfo",
     "TafaseerManager",

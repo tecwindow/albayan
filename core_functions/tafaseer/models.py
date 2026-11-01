@@ -40,34 +40,42 @@ class Category:
     sa3dy = "sa3dy"
     tabary = "tabary"
 
-    _category_in_arabic: Dict[str, str] = {
-        meta["arabic_name"]: cat_id for cat_id, meta in TAFASEER_CATALOG.items()
-    }
-
-    @classmethod
-    def is_valid(cls, category: str) -> bool:
-        return category in TAFASEER_CATALOG
-
-    @classmethod
-    def get_category_by_arabic_name(cls, arabic_name: str) -> Optional[str]:
-        return cls._category_in_arabic.get(arabic_name, None)
-
-    @classmethod
-    def get_arabic_name_by_category(cls, category: str) -> Optional[str]:
-        info = TAFASEER_CATALOG.get(category)
-        return info["arabic_name"] if info else None
-
-    @classmethod
-    def get_categories_in_arabic(cls) -> list:
-        return list(cls._category_in_arabic.keys())
-
-    @classmethod
-    def get_tafsir_info(cls, category: str) -> Optional[Dict[str, Any]]:
-        return TAFASEER_CATALOG.get(category)
+    _category_in_arabic: Dict[str, str] = {}
 
     @classmethod
     def get_all_catalog(cls) -> Dict[str, Dict[str, Any]]:
         return TAFASEER_CATALOG
+
+    @classmethod
+    def get_category_map(cls) -> Dict[str, str]:
+        mapping = {
+            meta["arabic_name"]: cat_id
+            for cat_id, meta in cls.get_all_catalog().items()
+            if isinstance(meta, dict) and "arabic_name" in meta
+        }
+        cls._category_in_arabic = mapping
+        return mapping
+
+    @classmethod
+    def is_valid(cls, category: str) -> bool:
+        return category in cls.get_all_catalog()
+
+    @classmethod
+    def get_category_by_arabic_name(cls, arabic_name: str) -> Optional[str]:
+        return cls.get_category_map().get(arabic_name, None)
+
+    @classmethod
+    def get_arabic_name_by_category(cls, category: str) -> Optional[str]:
+        info = cls.get_tafsir_info(category)
+        return info["arabic_name"] if (info and "arabic_name" in info) else None
+
+    @classmethod
+    def get_categories_in_arabic(cls) -> list:
+        return list(cls.get_category_map().keys())
+
+    @classmethod
+    def get_tafsir_info(cls, category: str) -> Optional[Dict[str, Any]]:
+        return cls.get_all_catalog().get(category)
 
     @classmethod
     def find_tafsir_db_path(cls, category: str) -> Optional[Path]:
@@ -166,7 +174,7 @@ class Category:
         if bundled_arabic:
             installed.append(bundled_arabic)
 
-        for arabic_name, cat_id in cls._category_in_arabic.items():
+        for arabic_name, cat_id in cls.get_category_map().items():
             if cat_id != DEFAULT_BUNDLED_TAFSIR_ID and cls.is_installed(cat_id):
                 if arabic_name not in installed:
                     installed.append(arabic_name)

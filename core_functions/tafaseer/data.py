@@ -1,4 +1,13 @@
-from typing import Dict, Any
+import json
+import os
+import sys
+from pathlib import Path
+from typing import Dict, Any, Optional, List
+import requests
+from utils.paths import paths
+from utils.logger import LoggerManager
+
+logger = LoggerManager.get_logger(__name__)
 
 DEFAULT_BUNDLED_TAFSIR_ID = "muyassar"
 
@@ -6,7 +15,18 @@ PRIMARY_TAFASEER_BASE_URL = "https://albayan.tecwindow.net/tafaseer"
 BACKUP_GITHUB_RAW_BASE_URL = "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer"
 BACKUP_GITHUB_RELEASE_BASE_URL = "https://github.com/tecwindow/albayan-data/releases/download/v1.0"
 
-TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
+# Ordered list of remote endpoints to fetch latest tafaseer.json
+TAFASEER_JSON_REMOTE_URLS: List[str] = [
+    "https://albayan.tecwindow.net/tafaseer/tafaseer.json",
+    "https://albayan.tecwindow.net/tafaseer.json",
+    "https://raw.githubusercontent.com/tecwindow/albayan/albayan_beta/database/tafaseer/tafaseer.json",
+    "https://raw.githubusercontent.com/tecwindow/albayan/main/database/tafaseer/tafaseer.json",
+    "https://raw.githubusercontent.com/tecwindow/albayan/master/database/tafaseer/tafaseer.json",
+    "https://raw.githubusercontent.com/tecwindow/albayan-data/main/tafaseer/tafaseer.json",
+]
+
+# Static fallback catalog guaranteed to always be available offline
+DEFAULT_CATALOG: Dict[str, Dict[str, Any]] = {
     "muyassar": {
         "id": "muyassar",
         "arabic_name": "الميسر",
@@ -144,3 +164,130 @@ TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = {
         ],
     },
 }
+
+
+def _validate_catalog(data: Any) -> bool:
+    """Validate that the loaded catalog data is a non-empty dictionary of valid tafsir metadata."""
+    if not isinstance(data, dict) or not data:
+        return False
+    for cat_id, info in data.items():
+        if not isinstance(cat_id, str) or not isinstance(info, dict):
+            return False
+        if "arabic_name" not in info or "mirrors" not in info:
+            return False
+    return True
+
+
+def get_bundled_json_path() -> Optional[Path]:
+    """Find the bundled tafaseer.json if available."""
+    candidates = [
+        paths.data_folder / "tafaseer" / "tafaseer.json",
+        Path(__file__).resolve().parents[2] / "database" / "tafaseer" / "tafaseer.json",
+        Path("database") / "tafaseer" / "tafaseer.json",
+    ]
+    for p in candidates:
+        if p.is_file():
+            return p
+    return None
+
+
+def get_cached_json_path() -> Path:
+    """Return the user cache path for tafaseer.json."""
+    return paths.tafaseer_folder / "tafaseer.json"
+
+
+def load_local_catalog() -> Dict[str, Dict[str, Any]]:
+    """
+    Load the catalog from local sources:
+    1. User cache (downloaded previously)
+    2. Bundled json file in database/tafaseer/tafaseer.json
+    3. Static DEFAULT_CATALOG fallback
+    """
+    # 1. Try cache
+    cache_path = get_cached_json_path()
+    if cache_path.is_file():
+        try:
+            with open(cache_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if _validate_catalog(data):
+                logger.debug(f"Loaded tafaseer catalog from cache: {cache_path}")
+                return data
+        except Exception as e:
+            logger.warning(f"Failed to read cached tafaseer.json: {e}")
+
+    # 2. Try bundled json
+    bundled_path = get_bundled_json_path()
+    if bundled_path:
+        try:
+            with open(bundled_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if _validate_catalog(data):
+                logger.debug(f"Loaded tafaseer catalog from bundled file: {bundled_path}")
+                return data
+        except Exception as e:
+            logger.warning(f"Failed to read bundled tafaseer.json: {e}")
+
+    # 3. Fallback
+    logger.debug("Using built-in DEFAULT_CATALOG fallback for tafaseer.")
+    return {k: v.copy() for k, v in DEFAULT_CATALOG.items()}
+
+
+def save_catalog_to_cache(catalog: Dict[str, Dict[str, Any]]) -> bool:
+    """Save the catalog dictionary to user cache as formatted JSON."""
+    cache_path = get_cached_json_path()
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(catalog, f, ensure_ascii=False, indent=2)
+        logger.debug(f"Saved updated tafaseer catalog to cache: {cache_path}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to save tafaseer catalog to cache: {e}")
+        return False
+
+
+# The active global catalog instance initialized from local storage
+TAFASEER_CATALOG: Dict[str, Dict[str, Any]] = load_local_catalog()
+
+
+def update_catalog(new_catalog: Dict[str, Dict[str, Any]], save_cache: bool = True) -> bool:
+    """Update TAFASEER_CATALOG in-place and optionally save to user cache."""
+    if not _validate_catalog(new_catalog):
+        logger.error("Invalid catalog format provided to update_catalog.")
+        return False
+
+    TAFASEER_CATALOG.clear()
+    TAFASEER_CATALOG.update(new_catalog)
+    if save_cache:
+        save_catalog_to_cache(new_catalog)
+    logger.info(f"Tafaseer catalog updated with {len(TAFASEER_CATALOG)} entries.")
+    return True
+
+
+def fetch_remote_catalog(timeout: int = 5) -> Optional[Dict[str, Dict[str, Any]]]:
+    """
+    Fetch the latest tafaseer.json from albayan.tecwindow.net or GitHub.
+    Returns the parsed catalog dictionary if successful, or None if unreachable.
+    """
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Albayan-Quran-App"})
+
+    for url in TAFASEER_JSON_REMOTE_URLS:
+        try:
+            logger.debug(f"Attempting to fetch tafaseer catalog from: {url}")
+            resp = session.get(url, timeout=timeout)
+            if resp.status_code == 200:
+                data = resp.json()
+                if _validate_catalog(data):
+                    logger.info(f"Successfully fetched tafaseer catalog from: {url}")
+                    update_catalog(data, save_cache=True)
+                    return data
+                else:
+                    logger.warning(f"Catalog fetched from {url} was invalid.")
+            else:
+                logger.debug(f"Fetch from {url} returned status code {resp.status_code}")
+        except Exception as e:
+            logger.debug(f"Failed to fetch tafaseer catalog from {url}: {e}")
+
+    logger.warning("Could not fetch remote tafaseer catalog from any URL.")
+    return None
