@@ -31,7 +31,7 @@ from utils.settings import Config
 from utils.logger import LoggerManager
 from utils.const import program_name, program_version, website, Globals
 from utils.paths import paths, is_installed, is_portable
-from utils.audio_player import bass
+from core_functions.audio_player import bass
 from theme import ThemeManager
 
 logger = LoggerManager.get_logger(__name__)

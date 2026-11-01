@@ -36,7 +36,7 @@ from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from ui.quran_interface import QuranInterface
 from core_functions.athkar.athkar_scheduler import AthkarScheduler
 from utils.update import UpdateManager
-from utils.audio_player import StartupSoundEffectPlayer, VolumeController
+from core_functions.audio_player import StartupSoundEffectPlayer, VolumeController
 
 
 class SingleInstanceApplication(QApplication):

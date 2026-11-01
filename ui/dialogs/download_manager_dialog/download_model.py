@@ -6,7 +6,7 @@ from core_functions.Reciters import RecitersManager
 from core_functions.quran.types import Surah
 
 from typing import List, Dict, Any, Optional
-from utils.audio_player import status
+from core_functions.audio_player import status
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)

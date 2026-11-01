@@ -1,5 +1,5 @@
 from PySide6.QtCore import QTimer
-from utils.audio_player import SurahPlayer
+from core_functions.audio_player import SurahPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.logger import LoggerManager
 

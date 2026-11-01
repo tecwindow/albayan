@@ -11,7 +11,7 @@ from apscheduler.triggers.cron import CronTrigger
 from sqlalchemy.exc import IntegrityError
 from .athkar_db_manager import AthkarDBManager
 from .athkar_refresher import AthkarRefresher
-from utils.audio_player import AthkarPlayer
+from core_functions.audio_player import AthkarPlayer
 from utils.const import Globals, program_icon
 from utils.logger import LoggerManager
 from exceptions.base import ErrorMessage

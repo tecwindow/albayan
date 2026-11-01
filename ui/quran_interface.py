@@ -64,7 +64,7 @@ from utils.user_data import PreferencesManager
 from utils.const import program_name, program_icon, Globals
 from utils.paths import paths
 from utils.logger import LoggerManager
-from utils.audio_player import SoundEffectPlayer
+from core_functions.audio_player import SoundEffectPlayer
 from exceptions.error_decorators import exception_handler
 
 logger = LoggerManager.get_logger(__name__)

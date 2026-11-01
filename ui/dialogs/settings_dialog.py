@@ -30,7 +30,7 @@ from utils.const import program_english_name, Globals
 from utils.paths import paths
 from utils.settings import Config
 from utils.logger import LogLevel, LoggerManager
-from utils.audio_player import (
+from core_functions.audio_player import (
     bass_initializer,
     AthkarPlayer,
     AyahPlayer,

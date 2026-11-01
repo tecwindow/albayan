@@ -20,10 +20,10 @@ from PySide6.QtWidgets import (
 )
 from core_functions.Reciters import SurahReciter
 from .FilterManager import Item, FilterManager
-from utils.audio_player.audio_player_thread import AudioPlayerThread
+from core_functions.audio_player.audio_player_thread import AudioPlayerThread
 from utils.const import Globals, program_name
 from utils.paths import paths
-from utils.audio_player import SurahPlayer
+from core_functions.audio_player import SurahPlayer
 from utils.universal_speech import UniversalSpeech
 from utils.user_data import PreferencesManager
 from utils.settings import Config

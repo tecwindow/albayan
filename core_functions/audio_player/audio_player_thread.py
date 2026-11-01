@@ -1,7 +1,7 @@
 import time
 from typing import Optional
 from PySide6.QtCore import QThread, QTimer, Signal
-from utils.audio_player import AyahPlayer
+from .ayah_player import AyahPlayer
 from utils.logger import LoggerManager
 from exceptions.base import ErrorMessage
 

@@ -1,6 +1,9 @@
 from utils.settings import Config
 from utils.universal_speech import UniversalSpeech
-from utils.audio_player import AyahPlayer, SoundEffectPlayer, AthkarPlayer, SurahPlayer
+from .ayah_player import AyahPlayer
+from .sound_effect_player import SoundEffectPlayer
+from .athkar_player import AthkarPlayer
+from .sura_player import SurahPlayer
 from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)

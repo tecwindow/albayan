@@ -3,8 +3,8 @@ from PySide6.QtWidgets import QToolBar, QPushButton, QSlider, QMessageBox
 from PySide6.QtCore import Qt, Signal, QObject
 from core_functions.quran.quran_manager import QuranManager
 from core_functions.Reciters import AyahReciter
-from utils.audio_player import AyahPlayer
-from utils.audio_player.audio_player_thread import AudioPlayerThread
+from core_functions.audio_player import AyahPlayer
+from core_functions.audio_player.audio_player_thread import AudioPlayerThread
 from utils.settings import Config
 from utils.paths import paths
 from utils.logger import LoggerManager
