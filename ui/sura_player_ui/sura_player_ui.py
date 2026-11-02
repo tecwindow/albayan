@@ -135,7 +135,7 @@ class SuraPlayerWindow(QMainWindow):
         self.next_surah_button.setAccessibleName("السورة التالية")
         self.go_to_surah_button = QPushButton(qta.icon("fa5s.location-arrow"), "")
         self.go_to_surah_button.setAccessibleName("الذهاب إلى سورة برقمها")
-        self.go_to_surah_button.setToolTip("الذهاب إلى سورة برقمها (Ctrl+G)")
+        self.go_to_surah_button.setToolTip("الذهاب إلى سورة برقمها")
         self.volume_down_button = QPushButton(qta.icon("fa5s.volume-down"), "")
         self.volume_down_button.setAccessibleName("خفض الصوت")
         self.volume_up_button = QPushButton(qta.icon("fa5s.volume-up"), "")
@@ -210,7 +210,7 @@ class SuraPlayerWindow(QMainWindow):
         self.menubar.next_surah_action.triggered.connect(self.next_surah)
         self.menubar.previous_surah_action.triggered.connect(self.previous_surah)
         self.menubar.go_to_surah_action.triggered.connect(self.go_to_surah_by_number)
-        QShortcut(QKeySequence("Ctrl+G"), self).activated.connect(self.go_to_surah_by_number)
+
         self.menubar.previous_reciter_action.triggered.connect(self.previous_reciter)
         self.menubar.next_reciter_action.triggered.connect(self.next_reciter)
         self.menubar.set_start_action.triggered.connect(
