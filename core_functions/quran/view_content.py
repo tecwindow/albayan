@@ -26,13 +26,44 @@ class ViewContent:
     def edit_label(self) -> str:
         if self.mode == NavigationMode.SURAH:
             return self.start_ayah.sura_name
+
         elif self.mode == NavigationMode.CUSTOM_RANGE:
             start_ayah = self.start_ayah
             end_ayah = self.end_ayah
-            return f"آية {start_ayah.number_in_surah} {start_ayah.sura_name} / آية {end_ayah.number_in_surah} {end_ayah.sura_name}"
+
+            if not start_ayah or not end_ayah:
+                return "نطاق مخصص"
+
+            range_attributes = {
+                "صفحة": ("page", "الصفحة"),
+                "جزء": ("juz", "الجزء"),
+                "حزب": ("hizb", "الحزب"),
+                "ربع": ("hizbQuarter", "الربع"),
+            }
+
+            if self.label in range_attributes:
+                attribute, unit = range_attributes[self.label]
+
+                start_value = getattr(start_ayah, attribute)
+                end_value = getattr(end_ayah, attribute)
+
+                start_label = f"{unit} {start_value}"
+                end_label = f"{unit} {end_value}"
+            else:
+                start_label = ""
+                end_label = ""
+
+            return (
+                f"{start_label} {start_ayah.sura_name} "
+                f"الآية {start_ayah.number_in_surah} / "
+                f"{end_label} {end_ayah.sura_name} "
+                f"الآية {end_ayah.number_in_surah}"
+            ).strip()
+
         else:
             return f"ال{self.label} {self.number}"
-        
+
+
     @property
     def start_ayah(self) -> Optional[Ayah]:
         ayah_row = (

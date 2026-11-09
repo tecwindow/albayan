@@ -337,7 +337,19 @@ class QuranManager:
             f"Custom range resolved: type='{range_type}', start_ayah={start_num}, "
             f"end_ayah={end_num}, count={len(ayahs)}"
         )
-        view_content = self.get_view_content(number=None, label="نطاق", mode=self.navigation_mode, ayahs=ayahs)
+        range_labels = {
+            "page": "صفحة",
+            "juz": "جزء",
+            "hizb": "حزب",
+            "quarter": "ربع",
+        }
+
+        view_content = self.get_view_content(
+            number=None,
+            label=range_labels.get(range_type, "نطاق"),
+            mode=self.navigation_mode,
+            ayahs=ayahs
+        )
 
         return view_content
 
