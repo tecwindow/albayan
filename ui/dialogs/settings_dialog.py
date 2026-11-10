@@ -95,6 +95,10 @@ class SettingsDialog(QDialog):
         self.tree_widget.addTopLevelItem(downloading_item)
         self.tree_widget.addTopLevelItem(search_item)
 
+        self.shortcuts_item = QTreeWidgetItem(["الاختصارات"])
+        self.shortcuts_item.setIcon(0, qta.icon("fa5s.keyboard"))
+        self.tree_widget.addTopLevelItem(self.shortcuts_item)
+
         # Stacked widget to switch views
         self.stacked_widget = QStackedWidget()
 
@@ -528,6 +532,28 @@ class SettingsDialog(QDialog):
         self.stacked_widget.addWidget(self.group_surah_player)
         self.stacked_widget.addWidget(self.group_downloading)
         self.stacked_widget.addWidget(self.group_search)
+
+        # Shortcuts section
+        self.group_shortcuts = QGroupBox("إعدادات الاختصارات")
+        self.group_shortcuts_layout = QVBoxLayout()
+        shortcuts_desc = QLabel(
+            "تتيح لك نافذة إدارة الاختصارات التحكم الكامل في اختصارات لوحة المفاتيح في البرنامج:\n"
+            "• تعديل أي اختصار أو تغييره عبر الضغط على المفاتيح وتركها.\n"
+            "• تعطيل أي اختصار لا تحتاجه أو إزالته.\n"
+            "• إضافة اختصارات جديدة للإجراءات.\n"
+            "• استعادة أي اختصار أو كافة الاختصارات إلى الوضع الافتراضي."
+        )
+        shortcuts_desc.setWordWrap(True)
+        self.group_shortcuts_layout.addWidget(shortcuts_desc)
+
+        self.btn_open_shortcuts_dialog = QPushButton("فتح نافذة إدارة وتخصيص الاختصارات...")
+        self.btn_open_shortcuts_dialog.setAccessibleName("فتح نافذة إدارة وتخصيص اختصارات لوحة المفاتيح")
+        self.btn_open_shortcuts_dialog.setIcon(qta.icon("fa5s.keyboard"))
+        self.btn_open_shortcuts_dialog.clicked.connect(self.open_shortcuts_dialog)
+        self.group_shortcuts_layout.addWidget(self.btn_open_shortcuts_dialog)
+        self.group_shortcuts_layout.addStretch()
+        self.group_shortcuts.setLayout(self.group_shortcuts_layout)
+        self.stacked_widget.addWidget(self.group_shortcuts)
 
         #        self.tree_widget.currentItemChanged.connect(lambda current, previous: self.stacked_widget.setCurrentIndex(self.tree_widget.indexOfTopLevelItem(current)))
 
@@ -984,6 +1010,30 @@ class SettingsDialog(QDialog):
         if hasattr(self, "font_preview_label"):
             self.font_preview_label.setText(f"معاينة الخط الحالي: {details}")
         logger.debug(f"Updated font preview label: {details}")
+
+    def open_shortcuts_dialog(self):
+        """Open the dedicated shortcuts manager dialog."""
+        from ui.dialogs.shortcuts_dialog import ShortcutsDialog
+        dlg = ShortcutsDialog(self)
+        dlg.shortcuts_changed.connect(self._on_shortcuts_changed)
+        dlg.exec()
+        self._on_shortcuts_changed()
+
+    def _on_shortcuts_changed(self):
+        """Re-apply updated shortcuts to the application menu bar and main window."""
+        try:
+            if hasattr(self.parent, "menu_bar") and self.parent.menu_bar:
+                self.parent.menu_bar.setup_shortcuts()
+            if hasattr(self.parent, "set_shortcut"):
+                self.parent.set_shortcut()
+            logger.info("Shortcuts re-applied successfully.")
+        except Exception as e:
+            logger.error(f"Error re-applying shortcuts: {e}", exc_info=True)
+
+    def open_shortcuts_tab(self):
+        """Navigate to the shortcuts tab in Settings."""
+        self.tree_widget.setCurrentItem(self.shortcuts_item)
+        self.btn_open_shortcuts_dialog.setFocus()
 
     def open_listening_tab_and_focus_reciter(self):
         self.tree_widget.setCurrentItem(self.listening_item)

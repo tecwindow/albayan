@@ -31,6 +31,7 @@ from utils.settings import Config
 from utils.logger import LoggerManager
 from utils.const import program_name, program_version, website, Globals
 from utils.paths import paths, is_installed, is_portable
+from utils.shortcuts_manager import ShortcutsManager
 from core_functions.audio_player import bass
 from theme import ThemeManager
 
@@ -164,8 +165,8 @@ class MenuBar(QMenuBar):
 
         self.tafaseer_menu = QMenu("التفسير")
         self.tafaseer_menu.setAccessibleName("قائمة المفسرين")
-        tafaseershortcut = QShortcut(QKeySequence("Shift+T"), self)
-        tafaseershortcut.activated.connect(self.OnTafaseerMenu)
+        self.tafaseer_shortcut = QShortcut(QKeySequence("Shift+T"), self)
+        self.tafaseer_shortcut.activated.connect(self.OnTafaseerMenu)
         self.tafaseer_menu.aboutToShow.connect(self.update_tafaseer_menu)
         self.update_tafaseer_menu()
         self.verse_info_action = QAction("أسباب نزول الآية", self)
@@ -924,81 +925,104 @@ class MenuBar(QMenuBar):
         self,
         disable=False,
     ):
-        logger.debug("Setting up shortcuts.")
-        shortcuts = {
+        logger.debug(f"Setting up shortcuts (disable={disable}).")
+        action_map = {
             # Navigation actions
-            self.next_action: [
-                "Ctrl+N",
-                "Ctrl+Down",
-                "Alt+Right",
-                QKeySequence(Qt.Key.Key_PageDown),
-            ],
-            self.previous_action: [
-                "Ctrl+B",
-                QKeySequence(Qt.Key.Key_PageUp),
-                "Ctrl+Up",
-                "Alt+Left",
-            ],
-            self.go_to_saved_position_action: ["Ctrl+Backspace"],
-            self.search_action: ["Ctrl+F"],
-            self.go_to_action: ["Ctrl+G"],
-            self.go_to_ayah_action: ["Shift+G"],
-            self.quick_access_action: ["Ctrl+Q"],
-            self.close_action: ["Ctrl+W", "Ctrl+F4"],
-            self.exit_action: ["Ctrl+Shift+W", "Ctrl+Shift+F4"],
+            "next_action": self.next_action,
+            "previous_action": self.previous_action,
+            "go_to_saved_position_action": self.go_to_saved_position_action,
+            "search_action": self.search_action,
+            "go_to_action": self.go_to_action,
+            "go_to_ayah_action": self.go_to_ayah_action,
+            "quick_access_action": self.quick_access_action,
+            "close_action": self.close_action,
+            "exit_action": self.exit_action,
             # Playback controls
-            self.play_pause_action: ["K", "Ctrl+P"],
-            self.stop_action: ["Ctrl+E"],
-            self.rewind_action: ["J", "Ctrl+Alt+Left"],
-            self.forward_action: ["L", "Ctrl+Alt+Right"],
-            self.replay_action: ["Shift+J"],
-            self.play_next_action: ["Ctrl+Shift+N"],
-            self.play_previous_action: ["Ctrl+Shift+B"],
+            "play_pause_action": self.play_pause_action,
+            "stop_action": self.stop_action,
+            "rewind_action": self.rewind_action,
+            "forward_action": self.forward_action,
+            "replay_action": self.replay_action,
+            "play_next_action": self.play_next_action,
+            "play_previous_action": self.play_previous_action,
             # Actions
-            self.save_position_action: ["Ctrl+S"],
-            self.save_bookmark_action: ["Ctrl+D"],
-            self.verse_tafsir_action: ["Ctrl+T"],
-            self.verse_info_action: ["Shift+R"],
-            self.verse_grammar_action: ["Shift+E"],
-            self.copy_verse_action: ["Shift+C"],
-            # info
-            self.ayah_info_action: ["Shift+I", "Alt+Shift+7"],
-            self.surah_info_action: ["Alt+Shift+1", "Ctrl+I"],
-            self.page_info_action: ["Alt+Shift+2"],
-            self.quarter_info_action: ["Alt+Shift+3"],
-            self.hizb_info_action: ["Alt+Shift+4"],
-            self.juz_info_action: ["Alt+Shift+5"],
-            self.moshaf_info_action: ["Alt+Shift+6"],
-            # tools
-            self.sura_player_action: ["Shift+P"],
-            self.athkar_action: ["Shift+A"],
-            self.bookmark_manager_action: ["Shift+D"],
-            self.tasbih_action: ["Shift+S"],
-            self.download_manager_action: ["Ctrl+J"],
-            self.message_for_you_action: ["Shift+M"],
+            "save_position_action": self.save_position_action,
+            "save_bookmark_action": self.save_bookmark_action,
+            "verse_tafsir_action": self.verse_tafsir_action,
+            "verse_info_action": self.verse_info_action,
+            "verse_grammar_action": self.verse_grammar_action,
+            "copy_verse_action": self.copy_verse_action,
+            # Info
+            "ayah_info_action": self.ayah_info_action,
+            "surah_info_action": self.surah_info_action,
+            "page_info_action": self.page_info_action,
+            "quarter_info_action": self.quarter_info_action,
+            "hizb_info_action": self.hizb_info_action,
+            "juz_info_action": self.juz_info_action,
+            "moshaf_info_action": self.moshaf_info_action,
+            # Tools
+            "sura_player_action": self.sura_player_action,
+            "athkar_action": self.athkar_action,
+            "bookmark_manager_action": self.bookmark_manager_action,
+            "tasbih_action": self.tasbih_action,
+            "download_manager_action": self.download_manager_action,
+            "message_for_you_action": self.message_for_you_action,
             # Preferences
-            self.settings_action: ["Alt+S", "F3"],
-            self.change_reciter_action: ["Ctrl+Shift+R"],
-            self.change_after_listening_action: ["Ctrl+Shift+U"],
-            self.change_repeat_limit_action: ["Ctrl+Shift+Y"],
-            self.change_text_repeat_action: ["Ctrl+Shift+T"],
-            self.change_after_text_action: ["Ctrl+Shift+E"],
+            "settings_action": self.settings_action,
+            "change_reciter_action": self.change_reciter_action,
+            "change_after_listening_action": self.change_after_listening_action,
+            "change_repeat_limit_action": self.change_repeat_limit_action,
+            "change_text_repeat_action": self.change_text_repeat_action,
+            "change_after_text_action": self.change_after_text_action,
             # Help
-            self.user_guide_action: ["F1"],
-            self.whats_new_action: ["F2"],
-            self.shortcuts_action: ["Shift+F1"],
-            self.marks_action: ["Shift+F2"],
-            self.update_program_action: ["Ctrl+F2"],
-            self.open_log_action: ["Shift+L"],
-            self.about_program_action: ["Ctrl+F1"],
+            "user_guide_action": self.user_guide_action,
+            "whats_new_action": self.whats_new_action,
+            "shortcuts_action": self.shortcuts_action,
+            "marks_action": self.marks_action,
+            "update_program_action": self.update_program_action,
+            "open_log_action": self.open_log_action,
+            "about_program_action": self.about_program_action,
         }
 
-        for widget, key_sequence in shortcuts.items():
-            key_sequence = (
-                [key_sequence] if isinstance(key_sequence, str) else key_sequence
+        browse_modes = [
+            ("browse_mode_surah", NavigationMode.SURAH),
+            ("browse_mode_page", NavigationMode.PAGE),
+            ("browse_mode_quarter", NavigationMode.QUARTER),
+            ("browse_mode_hizb", NavigationMode.HIZB),
+            ("browse_mode_juz", NavigationMode.JUZ),
+            ("browse_mode_custom", NavigationMode.CUSTOM_RANGE),
+        ]
+
+        if disable:
+            for widget in action_map.values():
+                widget.setShortcuts([])
+            for _, mode in browse_modes:
+                if mode.value < len(self.browse_mode_actions):
+                    self.browse_mode_actions[mode.value].setShortcuts([])
+            if hasattr(self, "tafaseer_shortcut") and self.tafaseer_shortcut:
+                self.tafaseer_shortcut.setKey(QKeySequence())
+            logger.debug("All shortcuts disabled.")
+            return
+
+        for action_id, widget in action_map.items():
+            shortcuts = ShortcutsManager.get(action_id)
+            widget.setShortcuts([QKeySequence(s) for s in shortcuts if s])
+            logger.debug(f"Set shortcuts for '{action_id}' ({widget.text()}): {shortcuts}")
+
+        for action_id, mode in browse_modes:
+            if mode.value < len(self.browse_mode_actions):
+                shortcuts = ShortcutsManager.get(action_id)
+                self.browse_mode_actions[mode.value].setShortcuts(
+                    [QKeySequence(s) for s in shortcuts if s]
+                )
+                logger.debug(f"Set browse mode shortcuts for '{action_id}': {shortcuts}")
+
+        if hasattr(self, "tafaseer_shortcut") and self.tafaseer_shortcut:
+            tafaseer_shortcuts = ShortcutsManager.get("tafaseer_menu_action")
+            self.tafaseer_shortcut.setKey(
+                QKeySequence(tafaseer_shortcuts[0]) if tafaseer_shortcuts else QKeySequence()
             )
-            widget.setShortcuts([QKeySequence(key) for key in key_sequence])
-            logger.debug(f"Set shortcuts for {widget.text()}: {key_sequence}")
+            logger.debug(f"Updated tafaseer shortcut to: {tafaseer_shortcuts}")
 
         logger.debug("Shortcuts set up completed.")
 

@@ -64,6 +64,7 @@ from utils.user_data import PreferencesManager
 from utils.const import program_name, program_icon, Globals
 from utils.paths import paths
 from utils.logger import LoggerManager
+from utils.shortcuts_manager import ShortcutsManager
 from core_functions.audio_player import SoundEffectPlayer
 from exceptions.error_decorators import exception_handler
 
@@ -162,15 +163,28 @@ class QuranInterface(QMainWindow):
         self.move(window_geometry.topLeft())
 
     def set_shortcut(self):
-        QShortcut(QKeySequence("Ctrl+M"), self).activated.connect(
-            lambda: self.quran_view.setFocus()
-        )
-        QShortcut(QKeySequence("C"), self).activated.connect(self.say_played_ayah)
-        QShortcut(QKeySequence("B"), self).activated.connect(self.say_repeat_ayah)
-        QShortcut(QKeySequence("Alt+Shift+C"), self).activated.connect(
-            lambda: self.toolbar.change_ayah_focus(manual=True)
-        )
-        QShortcut(QKeySequence("V"), self).activated.connect(self.say_focused_ayah)
+        """Set up quick shortcuts dynamically using ShortcutsManager."""
+        if not hasattr(self, "_quick_shortcuts"):
+            self._quick_shortcuts = []
+        for sc in self._quick_shortcuts:
+            sc.setEnabled(False)
+            sc.deleteLater()
+        self._quick_shortcuts.clear()
+
+        def _register(action_id, slot):
+            keys = ShortcutsManager.get(action_id)
+            for key_str in keys:
+                if key_str:
+                    sc = QShortcut(QKeySequence(key_str), self)
+                    sc.activated.connect(slot)
+                    self._quick_shortcuts.append(sc)
+                    logger.debug(f"Registered quick shortcut: {action_id} -> {key_str}")
+
+        _register("focus_quran_view", lambda: self.quran_view.setFocus())
+        _register("say_played_ayah", self.say_played_ayah)
+        _register("say_repeat_ayah", self.say_repeat_ayah)
+        _register("change_ayah_focus", lambda: self.toolbar.change_ayah_focus(manual=True))
+        _register("say_focused_ayah", self.say_focused_ayah)
 
     def create_widgets(self):
         central_widget = QWidget()

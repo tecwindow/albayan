@@ -12,6 +12,9 @@ from utils.logger import LogLevel, LoggerManager
 sys.excepthook = LoggerManager.my_excepthook
 # load the config file
 Config.load_settings()
+# load shortcuts
+from utils.shortcuts_manager import ShortcutsManager
+ShortcutsManager.load()
 # setup the logger
 LoggerManager.setup_logger(
     log_file=paths.log_file,
