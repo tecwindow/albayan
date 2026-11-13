@@ -11,331 +11,281 @@ from utils.logger import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
-# Complete built-in default shortcuts dictionary.
-# Preserved in code as source of truth and fallback.
-DEFAULT_SHORTCUTS: Dict[str, dict] = {
-    # --- Navigation ---
-    "next_action": {
-        "label": "التالي",
-        "shortcuts": ["Ctrl+N", "Ctrl+Down", "Alt+Right", "PgDown"],
-        "category": "التنقل",
+# 3-level built-in default shortcuts dictionary:
+# Level 1: Category -> Level 2: Action ID -> Level 3: Action details & shortcuts list.
+DEFAULT_SHORTCUTS: Dict[str, Dict[str, dict]] = {
+    "التنقل": {
+        "next_action": {
+            "label": "التالي",
+            "shortcuts": ["Ctrl+N", "Ctrl+Down", "Alt+Right", "PgDown"],
+        },
+        "previous_action": {
+            "label": "السابق",
+            "shortcuts": ["Ctrl+B", "PgUp", "Ctrl+Up", "Alt+Left"],
+        },
+        "go_to_saved_position_action": {
+            "label": "الذهاب إلى الموضع المحفوظ",
+            "shortcuts": ["Ctrl+Backspace"],
+        },
+        "search_action": {
+            "label": "البحث",
+            "shortcuts": ["Ctrl+F"],
+        },
+        "go_to_action": {
+            "label": "اذهب إلى",
+            "shortcuts": ["Ctrl+G"],
+        },
+        "go_to_ayah_action": {
+            "label": "الذهاب إلى آية",
+            "shortcuts": ["Shift+G"],
+        },
+        "quick_access_action": {
+            "label": "الوصول السريع",
+            "shortcuts": ["Ctrl+Q"],
+        },
+        "close_action": {
+            "label": "إغلاق النافذة",
+            "shortcuts": ["Ctrl+W", "Ctrl+F4"],
+        },
+        "exit_action": {
+            "label": "إغلاق البرنامج",
+            "shortcuts": ["Ctrl+Shift+W", "Ctrl+Shift+F4"],
+        },
     },
-    "previous_action": {
-        "label": "السابق",
-        "shortcuts": ["Ctrl+B", "PgUp", "Ctrl+Up", "Alt+Left"],
-        "category": "التنقل",
+    "وضع التصفح": {
+        "browse_mode_surah": {
+            "label": "وضع السور",
+            "shortcuts": ["Ctrl+1"],
+        },
+        "browse_mode_page": {
+            "label": "وضع الصفحات",
+            "shortcuts": ["Ctrl+2"],
+        },
+        "browse_mode_quarter": {
+            "label": "وضع الأرباع",
+            "shortcuts": ["Ctrl+3"],
+        },
+        "browse_mode_hizb": {
+            "label": "وضع الأحزاب",
+            "shortcuts": ["Ctrl+4"],
+        },
+        "browse_mode_juz": {
+            "label": "وضع الأجزاء",
+            "shortcuts": ["Ctrl+5"],
+        },
+        "browse_mode_custom": {
+            "label": "وضع مخصص",
+            "shortcuts": ["Ctrl+6"],
+        },
     },
-    "go_to_saved_position_action": {
-        "label": "الذهاب إلى الموضع المحفوظ",
-        "shortcuts": ["Ctrl+Backspace"],
-        "category": "التنقل",
+    "المشغل": {
+        "play_pause_action": {
+            "label": "تشغيل/إيقاف مؤقت",
+            "shortcuts": ["K", "Ctrl+P"],
+        },
+        "stop_action": {
+            "label": "إيقاف",
+            "shortcuts": ["Ctrl+E"],
+        },
+        "rewind_action": {
+            "label": "ترجيع",
+            "shortcuts": ["J", "Ctrl+Alt+Left"],
+        },
+        "forward_action": {
+            "label": "تقديم",
+            "shortcuts": ["L", "Ctrl+Alt+Right"],
+        },
+        "replay_action": {
+            "label": "إعادة",
+            "shortcuts": ["Shift+J"],
+        },
+        "play_next_action": {
+            "label": "تشغيل الآية التالية",
+            "shortcuts": ["Ctrl+Shift+N"],
+        },
+        "play_previous_action": {
+            "label": "تشغيل الآية السابقة",
+            "shortcuts": ["Ctrl+Shift+B"],
+        },
     },
-    "search_action": {
-        "label": "البحث",
-        "shortcuts": ["Ctrl+F"],
-        "category": "التنقل",
+    "مفاتيح سريعة": {
+        "focus_quran_view": {
+            "label": "التركيز على نص القرآن",
+            "shortcuts": ["Ctrl+M"],
+        },
+        "say_played_ayah": {
+            "label": "قراءة الآية المشغلة",
+            "shortcuts": ["C"],
+        },
+        "say_repeat_ayah": {
+            "label": "قراءة حالة التكرار",
+            "shortcuts": ["B"],
+        },
+        "change_ayah_focus": {
+            "label": "تغيير التركيز على الآية",
+            "shortcuts": ["Alt+Shift+C"],
+        },
+        "say_focused_ayah": {
+            "label": "قراءة الآية المحددة",
+            "shortcuts": ["V"],
+        },
     },
-    "go_to_action": {
-        "label": "اذهب إلى",
-        "shortcuts": ["Ctrl+G"],
-        "category": "التنقل",
+    "الإجراءات": {
+        "save_position_action": {
+            "label": "حفظ الموضع الحالي",
+            "shortcuts": ["Ctrl+S"],
+        },
+        "save_bookmark_action": {
+            "label": "حفظ علامة",
+            "shortcuts": ["Ctrl+D"],
+        },
+        "verse_tafsir_action": {
+            "label": "تفسير الآية",
+            "shortcuts": ["Ctrl+T"],
+        },
+        "tafaseer_menu_action": {
+            "label": "قائمة التفسير",
+            "shortcuts": ["Shift+T"],
+        },
+        "verse_info_action": {
+            "label": "أسباب نزول الآية",
+            "shortcuts": ["Shift+R"],
+        },
+        "verse_grammar_action": {
+            "label": "إعراب الآية",
+            "shortcuts": ["Shift+E"],
+        },
+        "copy_verse_action": {
+            "label": "نسخ الآية",
+            "shortcuts": ["Shift+C"],
+        },
     },
-    "go_to_ayah_action": {
-        "label": "الذهاب إلى آية",
-        "shortcuts": ["Shift+G"],
-        "category": "التنقل",
+    "المعلومات": {
+        "ayah_info_action": {
+            "label": "معلومات الآية",
+            "shortcuts": ["Shift+I", "Alt+Shift+7"],
+        },
+        "surah_info_action": {
+            "label": "معلومات السورة",
+            "shortcuts": ["Alt+Shift+1", "Ctrl+I"],
+        },
+        "page_info_action": {
+            "label": "معلومات الصفحة",
+            "shortcuts": ["Alt+Shift+2"],
+        },
+        "quarter_info_action": {
+            "label": "معلومات الربع",
+            "shortcuts": ["Alt+Shift+3"],
+        },
+        "hizb_info_action": {
+            "label": "معلومات الحزب",
+            "shortcuts": ["Alt+Shift+4"],
+        },
+        "juz_info_action": {
+            "label": "معلومات الجزء",
+            "shortcuts": ["Alt+Shift+5"],
+        },
+        "moshaf_info_action": {
+            "label": "معلومات المصحف",
+            "shortcuts": ["Alt+Shift+6"],
+        },
     },
-    "quick_access_action": {
-        "label": "الوصول السريع",
-        "shortcuts": ["Ctrl+Q"],
-        "category": "التنقل",
+    "الأدوات": {
+        "sura_player_action": {
+            "label": "مشغل سور القرآن",
+            "shortcuts": ["Shift+P"],
+        },
+        "athkar_action": {
+            "label": "الأذكار",
+            "shortcuts": ["Shift+A"],
+        },
+        "bookmark_manager_action": {
+            "label": "مدير العلامات",
+            "shortcuts": ["Shift+D"],
+        },
+        "tasbih_action": {
+            "label": "المسبحة",
+            "shortcuts": ["Shift+S"],
+        },
+        "download_manager_action": {
+            "label": "مدير التنزيلات",
+            "shortcuts": ["Ctrl+J"],
+        },
+        "message_for_you_action": {
+            "label": "رسالة لك",
+            "shortcuts": ["Shift+M"],
+        },
     },
-    "close_action": {
-        "label": "إغلاق النافذة",
-        "shortcuts": ["Ctrl+W", "Ctrl+F4"],
-        "category": "التنقل",
+    "التفضيلات": {
+        "settings_action": {
+            "label": "الإعدادات",
+            "shortcuts": ["Alt+S", "F3"],
+        },
+        "change_reciter_action": {
+            "label": "تغيير القارئ",
+            "shortcuts": ["Ctrl+Shift+R"],
+        },
+        "change_after_listening_action": {
+            "label": "تغيير الإجراء بعد الاستماع",
+            "shortcuts": ["Ctrl+Shift+U"],
+        },
+        "change_repeat_limit_action": {
+            "label": "تغيير عدد مرات تكرار الآية",
+            "shortcuts": ["Ctrl+Shift+Y"],
+        },
+        "change_text_repeat_action": {
+            "label": "تغيير عدد مرات تكرار النص",
+            "shortcuts": ["Ctrl+Shift+T"],
+        },
+        "change_after_text_action": {
+            "label": "تغيير الإجراء بعد النص",
+            "shortcuts": ["Ctrl+Shift+E"],
+        },
     },
-    "exit_action": {
-        "label": "إغلاق البرنامج",
-        "shortcuts": ["Ctrl+Shift+W", "Ctrl+Shift+F4"],
-        "category": "التنقل",
-    },
-    # --- Browse Mode ---
-    "browse_mode_surah": {
-        "label": "وضع السور",
-        "shortcuts": ["Ctrl+1"],
-        "category": "وضع التصفح",
-    },
-    "browse_mode_page": {
-        "label": "وضع الصفحات",
-        "shortcuts": ["Ctrl+2"],
-        "category": "وضع التصفح",
-    },
-    "browse_mode_quarter": {
-        "label": "وضع الأرباع",
-        "shortcuts": ["Ctrl+3"],
-        "category": "وضع التصفح",
-    },
-    "browse_mode_hizb": {
-        "label": "وضع الأحزاب",
-        "shortcuts": ["Ctrl+4"],
-        "category": "وضع التصفح",
-    },
-    "browse_mode_juz": {
-        "label": "وضع الأجزاء",
-        "shortcuts": ["Ctrl+5"],
-        "category": "وضع التصفح",
-    },
-    "browse_mode_custom": {
-        "label": "وضع مخصص",
-        "shortcuts": ["Ctrl+6"],
-        "category": "وضع التصفح",
-    },
-    # --- Playback ---
-    "play_pause_action": {
-        "label": "تشغيل/إيقاف مؤقت",
-        "shortcuts": ["K", "Ctrl+P"],
-        "category": "المشغل",
-    },
-    "stop_action": {
-        "label": "إيقاف",
-        "shortcuts": ["Ctrl+E"],
-        "category": "المشغل",
-    },
-    "rewind_action": {
-        "label": "ترجيع",
-        "shortcuts": ["J", "Ctrl+Alt+Left"],
-        "category": "المشغل",
-    },
-    "forward_action": {
-        "label": "تقديم",
-        "shortcuts": ["L", "Ctrl+Alt+Right"],
-        "category": "المشغل",
-    },
-    "replay_action": {
-        "label": "إعادة",
-        "shortcuts": ["Shift+J"],
-        "category": "المشغل",
-    },
-    "play_next_action": {
-        "label": "تشغيل الآية التالية",
-        "shortcuts": ["Ctrl+Shift+N"],
-        "category": "المشغل",
-    },
-    "play_previous_action": {
-        "label": "تشغيل الآية السابقة",
-        "shortcuts": ["Ctrl+Shift+B"],
-        "category": "المشغل",
-    },
-    # --- Quick Keys (QuranInterface shortcuts) ---
-    "focus_quran_view": {
-        "label": "التركيز على نص القرآن",
-        "shortcuts": ["Ctrl+M"],
-        "category": "مفاتيح سريعة",
-    },
-    "say_played_ayah": {
-        "label": "قراءة الآية المشغلة",
-        "shortcuts": ["C"],
-        "category": "مفاتيح سريعة",
-    },
-    "say_repeat_ayah": {
-        "label": "قراءة حالة التكرار",
-        "shortcuts": ["B"],
-        "category": "مفاتيح سريعة",
-    },
-    "change_ayah_focus": {
-        "label": "تغيير التركيز على الآية",
-        "shortcuts": ["Alt+Shift+C"],
-        "category": "مفاتيح سريعة",
-    },
-    "say_focused_ayah": {
-        "label": "قراءة الآية المحددة",
-        "shortcuts": ["V"],
-        "category": "مفاتيح سريعة",
-    },
-    # --- Actions ---
-    "save_position_action": {
-        "label": "حفظ الموضع الحالي",
-        "shortcuts": ["Ctrl+S"],
-        "category": "الإجراءات",
-    },
-    "save_bookmark_action": {
-        "label": "حفظ علامة",
-        "shortcuts": ["Ctrl+D"],
-        "category": "الإجراءات",
-    },
-    "verse_tafsir_action": {
-        "label": "تفسير الآية",
-        "shortcuts": ["Ctrl+T"],
-        "category": "الإجراءات",
-    },
-    "tafaseer_menu_action": {
-        "label": "قائمة التفسير",
-        "shortcuts": ["Shift+T"],
-        "category": "الإجراءات",
-    },
-    "verse_info_action": {
-        "label": "أسباب نزول الآية",
-        "shortcuts": ["Shift+R"],
-        "category": "الإجراءات",
-    },
-    "verse_grammar_action": {
-        "label": "إعراب الآية",
-        "shortcuts": ["Shift+E"],
-        "category": "الإجراءات",
-    },
-    "copy_verse_action": {
-        "label": "نسخ الآية",
-        "shortcuts": ["Shift+C"],
-        "category": "الإجراءات",
-    },
-    # --- Info ---
-    "ayah_info_action": {
-        "label": "معلومات الآية",
-        "shortcuts": ["Shift+I", "Alt+Shift+7"],
-        "category": "المعلومات",
-    },
-    "surah_info_action": {
-        "label": "معلومات السورة",
-        "shortcuts": ["Alt+Shift+1", "Ctrl+I"],
-        "category": "المعلومات",
-    },
-    "page_info_action": {
-        "label": "معلومات الصفحة",
-        "shortcuts": ["Alt+Shift+2"],
-        "category": "المعلومات",
-    },
-    "quarter_info_action": {
-        "label": "معلومات الربع",
-        "shortcuts": ["Alt+Shift+3"],
-        "category": "المعلومات",
-    },
-    "hizb_info_action": {
-        "label": "معلومات الحزب",
-        "shortcuts": ["Alt+Shift+4"],
-        "category": "المعلومات",
-    },
-    "juz_info_action": {
-        "label": "معلومات الجزء",
-        "shortcuts": ["Alt+Shift+5"],
-        "category": "المعلومات",
-    },
-    "moshaf_info_action": {
-        "label": "معلومات المصحف",
-        "shortcuts": ["Alt+Shift+6"],
-        "category": "المعلومات",
-    },
-    # --- Tools ---
-    "sura_player_action": {
-        "label": "مشغل سور القرآن",
-        "shortcuts": ["Shift+P"],
-        "category": "الأدوات",
-    },
-    "athkar_action": {
-        "label": "الأذكار",
-        "shortcuts": ["Shift+A"],
-        "category": "الأدوات",
-    },
-    "bookmark_manager_action": {
-        "label": "مدير العلامات",
-        "shortcuts": ["Shift+D"],
-        "category": "الأدوات",
-    },
-    "tasbih_action": {
-        "label": "المسبحة",
-        "shortcuts": ["Shift+S"],
-        "category": "الأدوات",
-    },
-    "download_manager_action": {
-        "label": "مدير التنزيلات",
-        "shortcuts": ["Ctrl+J"],
-        "category": "الأدوات",
-    },
-    "message_for_you_action": {
-        "label": "رسالة لك",
-        "shortcuts": ["Shift+M"],
-        "category": "الأدوات",
-    },
-    # --- Preferences ---
-    "settings_action": {
-        "label": "الإعدادات",
-        "shortcuts": ["Alt+S", "F3"],
-        "category": "التفضيلات",
-    },
-    "change_reciter_action": {
-        "label": "تغيير القارئ",
-        "shortcuts": ["Ctrl+Shift+R"],
-        "category": "التفضيلات",
-    },
-    "change_after_listening_action": {
-        "label": "تغيير الإجراء بعد الاستماع",
-        "shortcuts": ["Ctrl+Shift+U"],
-        "category": "التفضيلات",
-    },
-    "change_repeat_limit_action": {
-        "label": "تغيير عدد مرات تكرار الآية",
-        "shortcuts": ["Ctrl+Shift+Y"],
-        "category": "التفضيلات",
-    },
-    "change_text_repeat_action": {
-        "label": "تغيير عدد مرات تكرار النص",
-        "shortcuts": ["Ctrl+Shift+T"],
-        "category": "التفضيلات",
-    },
-    "change_after_text_action": {
-        "label": "تغيير الإجراء بعد النص",
-        "shortcuts": ["Ctrl+Shift+E"],
-        "category": "التفضيلات",
-    },
-    # --- Help ---
-    "user_guide_action": {
-        "label": "دليل البرنامج",
-        "shortcuts": ["F1"],
-        "category": "المساعدة",
-    },
-    "whats_new_action": {
-        "label": "المستجدات",
-        "shortcuts": ["F2"],
-        "category": "المساعدة",
-    },
-    "shortcuts_action": {
-        "label": "اختصارات لوحة المفاتيح",
-        "shortcuts": ["Shift+F1"],
-        "category": "المساعدة",
-    },
-    "marks_action": {
-        "label": "علامات الوقف",
-        "shortcuts": ["Shift+F2"],
-        "category": "المساعدة",
-    },
-    "update_program_action": {
-        "label": "تحديث البرنامج",
-        "shortcuts": ["Ctrl+F2"],
-        "category": "المساعدة",
-    },
-    "open_log_action": {
-        "label": "فتح ملف السجل",
-        "shortcuts": ["Shift+L"],
-        "category": "المساعدة",
-    },
-    "about_program_action": {
-        "label": "حول البرنامج",
-        "shortcuts": ["Ctrl+F1"],
-        "category": "المساعدة",
+    "المساعدة": {
+        "user_guide_action": {
+            "label": "دليل البرنامج",
+            "shortcuts": ["F1"],
+        },
+        "whats_new_action": {
+            "label": "المستجدات",
+            "shortcuts": ["F2"],
+        },
+        "shortcuts_action": {
+            "label": "اختصارات لوحة المفاتيح",
+            "shortcuts": ["Shift+F1"],
+        },
+        "marks_action": {
+            "label": "علامات الوقف",
+            "shortcuts": ["Shift+F2"],
+        },
+        "update_program_action": {
+            "label": "تحديث البرنامج",
+            "shortcuts": ["Ctrl+F2"],
+        },
+        "open_log_action": {
+            "label": "فتح ملف السجل",
+            "shortcuts": ["Shift+L"],
+        },
+        "about_program_action": {
+            "label": "حول البرنامج",
+            "shortcuts": ["Ctrl+F1"],
+        },
     },
 }
 
-CATEGORY_ORDER = [
-    "التنقل",
-    "وضع التصفح",
-    "المشغل",
-    "مفاتيح سريعة",
-    "الإجراءات",
-    "المعلومات",
-    "الأدوات",
-    "التفضيلات",
-    "المساعدة",
-]
+# Flat dictionary for fast O(1) lookups by action_id:
+FLAT_DEFAULT_SHORTCUTS: Dict[str, dict] = {
+    action_id: {
+        "label": info["label"],
+        "shortcuts": list(info["shortcuts"]),
+        "category": category,
+    }
+    for category, actions in DEFAULT_SHORTCUTS.items()
+    for action_id, info in actions.items()
+}
+
+CATEGORY_ORDER = list(DEFAULT_SHORTCUTS.keys())
 
 
 class ShortcutsManager:
@@ -375,7 +325,7 @@ class ShortcutsManager:
             if not isinstance(saved, dict):
                 raise ValueError("Shortcuts JSON root must be a dictionary.")
 
-            for action_id, info in DEFAULT_SHORTCUTS.items():
+            for action_id, info in FLAT_DEFAULT_SHORTCUTS.items():
                 if action_id in saved:
                     val = saved[action_id]
                     if isinstance(val, list):
@@ -415,7 +365,7 @@ class ShortcutsManager:
         """Reset internal shortcuts state to defaults without saving."""
         cls._current_shortcuts = {
             action_id: list(info["shortcuts"])
-            for action_id, info in DEFAULT_SHORTCUTS.items()
+            for action_id, info in FLAT_DEFAULT_SHORTCUTS.items()
         }
 
     @classmethod
@@ -425,12 +375,17 @@ class ShortcutsManager:
             cls.load()
         if action_id in cls._current_shortcuts:
             return list(cls._current_shortcuts[action_id])
-        return list(DEFAULT_SHORTCUTS.get(action_id, {}).get("shortcuts", []))
+        return list(FLAT_DEFAULT_SHORTCUTS.get(action_id, {}).get("shortcuts", []))
 
     @classmethod
     def get_default(cls, action_id: str) -> List[str]:
         """Return the built-in default shortcuts for an action."""
-        return list(DEFAULT_SHORTCUTS.get(action_id, {}).get("shortcuts", []))
+        return list(FLAT_DEFAULT_SHORTCUTS.get(action_id, {}).get("shortcuts", []))
+
+    @classmethod
+    def get_action_label(cls, action_id: str) -> str:
+        """Return the user-facing label for an action."""
+        return FLAT_DEFAULT_SHORTCUTS.get(action_id, {}).get("label", action_id)
 
     @classmethod
     def set(cls, action_id: str, shortcuts: List[str]) -> bool:
@@ -515,7 +470,7 @@ class ShortcutsManager:
                 continue
             for sc in sc_list:
                 if sc.strip().lower() == shortcut_norm:
-                    label = DEFAULT_SHORTCUTS.get(act_id, {}).get("label", act_id)
+                    label = cls.get_action_label(act_id)
                     return (act_id, label)
         return None
 
@@ -525,20 +480,20 @@ class ShortcutsManager:
         if not cls._current_shortcuts:
             cls.load()
         result = {}
-        for action_id, info in DEFAULT_SHORTCUTS.items():
-            current = cls._current_shortcuts.get(action_id, list(info["shortcuts"]))
-            result[action_id] = {
-                "label": info["label"],
-                "category": info["category"],
-                "shortcuts": list(current),
-                "default_shortcuts": list(info["shortcuts"]),
-                "is_disabled": len(current) == 0,
-                "is_modified": current != info["shortcuts"],
-            }
+        for category, actions in DEFAULT_SHORTCUTS.items():
+            for action_id, info in actions.items():
+                current = cls._current_shortcuts.get(action_id, list(info["shortcuts"]))
+                result[action_id] = {
+                    "label": info["label"],
+                    "category": category,
+                    "shortcuts": list(current),
+                    "default_shortcuts": list(info["shortcuts"]),
+                    "is_disabled": len(current) == 0,
+                    "is_modified": current != info["shortcuts"],
+                }
         return result
 
     @classmethod
     def get_categories(cls) -> List[str]:
         """Return unique categories sorted according to preferred CATEGORY_ORDER."""
-        cats = {info["category"] for info in DEFAULT_SHORTCUTS.values()}
-        return [c for c in CATEGORY_ORDER if c in cats] + sorted(cats - set(CATEGORY_ORDER))
+        return list(DEFAULT_SHORTCUTS.keys())
